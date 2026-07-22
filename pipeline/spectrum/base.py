@@ -19,3 +19,10 @@ class SpectrumProvider(Protocol):
     def geometric_albedo(self, wavelengths_nm: np.ndarray) -> np.ndarray:
         """Geometric albedo A(lambda) in [0, ~1] evaluated at the given wavelengths (nm)."""
         ...
+
+
+class ProviderUnavailable(Exception):
+    """Raised by a provider factory when its data/library is not installed (e.g. the Cahoy
+    grid files or PICASO's opacity database are missing). The router catches this and falls
+    back to the next provider, ultimately the always-available parametric one. This is how a
+    real Cahoy/PICASO setup 'lights up' with zero code changes once its data is present."""

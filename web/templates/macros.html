@@ -147,6 +147,8 @@
           This planet's light has never been isolated by any telescope.
           {% endif %}
           <br><br>
+          {%- set engine = {'parametric': 'a parametric albedo model', 'cahoy': 'the Cahoy et al. 2010 grid', 'picaso': 'PICASO radiative transfer'} -%}
+          Spectrum engine: {{ engine.get(rec.params.spectrum_source, rec.params.spectrum_source) }}.
           Model assumptions — cloud state: {{ rec.params.assumed_cloud_state }};
           metallicity: {{ rec.params.assumed_metallicity }}× solar;
           phase angle: {{ rec.params.assumed_phase_angle_deg|round|int }}°.

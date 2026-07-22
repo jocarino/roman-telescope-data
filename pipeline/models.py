@@ -94,6 +94,8 @@ class PlanetParams(BaseModel):
     assumed_cloud_state: str
     assumed_metallicity: float
     assumed_phase_angle_deg: float
+    # Which spectrum engine produced the albedo: "parametric" | "cahoy" | "picaso".
+    spectrum_source: str = "parametric"
 
 
 class Discovery(BaseModel):

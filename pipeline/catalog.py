@@ -15,7 +15,7 @@ from pipeline.emit.build import PlanetInput
 from pipeline.fetch.archive import ArchiveRecord, fetch_by_names
 from pipeline.illuminant.blackbody import BlackbodyStar
 from pipeline.models import Discovery, HostStar, PlanetParams
-from pipeline.spectrum.parametric import model_for
+from pipeline.spectrum.router import choose_model
 
 # Planets flagged as Roman-CGI-style reflected-light targets (RV giants at wide separation).
 _CGI_TARGETS = {"47 UMa b", "ups And d", "upsilon And d", "47 UMa c"}
@@ -70,11 +70,19 @@ def _slug(name: str) -> str:
 
 def _to_input(rec: ArchiveRecord) -> PlanetInput:
     eq_temp = rec.equilibrium_temp_k()
-    model = model_for(equilibrium_temp_k=eq_temp, radius_r_earth=rec.pl_rade)
-
     teff = rec.st_teff if rec.st_teff is not None else 5772.0
     # The Archive returns abbreviated method codes ("micro", "tran", "rv", "imag", ...).
     is_microlensing = "micro" in (rec.disc_method or "").lower()
+
+    # The router picks the best available albedo engine (Cahoy / PICASO / parametric) and
+    # reports which it used; with no grid/opacity data installed it returns parametric.
+    model = choose_model(
+        equilibrium_temp_k=eq_temp,
+        radius_r_earth=rec.pl_rade,
+        mass_m_earth=rec.pl_bmasse,
+        semi_major_axis_au=rec.pl_orbsmax,
+        teff_k=teff,
+    )
 
     host = HostStar(
         name=rec.hostname or rec.pl_name,
@@ -87,8 +95,9 @@ def _to_input(rec: ArchiveRecord) -> PlanetInput:
         mass_m_earth=rec.pl_bmasse,
         semi_major_axis_au=rec.pl_orbsmax,
         assumed_cloud_state=model.cloud_state,
-        assumed_metallicity=model.assumed_metallicity,
+        assumed_metallicity=model.metallicity,
         assumed_phase_angle_deg=model.phase_angle_deg,
+        spectrum_source=model.source,
     )
     discovery = Discovery(
         method=_method_label(rec.disc_method),
@@ -101,7 +110,7 @@ def _to_input(rec: ArchiveRecord) -> PlanetInput:
         host_star=host,
         params=params,
         discovery=discovery,
-        provider=model.albedo,
+        provider=model.provider,
         illuminant=BlackbodyStar(teff_k=teff),
         is_light_isolable=not is_microlensing,
         is_cgi_target=rec.pl_name in _CGI_TARGETS,

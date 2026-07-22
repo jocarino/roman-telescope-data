@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "grid": "cie-vis-380-780-5",
-  "generated_at": "2026-07-22T19:09:26+00:00",
+  "generated_at": "2026-07-22T22:07:54+00:00",
   "planets": [
     {
       "id": "hd-189733-b",
@@ -18,7 +18,8 @@
         "semi_major_axis_au": 0.03126,
         "assumed_cloud_state": "hot, cloud-free, alkali (sodium) absorption",
         "assumed_metallicity": 1.0,
-        "assumed_phase_angle_deg": 0.0
+        "assumed_phase_angle_deg": 0.0,
+        "spectrum_source": "parametric"
       },
       "discovery": {
         "method": "Radial Velocity",
@@ -331,7 +332,7 @@
         }
       ],
       "meta": {
-        "generated_at": "2026-07-22T19:09:26+00:00",
+        "generated_at": "2026-07-22T22:07:54+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -351,7 +352,8 @@
         "semi_major_axis_au": 0.052,
         "assumed_cloud_state": "hot, cloud-free, alkali (sodium) absorption",
         "assumed_metallicity": 1.0,
-        "assumed_phase_angle_deg": 0.0
+        "assumed_phase_angle_deg": 0.0,
+        "spectrum_source": "parametric"
       },
       "discovery": {
         "method": "Radial Velocity",
@@ -664,7 +666,7 @@
         }
       ],
       "meta": {
-        "generated_at": "2026-07-22T19:09:26+00:00",
+        "generated_at": "2026-07-22T22:07:54+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -684,7 +686,8 @@
         "semi_major_axis_au": 0.04707,
         "assumed_cloud_state": "hot, cloud-free, alkali (sodium) absorption",
         "assumed_metallicity": 1.0,
-        "assumed_phase_angle_deg": 0.0
+        "assumed_phase_angle_deg": 0.0,
+        "spectrum_source": "parametric"
       },
       "discovery": {
         "method": "Radial Velocity",
@@ -997,7 +1000,7 @@
         }
       ],
       "meta": {
-        "generated_at": "2026-07-22T19:09:26+00:00",
+        "generated_at": "2026-07-22T22:07:54+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -1017,7 +1020,8 @@
         "semi_major_axis_au": 0.0234,
         "assumed_cloud_state": "ultra-hot, cloud-free, very dark",
         "assumed_metallicity": 1.0,
-        "assumed_phase_angle_deg": 0.0
+        "assumed_phase_angle_deg": 0.0,
+        "spectrum_source": "parametric"
       },
       "discovery": {
         "method": "Transit",
@@ -1330,7 +1334,7 @@
         }
       ],
       "meta": {
-        "generated_at": "2026-07-22T19:09:26+00:00",
+        "generated_at": "2026-07-22T22:07:54+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -1350,7 +1354,8 @@
         "semi_major_axis_au": 0.02571,
         "assumed_cloud_state": "ultra-hot, cloud-free, very dark",
         "assumed_metallicity": 1.0,
-        "assumed_phase_angle_deg": 0.0
+        "assumed_phase_angle_deg": 0.0,
+        "spectrum_source": "parametric"
       },
       "discovery": {
         "method": "Transit",
@@ -1663,7 +1668,7 @@
         }
       ],
       "meta": {
-        "generated_at": "2026-07-22T19:09:26+00:00",
+        "generated_at": "2026-07-22T22:07:54+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -1683,7 +1688,8 @@
         "semi_major_axis_au": 0.0142,
         "assumed_cloud_state": "hot, cloud-free, alkali (sodium) absorption",
         "assumed_metallicity": 1.0,
-        "assumed_phase_angle_deg": 0.0
+        "assumed_phase_angle_deg": 0.0,
+        "spectrum_source": "parametric"
       },
       "discovery": {
         "method": "Transit",
@@ -1996,7 +2002,7 @@
         }
       ],
       "meta": {
-        "generated_at": "2026-07-22T19:09:26+00:00",
+        "generated_at": "2026-07-22T22:07:54+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -2016,7 +2022,8 @@
         "semi_major_axis_au": 10.4,
         "assumed_cloud_state": "hot, cloud-free, alkali (sodium) absorption",
         "assumed_metallicity": 1.0,
-        "assumed_phase_angle_deg": 0.0
+        "assumed_phase_angle_deg": 0.0,
+        "spectrum_source": "parametric"
       },
       "discovery": {
         "method": "ima",
@@ -2329,7 +2336,7 @@
         }
       ],
       "meta": {
-        "generated_at": "2026-07-22T19:09:26+00:00",
+        "generated_at": "2026-07-22T22:07:54+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -2349,7 +2356,8 @@
         "semi_major_axis_au": 68.0,
         "assumed_cloud_state": "hot, cloud-free, alkali (sodium) absorption",
         "assumed_metallicity": 1.0,
-        "assumed_phase_angle_deg": 0.0
+        "assumed_phase_angle_deg": 0.0,
+        "spectrum_source": "parametric"
       },
       "discovery": {
         "method": "ima",
@@ -2662,7 +2670,7 @@
         }
       ],
       "meta": {
-        "generated_at": "2026-07-22T19:09:26+00:00",
+        "generated_at": "2026-07-22T22:07:54+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -2682,7 +2690,8 @@
         "semi_major_axis_au": 38.0,
         "assumed_cloud_state": "hot, cloud-free, alkali (sodium) absorption",
         "assumed_metallicity": 1.0,
-        "assumed_phase_angle_deg": 0.0
+        "assumed_phase_angle_deg": 0.0,
+        "spectrum_source": "parametric"
       },
       "discovery": {
         "method": "ima",
@@ -2995,7 +3004,7 @@
         }
       ],
       "meta": {
-        "generated_at": "2026-07-22T19:09:26+00:00",
+        "generated_at": "2026-07-22T22:07:54+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -3015,7 +3024,8 @@
         "semi_major_axis_au": 16.4,
         "assumed_cloud_state": "hot, cloud-free, alkali (sodium) absorption",
         "assumed_metallicity": 1.0,
-        "assumed_phase_angle_deg": 0.0
+        "assumed_phase_angle_deg": 0.0,
+        "spectrum_source": "parametric"
       },
       "discovery": {
         "method": "ima",
@@ -3328,7 +3338,7 @@
         }
       ],
       "meta": {
-        "generated_at": "2026-07-22T19:09:26+00:00",
+        "generated_at": "2026-07-22T22:07:54+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -3348,7 +3358,8 @@
         "semi_major_axis_au": 55.7,
         "assumed_cloud_state": "hot, cloud-free, alkali (sodium) absorption",
         "assumed_metallicity": 1.0,
-        "assumed_phase_angle_deg": 0.0
+        "assumed_phase_angle_deg": 0.0,
+        "spectrum_source": "parametric"
       },
       "discovery": {
         "method": "ima",
@@ -3661,7 +3672,7 @@
         }
       ],
       "meta": {
-        "generated_at": "2026-07-22T19:09:26+00:00",
+        "generated_at": "2026-07-22T22:07:54+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -3681,7 +3692,8 @@
         "semi_major_axis_au": 43.5,
         "assumed_cloud_state": "warm, partial cloud / haze",
         "assumed_metallicity": 1.0,
-        "assumed_phase_angle_deg": 0.0
+        "assumed_phase_angle_deg": 0.0,
+        "spectrum_source": "parametric"
       },
       "discovery": {
         "method": "ima",
@@ -3994,7 +4006,7 @@
         }
       ],
       "meta": {
-        "generated_at": "2026-07-22T19:09:26+00:00",
+        "generated_at": "2026-07-22T22:07:54+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -4014,7 +4026,8 @@
         "semi_major_axis_au": 2.1,
         "assumed_cloud_state": "temperate, water/ammonia clouds",
         "assumed_metallicity": 3.0,
-        "assumed_phase_angle_deg": 0.0
+        "assumed_phase_angle_deg": 0.0,
+        "spectrum_source": "parametric"
       },
       "discovery": {
         "method": "Radial Velocity",
@@ -4327,7 +4340,7 @@
         }
       ],
       "meta": {
-        "generated_at": "2026-07-22T19:09:26+00:00",
+        "generated_at": "2026-07-22T22:07:54+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -4347,7 +4360,8 @@
         "semi_major_axis_au": 2.51329,
         "assumed_cloud_state": "temperate, water/ammonia clouds",
         "assumed_metallicity": 3.0,
-        "assumed_phase_angle_deg": 0.0
+        "assumed_phase_angle_deg": 0.0,
+        "spectrum_source": "parametric"
       },
       "discovery": {
         "method": "Radial Velocity",
@@ -4660,7 +4674,7 @@
         }
       ],
       "meta": {
-        "generated_at": "2026-07-22T19:09:26+00:00",
+        "generated_at": "2026-07-22T22:07:54+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -4680,7 +4694,8 @@
         "semi_major_axis_au": 0.432,
         "assumed_cloud_state": "rocky / thin atmosphere (grey)",
         "assumed_metallicity": 1.0,
-        "assumed_phase_angle_deg": 0.0
+        "assumed_phase_angle_deg": 0.0,
+        "spectrum_source": "parametric"
       },
       "discovery": {
         "method": "Transit",
@@ -4993,7 +5008,7 @@
         }
       ],
       "meta": {
-        "generated_at": "2026-07-22T19:09:26+00:00",
+        "generated_at": "2026-07-22T22:07:54+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -5013,7 +5028,8 @@
         "semi_major_axis_au": 0.02925,
         "assumed_cloud_state": "rocky / thin atmosphere (grey)",
         "assumed_metallicity": 1.0,
-        "assumed_phase_angle_deg": 0.0
+        "assumed_phase_angle_deg": 0.0,
+        "spectrum_source": "parametric"
       },
       "discovery": {
         "method": "Transit",
@@ -5326,7 +5342,7 @@
         }
       ],
       "meta": {
-        "generated_at": "2026-07-22T19:09:26+00:00",
+        "generated_at": "2026-07-22T22:07:54+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -5346,7 +5362,8 @@
         "semi_major_axis_au": 0.04848,
         "assumed_cloud_state": "rocky / thin atmosphere (grey)",
         "assumed_metallicity": 1.0,
-        "assumed_phase_angle_deg": 0.0
+        "assumed_phase_angle_deg": 0.0,
+        "spectrum_source": "parametric"
       },
       "discovery": {
         "method": "Radial Velocity",
@@ -5659,7 +5676,7 @@
         }
       ],
       "meta": {
-        "generated_at": "2026-07-22T19:09:26+00:00",
+        "generated_at": "2026-07-22T22:07:54+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -5679,7 +5696,8 @@
         "semi_major_axis_au": 0.01505,
         "assumed_cloud_state": "warm, partial cloud / haze",
         "assumed_metallicity": 1.0,
-        "assumed_phase_angle_deg": 0.0
+        "assumed_phase_angle_deg": 0.0,
+        "spectrum_source": "parametric"
       },
       "discovery": {
         "method": "Transit",
@@ -5992,7 +6010,7 @@
         }
       ],
       "meta": {
-        "generated_at": "2026-07-22T19:09:26+00:00",
+        "generated_at": "2026-07-22T22:07:54+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -6012,7 +6030,8 @@
         "semi_major_axis_au": 2.6,
         "assumed_cloud_state": "cold, thick clouds + deep methane (ice giant)",
         "assumed_metallicity": 10.0,
-        "assumed_phase_angle_deg": 0.0
+        "assumed_phase_angle_deg": 0.0,
+        "spectrum_source": "parametric"
       },
       "discovery": {
         "method": "Microlensing",
@@ -6325,7 +6344,7 @@
         }
       ],
       "meta": {
-        "generated_at": "2026-07-22T19:09:26+00:00",
+        "generated_at": "2026-07-22T22:07:54+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
