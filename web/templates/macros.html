@@ -1,0 +1,158 @@
+{# Reusable UI pieces. #}
+
+{% macro provenance_badge(rec) -%}
+  {%- set labels = {
+    'model': 'Model',
+    'simulated-cgi': 'Roman: simulated',
+    'measured-cgi': 'Roman: measured',
+    'model-microlensing': 'Model only — never observable',
+    'measured-hwo': 'HWO: measured'
+  } -%}
+  <span class="badge {{ rec.provenance }}">{{ labels.get(rec.provenance, rec.provenance) }}</span>
+{%- endmacro %}
+
+{% macro palette_strip(palette) -%}
+  <span class="palette-strip">
+    {%- for s in palette %}<span style="background: {{ s.hex }}"></span>{% endfor -%}
+  </span>
+{%- endmacro %}
+
+{% macro palette_full(palette) -%}
+  <div class="palette">
+    {%- for s in palette %}
+    <div class="stop" style="background: {{ s.hex }}">
+      <code @click="copy('{{ s.hex }}', $event)">{{ s.hex }}</code>
+    </div>
+    {%- endfor %}
+  </div>
+{%- endmacro %}
+
+{# The detail body — reused verbatim by the full page and the htmx drawer fragment.
+   Alpine holds the full-spectrum <-> Roman view; both colours/palettes are precomputed.
+   NB: neither view is "true colour" — both are MODELLED. They differ by spectral coverage
+   (full model spectrum vs Roman's four bands); provenance (modelled/measured) is separate. #}
+{% macro detail_body(ctx) -%}
+{%- set rec = ctx.record -%}
+{%- set tc = rec.true_colour -%}
+{%- set iview = rec.instrument_views[0] -%}
+{%- set rv = iview.colour -%}
+<div class="detail" x-data="detail({
+    fullHex: '{{ tc.hex }}', romanHex: '{{ rv.hex }}',
+    fullConf: '{{ tc.confidence }}', romanConf: '{{ rv.confidence }}',
+    fullLum: {{ '%.3f'|format(tc.luminance_y) }}, romanLum: {{ '%.3f'|format(rv.luminance_y) }},
+    fullOog: {{ 'true' if tc.out_of_gamut else 'false' }},
+    romanOog: {{ 'true' if rv.out_of_gamut else 'false' }},
+    fullPalette: [{% for s in tc.palette %}'{{ s.hex }}'{{ ',' if not loop.last }}{% endfor %}],
+    romanPalette: [{% for s in rv.palette %}'{{ s.hex }}'{{ ',' if not loop.last }}{% endfor %}],
+    fullCap: 'Modelled from the complete reflected-light spectrum (380–780 nm) — a physics prediction, not a photograph.',
+    romanCap: '{% if iview.band_samples.source == 'measured' %}Measured: real Roman photometry in four bands{% if iview.band_samples.epoch %} ({{ iview.band_samples.epoch }}){% endif %}, reconstructed to a colour — real data.{% else %}Simulated: the model pushed through Roman four filters — what Roman would measure, not real data yet.{% endif %}'
+  })">
+
+  {% if not rec.is_light_isolable %}
+  <div class="banner">
+    ⚠︎ Discovered by microlensing — no light from this planet is ever isolable by any
+    telescope. Both swatches are <strong>model-only</strong>, shown for interest, never observed.
+  </div>
+  {% endif %}
+
+  <div class="detail-head">
+    <div class="detail-swatch"
+      :style="{ background: view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}' }"></div>
+    <div class="detail-title">
+      <a class="back" href="/">← all planets</a>
+      <h1>{{ rec.name }}</h1>
+      <div class="host">{{ rec.host_star.name }}
+        {%- if rec.host_star.spectral_type %} · {{ rec.host_star.spectral_type }}{% endif -%}
+        {%- if rec.host_star.teff_k %} · {{ rec.host_star.teff_k|round|int }} K{% endif -%}
+      </div>
+      <div style="margin-top:10px">{{ provenance_badge(rec) }}
+        <span class="badge">{{ rec.discovery.method }}</span></div>
+      <div style="margin-top:14px" class="toggle">
+        <button :class="view === 'full' ? 'on' : ''" @click="view='full'">Full spectrum</button>
+        <button :class="view === 'roman' ? 'on' : ''" @click="view='roman'">Roman · 4 bands</button>
+      </div>
+      <p class="viewnote" x-text="view === 'full' ? fullCap : romanCap"></p>
+    </div>
+  </div>
+
+  <div class="detail-cols">
+    <div>
+      <div class="panel">
+        <h3>Reflected-light spectrum</h3>
+        {{ ctx.spectrum_svg|safe }}
+        <div class="legend">
+          <span><span class="k true"></span>Full model spectrum</span>
+          <span><span class="k roman"></span>Roman four-band reconstruction</span>
+        </div>
+        <p class="assume" style="margin-top:14px">
+          How much of the modelled colour survives Roman's four filters:
+          <strong class="de">ΔE₂₀₀₀ = {{ '%.1f'|format(iview.reconstruction_error.delta_e2000) }}</strong>
+          &mdash; the perceptual distance between the full-spectrum model and the four-band
+          reconstruction. Below {{ iview.reconstruction.extrapolated_below_nm|round|int }} nm
+          Roman has no data; that region is a flat-held guess.
+        </p>
+      </div>
+
+      <div class="panel">
+        <h3>Palette <span style="color:var(--fg-faint);text-transform:none;font-weight:400">
+          (<span x-text="view === 'full' ? 'full spectrum' : 'Roman 4-band'"></span> · click a hex to copy)</span></h3>
+        <div x-show="view === 'full'">{{ palette_full(tc.palette) }}</div>
+        <div x-show="view === 'roman'" x-cloak>{{ palette_full(rv.palette) }}</div>
+        <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <button class="badge hex" @click="copyBase($event)"
+            x-text="'base ' + (view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}')"></button>
+          <button class="badge hex" @click="copyCssVars($event)">copy CSS variables</button>
+          <a class="badge hex" href="/palettes/{{ rec.id }}.ase" download>download .ase</a>
+          <span class="copied" x-show="msg" x-text="msg" x-cloak></span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h3>Colour <span style="color:var(--fg-faint);text-transform:none;font-weight:400">
+          (<span x-text="view === 'full' ? 'full-spectrum model' : 'Roman four-band'"></span>)</span></h3>
+        <table class="params">
+          <tr><td>Base hex</td><td><code x-text="view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}'"></code></td></tr>
+          <tr><td>Reflected brightness (Y)</td><td x-text="(view === 'full' ? fullLum : romanLum).toFixed(3)"></td></tr>
+          <tr><td>Confidence</td><td x-text="view === 'full' ? fullConf : romanConf"></td></tr>
+          <tr><td>Out of sRGB gamut</td><td x-text="(view === 'full' ? fullOog : romanOog) ? 'yes' : 'no'"></td></tr>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h3>Planet</h3>
+        <table class="params">
+          <tr><td>Equilibrium temp</td><td>{{ (rec.params.equilibrium_temp_k|round|int ~ ' K') if rec.params.equilibrium_temp_k else '—' }}</td></tr>
+          <tr><td>Radius</td><td>{{ (rec.params.radius_r_earth|round(2) ~ ' R⊕') if rec.params.radius_r_earth else '—' }}</td></tr>
+          <tr><td>Mass</td><td>{{ (rec.params.mass_m_earth|round(1) ~ ' M⊕') if rec.params.mass_m_earth else '—' }}</td></tr>
+          <tr><td>Semi-major axis</td><td>{{ (rec.params.semi_major_axis_au|round(3) ~ ' AU') if rec.params.semi_major_axis_au else '—' }}</td></tr>
+          <tr><td>Discovery</td><td>{{ rec.discovery.method }}{{ (' · ' ~ rec.discovery.year) if rec.discovery.year else '' }}</td></tr>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h3>How to read this</h3>
+        <div class="assume">
+          Both colours are <strong>modelled predictions, not photographs</strong>. The
+          full-spectrum swatch is our most complete model; the Roman view is coarser (four
+          bands).
+          {% if rec.provenance in ['simulated-cgi', 'measured-cgi'] %}
+          For this Roman tech-demo target, the four-band view will be replaced by
+          <strong>real measured data</strong> once Roman observes it — the only real colour
+          data this planet will ever have.
+          {% elif not rec.is_light_isolable %}
+          No telescope can ever isolate this planet's light, so it stays model-only forever.
+          {% else %}
+          This planet's light has never been isolated by any telescope.
+          {% endif %}
+          <br><br>
+          Model assumptions — cloud state: {{ rec.params.assumed_cloud_state }};
+          metallicity: {{ rec.params.assumed_metallicity }}× solar;
+          phase angle: {{ rec.params.assumed_phase_angle_deg|round|int }}°.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{%- endmacro %}

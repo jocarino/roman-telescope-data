@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Pipeline caches (regenerable; not the committed planets.json artifact)
+data/cache/
+
+# Built static site (regenerable via `python -m web.build`; the Dockerfile builds it)
+dist/
+
+# Local Claude Code tooling / session data
+.claude/
+
+# OS
+.DS_Store

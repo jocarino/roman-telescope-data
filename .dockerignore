@@ -1,0 +1,12 @@
+.git
+.venv
+dist
+__pycache__
+**/__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+.DS_Store
+# Regenerable caches — but keep data/planets.json (the build input).
+data/cache
+tests
