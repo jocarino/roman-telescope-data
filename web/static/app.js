@@ -83,7 +83,6 @@ document.addEventListener("alpine:init", () => {
       };
       PlanetRender.render(this.$refs.cSmooth, { ...opts, style: "smooth" });
       PlanetRender.render(this.$refs.cRetro, { ...opts, style: "retro" });
-      PlanetRender.render(this.$refs.cModern, { ...opts, style: "modern" });
     },
   }));
 });
