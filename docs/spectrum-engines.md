@@ -24,25 +24,32 @@ automatically once their data is installed — **no code changes.**
 via documented physical heuristics. Fast, offline, no data. Good enough for a striking
 gallery; coarse (planets in the same temperature bucket look similar).
 
-## Provider 2 — Cahoy et al. 2010 grid
+## Provider 2 — Cahoy et al. 2010 grid  ✅ INCLUDED
 
-`pipeline/spectrum/cahoy_grid.py`. Precomputed albedo spectra for cool Jupiter/Neptune-class
-planets — the Roman community reference set.
+`pipeline/spectrum/cahoy_grid.py`. Precomputed geometric-albedo spectra (0° phase) for cool
+Jupiter/Neptune-class planets — the Roman community reference set. **The grid is committed to
+this repo** at `data/cahoy_grid/` (16 points: Jupiter 1×/3×, Neptune 10×/30×, at 0.8/2/5/10 AU;
+~260 KB), so it is active out of the box for genuinely cool giants (T_eq < 500 K).
 
-**Activate:** populate `data/cahoy_grid/` with the grid files and a `manifest.json`:
+Data credit: **Cahoy, Marley & Fortney 2010, ApJ 724, 189.** Source tarball:
+`https://roman.ipac.caltech.edu/data/sims/cahoy2010_spectra.tgz`.
 
-```json
-{
-  "points": [
-    {"dist_au": 2.0, "metallicity": 1.0, "cloud": "cloudy", "file": "d2_m1_cloudy.csv"}
-  ]
-}
+To regenerate the grid from scratch:
+
+```bash
+curl -L https://roman.ipac.caltech.edu/data/sims/cahoy2010_spectra.tgz -o cahoy.tgz
+tar xzf cahoy.tgz -C /tmp/cahoy
+uv run python -m pipeline.spectrum.cahoy_ingest /tmp/cahoy   # -> data/cahoy_grid/*.csv + manifest.json
 ```
 
-Each referenced CSV has two columns: `wavelength_nm, geometric_albedo`. The provider picks the
-nearest point in (log-distance, log-metallicity) and interpolates onto the CIE grid. Disk: tens
-of MB. (Bilinear interpolation across the four surrounding points is a straightforward upgrade
-from the v1 nearest-neighbour.)
+Each CSV has two columns `wavelength_nm, geometric_albedo`. The provider picks the nearest grid
+point in (log-distance, log-metallicity) — jovians (Z≈1–3) map to the Jupiter models, ice
+giants (Z≈10) to the Neptunes — and interpolates onto the CIE grid. (Bilinear interpolation
+across the four surrounding points is a straightforward upgrade from the v1 nearest-neighbour.)
+
+Note on scope: Cahoy models *cool, reflected-light-dominated* giants. Hot young imaged giants
+(HR 8799, etc., T_eq ~1000 K+) are correctly **not** routed to Cahoy — they need PICASO — so
+they fall to parametric until PICASO is active.
 
 ## Provider 3 — PICASO
 
