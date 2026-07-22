@@ -13,9 +13,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Heavy model-spectrum engine; not needed for the site build or the synthetic M1 provider.
+# Heavy model-spectrum engine; not needed for the site build or the parametric provider.
+# Activating it also requires downloading PICASO's opacity/reference data (multi-GB) — see docs.
 picaso = [
     "picaso>=3.1",
+    "astropy>=6.0",
+    "pandas>=2.0",
 ]
 
 [dependency-groups]
