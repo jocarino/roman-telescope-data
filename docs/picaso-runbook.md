@@ -13,8 +13,25 @@ anchors with external truth (HD 189733 b's measured blue; our committed Cahoy gr
 
 ## 0. Preconditions & install
 
+> **REAL FINDING (2026-07, verified):** PICASO pulls `numba`, which requires **NumPy ≤ 2.4**,
+> but this project runs **NumPy 2.5**. So PICASO **cannot share the main venv** — do not
+> downgrade the project's NumPy for it. Run PICASO in its **own isolated environment**, have it
+> write albedo spectra to `data/cache/spectra/` (or a small `.npz` grid), and let the main
+> pipeline consume that cache. This matches the "PICASO is heavy / offline" stance and keeps
+> the main env clean. Concretely:
+>
+> ```bash
+> uv venv .venv-picaso --python 3.11          # separate interpreter; 3.11 is safest for picaso
+> uv pip install --python .venv-picaso picaso 'numpy<2.5'
+> # run PICASO scripts with .venv-picaso; emit spectra the main pipeline reads.
+> ```
+> A thin `pipeline/spectrum/picaso_runner.py` (invoked as a subprocess in the picaso venv, or a
+> standalone script) computes + caches spectra; `picaso_model.py` then just *loads the cache*
+> and raises ProviderUnavailable when a planet's spectrum isn't cached yet. This keeps the
+> dependency conflict fully out of the main package.
+
 ```bash
-# Deps (already declared in the picaso optional-extra)
+# (Legacy single-env attempt — FAILS on this project due to the numba/numpy conflict above.)
 uv pip install -e '.[picaso]'          # picaso + astropy + pandas
 
 # Reference + opacity data (the heavy part — build-time only, never in the image)
