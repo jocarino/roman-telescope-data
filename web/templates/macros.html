@@ -44,6 +44,8 @@
     romanOog: {{ 'true' if rv.out_of_gamut else 'false' }},
     fullPalette: [{% for s in tc.palette %}'{{ s.hex }}'{{ ',' if not loop.last }}{% endfor %}],
     romanPalette: [{% for s in rv.palette %}'{{ s.hex }}'{{ ',' if not loop.last }}{% endfor %}],
+    radius: {{ rec.params.radius_r_earth if rec.params.radius_r_earth else 8 }},
+    cloudState: '{{ rec.params.assumed_cloud_state }}',
     fullCap: 'Modelled from the complete reflected-light spectrum (380–780 nm) — a physics prediction, not a photograph.',
     romanCap: '{% if iview.band_samples.source == 'measured' %}Measured: real Roman photometry in four bands{% if iview.band_samples.epoch %} ({{ iview.band_samples.epoch }}){% endif %}, reconstructed to a colour — real data.{% else %}Simulated: the model pushed through Roman four filters — what Roman would measure, not real data yet.{% endif %}'
   })">
@@ -77,6 +79,23 @@
 
   <div class="detail-cols">
     <div>
+      <div class="panel">
+        <h3>Rendered planet <span style="color:var(--fg-faint);text-transform:none;font-weight:400">
+          (artistic impression · <span x-text="view === 'full' ? 'full spectrum' : 'Roman view'"></span>)</span></h3>
+        <div class="renders" x-effect="view; $nextTick(() => renderAll())">
+          <figure><canvas x-ref="cSmooth" class="planet-canvas" width="256" height="256"></canvas>
+            <figcaption>Sphere</figcaption></figure>
+          <figure><canvas x-ref="cRetro" class="planet-canvas pixel" width="256" height="256"></canvas>
+            <figcaption>Pixel · retro</figcaption></figure>
+          <figure><canvas x-ref="cModern" class="planet-canvas pixel" width="256" height="256"></canvas>
+            <figcaption>Pixel · modern</figcaption></figure>
+        </div>
+        <p class="assume" style="margin-top:12px">
+          Colour and brightness are derived from the model; cloud bands are schematic.
+          Not a photograph or a surface map.
+        </p>
+      </div>
+
       <div class="panel">
         <h3>Reflected-light spectrum</h3>
         {{ ctx.spectrum_svg|safe }}
