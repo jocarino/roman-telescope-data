@@ -61,6 +61,16 @@ class ArchiveRecord:
         """
         if self.pl_eqt is not None:
             return self.pl_eqt
+        return self.irradiation_temp_k(bond_albedo)
+
+    def irradiation_temp_k(self, bond_albedo: float = 0.3) -> float | None:
+        """The IRRADIATION equilibrium temperature, always computed from the star and orbit
+        (never the archive pl_eqt). For most planets this equals pl_eqt, but for young,
+        self-luminous *imaged* giants the archive pl_eqt reflects INTERNAL heat, not
+        irradiation — e.g. HR 8799 b's pl_eqt is ~1200 K but at ~68 AU its irradiation temp is
+        ~45 K. The reflected-light regime (clouds/chemistry we actually see) is set by
+        irradiation, so this is the right temperature for engine routing. None if inputs missing.
+        """
         if self.st_teff is None or self.st_rad is None or self.pl_orbsmax is None:
             return None
         if self.pl_orbsmax <= 0:
