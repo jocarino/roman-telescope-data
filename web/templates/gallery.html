@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% from "macros.html" import provenance_badge, palette_strip %}
+{% block content %}
+<div class="site-head">
+  <h1>Exoplanet Palette</h1>
+  <span class="tagline">the colour scheme of every known exoplanet, derived from physics</span>
+</div>
+<p class="subhead">
+  Each planet's colour is computed from its reflected-light spectrum (albedo model × host-star
+  spectrum) via CIE 1931 colour matching. Every planet is shown two ways: the full modelled
+  spectrum, and what the Roman Coronagraph would recover from just four bands. <strong>Both are
+  modelled predictions, not photographs</strong> — for Roman's ~dozen tech-demo targets, the
+  four-band view will one day be replaced by real measured data.
+</p>
+
+<div class="stats">
+  <div class="stat"><div class="n">{{ stats.total }}</div><div class="l">planets</div></div>
+  <div class="stat"><div class="n">{{ stats.median_de }}</div><div class="l">median ΔE₂₀₀₀ (full vs Roman)</div></div>
+  <div class="stat"><div class="n">{{ stats.cgi_targets }}</div><div class="l">Roman CGI-style targets</div></div>
+  <div class="stat"><div class="n">{{ stats.microlensing }}</div><div class="l">model-only (microlensing)</div></div>
+</div>
+
+<div x-data="gallery()">
+  <div class="controls">
+    <input type="search" placeholder="Search planet or star…" x-model="q" aria-label="Search">
+    <select x-model="prov" aria-label="Filter by provenance">
+      <option value="all">All provenance</option>
+      <option value="model">Model</option>
+      <option value="simulated-cgi">Roman: simulated</option>
+      <option value="measured-cgi">Roman: measured</option>
+      <option value="model-microlensing">Microlensing (model-only)</option>
+    </select>
+    <select x-model="sort" aria-label="Sort">
+      <option value="name">Sort: name</option>
+      <option value="temp">Sort: hottest</option>
+      <option value="lum">Sort: brightest</option>
+      <option value="de">Sort: most colour lost to Roman</option>
+    </select>
+    <div class="spacer"></div>
+    <span class="count"><span x-text="count()"></span> shown</span>
+  </div>
+
+  <div class="grid">
+    {% for p in planets %}
+    <a class="card" href="/planet/{{ p.record.id }}.html"
+       hx-get="/fragments/planet/{{ p.record.id }}.html" hx-target="#drawer-body"
+       hx-swap="innerHTML" @click="$store.drawer.open = true"
+       x-show="show('{{ p.record.id }}')" :style="{ order: order('{{ p.record.id }}') }">
+      <div class="swatch" style="background: {{ p.record.true_colour.hex }}">
+        {{ palette_strip(p.record.true_colour.palette) }}
+      </div>
+      <div class="card-body">
+        <div class="name">{{ p.record.name }}</div>
+        <div class="host">{{ p.record.host_star.name }}</div>
+        <div class="card-meta">
+          {{ provenance_badge(p.record) }}
+          <span class="badge hex">{{ p.record.true_colour.hex }}</span>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+{# Slide-in drawer for htmx-loaded detail (full pages exist too, for direct links). #}
+<div class="drawer" x-data :class="$store.drawer.open ? 'open' : ''"
+     @keydown.escape.window="$store.drawer.open=false">
+  <div class="drawer-backdrop" @click="$store.drawer.open=false"></div>
+  <aside class="drawer-panel">
+    <button class="drawer-close" @click="$store.drawer.open=false" aria-label="Close">×</button>
+    <div id="drawer-body"></div>
+  </aside>
+</div>
+
+<script>window.PLANETS = {{ index_json|safe }};</script>
+{% endblock %}

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Exoplanet Palette{% endblock %}</title>
+  <meta name="description" content="The colour scheme of every known exoplanet, derived from physics.">
+  <link rel="stylesheet" href="/static/style.css">
+  <style>[x-cloak]{display:none !important}</style>
+  <script src="/static/vendor/htmx.min.js" defer></script>
+  <script src="/static/vendor/alpine.min.js" defer></script>
+  <script src="/static/app.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    {% block content %}{% endblock %}
+    <div class="foot">
+      Colours derived from reflected-light albedo models × host-star spectra via CIE 1931
+      colour matching. Modelled, not photographed. Data: NASA Exoplanet Archive.
+    </div>
+  </div>
+</body>
+</html>

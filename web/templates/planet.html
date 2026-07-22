@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% from "macros.html" import detail_body %}
+{% block title %}{{ ctx.record.name }} — Exoplanet Palette{% endblock %}
+{% block content %}
+{{ detail_body(ctx) }}
+{% endblock %}
