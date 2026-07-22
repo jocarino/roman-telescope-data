@@ -68,6 +68,18 @@ def _slug(name: str) -> str:
     return s.strip("-")
 
 
+def _model_temperature(rec: ArchiveRecord, eq_temp: float | None) -> float | None:
+    """Temperature that sets the reflected-light regime. Usually the archive equilibrium
+    temp, but for internal-heat-dominated young imaged giants (archive pl_eqt >> irradiation
+    temp) use the irradiation temp — otherwise they are mis-routed to the hot-Jupiter engine
+    and render an unphysical clipped blue. The 3x guard only triggers on clear cases and
+    leaves normal irradiated planets (where the two temps ~match) untouched."""
+    irr = rec.irradiation_temp_k()
+    if irr is not None and eq_temp is not None and eq_temp > 3.0 * irr:
+        return irr
+    return eq_temp
+
+
 def _to_input(rec: ArchiveRecord) -> PlanetInput:
     eq_temp = rec.equilibrium_temp_k()
     teff = rec.st_teff if rec.st_teff is not None else 5772.0
@@ -77,7 +89,7 @@ def _to_input(rec: ArchiveRecord) -> PlanetInput:
     # The router picks the best available albedo engine (Cahoy / PICASO / parametric) and
     # reports which it used; with no grid/opacity data installed it returns parametric.
     model = choose_model(
-        equilibrium_temp_k=eq_temp,
+        equilibrium_temp_k=_model_temperature(rec, eq_temp),
         radius_r_earth=rec.pl_rade,
         mass_m_earth=rec.pl_bmasse,
         semi_major_axis_au=rec.pl_orbsmax,

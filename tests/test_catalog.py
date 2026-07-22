@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 
+from pipeline.catalog import _model_temperature
 from pipeline.fetch.archive import ArchiveRecord
 from pipeline.spectrum.parametric import model_for
 
@@ -58,3 +59,16 @@ def test_eqt_fallback_matches_formula():
     r_star_au = 1.2 * 0.00465047
     expected = 6000.0 * math.sqrt(r_star_au / (2 * 2.0)) * (1 - 0.3) ** 0.25
     assert math.isclose(rec.equilibrium_temp_k(), expected, rel_tol=1e-9)
+
+
+def test_hot_jupiter_keeps_archive_temp_for_model():
+    # Irradiated hot Jupiter: archive eqt ~ irradiation temp -> NOT reclassified.
+    rec = _rec(pl_eqt=1200.0, st_teff=5052.0, st_rad=0.76, pl_orbsmax=0.031)
+    assert _model_temperature(rec, rec.equilibrium_temp_k()) == 1200.0
+
+
+def test_young_imaged_giant_reclassified_to_irradiation_temp():
+    # Archive pl_eqt=1200 K (internal heat), but at 68 AU irradiation temp is ~cold.
+    rec = _rec(pl_eqt=1200.0, st_teff=7400.0, st_rad=1.4, pl_orbsmax=68.0)
+    mt = _model_temperature(rec, rec.equilibrium_temp_k())
+    assert mt is not None and mt < 100, f"expected cold irradiation temp, got {mt}"

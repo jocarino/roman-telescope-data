@@ -76,12 +76,16 @@ Implemented and verified. Key decisions that differ from / refine the plan below
   `.npz`. Tests pass in the main venv against the committed cache.
 - **Result:** HD 189733 b → `#007cff` (blue ✓, Anchor 2). Classic hot Jupiters now
   differentiated (`#007cff`/`#0080ff`/`#008fff`/`#7bcbff`/…) vs near-identical parametric.
-- **KNOWN ARTIFACT:** young *imaged* giants (HR 8799 b/c/e, HD 95086 b; archive T_eq ~1000–
-  1200 K from *internal* heat, not irradiation) route to PICASO and come out `#0000ff` (pure
-  clipped blue): a cloud-free methane atmosphere reflects almost only blue, clipped at display
-  luminance. Honest + gamut-flagged, but these objects are really thermal/dusty — reflected-
-  light modelling is the wrong regime for them. Future: detect internal-heat-dominated giants
-  (wide separation + youth) and treat separately, or add clouds (virga).
+- **ARTIFACT — FIXED:** young *imaged* giants (HR 8799 b/c/e, HD 95086 b, 51 Eri b, GJ 504 b)
+  previously routed to PICASO and clipped to `#0000ff` (pure blue), because their archive
+  `pl_eqt` (~1000–1200 K) is *internal* heat, not irradiation. Fix: the router now selects the
+  engine by the **irradiation** temperature (computed from star + orbit — `_model_temperature`
+  in catalog.py, `ArchiveRecord.irradiation_temp_k`), used only when `pl_eqt > 3× irradiation`
+  so normal irradiated planets are untouched. At their true ~45 K these giants are cold →
+  route to **Cahoy** and render soft lavender-white (`#c6cae4`), which is the correct cold-
+  giant reflected colour. Genuine hot Jupiters keep their PICASO blues. Engines: 7 picaso /
+  9 cahoy / 3 parametric; zero `#0000ff`. (Adding virga clouds to PICASO remains a future
+  refinement for the hot-Jupiter absolute albedos.)
 
 ## 1. Replace the atmosphere setup
 
