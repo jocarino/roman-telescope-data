@@ -72,6 +72,19 @@ document.addEventListener("alpine:init", () => {
       navigator.clipboard?.writeText(css);
       this.flash("copied CSS variables");
     },
+    // Render the three planet visualisations from the CURRENT view's palette + attributes.
+    renderAll() {
+      if (!window.PlanetRender || !this.$refs.cSmooth) return;
+      const opts = {
+        palette: this.view === "full" ? this.fullPalette : this.romanPalette,
+        radius: this.radius,
+        cloudState: this.cloudState,
+        lumY: this.view === "full" ? this.fullLum : this.romanLum,
+      };
+      PlanetRender.render(this.$refs.cSmooth, { ...opts, style: "smooth" });
+      PlanetRender.render(this.$refs.cRetro, { ...opts, style: "retro" });
+      PlanetRender.render(this.$refs.cModern, { ...opts, style: "modern" });
+    },
   }));
 });
 
