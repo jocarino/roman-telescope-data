@@ -1,0 +1,116 @@
+{
+  "points": [
+    {
+      "dist_au": 0.8,
+      "metallicity": 1.0,
+      "cloud": "cahoy",
+      "planet": "Jupiter",
+      "file": "Jupiter_1x_0.8AU.csv"
+    },
+    {
+      "dist_au": 10.0,
+      "metallicity": 1.0,
+      "cloud": "cahoy",
+      "planet": "Jupiter",
+      "file": "Jupiter_1x_10AU.csv"
+    },
+    {
+      "dist_au": 2.0,
+      "metallicity": 1.0,
+      "cloud": "cahoy",
+      "planet": "Jupiter",
+      "file": "Jupiter_1x_2AU.csv"
+    },
+    {
+      "dist_au": 5.0,
+      "metallicity": 1.0,
+      "cloud": "cahoy",
+      "planet": "Jupiter",
+      "file": "Jupiter_1x_5AU.csv"
+    },
+    {
+      "dist_au": 0.8,
+      "metallicity": 3.0,
+      "cloud": "cahoy",
+      "planet": "Jupiter",
+      "file": "Jupiter_3x_0.8AU.csv"
+    },
+    {
+      "dist_au": 10.0,
+      "metallicity": 3.0,
+      "cloud": "cahoy",
+      "planet": "Jupiter",
+      "file": "Jupiter_3x_10AU.csv"
+    },
+    {
+      "dist_au": 2.0,
+      "metallicity": 3.0,
+      "cloud": "cahoy",
+      "planet": "Jupiter",
+      "file": "Jupiter_3x_2AU.csv"
+    },
+    {
+      "dist_au": 5.0,
+      "metallicity": 3.0,
+      "cloud": "cahoy",
+      "planet": "Jupiter",
+      "file": "Jupiter_3x_5AU.csv"
+    },
+    {
+      "dist_au": 0.8,
+      "metallicity": 10.0,
+      "cloud": "cahoy",
+      "planet": "Neptune",
+      "file": "Neptune_10x_0.8AU.csv"
+    },
+    {
+      "dist_au": 10.0,
+      "metallicity": 10.0,
+      "cloud": "cahoy",
+      "planet": "Neptune",
+      "file": "Neptune_10x_10AU.csv"
+    },
+    {
+      "dist_au": 2.0,
+      "metallicity": 10.0,
+      "cloud": "cahoy",
+      "planet": "Neptune",
+      "file": "Neptune_10x_2AU.csv"
+    },
+    {
+      "dist_au": 5.0,
+      "metallicity": 10.0,
+      "cloud": "cahoy",
+      "planet": "Neptune",
+      "file": "Neptune_10x_5AU.csv"
+    },
+    {
+      "dist_au": 0.8,
+      "metallicity": 30.0,
+      "cloud": "cahoy",
+      "planet": "Neptune",
+      "file": "Neptune_30x_0.8AU.csv"
+    },
+    {
+      "dist_au": 10.0,
+      "metallicity": 30.0,
+      "cloud": "cahoy",
+      "planet": "Neptune",
+      "file": "Neptune_30x_10AU.csv"
+    },
+    {
+      "dist_au": 2.0,
+      "metallicity": 30.0,
+      "cloud": "cahoy",
+      "planet": "Neptune",
+      "file": "Neptune_30x_2AU.csv"
+    },
+    {
+      "dist_au": 5.0,
+      "metallicity": 30.0,
+      "cloud": "cahoy",
+      "planet": "Neptune",
+      "file": "Neptune_30x_5AU.csv"
+    }
+  ]
+}
