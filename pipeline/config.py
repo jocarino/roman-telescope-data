@@ -15,8 +15,10 @@ import numpy as np
 # CahoyProvider (see pipeline/spectrum/cahoy_grid.py and docs). Absent by default -> the
 # router falls back. PICASO availability is detected by import, not a path.
 CAHOY_GRID_DIR = Path("data/cahoy_grid")
-# Cache for computed model spectra (PICASO is slow); keyed by planet + engine.
-SPECTRA_CACHE_DIR = Path("data/cache/spectra")
+# Precomputed PICASO spectra (PICASO is slow + needs a 7 GB opacity DB to regenerate, so
+# these are COMMITTED for reproducibility — the pipeline/deploy rebuild reads them without
+# needing PICASO installed). Keyed by planet params.
+SPECTRA_CACHE_DIR = Path("data/picaso_spectra")
 
 # --- The one fixed grid every ReflectedFlux curve lives on -------------------------------
 # 380-780 nm at 5 nm => 81 samples. Tag every stored curve with GRID_ID so a stale record

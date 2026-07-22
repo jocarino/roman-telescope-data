@@ -1,37 +1,35 @@
-"""PICASO reflected-light albedo provider.
+"""PICASO reflected-light albedo provider (main-env side).
 
-PICASO (NASA's open-source radiative-transfer package) generates reflected-light albedo
-spectra from planet + star parameters. It is the engine for hot / exotic giants that the
-Cahoy grid does not cover.
+PICASO's numba pins NumPy <= 2.4, which conflicts with the project's 2.5, so PICASO **cannot
+run in the main venv**. Instead the heavy run happens in an isolated venv via
+`pipeline/spectrum/picaso_runner.py`, which writes a small `.npz` albedo cache. This module
+just **loads that cache** — and, if configured, invokes the runner as a subprocess to generate
+a missing spectrum on demand.
 
-ACTIVATION: `pip install -e '.[picaso]'` AND download PICASO's reference/opacity data (multi-
-GB — see PICASO's install guide, and docs/ here). Until both are present, `make_picaso()`
-raises ProviderUnavailable (via a guarded import + a guarded opannection) and the router falls
-back. Nothing else in the pipeline changes when PICASO becomes available.
+Activation (env vars, see docs/picaso-runbook.md):
+    PICASO_VENV_PYTHON  -> interpreter of the isolated picaso venv (e.g. .venv-picaso/bin/python)
+    PICASO_REFDATA      -> cloned reference/ dir
+    PICASO_OPACITY_DB   -> path to opacities_*.db
 
-IMPORTANT (honesty): the atmosphere setup below (TP profile + chemistry) is a *starting
-point*. Once the opacity data is installed, validate the output against a known planet (e.g.
-HD 189733 b should trend blue) and tune the profile/cloud treatment before trusting colours.
-This wrapper is the integration seam; the atmospheric physics needs a validation pass on
-install. All setup is wrapped so any failure degrades gracefully to ProviderUnavailable.
+If a spectrum is neither cached nor generatable (no venv/data), `make_picaso` raises
+ProviderUnavailable and the router falls back — the fallback contract is preserved.
 """
 
 from __future__ import annotations
 
 import hashlib
+import os
+import subprocess
+from pathlib import Path
 
 import numpy as np
 
 from pipeline.config import SPECTRA_CACHE_DIR
 from pipeline.spectrum.base import ProviderUnavailable
 
-# Wavelength window for the reflected-light run (µm) — a little past the CIE grid so the
-# Roman 835 nm band is covered.
-_WAVE_RANGE_UM = (0.36, 0.95)
-
 
 class PicasoProvider:
-    """Holds a precomputed albedo curve (PICASO is slow, so we run once and interpolate)."""
+    """Loads a precomputed albedo curve (from the isolated-venv runner) and interpolates."""
 
     def __init__(self, wavelengths_nm: np.ndarray, albedo: np.ndarray):
         self._wl = wavelengths_nm
@@ -42,48 +40,40 @@ class PicasoProvider:
         return np.clip(np.interp(wl, self._wl, self._albedo), 0.0, 1.0)
 
 
-def _cache_key(**params) -> str:
-    payload = repr(sorted(params.items()))
+def _cache_key(eqt: float, radius: float, mass: float, teff: float, metallicity: float) -> str:
+    """MUST match pipeline.spectrum.picaso_runner.cache_key exactly."""
+    payload = repr(sorted({
+        "eqt": round(eqt, 1), "r": round(radius, 3), "m": round(mass, 2),
+        "teff": round(teff, 1), "z": round(metallicity, 3),
+    }.items()))
     return hashlib.sha256(payload.encode()).hexdigest()[:16]
 
 
-def _run_picaso(
-    *, equilibrium_temp_k: float, radius_r_earth: float, mass_m_earth: float,
-    teff_k: float, metallicity: float,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Run one PICASO reflected-light spectrum. Imports are lazy and any failure propagates
-    (the caller converts it to ProviderUnavailable)."""
-    from astropy import units as u  # noqa: PLC0415
-    from picaso import justdoit as jdi  # noqa: PLC0415
+def _load(cache_file: Path) -> PicasoProvider:
+    d = np.load(cache_file)
+    return PicasoProvider(d["wl_nm"], d["albedo"])
 
-    # opannection needs the opacity database; this line fails loudly if it is missing.
-    opa = jdi.opannection(wave_range=list(_WAVE_RANGE_UM))
 
-    case = jdi.inputs()
-    case.phase_angle(0)
-    case.gravity(
-        mass=mass_m_earth, mass_unit=u.M_earth,
-        radius=radius_r_earth, radius_unit=u.R_earth,
-    )
-    case.star(opa, temp=teff_k, metal=0.0, logg=4.5)
-
-    # Atmosphere: a simple isothermal-ish profile at the equilibrium temperature with
-    # chemical-equilibrium abundances. STARTING POINT — validate/tune on install.
-    import pandas as pd  # noqa: PLC0415
-
-    n_layers = 60
-    pressure = np.logspace(-6, 2, n_layers)  # bars
-    temperature = np.full(n_layers, max(equilibrium_temp_k, 50.0))
-    atmo = pd.DataFrame({"pressure": pressure, "temperature": temperature})
-    case.atmosphere(df=atmo)
-    case.chemeq_visscher(c_o=1.0, log_mh=np.log10(max(metallicity, 0.1)))
-
-    df = case.spectrum(opa, calculation="reflected", full_output=True)
-    wno = np.asarray(df["wavenumber"])  # cm^-1
-    albedo = np.asarray(df["albedo"])
-    wl_nm = 1e7 / wno  # cm^-1 -> nm
-    order = np.argsort(wl_nm)
-    return wl_nm[order], albedo[order]
+def _try_generate(cache_file: Path, *, eqt, radius, mass, teff, metallicity, semi_major) -> bool:
+    """Invoke the isolated-venv runner to produce the spectrum. Returns True on success."""
+    venv_py = os.environ.get("PICASO_VENV_PYTHON", ".venv-picaso/bin/python")
+    if not Path(venv_py).exists() or "PICASO_OPACITY_DB" not in os.environ:
+        return False
+    # Invoke the runner by FILE PATH: it is standalone (no `pipeline.*` imports), so it runs
+    # in the isolated venv which has picaso+numpy but not the pipeline package.
+    runner = Path(__file__).with_name("picaso_runner.py")
+    cmd = [
+        venv_py, str(runner),
+        "--eqt", str(eqt), "--radius", str(radius), "--mass", str(mass),
+        "--teff", str(teff), "--metallicity", str(metallicity),
+        "--semi-major", str(semi_major if semi_major is not None else 0.05),
+        "--out", str(cache_file),
+    ]
+    try:
+        subprocess.run(cmd, check=True, capture_output=True, timeout=1200)
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError):
+        return False
+    return cache_file.exists()
 
 
 def make_picaso(
@@ -93,32 +83,27 @@ def make_picaso(
     mass_m_earth: float | None,
     teff_k: float,
     metallicity: float,
+    semi_major_axis_au: float | None = None,
     **_ignored,
 ) -> PicasoProvider:
-    """Factory for the router. Raises ProviderUnavailable if PICASO or its data is missing,
-    or if any step of the run fails."""
+    """Factory for the router. Loads a cached PICASO spectrum, generating it via the isolated
+    venv if configured. Raises ProviderUnavailable if unavailable."""
     if radius_r_earth is None or mass_m_earth is None or equilibrium_temp_k is None:
         raise ProviderUnavailable("PICASO needs radius, mass and equilibrium temperature.")
 
-    key = _cache_key(
-        eqt=round(equilibrium_temp_k, 1), r=round(radius_r_earth, 3),
-        m=round(mass_m_earth, 2), teff=round(teff_k, 1), z=round(metallicity, 3),
-    )
+    key = _cache_key(equilibrium_temp_k, radius_r_earth, mass_m_earth, teff_k, metallicity)
     cache_file = SPECTRA_CACHE_DIR / f"picaso_{key}.npz"
+
     if cache_file.exists():
-        d = np.load(cache_file)
-        return PicasoProvider(d["wl_nm"], d["albedo"])
+        return _load(cache_file)
 
-    try:
-        wl_nm, albedo = _run_picaso(
-            equilibrium_temp_k=equilibrium_temp_k, radius_r_earth=radius_r_earth,
-            mass_m_earth=mass_m_earth, teff_k=teff_k, metallicity=metallicity,
-        )
-    except ProviderUnavailable:
-        raise
-    except Exception as exc:  # ImportError, missing opacity DB, run failure, ...
-        raise ProviderUnavailable(f"PICASO unavailable or run failed: {exc}") from exc
+    if _try_generate(
+        cache_file, eqt=equilibrium_temp_k, radius=radius_r_earth, mass=mass_m_earth,
+        teff=teff_k, metallicity=metallicity, semi_major=semi_major_axis_au,
+    ):
+        return _load(cache_file)
 
-    SPECTRA_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    np.savez(cache_file, wl_nm=wl_nm, albedo=albedo)
-    return PicasoProvider(wl_nm, albedo)
+    raise ProviderUnavailable(
+        "No cached PICASO spectrum and the isolated picaso venv/data is not configured "
+        "(set PICASO_VENV_PYTHON + PICASO_OPACITY_DB + PICASO_REFDATA)."
+    )

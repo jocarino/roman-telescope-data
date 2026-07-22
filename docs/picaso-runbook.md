@@ -52,6 +52,37 @@ the router keeps falling back to Cahoy/parametric (no harm).
 
 ---
 
+## ✅ AS-BUILT (2026-07, PICASO 4.0.1 — this is what actually works)
+
+Implemented and verified. Key decisions that differ from / refine the plan below:
+
+- **No CDBS stellar download needed.** `case.star()` accepts a `filename` — we feed it the
+  *same blackbody* the pipeline uses everywhere (`star(filename=bb.dat, w_unit='um',
+  f_unit='erg/(cm**2 s AA)')`). `PYSYN_CDBS` just needs to point at any existing dir to pass
+  the import check. Saves a multi-GB stellar-data download.
+- **Data:** reference dir cloned from the picaso repo (`reference/`, 179 MB, v4.0);
+  opacity DB from Zenodo record 14861730 (`opacities_0.3_15_R15000.db`, 4.78 GB compressed →
+  7.34 GB). Set `picaso_refdata`, `PICASO_OPACITY_DB`. A run with `wave_range=[0.36,0.95]`
+  takes ~5 s (loads only the visible subset).
+- **Working recipe** (`pipeline/spectrum/picaso_runner.py`):
+  `opannection(wave_range=[0.36,0.95], filename_db=DB)` → `inputs()` → `phase_angle(0)`
+  (geometric albedo) → `gravity(mass,radius)` → `star(filename=blackbody)` →
+  `guillot_pt(Teq)` → `chemeq_visscher(0.55, log10(Z))` → `spectrum(calc='reflected')`.
+  Output: `df['albedo']` on `opa.wno` (cm⁻¹). Cloud-free v1.
+- **Architecture (dep isolation):** the runner runs in `.venv-picaso` and writes a small
+  resampled `.npz` (350–1000 nm) to `data/picaso_spectra/` (COMMITTED). `picaso_model.py` in
+  the main venv just loads that cache (and can subprocess the runner to fill a miss). So the
+  main pipeline, tests, and deploy need neither PICASO nor the 7 GB DB — only the committed
+  `.npz`. Tests pass in the main venv against the committed cache.
+- **Result:** HD 189733 b → `#007cff` (blue ✓, Anchor 2). Classic hot Jupiters now
+  differentiated (`#007cff`/`#0080ff`/`#008fff`/`#7bcbff`/…) vs near-identical parametric.
+- **KNOWN ARTIFACT:** young *imaged* giants (HR 8799 b/c/e, HD 95086 b; archive T_eq ~1000–
+  1200 K from *internal* heat, not irradiation) route to PICASO and come out `#0000ff` (pure
+  clipped blue): a cloud-free methane atmosphere reflects almost only blue, clipped at display
+  luminance. Honest + gamut-flagged, but these objects are really thermal/dusty — reflected-
+  light modelling is the wrong regime for them. Future: detect internal-heat-dominated giants
+  (wide separation + youth) and treat separately, or add clouds (virga).
+
 ## 1. Replace the atmosphere setup
 
 Edit `pipeline/spectrum/picaso_model.py`, function `_run_picaso`. Replace the isothermal
