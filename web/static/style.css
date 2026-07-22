@@ -126,7 +126,7 @@ a:hover { text-decoration: underline; }
   background: radial-gradient(circle at 50% 45%, #0e1420 0%, #070a10 70%);
   border-radius: 50%;
 }
-.planet-canvas.pixel { image-rendering: pixelated; image-rendering: crisp-edges; border-radius: 0; }
+.planet-canvas.pixel { image-rendering: pixelated; image-rendering: crisp-edges; border-radius: 0; background: transparent; }
 .renders figcaption { margin-top: 8px; font-size: 12px; color: var(--fg-dim); }
 
 /* Spectrum SVG */
