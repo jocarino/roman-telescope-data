@@ -13,7 +13,7 @@
     "precision highp float;",
     "varying vec2 v;",
     "uniform vec3 pal[5];",
-    "uniform float bandFreq, bandContrast, haze, brightness, light, dither;",
+    "uniform float bandFreq, bandContrast, haze, brightness, light, dither, levels;",
     "uniform int pixel, outline;",
     "vec3 ramp(float t){",
     "  t = clamp(t,0.,1.)*4.;",
@@ -42,19 +42,23 @@
     "  float z = sqrt(1.0 - r2);",
     "  vec3 N = vec3(uv, z);",
     "  float lat = asin(clamp(uv.y,-1.,1.));",
-    // Near-full phase (phase angle ~0): light mostly toward the viewer, small terminator.
+    // Near-full phase: single soft day/night term + limb darkening.
     "  vec3 L = normalize(vec3(cos(light)*0.55, 0.28, 0.90));",
-    "  float diff = max(dot(N, L), 0.0);",
-    "  float limb = pow(z, 0.32);",
-    "  float shade = (diff*0.72 + 0.30) * limb;",
+    "  float lit = smoothstep(-0.08, 0.42, dot(N, L));",
+    "  float limb = pow(z, 0.30);",
+    "  float shade = (0.34 + 0.66*lit) * limb;",
     "  float band = 0.5 + 0.5*sin(lat*bandFreq + sin(lat*bandFreq*0.5)*0.6);",
     "  band = mix(0.5, band, bandContrast);",
-    "  float tone = shade * (0.62 + 0.42*band) * brightness;",
-    "  if(pixel==1){ tone += bayer(gl_FragCoord.xy) * dither; }",
+    "  float rim = smoothstep(0.74,1.0,r2);",
+    "  float tone = shade * (0.60 + 0.44*band) * brightness + rim*haze*0.28;",
+    // Pixel styles: dither THEN posterize -> clean flat colour bands with dithered edges.
+    "  if(pixel==1){",
+    "    tone = clamp(tone, 0.0, 1.0);",
+    "    tone += bayer(gl_FragCoord.xy) * dither;",
+    "    tone = floor(tone*levels + 0.5) / levels;",
+    "  }",
     "  vec3 col = ramp(tone);",
-    "  float rim = smoothstep(0.72,1.0,r2);",
-    "  col = mix(col, pal[4], rim*haze*0.55);",
-    "  col *= mix(0.42, 1.0, smoothstep(0.0,0.30,diff));",  // terminator/night (softened)
+    "  if(pixel==0){ col = mix(col, pal[4], rim*haze*0.4); }",  // smooth-only haze tint
     "  if(outline==1 && r2>0.90){ col *= 0.35; }",
     "  gl_FragColor = vec4(col, 1.0);",
     "}",
@@ -78,7 +82,7 @@
     var loc = gl.getAttribLocation(prog, "p");
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    ["pal","bandFreq","bandContrast","haze","brightness","light","dither","pixel","outline"]
+    ["pal","bandFreq","bandContrast","haze","brightness","light","dither","levels","pixel","outline"]
       .forEach(function (n) { U[n] = gl.getUniformLocation(prog, n === "pal" ? "pal[0]" : n); });
     return true;
   }
@@ -128,18 +132,22 @@
     gl.uniform1f(U.bandContrast, d.bandContrast);
     gl.uniform1f(U.haze, d.haze);
     gl.uniform1f(U.brightness, d.brightness);
-    gl.uniform1f(U.light, opts.light == null ? -0.6 : opts.light);
+    gl.uniform1f(U.light, opts.light == null ? 0.0 : opts.light);
     gl.uniform1i(U.pixel, pixel ? 1 : 0);
-    gl.uniform1f(U.dither, opts.style === "retro" ? 0.10 : (opts.style === "modern" ? 0.06 : 0));
+    // retro = fewer, bolder colour bands + outline; modern = more bands, no outline. Dither
+    // amplitude is ~one posterization step so transitions read as clean pixel-art gradients.
+    var levels = opts.style === "retro" ? 5.0 : 8.0;
+    gl.uniform1f(U.levels, levels);
+    gl.uniform1f(U.dither, pixel ? 0.9 / levels : 0.0);
     gl.uniform1i(U.outline, opts.style === "retro" ? 1 : 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
-    // Blit to the target 2D canvas (nearest-neighbour for the pixel styles).
+    // Blit 1:1 into the target canvas; CSS does the INTEGER upscale (80->160 = 2x) with
+    // image-rendering:pixelated, so pixels stay uniform and crisp (this was the jank).
+    target.width = res; target.height = res;
     var ctx = target.getContext("2d");
-    var size = target.width;
-    ctx.clearRect(0, 0, size, size);
-    ctx.imageSmoothingEnabled = !pixel;
-    ctx.drawImage(glCanvas, 0, 0, size, size);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(glCanvas, 0, 0);
   }
 
   window.PlanetRender = { render: render };
