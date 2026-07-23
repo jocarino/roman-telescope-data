@@ -242,6 +242,8 @@ body::after {
   padding: 10px 14px; font-size: 12.5px; line-height: 1.5; color: var(--fg-dim);
 }
 .scope-info strong { color: var(--fg); }
+.scope-info p { margin: 0 0 8px; }
+.scope-info p:last-child { margin-bottom: 0; }
 .scope-main { display: grid; grid-template-columns: 1fr 200px; }
 .scope-screen {
   position: relative; background: #04070c; padding: 12px 12px 8px; overflow: hidden;
@@ -303,13 +305,18 @@ body::after {
 .badge.hex { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 /* Detail page */
+/* Far top-left of the viewport, tucked in the gutter so it steals no vertical space. */
 .back {
-  display: inline-block; margin: 4px 0 18px; padding: 7px 12px;
+  position: fixed; top: 16px; left: 18px; z-index: 40; margin: 0; padding: 7px 12px;
   font-family: var(--pixel); font-size: 9px; letter-spacing: .5px; color: var(--fg-dim);
   border: 1px solid var(--line); background: var(--bg-3); box-shadow: 3px 3px 0 var(--line);
 }
 .back:hover { color: var(--fg); border-color: var(--accent); }
 .back:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--line); }
+/* Below the width where the centred content leaves a gutter, fall back to in-flow. */
+@media (max-width: 1439px) { .back { position: static; display: inline-block; margin: 4px 0 16px; } }
+/* In the slide-in drawer the panel has its own close button — no back link needed. */
+#drawer-body .back { display: none; }
 .detail-head { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; margin: 12px 0 22px; }
 .detail-swatch { width: 200px; height: 200px; border-radius: var(--radius); border: 1px solid var(--line); flex: none; box-shadow: var(--shadow); }
 .detail-title h1 { margin: 0 0 4px; font-size: 28px; letter-spacing: -0.02em; }
