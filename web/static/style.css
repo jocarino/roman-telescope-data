@@ -252,17 +252,21 @@ a.badge:active, .drawer-close:active { transform: translateY(1px); }
   border-radius: 50%; background: var(--accent); box-shadow: 0 0 4px var(--accent);
 }
 .dd-btn.acc-trigger { padding: 9px; }
-/* Right-side search: a magnifier that expands an input leftward on click. */
-.search { display: inline-flex; align-items: center; }
+/* In-place morphing search: the magnifier IS the input, collapsed to icon width and growing
+   rightward on focus (or whenever it holds text). No separate button, no reveal. */
+.search { position: relative; display: inline-flex; align-items: center; }
+.search-mag { position: absolute; left: 11px; color: var(--fg-dim); pointer-events: none; }
+.search:focus-within .search-mag { color: var(--fg); }
 .search input {
-  width: 0; min-width: 0; padding: 0; border: 1px solid transparent; background: var(--bg-3);
-  color: var(--fg); font: inherit; font-size: 13px; opacity: 0; box-shadow: none;
-  transition: width .22s ease, padding .22s ease, opacity .15s ease;
+  width: 42px; min-width: 0; box-sizing: border-box; padding: 10px 10px 10px 34px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--bg-3); color: var(--fg);
+  font: inherit; font-size: 13px; box-shadow: 3px 3px 0 var(--line);
+  transition: width .22s ease;
 }
-.search.open input {
-  width: 220px; padding: 10px 12px; opacity: 1; border-color: var(--line);
-  box-shadow: 3px 3px 0 var(--line); margin-right: 6px;
-}
+.search input::placeholder { color: transparent; }
+.search:focus-within input,
+.search input:not(:placeholder-shown) { width: 230px; cursor: text; }
+.search:focus-within input::placeholder { color: var(--fg-faint); }
 .acc-swatch { width: 20px; height: 20px; display: block; border: 1px solid rgba(255, 255, 255, .25); }
 .acc-menu { padding: 8px; left: auto; right: 0; }
 .acc-menu .accents { display: grid; grid-template-columns: repeat(4, 24px); gap: 6px; }

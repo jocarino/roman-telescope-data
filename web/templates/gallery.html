@@ -76,20 +76,17 @@
         </div>
       </div>
     </div>
+    <!-- The magnifier IS the input: collapsed to icon width, it grows rightward on focus. -->
+    <label class="search">
+      <svg class="search-mag" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+        <circle cx="7" cy="7" r="4.3" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <input type="search" x-model="q" placeholder="Search planet or star…"
+        aria-label="Search planets">
+    </label>
     <div class="spacer"></div>
     <span class="count"><span x-text="count()"></span> shown · long-press for a quick peek</span>
-    <!-- Collapsed to a magnifier on the right; click expands the input. -->
-    <div class="search" :class="searchOpen ? 'open' : ''" @keydown.escape.window="searchOpen = false">
-      <input type="search" x-ref="sq" x-model="q" placeholder="Search planet or star…"
-        aria-label="Search planets" @blur="if (!q) searchOpen = false">
-      <button class="dd-btn dd-icon search-ic" aria-label="Search"
-        @click="searchOpen ? (q = '', searchOpen = false) : (searchOpen = true, $nextTick(() => $refs.sq.focus()))">
-        <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-          <circle cx="7" cy="7" r="4.3" fill="none" stroke="currentColor" stroke-width="1.6"/>
-          <path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-        </svg>
-      </button>
-    </div>
   </div>
 
   <div class="grid" x-init="$nextTick(() => renderCards())">
