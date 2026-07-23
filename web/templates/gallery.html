@@ -34,8 +34,12 @@
     </div>
     <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
       @click.outside="open=false">
-      <button class="dd-btn" @click="open=!open" :aria-expanded="open">
-        <span x-text="sortLabels[sort]"></span><span class="dd-arrow">▾</span>
+      <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
+        :title="sortLabels[sort]" aria-label="Sort planets">
+        <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <path d="M3 4h10M3 8h6.5M3 12h3.5" stroke="currentColor" stroke-width="1.6"
+            fill="none" stroke-linecap="round"/>
+        </svg>
       </button>
       <div class="dd-menu" x-show="open" x-cloak>
         <template x-for="[val, label] in Object.entries(sortLabels)" :key="val">
@@ -53,11 +57,21 @@
       <button :class="fidelity === 'classic' ? 'on' : ''" @click="setFidelity('classic')">Classic</button>
       <button :class="fidelity === 'stylised' ? 'on' : ''" @click="setFidelity('stylised')">Stylised</button>
     </div>
-    <div class="accents" role="group" aria-label="Accent colour">
-      <template x-for="a in accents" :key="a.id">
-        <button class="acc" :class="['acc-' + a.id, accent === a.id ? 'on' : '']"
-          @click="setAccent(a.id)" :title="a.name" :aria-label="a.name + ' accent'"></button>
-      </template>
+    <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
+      @click.outside="open=false">
+      <button class="dd-btn dd-icon acc-trigger" @click="open=!open" :aria-expanded="open"
+        title="Accent colour" aria-label="Accent colour">
+        <span class="acc-swatch" :class="'acc-' + accent"></span>
+      </button>
+      <div class="dd-menu acc-menu" x-show="open" x-cloak>
+        <div class="accents" role="group" aria-label="Accent colour">
+          <template x-for="a in accents" :key="a.id">
+            <button class="acc" :class="['acc-' + a.id, accent === a.id ? 'on' : '']"
+              @click="setAccent(a.id); open = false" :title="a.name"
+              :aria-label="a.name + ' accent'"></button>
+          </template>
+        </div>
+      </div>
     </div>
     <div class="spacer"></div>
     <span class="count"><span x-text="count()"></span> shown · long-press for a quick peek</span>

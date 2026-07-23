@@ -65,7 +65,13 @@ a:hover { text-decoration: underline; }
 .site-head { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 6px; }
 .site-head h1 { font-size: 26px; margin: 0; letter-spacing: -0.02em; }
 .tagline { color: var(--fg-dim); font-size: 14px; }
-.subhead { color: var(--fg-faint); font-size: 13px; margin: 6px 0 24px; max-width: 70ch; }
+/* Revealed by the ℹ: a full-width accent callout, matching the planet-page info boxes. */
+.subhead {
+  color: var(--fg-dim); font-size: 13px; line-height: 1.55; margin: 10px 0 24px;
+  border: 1px solid var(--accent); border-left-width: 4px; background: var(--bg-3);
+  padding: 12px 16px;
+}
+.subhead strong { color: var(--fg); }
 
 /* Stats strip */
 .stats { display: flex; gap: 10px; flex-wrap: wrap; margin: 0 0 22px; }
@@ -222,14 +228,22 @@ a.badge:active, .drawer-close:active { transform: translateY(1px); }
 :root[data-accent="violet"]  { --accent: #b98cff; }  /* vaporwave */
 .accents { display: inline-flex; gap: 5px; align-items: center; }
 .acc { width: 24px; height: 24px; border: 1px solid var(--line); cursor: pointer; padding: 0; }
-.acc.acc-blue    { background: #7cc4ff; }
-.acc.acc-mustard { background: #e3b23c; }
-.acc.acc-green   { background: #3bf07a; }
-.acc.acc-amber   { background: #ffb000; }
-.acc.acc-pink    { background: #ff5fa2; }
-.acc.acc-cyan    { background: #37e6d6; }
-.acc.acc-violet  { background: #b98cff; }
+.acc.acc-blue,    .acc-swatch.acc-blue    { background: #7cc4ff; }
+.acc.acc-mustard, .acc-swatch.acc-mustard { background: #e3b23c; }
+.acc.acc-green,   .acc-swatch.acc-green   { background: #3bf07a; }
+.acc.acc-amber,   .acc-swatch.acc-amber   { background: #ffb000; }
+.acc.acc-pink,    .acc-swatch.acc-pink    { background: #ff5fa2; }
+.acc.acc-cyan,    .acc-swatch.acc-cyan    { background: #37e6d6; }
+.acc.acc-violet,  .acc-swatch.acc-violet  { background: #b98cff; }
 .acc.on { outline: 2px solid var(--fg); outline-offset: 1px; }
+/* Icon-only dropdown trigger (Sort, Accent) + accent-swatch popover. */
+.dd-icon { min-width: 0; padding: 8px 11px; justify-content: center; }
+.dd-icon .ic { color: var(--fg-dim); display: block; }
+.dd-icon:hover .ic { color: var(--fg); }
+.acc-trigger { padding: 7px; }
+.acc-swatch { width: 20px; height: 20px; display: block; border: 1px solid rgba(255, 255, 255, .25); }
+.acc-menu { padding: 8px; left: auto; right: 0; }
+.acc-menu .accents { display: grid; grid-template-columns: repeat(4, 24px); gap: 6px; }
 
 /* ---- Chunky 8-bit depth on toggles + action pills ---- */
 .segmented, .toggle { box-shadow: 3px 3px 0 var(--line); }
@@ -443,7 +457,9 @@ body::after {
 .spectrum .line-true { fill: none; stroke: #ffd23f; stroke-width: 2; }
 .spectrum .line-roman { fill: none; stroke: #3fd0ff; stroke-width: 2; stroke-dasharray: 5 4; }
 .spectrum .hatchline { stroke: var(--fg-faint); stroke-width: 1; }
-.spectrum .hatchlabel { fill: var(--fg-faint); font-size: 10px; }
+/* "Roman is blind here": accent highlight box + dark text so it reads over the hatching. */
+.spectrum .hatch-hl { fill: var(--accent); opacity: .9; }
+.spectrum .hatchlabel { fill: #05121f; font-size: 10px; font-weight: 600; }
 .legend { display: flex; gap: 16px; font-size: 12px; color: var(--fg-dim); margin-top: 8px; }
 .legend .k { display: inline-block; width: 22px; height: 0; border-top: 2px solid; vertical-align: middle; margin-right: 6px; }
 .legend .k.true { border-color: var(--fg); }
