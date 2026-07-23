@@ -115,13 +115,14 @@ def spectrum_svg(true_albedo: list[float], roman_recon: list[float], extrap_belo
   </defs>
   <rect x="{x0:.0f}" y="{_PAD_T}" width="{hatch_x1 - x0:.1f}" height="{y_axis - _PAD_T:.0f}"
     fill="url(#hatch)" opacity="0.5"/>
+  {gridlines}
+  <polyline points="{true_pts}" class="line-true"/>
+  <polyline points="{roman_pts}" class="line-roman"/>
+  <!-- Drawn last so the label sits ON TOP of the gridlines and plot lines. -->
   <rect x="{(x0 + hatch_x1) / 2 - 66:.0f}" y="{_PAD_T + 3:.0f}" width="132" height="15"
     rx="2" class="hatch-hl"/>
   <text x="{(x0 + hatch_x1) / 2:.0f}" y="{_PAD_T + 14:.0f}" class="hatchlabel"
     text-anchor="middle">Roman is blind here</text>
-  {gridlines}
-  <polyline points="{true_pts}" class="line-true"/>
-  <polyline points="{roman_pts}" class="line-roman"/>
   <rect x="{x0:.0f}" y="{y_axis + 6:.0f}" width="{x1 - x0:.0f}" height="8" fill="url(#specbar)"
     rx="2"/>
   <text x="{x0:.0f}" y="{_H - 4:.0f}" class="xtick">380 nm</text>
