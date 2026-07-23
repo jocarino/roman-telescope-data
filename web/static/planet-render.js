@@ -20,7 +20,7 @@
     "precision highp float;",
     "varying vec2 v;",
     "uniform vec3 pal[5];",
-    "uniform float bandFreq, bandContrast, haze, brightness, light, dither, levels;",
+    "uniform float bandFreq, bandContrast, haze, brightness, light, dither, levels, rot;",
     "uniform float turb, warmCool, bandGain;",  // stylised-mode restyling (0 in classic)
     "uniform int pixel, outline;",
     "vec3 ramp(float t){",
@@ -75,6 +75,9 @@
     "  }",
     "  float band = 0.5 + 0.5*sin(lat*bandFreq + wphase + sin(lat*bandFreq*0.5)*0.6);",
     "  band = mix(0.5, band, bandContrast);",
+    // Longitudinal swirl that scrolls with `rot` — makes rotation visible on banded worlds.
+    "  float lon = atan(uv.x, z) + rot;",
+    "  band += 0.12 * bandContrast * sin(lon*3.0 + lat*bandFreq*0.5);",
     "  float rim = smoothstep(0.74,1.0,r2);",
     "  float tone = shade * (0.60 + bandGain*band) * brightness + rim*haze*0.28;",
     "  tone *= 1.0 + mottle*0.12;",
@@ -118,7 +121,7 @@
     var loc = gl.getAttribLocation(prog, "p");
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    ["pal","bandFreq","bandContrast","haze","brightness","light","dither","levels",
+    ["pal","bandFreq","bandContrast","haze","brightness","light","dither","levels","rot",
      "turb","warmCool","bandGain","pixel","outline"]
       .forEach(function (n) { U[n] = gl.getUniformLocation(prog, n === "pal" ? "pal[0]" : n); });
     return true;
@@ -182,6 +185,7 @@
     gl.uniform1f(U.levels, levels);
     gl.uniform1f(U.dither, pixel ? 0.9 / levels : 0.0);
     gl.uniform1i(U.outline, opts.style === "retro" ? 1 : 0);
+    gl.uniform1f(U.rot, opts.rot || 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     // Blit 1:1 into the target canvas; CSS does the INTEGER upscale (80->160 = 2x) with
@@ -192,5 +196,25 @@
     ctx.drawImage(glCanvas, 0, 0);
   }
 
-  window.PlanetRender = { render: render };
+  // Rotation: a rAF loop that re-renders with an advancing `rot`. Throttled to ~30fps.
+  // Only ever run for a few canvases at once (detail page + hovered card), so it's cheap.
+  function spin(canvas, opts) {
+    stop(canvas);
+    var st = { rot: Math.random() * 6.283, last: 0 };
+    function frame(t) {
+      if (t - st.last > 33) {
+        st.rot += 0.05;
+        render(canvas, Object.assign({}, opts, { rot: st.rot }));
+        st.last = t;
+      }
+      st.raf = requestAnimationFrame(frame);
+    }
+    st.raf = requestAnimationFrame(frame);
+    canvas.__spin = st;
+  }
+  function stop(canvas) {
+    if (canvas && canvas.__spin) { cancelAnimationFrame(canvas.__spin.raf); canvas.__spin = null; }
+  }
+
+  window.PlanetRender = { render: render, spin: spin, stop: stop };
 })();

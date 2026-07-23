@@ -13,6 +13,13 @@ document.addEventListener("alpine:init", () => {
     style: localStorage.getItem("planetStyle") || "retro",
     // Render fidelity: "classic" (physics-honest) or "stylised" (restyled for looks). Global, persisted.
     fidelity: localStorage.getItem("renderFidelity") || "classic",
+    // Accent theme, persisted and applied site-wide via a data-attribute on <html>.
+    accent: localStorage.getItem("accent") || "blue",
+    setAccent(a) {
+      this.accent = a;
+      try { localStorage.setItem("accent", a); } catch (e) { /* ignore */ }
+      document.documentElement.setAttribute("data-accent", a);
+    },
     setStyle(s) {
       this.style = s;
       try { localStorage.setItem("planetStyle", s); } catch (e) { /* ignore */ }
@@ -118,9 +125,10 @@ document.addEventListener("alpine:init", () => {
         lumY: this.view === "full" ? this.fullLum : this.romanLum,
         fidelity: this.fidelity,
       };
-      if (this.$refs.cHero) PlanetRender.render(this.$refs.cHero, { ...opts, style: "retro" });
-      PlanetRender.render(this.$refs.cSmooth, { ...opts, style: "smooth" });
-      PlanetRender.render(this.$refs.cRetro, { ...opts, style: "retro" });
+      // On the detail page the planets rotate (only a few canvases, so it's cheap).
+      if (this.$refs.cHero) PlanetRender.spin(this.$refs.cHero, { ...opts, style: "retro" });
+      PlanetRender.spin(this.$refs.cSmooth, { ...opts, style: "smooth" });
+      PlanetRender.spin(this.$refs.cRetro, { ...opts, style: "retro" });
     },
   }));
 });
@@ -183,5 +191,37 @@ document.addEventListener("htmx:afterSwap", (e) => {
   }, true);
   document.addEventListener("contextmenu", function (e) {
     if (e.target.closest && e.target.closest("a.card")) e.preventDefault();
+  });
+})();
+
+// Hover-to-spin on gallery cards (desktop with a real pointer only — avoids mobile churn
+// and keeps the site light: only the hovered planet animates).
+(function () {
+  if (!window.matchMedia || !window.matchMedia("(hover: hover)").matches) return;
+  var hovered = null;
+  function optsFor(cv) {
+    var list = window.PLANETS || [];
+    var p = null;
+    for (var i = 0; i < list.length; i++) if (list[i].id === cv.dataset.id) { p = list[i]; break; }
+    if (!p) return null;
+    return {
+      palette: p.palette, radius: p.radius, cloudState: p.cloud, lumY: p.lum,
+      style: localStorage.getItem("planetStyle") || "retro",
+      fidelity: localStorage.getItem("renderFidelity") || "classic",
+    };
+  }
+  document.addEventListener("mouseover", function (e) {
+    var card = e.target.closest && e.target.closest("a.card");
+    if (card === hovered) return;
+    if (hovered && window.PlanetRender) {
+      var pc = hovered.querySelector(".card-planet");
+      if (pc) { window.PlanetRender.stop(pc); var o0 = optsFor(pc); if (o0) window.PlanetRender.render(pc, o0); }
+    }
+    hovered = card;
+    if (card && window.PlanetRender) {
+      var cv = card.querySelector(".card-planet");
+      var o = cv && optsFor(cv);
+      if (o) window.PlanetRender.spin(cv, o);
+    }
   });
 })();

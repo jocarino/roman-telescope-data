@@ -139,6 +139,39 @@ a:hover { text-decoration: underline; }
 a.badge:active, .drawer-close:active { transform: translateY(1px); }
 .toggle button, .segmented button, .badge { transition: transform .04s; }
 
+/* ---- Accent theme + switcher ---- */
+:root[data-accent="mustard"] { --accent: #e3b23c; }
+.accents { display: inline-flex; gap: 5px; align-items: center; }
+.acc { width: 24px; height: 24px; border: 1px solid var(--line); cursor: pointer; padding: 0; }
+.acc.acc-blue { background: #7cc4ff; }
+.acc.acc-mustard { background: #e3b23c; }
+.acc.on { outline: 2px solid var(--fg); outline-offset: 1px; }
+
+/* ---- Chunky 8-bit depth on toggles + action pills ---- */
+.segmented, .toggle { box-shadow: 3px 3px 0 var(--line); }
+button.badge, a.badge { box-shadow: 2px 2px 0 var(--line); }
+button.badge:active, a.badge:active { box-shadow: none; }
+
+/* ---- Hex colour chip ---- */
+.chip {
+  display: inline-block; width: 8px; height: 8px; margin-right: 5px;
+  border: 1px solid rgba(255, 255, 255, .3); vertical-align: middle;
+}
+
+/* ---- Notched (chamfered) pixel panel corners ---- */
+.panel {
+  clip-path: polygon(5px 0, calc(100% - 5px) 0, 100% 5px, 100% calc(100% - 5px),
+    calc(100% - 5px) 100%, 5px 100%, 0 calc(100% - 5px), 0 5px);
+}
+
+/* ---- Subtle CRT scanlines ---- */
+body::after {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 60;
+  background: repeating-linear-gradient(to bottom,
+    rgba(0, 0, 0, 0), rgba(0, 0, 0, 0) 2px, rgba(0, 0, 0, .20) 3px, rgba(0, 0, 0, 0) 4px);
+  opacity: .5;
+}
+
 /* Badges */
 .badge {
   font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line);
