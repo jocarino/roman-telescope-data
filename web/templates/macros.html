@@ -60,8 +60,24 @@
   {% endif %}
 
   <div class="detail-head" x-effect="view; fidelity; heroStyle; $nextTick(() => renderAll())">
-    <canvas class="detail-hero" :class="heroStyle === 'retro' ? 'pixel' : ''" x-ref="cHero"
-      width="256" height="256" aria-label="{{ rec.name }} render"></canvas>
+    <div class="hero-stack">
+      <canvas class="detail-hero" x-show="heroSource !== 'telescope'"
+        :class="heroStyle === 'retro' ? 'pixel' : ''" x-ref="cHero"
+        width="256" height="256" aria-label="{{ rec.name }} modelled render"></canvas>
+      {% if rec.real_observation %}
+      <figure class="hero-obs" x-show="heroSource === 'telescope'" x-cloak>
+        <img class="detail-hero" src="/static/{{ rec.real_observation.file }}"
+          alt="{{ rec.name }} — real {{ rec.real_observation.band }} telescope image"
+          width="256" height="256" loading="lazy">
+        <figcaption class="obs-credit">
+          <span class="obs-real">◉ REAL IMAGE</span>
+          {{ rec.real_observation.instrument }} · {{ rec.real_observation.band }}{% if rec.real_observation.year %} · {{ rec.real_observation.year }}{% endif %}<br>
+          <span class="obs-sub">{{ rec.real_observation.note }}</span><br>
+          <span class="obs-sub">{{ rec.real_observation.credit }} · {{ rec.real_observation.license }}</span>
+        </figcaption>
+      </figure>
+      {% endif %}
+    </div>
     <div class="detail-title">
       <h1>{{ rec.name }}</h1>
       <div class="host">{{ rec.host_star.name }}
@@ -106,6 +122,16 @@
           turbulence for looks: prettier, not more accurate.</p>
         <p>The palette below is identical either way — only the picture changes.</p>
       </div></template>
+      <template x-if="info === 'source'"><div>
+        <p><strong>Modelled</strong> — the planet as our physics computes it should look: a
+          smooth globe in its derived colour. Not a photograph.</p>
+        <p><strong>Telescope</strong> — the <em>actual</em> processed image astronomers took of
+          this planet: a faint point of light beside its (blocked-out) star. It is almost
+          always infrared and false-coloured — the real dot humanity has received, not a
+          picture of the surface.</p>
+        <p>Only a handful of planets have ever been photographed directly; that is why this
+          knob appears on some pages and not others.</p>
+      </div></template>
     </div>
     <div class="scope-main">
       <div class="scope-screen">{{ ctx.spectrum_svg|safe }}</div>
@@ -127,8 +153,9 @@
           &lt;{{ iview.reconstruction.extrapolated_below_nm|round|int }} nm: Roman blind, flat-held.</div>
       </div>
       <div class="scope-rail">
-        <div class="knob-tag">RENDER CONTROLS</div>
-        <div class="knob-cell">
+        <div class="knob-tag">PLANET IMAGE <span class="knob-tag-sub">— the picture up top</span></div>
+        <div class="knob-cell" :class="heroSource === 'telescope' ? 'knob-off' : ''"
+          title="Only affects the modelled render">
           <div class="knob" role="button" tabindex="0" title="Switch render style"
             @click="toggleFidelity()" @keydown.enter.prevent="toggleFidelity()"
             :style="{ '--a': fidelity === 'classic' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
@@ -137,14 +164,26 @@
               aria-label="What does style change?" title="What does style change?">i</button></span>
           <span class="knob-val" x-text="fidelity === 'classic' ? 'Classic' : 'Stylised'"></span>
         </div>
-        <div class="knob-cell">
+        <div class="knob-cell" :class="heroSource === 'telescope' ? 'knob-off' : ''"
+          title="Only affects the modelled render">
           <div class="knob" role="button" tabindex="0" title="Switch pixel / sphere"
             @click="toggleHeroStyle()" @keydown.enter.prevent="toggleHeroStyle()"
             :style="{ '--a': heroStyle === 'retro' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
           <span class="knob-name">Shape</span>
           <span class="knob-val" x-text="heroStyle === 'retro' ? 'Pixel' : 'Sphere'"></span>
         </div>
-        <button class="scope-fbtn" @click="resetScope()" title="Reset view + render to defaults">Reset</button>
+        {% if rec.real_observation %}
+        <div class="knob-cell knob-cell-source">
+          <div class="knob knob-source" role="button" tabindex="0"
+            title="Switch between the modelled render and the real telescope photo"
+            @click="toggleHeroSource()" @keydown.enter.prevent="toggleHeroSource()"
+            :style="{ '--a': heroSource === 'model' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
+          <span class="knob-name">Source
+            <button class="info-btn xs" @click="toggleInfo('source')" :class="info === 'source' ? 'on' : ''"
+              aria-label="What is modelled vs telescope?" title="Modelled vs telescope?">i</button></span>
+          <span class="knob-val" x-text="heroSource === 'model' ? 'Modelled' : 'Telescope'"></span>
+        </div>
+        {% endif %}
       </div>
     </div>
     <div class="scope-bottom">
