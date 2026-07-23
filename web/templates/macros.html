@@ -86,11 +86,6 @@
               @click="selectObs(i)" x-text="o.telescope"></button>
           </template>
         </div>
-        <figcaption class="obs-credit">
-          <span class="obs-real">◉ REAL IMAGE</span> ·
-          <span x-text="curObs().telescope"></span>
-          <span class="obs-sub" x-show="obs.length === 1"> · full details by the planet name</span>
-        </figcaption>
       </figure>
       {% endif %}
     </div>
@@ -103,18 +98,22 @@
       <div style="margin-top:10px">{{ provenance_badge(rec) }}
         <span class="badge">{{ rec.discovery.method }}</span></div>
       {# The description here tracks what the hero is showing: the modelled caption, or —
-         when the Source knob is on Telescope — the real image's details + credit, in full. #}
-      <p class="viewnote" x-show="heroSource !== 'telescope'"
-        x-text="view === 'full' ? fullCap : romanCap"></p>
-      {% if rec.real_observations %}
-      <p class="viewnote obs-note" x-show="heroSource === 'telescope'" x-cloak>
-        <span class="obs-real">◉ REAL IMAGE</span>
-        <span x-text="curObs().instrument"></span> · <span x-text="curObs().band"></span><template
-          x-if="curObs().year"><span> · <span x-text="curObs().year"></span></span></template><br>
-        <span x-text="curObs().note"></span><br>
-        <span class="obs-sub"><span x-text="curObs().credit"></span> · <span x-text="curObs().license"></span></span>
-      </p>
-      {% endif %}
+         when the Source knob is on Telescope — the real image's details + credit, in full.
+         The slot reserves a stable height and fills the width so toggling the Source knob
+         doesn't shove the header up and down. #}
+      <div class="desc-slot{% if rec.real_observations %} has-obs{% endif %}">
+        <p class="viewnote" x-show="heroSource !== 'telescope'"
+          x-text="view === 'full' ? fullCap : romanCap"></p>
+        {% if rec.real_observations %}
+        <p class="viewnote obs-note" x-show="heroSource === 'telescope'" x-cloak>
+          <span class="obs-real">◉ REAL IMAGE</span>
+          <span x-text="curObs().instrument"></span> · <span x-text="curObs().band"></span><template
+            x-if="curObs().year"><span> · <span x-text="curObs().year"></span></span></template> ·
+          <span x-text="curObs().note"></span>
+          <span class="obs-sub">— <span x-text="curObs().credit"></span> · <span x-text="curObs().license"></span></span>
+        </p>
+        {% endif %}
+      </div>
       {% if rec.system and rec.system.siblings %}
       <nav class="system-strip" aria-label="Other planets in this star system">
         <span class="system-lbl">SAME SYSTEM · {{ rec.host_star.name }}</span>
