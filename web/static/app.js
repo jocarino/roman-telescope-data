@@ -95,8 +95,16 @@ document.addEventListener("alpine:init", () => {
     // Render fidelity: "classic" (physics-honest) or "stylised" (restyled for looks). Global, persisted.
     fidelity: localStorage.getItem("renderFidelity") || "classic",
     msg: "",
+    help: false,       // "how to read this" expandable (ℹ button)
+    ledFlash: false,   // RUN LED blink on view change
     _t: null,
+    _lt: null,
     ...init,
+    blink() {
+      this.ledFlash = true;
+      clearTimeout(this._lt);
+      this._lt = setTimeout(() => (this.ledFlash = false), 320);
+    },
     setFidelity(f) {
       this.fidelity = f;
       try { localStorage.setItem("renderFidelity", f); } catch (e) { /* ignore */ }
