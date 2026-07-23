@@ -39,7 +39,7 @@ def _method_label(code: str | None) -> str:
 
 # The curated name list. Chosen for recognisability and type coverage.
 CURATED_NAMES: list[str] = [
-    "HD 189733 b",     # archetypal hot Jupiter — measured deep blue
+    "HD 189733 b",     # archetypal hot Jupiter, measured deep blue
     "51 Peg b",        # first hot Jupiter around a Sun-like star
     "HD 209458 b",     # "Osiris", first transiting planet
     "WASP-12 b",       # ultra-hot, very dark
@@ -52,13 +52,13 @@ CURATED_NAMES: list[str] = [
     "bet Pic b",       # imaged young giant (Archive uses the abbreviated "bet")
     "HD 95086 b",      # imaged cold giant
     "GJ 504 b",        # imaged cold, low-mass giant
-    "47 UMa b",        # RV giant — Roman CGI-style target
-    "ups And d",       # RV giant — Roman CGI-style target
+    "47 UMa b",        # RV giant, Roman CGI-style target
+    "ups And d",       # RV giant, Roman CGI-style target
     "Kepler-186 f",    # rocky, temperate
     "TRAPPIST-1 e",    # rocky, temperate
     "Proxima Cen b",   # nearest rocky planet
     "GJ 1214 b",       # warm sub-Neptune
-    "OGLE-2005-BLG-390L b",  # microlensing — light never isolable
+    "OGLE-2005-BLG-390L b",  # microlensing, light never isolable
 ]
 
 
@@ -70,7 +70,7 @@ def _slug(name: str) -> str:
 
 # The Archive's canonical pl_name abbreviates constellation genitives ("51 Peg b") and Greek
 # letters ("ups And d"). The friendlier public NASA display expands them ("51 Pegasi b"). We
-# expand only for DISPLAY — the id/slug and data matching still use the raw Archive name.
+# expand only for DISPLAY; the id/slug and data matching still use the raw Archive name.
 _CONSTELLATIONS = {
     "And": "Andromedae", "Aqr": "Aquarii", "Aql": "Aquilae", "Ari": "Arietis",
     "Boo": "Bootis", "Cnc": "Cancri", "CVn": "Canum Venaticorum", "CMa": "Canis Majoris",
@@ -104,7 +104,7 @@ def _display_name(name: str) -> str:
 def _model_temperature(rec: ArchiveRecord, eq_temp: float | None) -> float | None:
     """Temperature that sets the reflected-light regime. Usually the archive equilibrium
     temp, but for internal-heat-dominated young imaged giants (archive pl_eqt >> irradiation
-    temp) use the irradiation temp — otherwise they are mis-routed to the hot-Jupiter engine
+    temp) use the irradiation temp, otherwise they are mis-routed to the hot-Jupiter engine
     and render an unphysical clipped blue. The 3x guard only triggers on clear cases and
     leaves normal irradiated planets (where the two temps ~match) untouched."""
     irr = rec.irradiation_temp_k()

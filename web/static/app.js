@@ -136,7 +136,7 @@ document.addEventListener("alpine:init", () => {
       clearTimeout(this._lt);
       this._lt = setTimeout(() => (this.ledFlash = false), 320);
     },
-    // Scope controls — every knob/button drives real state (and persists across hops):
+    // Scope controls: every knob/button drives real state (and persists across hops):
     setView(v) { this.view = v; this._persist("scopeView", v); this.blink(); },
     selectObs(i) { this.obsIdx = i; this._persist("obsTelescope", this.curObs().telescope || ""); },
     // Style/Shape act on the modelled render. If the real photo is showing, the first click
@@ -155,7 +155,7 @@ document.addEventListener("alpine:init", () => {
     // The currently-selected real image (safe when none exist).
     curObs() { return this.obs[this.obsIdx] || {}; },
     // Flip the hero between the modelled render and the real telescope photo (only present
-    // for directly-imaged planets — the knob is not rendered otherwise).
+    // for directly-imaged planets; the knob is not rendered otherwise).
     toggleHeroSource() {
       if (!this.obs.length) return;
       this.heroSource = this.heroSource === "model" ? "telescope" : "model";
@@ -219,7 +219,7 @@ document.addEventListener("htmx:afterSwap", (e) => {
 //
 // Robustness: the click decision is DURATION-based and only ever cancels navigation for a
 // genuine long, still press on the same card. Every short/normal click falls through to the
-// browser's default <a href> navigation and is never prevented — so clicks always work.
+// browser's default <a href> navigation and is never prevented, so clicks always work.
 (function () {
   var LP_MS = 450, MOVE_TOL = 12;
   var downCard = null, downAt = 0, sx = 0, sy = 0, moved = false, timer = null;
@@ -268,7 +268,7 @@ document.addEventListener("htmx:afterSwap", (e) => {
   });
 })();
 
-// Hover-to-spin on gallery cards (desktop with a real pointer only — avoids mobile churn
+// Hover-to-spin on gallery cards (desktop with a real pointer only, avoids mobile churn
 // and keeps the site light: only the hovered planet animates).
 (function () {
   if (!window.matchMedia || !window.matchMedia("(hover: hover)").matches) return;

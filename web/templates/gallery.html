@@ -1,17 +1,21 @@
 {% extends "base.html" %}
 {% from "macros.html" import provenance_badge, palette_strip %}
 {% block content %}
-<div class="site-head">
-  <h1>Exoplanet Palette</h1>
-  <span class="tagline">the colour scheme of every known exoplanet, derived from physics</span>
+<div x-data="{ intro: false }">
+  <div class="site-head">
+    <h1>Exoplanet Palette</h1>
+    <span class="tagline">the colour scheme of every known exoplanet, derived from physics</span>
+    <button class="info-btn sm" @click="intro = !intro" :class="intro ? 'on' : ''"
+      aria-label="How these colours are made" title="How these colours are made">i</button>
+  </div>
+  <p class="subhead" x-show="intro" x-cloak>
+    Each planet's colour is computed from its reflected-light spectrum (albedo model × host-star
+    spectrum) via CIE 1931 colour matching. Every planet is shown two ways: the full modelled
+    spectrum, and what the Roman Coronagraph would recover from just four bands. <strong>Both are
+    modelled predictions, not photographs</strong>. For Roman's ~dozen tech-demo targets, the
+    four-band view will one day be replaced by real measured data.
+  </p>
 </div>
-<p class="subhead">
-  Each planet's colour is computed from its reflected-light spectrum (albedo model × host-star
-  spectrum) via CIE 1931 colour matching. Every planet is shown two ways: the full modelled
-  spectrum, and what the Roman Coronagraph would recover from just four bands. <strong>Both are
-  modelled predictions, not photographs</strong> — for Roman's ~dozen tech-demo targets, the
-  four-band view will one day be replaced by real measured data.
-</p>
 
 <div x-data="gallery()">
   <div class="controls">
@@ -67,7 +71,6 @@
       <canvas class="card-planet" data-id="{{ p.record.id }}" width="256" height="256"
         aria-label="{{ p.record.name }} render"></canvas>
       <div class="card-name">{{ p.record.name }}</div>
-      <div class="card-host">{{ p.record.host_star.name }}</div>
       <div class="card-meta">
         {{ provenance_badge(p.record) }}
         <span class="badge hex"><i class="chip" style="background: {{ p.record.true_colour.hex }}"></i>{{ p.record.true_colour.hex }}</span>
