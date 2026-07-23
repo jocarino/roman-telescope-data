@@ -27,9 +27,9 @@
   </div>
 {%- endmacro %}
 
-{# The detail body — reused verbatim by the full page and the htmx drawer fragment.
+{# The detail body, reused verbatim by the full page and the htmx drawer fragment.
    Alpine holds the full-spectrum <-> Roman view; both colours/palettes are precomputed.
-   NB: neither view is "true colour" — both are MODELLED. They differ by spectral coverage
+   NB: neither view is "true colour"; both are MODELLED. They differ by spectral coverage
    (full model spectrum vs Roman's four bands); provenance (modelled/measured) is separate. #}
 {% macro detail_body(ctx) -%}
 {%- set rec = ctx.record -%}
@@ -45,8 +45,8 @@
     romanPalette: [{% for s in rv.palette %}'{{ s.hex }}'{{ ',' if not loop.last }}{% endfor %}],
     radius: {{ rec.params.radius_r_earth if rec.params.radius_r_earth else 8 }},
     cloudState: '{{ rec.params.assumed_cloud_state }}',
-    fullCap: 'Modelled from the complete reflected-light spectrum (380–780 nm) — a physics prediction, not a photograph.',
-    romanCap: '{% if iview.band_samples.source == 'measured' %}Measured: real Roman photometry in four bands{% if iview.band_samples.epoch %} ({{ iview.band_samples.epoch }}){% endif %}, reconstructed to a colour — real data.{% else %}Simulated: the model pushed through Roman four filters — what Roman would measure, not real data yet.{% endif %}',
+    fullCap: 'Modelled from the complete reflected-light spectrum (380–780 nm): a physics prediction, not a photograph.',
+    romanCap: '{% if iview.band_samples.source == 'measured' %}Measured: real Roman photometry in four bands{% if iview.band_samples.epoch %} ({{ iview.band_samples.epoch }}){% endif %}, reconstructed to a colour. Real data.{% else %}Simulated: the model pushed through the four Roman filters, i.e. what Roman would measure, not real data yet.{% endif %}',
     obs: [{% for o in rec.real_observations %}{
       telescope: {{ o.telescope|tojson|forceescape }}, file: '/static/{{ o.file }}',
       instrument: {{ o.instrument|tojson|forceescape }}, band: {{ o.band|tojson|forceescape }},
@@ -59,7 +59,7 @@
 
   {% if not rec.is_light_isolable %}
   <div class="banner">
-    ⚠︎ Discovered by microlensing — no light from this planet is ever isolable by any
+    ⚠︎ Discovered by microlensing: no light from this planet is ever isolable by any
     telescope. Both swatches are <strong>model-only</strong>, shown for interest, never observed.
   </div>
   {% endif %}
@@ -74,7 +74,7 @@
         <button class="obs-thumb" @click="obsZoom = true" title="Click to enlarge the real image"
           aria-label="Enlarge the real telescope image">
           <img class="detail-hero" :src="curObs().file"
-            :alt="'{{ rec.name }} — real ' + curObs().band + ' image'"
+            :alt="'{{ rec.name }}: real ' + curObs().band + ' image'"
             width="256" height="256" loading="lazy">
           <span class="obs-zoom-cue">⤢ enlarge</span>
         </button>
@@ -96,8 +96,8 @@
       </div>
       <div style="margin-top:10px">{{ provenance_badge(rec) }}
         <span class="badge">{{ rec.discovery.method }}</span></div>
-      {# The description here tracks what the hero is showing: the modelled caption, or —
-         when the Source knob is on Telescope — the real image's details + credit, in full.
+      {# The description here tracks what the hero is showing: the modelled caption, or,
+         when the Source knob is on Telescope, the real image's details + credit, in full.
          The slot reserves a stable height and fills the width so toggling the Source knob
          doesn't shove the header up and down. #}
       <div class="desc-slot{% if rec.real_observations %} has-obs{% endif %}">
@@ -109,7 +109,7 @@
           <span x-text="curObs().instrument"></span> · <span x-text="curObs().band"></span><template
             x-if="curObs().year"><span> · <span x-text="curObs().year"></span></span></template> ·
           <span x-text="curObs().note"></span>
-          <span class="obs-sub">— <span x-text="curObs().credit"></span> · <span x-text="curObs().license"></span></span>
+          <span class="obs-sub">· <span x-text="curObs().credit"></span> · <span x-text="curObs().license"></span></span>
         </p>
         {% endif %}
       </div>
@@ -134,9 +134,9 @@
     @click="obsZoom = false" @keydown.escape.window="obsZoom = false">
     <figure class="obs-lightbox-inner" @click.stop>
       <button class="obs-close" @click="obsZoom = false" aria-label="Close">×</button>
-      <img :src="curObs().file" :alt="'{{ rec.name }} — real ' + curObs().band + ' image'">
+      <img :src="curObs().file" :alt="'{{ rec.name }}: real ' + curObs().band + ' image'">
       <figcaption class="obs-credit lg">
-        <span class="obs-real">◉ REAL IMAGE — {{ rec.name }}</span>
+        <span class="obs-real">◉ REAL IMAGE · {{ rec.name }}</span>
         <span x-text="curObs().instrument"></span> · <span x-text="curObs().band"></span><template
           x-if="curObs().year"><span> · <span x-text="curObs().year"></span></span></template><br>
         <span class="obs-sub" x-text="curObs().note"></span><br>
@@ -165,26 +165,26 @@
     </div>
     <div class="scope-info" x-show="info" x-cloak x-transition>
       <template x-if="info === 'view'"><div>
-        <p><strong>Full spectrum</strong> — the colour computed from the complete 380–780&nbsp;nm
+        <p><strong>Full spectrum</strong>: the colour computed from the complete 380–780&nbsp;nm
           reflected-light model.</p>
-        <p><strong>Roman 4-band</strong> — the same light as the Roman Space Telescope's
+        <p><strong>Roman 4-band</strong>: the same light as the Roman Space Telescope's
           Coronagraph would see it, through just four filters.</p>
         <p>Both are <strong>modelled, not photographs</strong>; flipping between them shows how
           much of a planet's colour survives Roman's coarse filter set.</p>
       </div></template>
       <template x-if="info === 'style'"><div>
-        <p><strong>Classic</strong> — surface colour and brightness taken straight from the
+        <p><strong>Classic</strong>: surface colour and brightness taken straight from the
           physics model (cloud bands are schematic).</p>
-        <p><strong>Stylised</strong> — that same colour restyled into warm/cool bands and
+        <p><strong>Stylised</strong>: that same colour restyled into warm/cool bands and
           turbulence for looks: prettier, not more accurate.</p>
-        <p>The palette below is identical either way — only the picture changes.</p>
+        <p>The palette below is identical either way; only the picture changes.</p>
       </div></template>
       <template x-if="info === 'source'"><div>
-        <p><strong>Modelled</strong> — the planet as our physics computes it should look: a
+        <p><strong>Modelled</strong>: the planet as our physics computes it should look: a
           smooth globe in its derived colour. Not a photograph.</p>
-        <p><strong>Telescope</strong> — the <em>actual</em> processed image astronomers took of
+        <p><strong>Telescope</strong>: the <em>actual</em> processed image astronomers took of
           this planet: a faint point of light beside its (blocked-out) star. It is almost
-          always infrared and false-coloured — the real dot humanity has received, not a
+          always infrared and false-coloured; the real dot humanity has received, not a
           picture of the surface.</p>
         <p>Only a handful of planets have ever been photographed directly; that is why this
           knob appears on some pages and not others. When more than one telescope has imaged
@@ -209,7 +209,7 @@
           &lt;{{ iview.reconstruction.extrapolated_below_nm|round|int }} nm: Roman blind, flat-held.</div>
       </div>
       <div class="scope-rail">
-        <div class="knob-tag">PLANET IMAGE <span class="knob-tag-sub">— the picture up top</span></div>
+        <div class="knob-tag"><span class="knob-tag-main">PLANET DISPLAY</span><span class="knob-tag-sub">the picture up top</span></div>
         <div class="knob-cell">
           <div class="knob" role="button" tabindex="0"
             title="Switch render style (shows the modelled planet)"
@@ -282,10 +282,10 @@
       <div class="dossier-stats">
         <div class="dossier-sub">Planet</div>
         <table class="params">
-          <tr><td>Equilibrium temp</td><td>{{ (rec.params.equilibrium_temp_k|round|int ~ ' K') if rec.params.equilibrium_temp_k else '—' }}</td></tr>
-          <tr><td>Radius</td><td>{{ (rec.params.radius_r_earth|round(2) ~ ' R⊕') if rec.params.radius_r_earth else '—' }}</td></tr>
-          <tr><td>Mass</td><td>{{ (rec.params.mass_m_earth|round(1) ~ ' M⊕') if rec.params.mass_m_earth else '—' }}</td></tr>
-          <tr><td>Semi-major axis</td><td>{{ (rec.params.semi_major_axis_au|round(3) ~ ' AU') if rec.params.semi_major_axis_au else '—' }}</td></tr>
+          <tr><td>Equilibrium temp</td><td>{{ (rec.params.equilibrium_temp_k|round|int ~ ' K') if rec.params.equilibrium_temp_k else 'n/a' }}</td></tr>
+          <tr><td>Radius</td><td>{{ (rec.params.radius_r_earth|round(2) ~ ' R⊕') if rec.params.radius_r_earth else 'n/a' }}</td></tr>
+          <tr><td>Mass</td><td>{{ (rec.params.mass_m_earth|round(1) ~ ' M⊕') if rec.params.mass_m_earth else 'n/a' }}</td></tr>
+          <tr><td>Semi-major axis</td><td>{{ (rec.params.semi_major_axis_au|round(3) ~ ' AU') if rec.params.semi_major_axis_au else 'n/a' }}</td></tr>
           <tr><td>Discovery</td><td>{{ rec.discovery.method }}{{ (' · ' ~ rec.discovery.year) if rec.discovery.year else '' }}</td></tr>
         </table>
       </div>
@@ -295,17 +295,17 @@
       <div class="assume">
         {% if rec.provenance in ['simulated-cgi', 'measured-cgi'] %}
         A Roman tech-demo target: the four-band view will be replaced by <strong>real measured
-        data</strong> once Roman observes it — the only real colour this planet will ever have.
+        data</strong> once Roman observes it, the only real colour this planet will ever have.
         {% elif not rec.is_light_isolable %}
         No telescope can ever isolate this planet's light, so both colours are
         <strong>model-only, forever</strong>.
         {% else %}
-        This planet's light has never been isolated by any telescope — both colours are modelled.
+        This planet's light has never been isolated by any telescope; both colours are modelled.
         {% endif %}
         <br><br>
         {%- set engine = {'parametric': 'a parametric albedo model', 'cahoy': 'the Cahoy et al. 2010 grid', 'picaso': 'PICASO radiative transfer'} -%}
         Spectrum engine: {{ engine.get(rec.params.spectrum_source, rec.params.spectrum_source) }}.
-        Model assumptions — cloud state: {{ rec.params.assumed_cloud_state }};
+        Model assumptions. Cloud state: {{ rec.params.assumed_cloud_state }};
         metallicity: {{ rec.params.assumed_metallicity }}× solar;
         phase angle: {{ rec.params.assumed_phase_angle_deg|round|int }}°.
       </div>

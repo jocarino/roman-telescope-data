@@ -3,12 +3,12 @@
 These are hand-maintained facts, not derivable from the Exoplanet Archive: which planets
 have an actual processed direct-imaging photograph, where it came from, and how it must be
 credited. Keyed by record id (see `pipeline.catalog._slug`). Only directly-imaged planets
-appear here — microlensing planets never yield an image, and RV/transit planets have none
+appear here: microlensing planets never yield an image, and RV/transit planets have none
 yet. The site's colour is always modelled; these are the genuine (always infrared, always
 false-coloured) dots of light a telescope actually received.
 
 Each planet maps to a LIST of observations so a second instrument (e.g. Roman, post-launch)
-is APPENDED beside the first, never substituted — the page then offers a per-telescope
+is APPENDED beside the first, never substituted, and the page then offers a per-telescope
 toggle. Every entry is a real observation visually verified against its source, with an
 honest credit + license. HR 8799 b/c/e share one JWST NIRCam system image (each note says
 which labelled point source is that planet). Do not add an entry without a verified image.
@@ -44,13 +44,13 @@ OBSERVATIONS: dict[str, list[RealObservation]] = {
             license="CC BY 4.0",
             source_url="https://esawebb.org/images/weic2504b/",
             note="The planet is the fuzzy red point labelled “b”, just left of the masked star "
-            "51 Eri. Infrared light, false-coloured — not a visible-light photo.",
+            "51 Eri. Infrared light, false-coloured, not a visible-light photo.",
         ),
     ],
     "hr-8799-b": [
         RealObservation(
             **{**_HR8799, "file": "obs/hr-8799-b.jpg"},
-            note="Planet “b” is the blue dot at far left — the outermost of HR 8799’s four "
+            note="Planet “b” is the blue dot at far left, the outermost of HR 8799’s four "
             "planets (~68 AU). Star hidden by the coronagraph; infrared, false-coloured.",
         ),
     ],
@@ -58,14 +58,14 @@ OBSERVATIONS: dict[str, list[RealObservation]] = {
         RealObservation(
             **{**_HR8799, "file": "obs/hr-8799-c.jpg"},
             note="Planet “c” is the bluish-white dot at top (~38 AU). Star hidden by the "
-            "coronagraph; infrared, false-coloured — not a visible-light photo.",
+            "coronagraph; infrared, false-coloured, not a visible-light photo.",
         ),
     ],
     "hr-8799-e": [
         RealObservation(
             **{**_HR8799, "file": "obs/hr-8799-e.jpg"},
-            note="Planet “e” is the orange dot nearest the masked star — the innermost of the "
-            "four (~16 AU). Infrared, false-coloured — not a visible-light photo.",
+            note="Planet “e” is the orange dot nearest the masked star, the innermost of the "
+            "four (~16 AU). Infrared, false-coloured, not a visible-light photo.",
         ),
     ],
     "bet-pic-b": [
@@ -106,7 +106,7 @@ OBSERVATIONS: dict[str, list[RealObservation]] = {
             band="near-infrared (J+H → false colour)",
             year=2013,
             credit="NAOJ (National Astronomical Observatory of Japan)",
-            license="NAOJ terms — credit required",
+            license="NAOJ terms, credit required",
             source_url="https://subarutelescope.org/en/gallery/pressrelease/galactic/2025/06/18/3566.html",
             note="The planet is the white point at upper-right; the star sits behind the black "
             "central mask amid blue/orange speckle noise. Near-infrared, false-coloured.",

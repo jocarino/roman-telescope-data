@@ -49,9 +49,9 @@ body {
 }
 ::selection { background: var(--accent); color: #05121f; }
 
-/* Retro pixel-art chrome: pixel font on headings/labels/pills, sharp edges, crisp borders */
-.site-head h1, .card-name, .panel h3, .toggle button, .segmented button, .badge,
-.viewnote strong, .stat .n {
+/* Retro chrome: only the big brand title keeps the pixel-art font. Every small label, pill,
+   badge and readout uses the mono font — the pixel font is hard to read at small sizes. */
+.site-head h1 {
   font-family: var(--pixel);
   -webkit-font-smoothing: none; font-smooth: never;
 }
@@ -97,7 +97,7 @@ a:hover { text-decoration: underline; }
 .card:hover { border-color: var(--line); text-decoration: none; }
 .card-planet { width: 160px; height: 160px; display: block; margin: 0 auto 12px; }
 .card-planet.pixel { image-rendering: pixelated; image-rendering: crisp-edges; }
-.card-name { font-size: 13px; font-weight: 550; color: var(--fg-dim); letter-spacing: -0.01em; }
+.card-name { font-size: 13px; font-weight: 480; color: var(--fg); letter-spacing: 0; }
 .card-host { font-size: 11px; color: var(--fg-faint); margin-top: 1px; }
 .card-meta { display: flex; gap: 6px; margin-top: 9px; flex-wrap: wrap; justify-content: center; }
 
@@ -116,9 +116,9 @@ a:hover { text-decoration: underline; }
 .site-head h1 { font-size: 18px; letter-spacing: 0; line-height: 1.3; }
 .tagline { font-size: 12px; }
 .panel h3 { font-size: 11px; letter-spacing: .04em; }
-.card-name { font-size: 10px; letter-spacing: .3px; }
+.card-name { font-size: 13px; letter-spacing: 0; }
 .badge {
-  border-radius: 0; font-size: 8.5px; padding: 4px 7px; letter-spacing: .3px; text-transform: uppercase;
+  border-radius: 0; font-size: 9.5px; padding: 4px 8px; letter-spacing: .4px; text-transform: uppercase;
 }
 .toggle, .toggle button, .segmented, .segmented button { border-radius: 0; }
 .toggle button, .segmented button { font-size: 9.5px; letter-spacing: .4px; padding: 8px 12px; }
@@ -130,7 +130,7 @@ a:hover { text-decoration: underline; }
 /* "Same system" neighbourhood strip: links to sibling planets of the same host star. */
 .system-strip { margin-top: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
 .system-lbl {
-  font-family: var(--pixel); font-size: 9px; letter-spacing: .5px; color: var(--fg-dim);
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .5px; color: var(--fg-dim);
   text-transform: uppercase;
 }
 .system-links { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -167,7 +167,7 @@ canvas.detail-hero:not(.pixel) { border-radius: 50%; }
 .obs-thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .obs-zoom-cue {
   position: absolute; right: 5px; bottom: 5px; padding: 2px 5px; line-height: 1.2;
-  font-family: var(--pixel); font-size: 7px; letter-spacing: .5px; color: var(--fg);
+  font-family: var(--mono); font-size: 7px; letter-spacing: .5px; color: var(--fg);
   background: rgba(0, 0, 0, .62); border: 1px solid rgba(255, 255, 255, .18); border-radius: 2px;
   opacity: .0; transition: opacity .14s;
 }
@@ -175,8 +175,8 @@ canvas.detail-hero:not(.pixel) { border-radius: 50%; }
 /* Per-telescope selector (JWST / Roman / …): shown only when >1 image exists. */
 .obs-tabs { display: flex; gap: 4px; margin-top: 2px; flex-wrap: wrap; }
 .obs-tab {
-  padding: 2px 8px; border: 1px solid var(--line); background: var(--bg-3); cursor: pointer;
-  font-family: var(--pixel); font-size: 8px; letter-spacing: .3px; color: var(--fg-dim); border-radius: 2px;
+  padding: 3px 9px; border: 1px solid var(--line); background: var(--bg-3); cursor: pointer;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .3px; color: var(--fg-dim); border-radius: 2px;
 }
 .obs-tab:hover { border-color: var(--accent); color: var(--fg); }
 .obs-tab.on { background: var(--accent); color: #05121f; border-color: var(--accent); }
@@ -202,7 +202,7 @@ canvas.detail-hero:not(.pixel) { border-radius: 50%; }
 }
 .obs-close:hover { border-color: var(--accent); color: var(--accent); }
 .obs-real {
-  font-family: var(--pixel); font-size: 9px; letter-spacing: .5px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .5px; font-weight: 600;
   color: var(--accent); display: inline-block; margin-right: 4px;
 }
 .obs-sub { color: var(--fg-faint); }
@@ -280,7 +280,7 @@ body::after {
 
 /* ---- Sharpen the last rounded boxes on the planet page ---- */
 .assume, .banner, .palette { border-radius: 0; }
-.palette .stop code { border-radius: 0; font-family: var(--pixel); font-size: 8px; }
+.palette .stop code { border-radius: 0; font-family: var(--mono); font-size: 8px; }
 
 /* ---- Unify all pills with the chunky 8-bit shadow ---- */
 .badge { box-shadow: 2px 2px 0 var(--line); }
@@ -292,9 +292,9 @@ body::after {
   box-shadow: 4px 4px 0 var(--line); margin-top: 4px;
 }
 .scope-top {
-  display: flex; align-items: center; gap: 12px; padding: 8px 12px;
+  display: flex; align-items: center; gap: 12px; padding: 11px 14px;
   border-bottom: 1px solid var(--line); background: #0a0c11;
-  font-family: var(--pixel); font-size: 9px; letter-spacing: .5px;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .5px;
 }
 .scope-brand { color: var(--accent); }
 .scope-model { color: var(--fg-dim); }
@@ -302,7 +302,7 @@ body::after {
 .led.on { background: #4ade80; box-shadow: 0 0 5px #4ade80; }
 /* Plain-labelled view selector (the two ways to see a planet's colour). */
 .scope-view { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-.scope-view-lbl { font-family: var(--pixel); font-size: 8px; letter-spacing: 1px; color: var(--fg-faint); }
+.scope-view-lbl { font-family: var(--mono); font-size: 9.5px; letter-spacing: 1px; color: var(--fg-faint); }
 .led-btn {
   display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border: 1px solid transparent;
   background: none; color: var(--fg-dim); font: inherit; font-size: 12px; cursor: pointer;
@@ -317,7 +317,7 @@ body::after {
 .scope-info strong { color: var(--fg); }
 .scope-info p { margin: 0 0 8px; }
 .scope-info p:last-child { margin-bottom: 0; }
-.scope-main { display: grid; grid-template-columns: 1fr 200px; }
+.scope-main { display: grid; grid-template-columns: 1fr 200px; min-height: 320px; }
 .scope-screen {
   position: relative; background: #04070c; padding: 12px 12px 8px; overflow: hidden;
   box-shadow: inset 0 0 34px rgba(0, 0, 0, .95); border-right: 1px solid var(--line);
@@ -330,23 +330,23 @@ body::after {
 }
 .scope-screen .spectrum { display: block; position: relative; z-index: 1; }
 .scope-side {
-  padding: 12px; display: flex; flex-direction: column; gap: 6px; background: #0a0c11;
-  font-family: var(--mono); font-size: 11px;
+  padding: 16px 14px; display: flex; flex-direction: column; gap: 9px; background: #0a0c11;
+  font-family: var(--mono); font-size: 12px;
 }
-.ro-ch { display: flex; align-items: center; gap: 6px; font-size: 9.5px; letter-spacing: .3px; }
-.ro-ch .sw { width: 9px; height: 9px; display: inline-block; border: 1px solid #000; }
+.ro-ch { display: flex; align-items: center; gap: 7px; font-size: 11px; letter-spacing: .3px; }
+.ro-ch .sw { width: 10px; height: 10px; display: inline-block; border: 1px solid #000; }
 .ro-ch.ch1 { color: #ffd23f; } .ro-ch.ch1 .sw { background: #ffd23f; }
 .ro-ch.ch2 { color: #3fd0ff; } .ro-ch.ch2 .sw { background: #3fd0ff; }
-.ro-ch code { color: var(--fg-faint); margin-left: auto; font-size: 9.5px; }
-.ro-sep { height: 1px; background: var(--line); margin: 3px 0; }
+.ro-ch code { color: var(--fg-faint); margin-left: auto; font-size: 10.5px; }
+.ro-sep { height: 1px; background: var(--line); margin: 4px 0; }
 .ro-row { display: flex; justify-content: space-between; align-items: baseline; color: var(--fg-dim); }
-.ro-row b { color: var(--fg); font-family: var(--pixel); font-size: 10px; }
-.ro-note { color: var(--fg-faint); font-size: 9px; line-height: 1.5; margin-top: auto; }
+.ro-row b { color: var(--fg); font-family: var(--mono); font-size: 12px; }
+.ro-note { color: var(--fg-faint); font-size: 10.5px; line-height: 1.55; margin-top: auto; }
 .scope-bottom {
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   padding: 10px 12px; border-top: 1px solid var(--line); background: #0a0c11;
 }
-.scope-pallabel { font-family: var(--pixel); font-size: 8.5px; color: var(--fg-dim); }
+.scope-pallabel { font-family: var(--mono); font-size: 9.5px; color: var(--fg-dim); }
 .scope-pal { flex: 1; min-width: 200px; }
 .scope-pal .palette { border: 1px solid var(--line); }
 .scope-pal .palette .stop { height: 44px; }
@@ -361,7 +361,7 @@ body::after {
   stroke: #3fd0ff; filter: drop-shadow(0 0 2.5px #3fd0ff);
 }
 .spectrum .ytick, .spectrum .xtick {
-  fill: rgba(190, 205, 225, .7); font-family: var(--pixel); font-size: 7px;
+  fill: rgba(190, 205, 225, .7); font-family: var(--mono); font-size: 7px;
 }
 .spectrum .hatchline { stroke: rgba(190, 205, 225, .22); }
 .spectrum .hatchlabel { fill: rgba(190, 205, 225, .55); }
@@ -381,7 +381,7 @@ body::after {
 /* Far top-left of the viewport, tucked in the gutter so it steals no vertical space. */
 .back {
   position: fixed; top: 16px; left: 18px; z-index: 40; margin: 0; padding: 7px 12px;
-  font-family: var(--pixel); font-size: 9px; letter-spacing: .5px; color: var(--fg-dim);
+  font-family: var(--mono); font-size: 9px; letter-spacing: .5px; color: var(--fg-dim);
   border: 1px solid var(--line); background: var(--bg-3); box-shadow: 3px 3px 0 var(--line);
 }
 .back:hover { color: var(--fg); border-color: var(--accent); }
@@ -475,7 +475,7 @@ body::after {
 .dossier-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .info-btn {
   width: 22px; height: 22px; flex: none; border: 1px solid var(--line); background: var(--bg-3);
-  color: var(--fg-dim); font-family: var(--pixel); font-size: 11px; line-height: 1; cursor: pointer;
+  color: var(--fg-dim); font-family: var(--mono); font-size: 11px; line-height: 1; cursor: pointer;
   box-shadow: 2px 2px 0 var(--line);
 }
 .info-btn.on { background: var(--accent); color: #05121f; }
@@ -488,7 +488,7 @@ body::after {
 .dossier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 14px; }
 @media (max-width: 720px) { .dossier-grid { grid-template-columns: 1fr; } }
 .dossier-sub {
-  font-family: var(--pixel); font-size: 10px; letter-spacing: .05em; text-transform: uppercase;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .05em; text-transform: uppercase;
   color: var(--fg-dim); margin-bottom: 6px;
 }
 
@@ -500,11 +500,12 @@ body::after {
   gap: 20px; padding: 22px 20px;
   background: linear-gradient(180deg, #171a22, #0d0f14); border-left: 1px solid var(--line);
 }
-.knob-tag { font-family: var(--pixel); font-size: 7px; letter-spacing: .5px; color: var(--fg-dim); text-align: center; margin-bottom: 2px; }
-.knob-tag-sub { color: var(--fg-faint); font-family: var(--sans, inherit); font-size: 10px; letter-spacing: 0; }
+.knob-tag { font-family: var(--mono); text-align: center; margin-bottom: 2px; }
+.knob-tag-main { display: block; font-size: 11.5px; letter-spacing: .5px; color: var(--fg-dim); text-transform: uppercase; }
+.knob-tag-sub { display: block; margin-top: 3px; color: var(--fg-faint); font-size: 9px; letter-spacing: .3px; text-transform: uppercase; }
 .knob-cell { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
-.knob-name { font-size: 11px; color: var(--fg-dim); display: inline-flex; align-items: center; gap: 4px; }
-.knob-val { font-family: var(--pixel); font-size: 8px; letter-spacing: .3px; color: var(--accent); }
+.knob-name { font-size: 12px; color: var(--fg-dim); display: inline-flex; align-items: center; gap: 4px; }
+.knob-val { font-family: var(--mono); font-size: 9.5px; letter-spacing: .3px; color: var(--accent); text-transform: uppercase; }
 .knob {
   width: 40px; height: 40px; border-radius: 50%; position: relative; cursor: pointer;
   background: radial-gradient(circle at 35% 30%, #3a4150, #14171e 70%);
