@@ -70,20 +70,48 @@
       <div style="margin-top:10px">{{ provenance_badge(rec) }}
         <span class="badge">{{ rec.discovery.method }}</span></div>
       <div style="margin-top:14px" class="toggle">
-        <button :class="view === 'full' ? 'on' : ''" @click="view='full'">Full spectrum</button>
-        <button :class="view === 'roman' ? 'on' : ''" @click="view='roman'">Roman · 4 bands</button>
+        <button :class="view === 'full' ? 'on' : ''" @click="view='full'; blink()">Full spectrum</button>
+        <button :class="view === 'roman' ? 'on' : ''" @click="view='roman'; blink()">Roman · 4 bands</button>
       </div>
       <p class="viewnote" x-text="view === 'full' ? fullCap : romanCap"></p>
     </div>
   </div>
 
-  <div class="detail-cols">
-    <div>
-      <div class="panel">
-        <h3>Rendered planet <span style="color:var(--fg-faint);text-transform:none;font-weight:400">
-          (artistic impression · <span x-text="view === 'full' ? 'full spectrum' : 'Roman view'"></span><span
-            x-show="fidelity === 'stylised'"> · stylised</span>)</span></h3>
-        <div class="toggle" style="margin:0 0 12px"
+  {# ── Dossier: renders + colour + planet stats in one retro info card, help on an ℹ button ── #}
+  <div class="panel dossier">
+    <div class="dossier-head">
+      <h3>Planet data <span style="color:var(--fg-faint);text-transform:none;font-weight:400">(<span
+        x-text="view === 'full' ? 'full spectrum' : 'Roman 4-band'"></span>)</span></h3>
+      <button class="info-btn" @click="help = !help" :class="help ? 'on' : ''"
+        :aria-expanded="help" title="How to read this" aria-label="How to read this">i</button>
+    </div>
+
+    <div class="dossier-help" x-show="help" x-cloak x-transition>
+      <div class="assume">
+        Both colours are <strong>modelled predictions, not photographs</strong>. The
+        full-spectrum swatch is our most complete model; the Roman view is coarser (four
+        bands).
+        {% if rec.provenance in ['simulated-cgi', 'measured-cgi'] %}
+        For this Roman tech-demo target, the four-band view will be replaced by
+        <strong>real measured data</strong> once Roman observes it — the only real colour
+        data this planet will ever have.
+        {% elif not rec.is_light_isolable %}
+        No telescope can ever isolate this planet's light, so it stays model-only forever.
+        {% else %}
+        This planet's light has never been isolated by any telescope.
+        {% endif %}
+        <br><br>
+        {%- set engine = {'parametric': 'a parametric albedo model', 'cahoy': 'the Cahoy et al. 2010 grid', 'picaso': 'PICASO radiative transfer'} -%}
+        Spectrum engine: {{ engine.get(rec.params.spectrum_source, rec.params.spectrum_source) }}.
+        Model assumptions — cloud state: {{ rec.params.assumed_cloud_state }};
+        metallicity: {{ rec.params.assumed_metallicity }}× solar;
+        phase angle: {{ rec.params.assumed_phase_angle_deg|round|int }}°.
+      </div>
+    </div>
+
+    <div class="dossier-grid">
+      <div class="dossier-render">
+        <div class="toggle" style="margin:0 0 10px"
           title="Classic: colour derived from the physics. Stylised: restyled for looks, not truer.">
           <button :class="fidelity === 'classic' ? 'on' : ''" @click="setFidelity('classic')">Classic</button>
           <button :class="fidelity === 'stylised' ? 'on' : ''" @click="setFidelity('stylised')">Stylised</button>
@@ -94,31 +122,24 @@
           <figure><canvas x-ref="cRetro" class="planet-canvas pixel" width="256" height="256"></canvas>
             <figcaption>Pixel</figcaption></figure>
         </div>
-        <p class="assume" style="margin-top:12px">
-          <template x-if="fidelity === 'classic'"><span>Colour and brightness are derived from the model;
-            cloud bands are schematic. Not a photograph or a surface map.</span></template>
-          <template x-if="fidelity === 'stylised'"><span>Stylised view: the derived colour is restyled
-            into warm/cool cloud bands with turbulence for looks — prettier, but not more accurate than
-            Classic. Palette and swatch are unchanged.</span></template>
+        <p class="assume" style="margin-top:10px">
+          <template x-if="fidelity === 'classic'"><span>Artistic impression — colour + brightness
+            from the model, cloud bands schematic. Not a photograph.</span></template>
+          <template x-if="fidelity === 'stylised'"><span>Stylised: derived colour restyled into
+            warm/cool bands + turbulence for looks — prettier, not truer. Palette unchanged.</span></template>
         </p>
       </div>
 
-    </div>
-
-    <div>
-      <div class="panel">
-        <h3>Colour <span style="color:var(--fg-faint);text-transform:none;font-weight:400">
-          (<span x-text="view === 'full' ? 'full-spectrum model' : 'Roman four-band'"></span>)</span></h3>
+      <div class="dossier-stats">
+        <div class="dossier-sub">Colour · <span
+          x-text="view === 'full' ? 'full-spectrum model' : 'Roman four-band'"></span></div>
         <table class="params">
           <tr><td>Base hex</td><td><code x-text="view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}'"></code></td></tr>
           <tr><td>Reflected brightness (Y)</td><td x-text="(view === 'full' ? fullLum : romanLum).toFixed(3)"></td></tr>
           <tr><td>Confidence</td><td x-text="view === 'full' ? fullConf : romanConf"></td></tr>
           <tr><td>Out of sRGB gamut</td><td x-text="(view === 'full' ? fullOog : romanOog) ? 'yes' : 'no'"></td></tr>
         </table>
-      </div>
-
-      <div class="panel">
-        <h3>Planet</h3>
+        <div class="dossier-sub" style="margin-top:16px">Planet</div>
         <table class="params">
           <tr><td>Equilibrium temp</td><td>{{ (rec.params.equilibrium_temp_k|round|int ~ ' K') if rec.params.equilibrium_temp_k else '—' }}</td></tr>
           <tr><td>Radius</td><td>{{ (rec.params.radius_r_earth|round(2) ~ ' R⊕') if rec.params.radius_r_earth else '—' }}</td></tr>
@@ -126,30 +147,6 @@
           <tr><td>Semi-major axis</td><td>{{ (rec.params.semi_major_axis_au|round(3) ~ ' AU') if rec.params.semi_major_axis_au else '—' }}</td></tr>
           <tr><td>Discovery</td><td>{{ rec.discovery.method }}{{ (' · ' ~ rec.discovery.year) if rec.discovery.year else '' }}</td></tr>
         </table>
-      </div>
-
-      <div class="panel">
-        <h3>How to read this</h3>
-        <div class="assume">
-          Both colours are <strong>modelled predictions, not photographs</strong>. The
-          full-spectrum swatch is our most complete model; the Roman view is coarser (four
-          bands).
-          {% if rec.provenance in ['simulated-cgi', 'measured-cgi'] %}
-          For this Roman tech-demo target, the four-band view will be replaced by
-          <strong>real measured data</strong> once Roman observes it — the only real colour
-          data this planet will ever have.
-          {% elif not rec.is_light_isolable %}
-          No telescope can ever isolate this planet's light, so it stays model-only forever.
-          {% else %}
-          This planet's light has never been isolated by any telescope.
-          {% endif %}
-          <br><br>
-          {%- set engine = {'parametric': 'a parametric albedo model', 'cahoy': 'the Cahoy et al. 2010 grid', 'picaso': 'PICASO radiative transfer'} -%}
-          Spectrum engine: {{ engine.get(rec.params.spectrum_source, rec.params.spectrum_source) }}.
-          Model assumptions — cloud state: {{ rec.params.assumed_cloud_state }};
-          metallicity: {{ rec.params.assumed_metallicity }}× solar;
-          phase angle: {{ rec.params.assumed_phase_angle_deg|round|int }}°.
-        </div>
       </div>
     </div>
   </div>
@@ -159,7 +156,7 @@
     <div class="scope-top">
       <span class="scope-brand">◼ EXOSCOPE</span>
       <span class="scope-model">{{ rec.name }} · reflected-light · 380–780 nm</span>
-      <span class="scope-leds"><i class="led on"></i>RUN<i class="led"></i>SINGLE</span>
+      <span class="scope-leds"><i class="led on" :class="ledFlash ? 'flash' : ''"></i>RUN<i class="led"></i>SINGLE</span>
     </div>
     <div class="scope-main">
       <div class="scope-screen">{{ ctx.spectrum_svg|safe }}</div>
@@ -179,6 +176,16 @@
         <div class="ro-sep"></div>
         <div class="ro-note">&#916;E = perceptual distance (full vs Roman).
           &lt;{{ iview.reconstruction.extrapolated_below_nm|round|int }} nm: Roman blind, flat-held.</div>
+      </div>
+      <div class="scope-rail">
+        <div class="knob" style="--a:-38deg"><span class="knob-dot"></span></div>
+        <span class="knob-lbl">HORIZ</span>
+        <div class="knob" style="--a:22deg"><span class="knob-dot"></span></div>
+        <span class="knob-lbl">VERT</span>
+        <div class="knob" style="--a:120deg"><span class="knob-dot"></span></div>
+        <span class="knob-lbl">TRIG</span>
+        <button class="scope-fbtn" @click="view='full'; blink()">AUTO</button>
+        <button class="scope-fbtn" @click="help=!help">MENU</button>
       </div>
     </div>
     <div class="scope-bottom">

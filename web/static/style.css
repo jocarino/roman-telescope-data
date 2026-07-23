@@ -363,3 +363,59 @@ body::after {
   color: var(--fg); border-radius: 0; width: 34px; height: 34px; font-size: 20px; cursor: pointer;
 }
 
+
+/* ---- Dossier: combined renders + colour + planet info card ---- */
+.dossier-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.info-btn {
+  width: 22px; height: 22px; flex: none; border: 1px solid var(--line); background: var(--bg-3);
+  color: var(--fg-dim); font-family: var(--pixel); font-size: 11px; line-height: 1; cursor: pointer;
+  box-shadow: 2px 2px 0 var(--line);
+}
+.info-btn.on { background: var(--accent); color: #05121f; }
+.info-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line); }
+.dossier-help { overflow: hidden; margin-top: 12px; }
+.dossier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 14px; }
+@media (max-width: 720px) { .dossier-grid { grid-template-columns: 1fr; } }
+.dossier-render .renders { justify-content: flex-start; }
+.dossier-sub {
+  font-family: var(--pixel); font-size: 10px; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--fg-dim); margin-bottom: 6px;
+}
+
+/* ---- Scope control rail: faux knobs + function buttons ---- */
+.scope-main { grid-template-columns: 1fr 190px auto; }
+@media (max-width: 760px) { .scope-main { grid-template-columns: 1fr; } .scope-rail { flex-direction: row; flex-wrap: wrap; border-left: 0; border-top: 1px solid var(--line); } }
+.scope-rail {
+  display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 12px 14px;
+  background: linear-gradient(180deg, #171a22, #0d0f14); border-left: 1px solid var(--line);
+}
+.knob {
+  width: 34px; height: 34px; border-radius: 50%; position: relative; margin-top: 6px;
+  background: radial-gradient(circle at 35% 30%, #3a4150, #14171e 70%);
+  border: 1px solid #000; box-shadow: 0 2px 3px rgba(0, 0, 0, .6), inset 0 1px 1px rgba(255, 255, 255, .15);
+}
+.knob-dot {
+  position: absolute; top: 3px; left: 50%; width: 2px; height: 9px; background: var(--accent);
+  transform-origin: 50% 14px; transform: translateX(-50%) rotate(var(--a, 0deg));
+  box-shadow: 0 0 3px var(--accent);
+}
+.knob-lbl { font-family: var(--pixel); font-size: 6.5px; color: var(--fg-faint); letter-spacing: .3px; margin-bottom: 3px; }
+.scope-fbtn {
+  margin-top: 8px; width: 46px; padding: 5px 0; border: 1px solid var(--line); background: var(--bg-3);
+  color: var(--fg-dim); font-family: var(--pixel); font-size: 7px; cursor: pointer; box-shadow: 2px 2px 0 var(--line);
+}
+.scope-fbtn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line); }
+
+/* ---- CRT screen curvature + glare ---- */
+.scope-screen { border-radius: 12px / 9px; }
+.scope-screen::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 2; border-radius: inherit;
+  background: radial-gradient(120% 90% at 30% 10%, rgba(255, 255, 255, .06), transparent 45%);
+  box-shadow: inset 0 0 44px rgba(0, 0, 0, .75);
+}
+
+/* ---- RUN LED: slow pulse for life, quick flash on view change ---- */
+.led.on { animation: ledpulse 2.4s ease-in-out infinite; }
+@keyframes ledpulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+.led.flash { animation: ledflash .32s ease-out; }
+@keyframes ledflash { 0% { background: #fff; box-shadow: 0 0 9px #fff; } 100% { background: #4ade80; } }
