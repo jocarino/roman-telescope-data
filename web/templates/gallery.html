@@ -29,6 +29,7 @@
         </svg>
       </button>
       <div class="dd-menu" x-show="open" x-cloak>
+        <div class="dd-head">Provenance<span class="dd-sub">how real the colour is</span></div>
         <template x-for="[val, label] in Object.entries(provLabels)" :key="val">
           <button :class="prov === val ? 'on' : ''" @click="prov = val; open = false"
             x-text="label"></button>
