@@ -91,6 +91,59 @@ document.addEventListener("alpine:init", () => {
 document.addEventListener("htmx:afterSwap", (e) => {
   if (e.detail && e.detail.target && e.detail.target.id === "drawer-body") {
     if (window.Alpine) Alpine.store("drawer").open = true;
-    window.scrollTo({ top: 0 });
   }
 });
+
+// Card interaction: a normal click/tap navigates to the full planet page (the <a href>);
+// a long-press (~450ms, held still) opens the side sheet instead. Works with mouse + touch.
+//
+// Robustness: the click decision is DURATION-based and only ever cancels navigation for a
+// genuine long, still press on the same card. Every short/normal click falls through to the
+// browser's default <a href> navigation and is never prevented — so clicks always work.
+(function () {
+  var LP_MS = 450, MOVE_TOL = 12;
+  var downCard = null, downAt = 0, sx = 0, sy = 0, moved = false, timer = null;
+
+  function openDrawer(card) {
+    var frag = card.getAttribute("data-fragment");
+    if (!frag || !window.htmx) return;
+    // Cache-bust so the drawer always reflects the current build (avoids stale fragments).
+    window.htmx.ajax("GET", frag + "?_=" + Date.now(), "#drawer-body");
+    if (window.Alpine) window.Alpine.store("drawer").open = true;
+  }
+
+  var pending = null;  // one-shot {card,longpress} set on release, consumed by the next click
+
+  document.addEventListener("pointerdown", function (e) {
+    var card = e.target.closest && e.target.closest("a.card");
+    downCard = card; downAt = Date.now(); moved = false; sx = e.clientX; sy = e.clientY;
+    clearTimeout(timer);
+    // Open at the threshold for responsiveness while still holding.
+    if (card) timer = setTimeout(function () { if (!moved && downCard === card) openDrawer(card); }, LP_MS);
+  }, true);
+  document.addEventListener("pointermove", function (e) {
+    if (downCard && (Math.abs(e.clientX - sx) > MOVE_TOL || Math.abs(e.clientY - sy) > MOVE_TOL)) {
+      moved = true; clearTimeout(timer);
+    }
+  }, true);
+  document.addEventListener("pointerup", function () {
+    clearTimeout(timer);
+    if (downCard) pending = { card: downCard, longpress: !moved && Date.now() - downAt >= LP_MS };
+    downCard = null;
+  }, true);
+  document.addEventListener("pointercancel", function () { downCard = null; clearTimeout(timer); }, true);
+
+  // Only a click that immediately follows a long, still press cancels navigation. Any other
+  // click (short press, keyboard-activated, synthetic) has no pending long-press -> navigates.
+  document.addEventListener("click", function (e) {
+    var card = e.target.closest && e.target.closest("a.card");
+    var p = pending; pending = null;
+    if (card && p && p.card === card && p.longpress) {
+      e.preventDefault(); e.stopPropagation();
+      openDrawer(card);
+    }
+  }, true);
+  document.addEventListener("contextmenu", function (e) {
+    if (e.target.closest && e.target.closest("a.card")) e.preventDefault();
+  });
+})();

@@ -57,6 +57,7 @@ a:hover { text-decoration: underline; }
 .card {
   background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius);
   overflow: hidden; display: block; color: var(--fg); transition: transform .12s, border-color .12s;
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
 }
 .card:hover { transform: translateY(-3px); border-color: #3b455b; text-decoration: none; }
 .swatch { height: 118px; position: relative; }
