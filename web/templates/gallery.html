@@ -22,8 +22,12 @@
     <input type="search" placeholder="Search planet or star…" x-model="q" aria-label="Search">
     <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
       @click.outside="open=false">
-      <button class="dd-btn" @click="open=!open" :aria-expanded="open">
-        <span x-text="provLabels[prov]"></span><span class="dd-arrow">▾</span>
+      <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
+        :class="prov !== 'all' ? 'active' : ''" :title="provLabels[prov]"
+        aria-label="Filter by provenance">
+        <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <path d="M2 3.5H14L9.5 8.5V13L6.5 14.5V8.5L2 3.5Z" fill="currentColor"/>
+        </svg>
       </button>
       <div class="dd-menu" x-show="open" x-cloak>
         <template x-for="[val, label] in Object.entries(provLabels)" :key="val">
@@ -35,7 +39,7 @@
     <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
       @click.outside="open=false">
       <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
-        :title="sortLabels[sort]" aria-label="Sort planets">
+        :class="sort !== 'name' ? 'active' : ''" :title="sortLabels[sort]" aria-label="Sort planets">
         <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
           <path d="M3 4h10M3 8h6.5M3 12h3.5" stroke="currentColor" stroke-width="1.6"
             fill="none" stroke-linecap="round"/>
