@@ -9,8 +9,8 @@ document.addEventListener("alpine:init", () => {
     q: "",
     prov: "all",
     sort: "name",
-    // Card render style: "smooth" (sphere) or "retro" (pixel). Persisted, default sphere.
-    style: localStorage.getItem("planetStyle") || "smooth",
+    // Card render style: "smooth" (sphere) or "retro" (pixel). Persisted, default pixel.
+    style: localStorage.getItem("planetStyle") || "retro",
     // Render fidelity: "classic" (physics-honest) or "stylised" (restyled for looks). Global, persisted.
     fidelity: localStorage.getItem("renderFidelity") || "classic",
     setStyle(s) {
@@ -118,6 +118,7 @@ document.addEventListener("alpine:init", () => {
         lumY: this.view === "full" ? this.fullLum : this.romanLum,
         fidelity: this.fidelity,
       };
+      if (this.$refs.cHero) PlanetRender.render(this.$refs.cHero, { ...opts, style: "retro" });
       PlanetRender.render(this.$refs.cSmooth, { ...opts, style: "smooth" });
       PlanetRender.render(this.$refs.cRetro, { ...opts, style: "retro" });
     },
