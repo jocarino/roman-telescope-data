@@ -91,17 +91,21 @@
       </span>
     </div>
     <div class="scope-info" x-show="info" x-cloak x-transition>
-      <template x-if="info === 'view'"><span>
-        <strong>Full spectrum</strong> — the colour computed from the complete 380–780&nbsp;nm
-        reflected-light model. <strong>Roman 4-band</strong> — the same light as the Roman Space
-        Telescope's Coronagraph would see it, through just four filters. Both are
-        <strong>modelled, not photographs</strong>; flipping between them shows how much of a
-        planet's colour survives Roman's coarse filter set.</span></template>
-      <template x-if="info === 'style'"><span>
-        <strong>Classic</strong> — surface colour and brightness taken straight from the physics
-        model (cloud bands are schematic). <strong>Stylised</strong> — that same colour restyled
-        into warm/cool bands and turbulence for looks: prettier, not more accurate. The palette
-        below is identical either way — only the picture changes.</span></template>
+      <template x-if="info === 'view'"><div>
+        <p><strong>Full spectrum</strong> — the colour computed from the complete 380–780&nbsp;nm
+          reflected-light model.</p>
+        <p><strong>Roman 4-band</strong> — the same light as the Roman Space Telescope's
+          Coronagraph would see it, through just four filters.</p>
+        <p>Both are <strong>modelled, not photographs</strong>; flipping between them shows how
+          much of a planet's colour survives Roman's coarse filter set.</p>
+      </div></template>
+      <template x-if="info === 'style'"><div>
+        <p><strong>Classic</strong> — surface colour and brightness taken straight from the
+          physics model (cloud bands are schematic).</p>
+        <p><strong>Stylised</strong> — that same colour restyled into warm/cool bands and
+          turbulence for looks: prettier, not more accurate.</p>
+        <p>The palette below is identical either way — only the picture changes.</p>
+      </div></template>
     </div>
     <div class="scope-main">
       <div class="scope-screen">{{ ctx.spectrum_svg|safe }}</div>
