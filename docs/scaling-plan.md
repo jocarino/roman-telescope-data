@@ -57,11 +57,13 @@ real problems, *without* committing to the full front-end rebuild blind.
 - A small type/metallicity archetype grid so colours vary by planet class, not temperature alone.
 - Incremental builds are essential here (already in place).
 
-## Open decisions (flagged, not yet settled)
+## Settled decisions
 
-- **Unknown host star (e.g. OGLE microlensing).** Currently kept with the host-star temperature
-  `assumed` (Sun-like fallback) and tagged as such. Microlensing lenses are usually cooler M
-  dwarfs, so the Sun-like assumption is a stretch. Options: exclude these, or assume an M-dwarf
-  temperature for microlensing lenses. Revisit at Phase 2.
-- **Missing radius on giants.** Shown as `n/a`; the model uses a generic default internally for
-  routing. We could instead display an assumed giant radius, tagged `assumed`, for completeness.
+- **Unknown host star (e.g. OGLE microlensing) — EXCLUDE.** The illuminant *is* the colour, so a
+  made-up star produces a made-up colour with no point in showing it. The gate now requires a
+  real host-star temperature; planets without one are dropped (and logged). This drops the OGLE
+  microlensing example from the curated set; the microlensing badge/banner code remains for any
+  future planet that *does* have a characterised host.
+- **Missing radius on giants — keep `n/a`, don't fabricate.** The model uses a generic default
+  internally for routing only; radius barely affects reflected-light colour, and inventing a
+  displayed value would add nothing.

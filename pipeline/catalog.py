@@ -118,15 +118,16 @@ def completeness_gate(rec: ArchiveRecord) -> tuple[bool, str | None]:
     there is nothing to anchor an archetype to and the result would be pure guesswork, so we
     exclude it rather than invent it. Returns (ok, reason-if-excluded).
 
-    Requires a SIZE (radius, or a mass we can class by) and a TEMPERATURE (measured, or
-    computable from the star + orbit). Anything genuinely fallbackable — a missing radius on a
-    known giant, an unknown host-star temperature — is filled and tagged "assumed" rather than
-    used to exclude, so the honesty lives in the visible per-field tags, not in silent dropping."""
+    Requires a SIZE (radius, or a mass we can class by), a real HOST-STAR temperature (the
+    illuminant IS the colour, so a made-up star produces a made-up colour and there is no point
+    showing it), and a planet TEMPERATURE (measured, or computable from the star + orbit).
+    A missing radius on a known giant is still fine (the value is tagged 'assumed' and barely
+    affects reflected-light colour); a missing/unknowable illuminant is not."""
     if rec.pl_rade is None and rec.pl_bmasse is None:
         return False, "no size (neither radius nor mass)"
-    temp_computable = (
-        rec.st_teff is not None and rec.st_rad is not None and rec.pl_orbsmax is not None
-    )
+    if rec.st_teff is None:
+        return False, "unknown host star (no stellar temperature; the illuminant is the colour)"
+    temp_computable = rec.st_rad is not None and rec.pl_orbsmax is not None
     if rec.pl_eqt is None and not temp_computable:
         return False, "no temperature and none computable from star + orbit"
     return True, None
