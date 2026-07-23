@@ -14,6 +14,7 @@ import argparse
 import json
 import shutil
 import statistics
+import time
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -92,6 +93,8 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     (out / "palettes").mkdir(parents=True)
 
     contexts = [_planet_ctx(r) for r in records]
+    # Cache-bust static assets on every build so browsers never serve a stale JS/CSS.
+    build_id = str(int(time.time()))
 
     # Emit one .ase per planet (true-colour + Roman-view stops, named).
     for rec in records:
@@ -108,6 +111,7 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
         planets=contexts,
         stats=_stats(records),
         index_json=json.dumps([_index_entry(r) for r in records]),
+        build_id=build_id,
     )
     (out / "index.html").write_text(gallery_html)
 
@@ -115,7 +119,7 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     frag_tpl = env.get_template("fragments/planet_detail.html")
     for ctx in contexts:
         pid = ctx["record"].id
-        (out / "planet" / f"{pid}.html").write_text(page_tpl.render(ctx=ctx))
+        (out / "planet" / f"{pid}.html").write_text(page_tpl.render(ctx=ctx, build_id=build_id))
         (out / "fragments" / "planet" / f"{pid}.html").write_text(frag_tpl.render(ctx=ctx))
 
     shutil.copytree(_STATIC, out / "static")

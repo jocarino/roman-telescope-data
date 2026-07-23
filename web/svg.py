@@ -56,6 +56,18 @@ def _polyline(values: np.ndarray, vmax: float) -> str:
     return pts
 
 
+def _stepped(values: np.ndarray, vmax: float) -> str:
+    """Step-chart points (horizontal then vertical) for a blocky, pixel-art line."""
+    xs = [_x(nm) for nm in GRID_NM]
+    ys = [_y(v, vmax) for v in values]
+    pts = []
+    for i in range(len(xs)):
+        pts.append(f"{xs[i]:.1f},{ys[i]:.1f}")
+        if i + 1 < len(xs):
+            pts.append(f"{xs[i + 1]:.1f},{ys[i]:.1f}")
+    return " ".join(pts)
+
+
 def spectrum_svg(true_albedo: list[float], roman_recon: list[float], extrap_below_nm: float) -> str:
     true_a = np.asarray(true_albedo, dtype=float)
     roman_a = np.asarray(roman_recon, dtype=float)
@@ -73,8 +85,8 @@ def spectrum_svg(true_albedo: list[float], roman_recon: list[float], extrap_belo
         stops.append(f'<stop offset="{off:.0f}%" stop-color="rgb({r},{g},{b})"/>')
     grad = "".join(stops)
 
-    true_pts = _polyline(true_a, vmax)
-    roman_pts = _polyline(roman_a, vmax)
+    true_pts = _stepped(true_a, vmax)
+    roman_pts = _stepped(roman_a, vmax)
 
     # y gridlines
     gridlines = ""
