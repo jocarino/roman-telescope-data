@@ -303,7 +303,13 @@ body::after {
 .badge.hex { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 /* Detail page */
-.back { font-size: 13px; color: var(--fg-dim); }
+.back {
+  display: inline-block; margin: 4px 0 18px; padding: 7px 12px;
+  font-family: var(--pixel); font-size: 9px; letter-spacing: .5px; color: var(--fg-dim);
+  border: 1px solid var(--line); background: var(--bg-3); box-shadow: 3px 3px 0 var(--line);
+}
+.back:hover { color: var(--fg); border-color: var(--accent); }
+.back:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--line); }
 .detail-head { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; margin: 12px 0 22px; }
 .detail-swatch { width: 200px; height: 200px; border-radius: var(--radius); border: 1px solid var(--line); flex: none; box-shadow: var(--shadow); }
 .detail-title h1 { margin: 0 0 4px; font-size: 28px; letter-spacing: -0.02em; }
