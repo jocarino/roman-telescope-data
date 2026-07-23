@@ -11,7 +11,7 @@ document.addEventListener("alpine:init", () => {
     sort: "name",
     // Card render style: "smooth" (sphere) or "retro" (pixel). Persisted, default sphere.
     style: localStorage.getItem("planetStyle") || "smooth",
-    // Render fidelity: "classic" (physics-honest) or "augmented" (stylised). Global, persisted.
+    // Render fidelity: "classic" (physics-honest) or "stylised" (restyled for looks). Global, persisted.
     fidelity: localStorage.getItem("renderFidelity") || "classic",
     setStyle(s) {
       this.style = s;
@@ -76,7 +76,7 @@ document.addEventListener("alpine:init", () => {
   // both are modelled. `init` carries the precomputed colours/palettes.
   Alpine.data("detail", (init) => ({
     view: "full",
-    // Render fidelity: "classic" (physics-honest) or "augmented" (stylised). Global, persisted.
+    // Render fidelity: "classic" (physics-honest) or "stylised" (restyled for looks). Global, persisted.
     fidelity: localStorage.getItem("renderFidelity") || "classic",
     msg: "",
     _t: null,

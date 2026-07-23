@@ -82,11 +82,11 @@
       <div class="panel">
         <h3>Rendered planet <span style="color:var(--fg-faint);text-transform:none;font-weight:400">
           (artistic impression · <span x-text="view === 'full' ? 'full spectrum' : 'Roman view'"></span><span
-            x-show="fidelity === 'augmented'"> · stylised</span>)</span></h3>
+            x-show="fidelity === 'stylised'"> · stylised</span>)</span></h3>
         <div class="toggle" style="margin:0 0 12px"
-          title="Classic: colour derived from the physics. Augmented: stylised for looks, not truer.">
+          title="Classic: colour derived from the physics. Stylised: restyled for looks, not truer.">
           <button :class="fidelity === 'classic' ? 'on' : ''" @click="setFidelity('classic')">Classic</button>
-          <button :class="fidelity === 'augmented' ? 'on' : ''" @click="setFidelity('augmented')">Augmented</button>
+          <button :class="fidelity === 'stylised' ? 'on' : ''" @click="setFidelity('stylised')">Stylised</button>
         </div>
         <div class="renders" x-effect="view; fidelity; $nextTick(() => renderAll())">
           <figure><canvas x-ref="cSmooth" class="planet-canvas" width="256" height="256"></canvas>
@@ -97,7 +97,7 @@
         <p class="assume" style="margin-top:12px">
           <template x-if="fidelity === 'classic'"><span>Colour and brightness are derived from the model;
             cloud bands are schematic. Not a photograph or a surface map.</span></template>
-          <template x-if="fidelity === 'augmented'"><span>Augmented view: the derived colour is restyled
+          <template x-if="fidelity === 'stylised'"><span>Stylised view: the derived colour is restyled
             into warm/cool cloud bands with turbulence for looks — prettier, but not more accurate than
             Classic. Palette and swatch are unchanged.</span></template>
         </p>

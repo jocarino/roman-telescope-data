@@ -41,9 +41,9 @@
       <button :class="style === 'retro' ? 'on' : ''" @click="setStyle('retro')">Pixel</button>
     </div>
     <div class="segmented" role="group" aria-label="Render fidelity"
-      title="Classic: colour derived from the physics. Augmented: stylised for looks, not truer.">
+      title="Classic: colour derived from the physics. Stylised: restyled for looks, not truer.">
       <button :class="fidelity === 'classic' ? 'on' : ''" @click="setFidelity('classic')">Classic</button>
-      <button :class="fidelity === 'augmented' ? 'on' : ''" @click="setFidelity('augmented')">Augmented</button>
+      <button :class="fidelity === 'stylised' ? 'on' : ''" @click="setFidelity('stylised')">Stylised</button>
     </div>
     <div class="spacer"></div>
     <span class="count"><span x-text="count()"></span> shown · long-press for a quick peek</span>
