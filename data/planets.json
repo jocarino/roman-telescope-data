@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "grid": "cie-vis-380-780-5",
-  "generated_at": "2026-07-23T08:23:40+00:00",
+  "generated_at": "2026-07-23T14:07:05+00:00",
   "planets": [
     {
       "id": "hd-189733-b",
@@ -331,8 +331,14 @@
           }
         }
       ],
+      "real_observations": [],
+      "system": {
+        "hostname": "HD 189733",
+        "member_count": 1,
+        "siblings": []
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -665,8 +671,14 @@
           }
         }
       ],
+      "real_observations": [],
+      "system": {
+        "hostname": "51 Pegasi",
+        "member_count": 1,
+        "siblings": []
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -999,8 +1011,14 @@
           }
         }
       ],
+      "real_observations": [],
+      "system": {
+        "hostname": "HD 209458",
+        "member_count": 1,
+        "siblings": []
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -1333,8 +1351,14 @@
           }
         }
       ],
+      "real_observations": [],
+      "system": {
+        "hostname": "WASP-12",
+        "member_count": 1,
+        "siblings": []
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -1667,8 +1691,14 @@
           }
         }
       ],
+      "real_observations": [],
+      "system": {
+        "hostname": "WASP-121",
+        "member_count": 1,
+        "siblings": []
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -2001,8 +2031,14 @@
           }
         }
       ],
+      "real_observations": [],
+      "system": {
+        "hostname": "WASP-43",
+        "member_count": 1,
+        "siblings": []
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -2335,8 +2371,26 @@
           }
         }
       ],
+      "real_observations": [
+        {
+          "telescope": "JWST",
+          "file": "obs/51-eri-b.jpg",
+          "instrument": "JWST NIRCam (coronagraph)",
+          "band": "near-infrared (4.1 µm, shown red → false colour)",
+          "year": 2024,
+          "credit": "NASA, ESA, CSA, STScI, W. Balmer (JHU), L. Pueyo & M. Perrin (STScI)",
+          "license": "CC BY 4.0",
+          "source_url": "https://esawebb.org/images/weic2504b/",
+          "note": "The planet is the fuzzy red point labelled “b”, just left of the masked star 51 Eri. Infrared light, false-coloured — not a visible-light photo."
+        }
+      ],
+      "system": {
+        "hostname": "51 Eridani",
+        "member_count": 1,
+        "siblings": []
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -2669,8 +2723,41 @@
           }
         }
       ],
+      "real_observations": [
+        {
+          "telescope": "JWST",
+          "file": "obs/hr-8799-b.jpg",
+          "instrument": "JWST NIRCam (coronagraph)",
+          "band": "near-infrared (4.1/4.3/4.6 µm → false colour)",
+          "year": 2024,
+          "credit": "NASA, ESA, CSA, STScI, W. Balmer (JHU), L. Pueyo & M. Perrin (STScI)",
+          "license": "CC BY 4.0",
+          "source_url": "https://esawebb.org/images/weic2504a/",
+          "note": "Planet “b” is the blue dot at far left — the outermost of HR 8799’s four planets (~68 AU). Star hidden by the coronagraph; infrared, false-coloured."
+        }
+      ],
+      "system": {
+        "hostname": "HR 8799",
+        "member_count": 3,
+        "siblings": [
+          {
+            "id": "hr-8799-e",
+            "name": "HR 8799 e",
+            "letter": "e",
+            "semi_major_axis_au": 16.4,
+            "base_hex": "#c6cae4"
+          },
+          {
+            "id": "hr-8799-c",
+            "name": "HR 8799 c",
+            "letter": "c",
+            "semi_major_axis_au": 38.0,
+            "base_hex": "#c7cae2"
+          }
+        ]
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -3003,8 +3090,41 @@
           }
         }
       ],
+      "real_observations": [
+        {
+          "telescope": "JWST",
+          "file": "obs/hr-8799-c.jpg",
+          "instrument": "JWST NIRCam (coronagraph)",
+          "band": "near-infrared (4.1/4.3/4.6 µm → false colour)",
+          "year": 2024,
+          "credit": "NASA, ESA, CSA, STScI, W. Balmer (JHU), L. Pueyo & M. Perrin (STScI)",
+          "license": "CC BY 4.0",
+          "source_url": "https://esawebb.org/images/weic2504a/",
+          "note": "Planet “c” is the bluish-white dot at top (~38 AU). Star hidden by the coronagraph; infrared, false-coloured — not a visible-light photo."
+        }
+      ],
+      "system": {
+        "hostname": "HR 8799",
+        "member_count": 3,
+        "siblings": [
+          {
+            "id": "hr-8799-e",
+            "name": "HR 8799 e",
+            "letter": "e",
+            "semi_major_axis_au": 16.4,
+            "base_hex": "#c6cae4"
+          },
+          {
+            "id": "hr-8799-b",
+            "name": "HR 8799 b",
+            "letter": "b",
+            "semi_major_axis_au": 68.0,
+            "base_hex": "#c7cae2"
+          }
+        ]
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -3337,8 +3457,41 @@
           }
         }
       ],
+      "real_observations": [
+        {
+          "telescope": "JWST",
+          "file": "obs/hr-8799-e.jpg",
+          "instrument": "JWST NIRCam (coronagraph)",
+          "band": "near-infrared (4.1/4.3/4.6 µm → false colour)",
+          "year": 2024,
+          "credit": "NASA, ESA, CSA, STScI, W. Balmer (JHU), L. Pueyo & M. Perrin (STScI)",
+          "license": "CC BY 4.0",
+          "source_url": "https://esawebb.org/images/weic2504a/",
+          "note": "Planet “e” is the orange dot nearest the masked star — the innermost of the four (~16 AU). Infrared, false-coloured — not a visible-light photo."
+        }
+      ],
+      "system": {
+        "hostname": "HR 8799",
+        "member_count": 3,
+        "siblings": [
+          {
+            "id": "hr-8799-c",
+            "name": "HR 8799 c",
+            "letter": "c",
+            "semi_major_axis_au": 38.0,
+            "base_hex": "#c7cae2"
+          },
+          {
+            "id": "hr-8799-b",
+            "name": "HR 8799 b",
+            "letter": "b",
+            "semi_major_axis_au": 68.0,
+            "base_hex": "#c7cae2"
+          }
+        ]
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -3671,8 +3824,26 @@
           }
         }
       ],
+      "real_observations": [
+        {
+          "telescope": "VLT",
+          "file": "obs/bet-pic-b.jpg",
+          "instrument": "ESO VLT / SPHERE",
+          "band": "near-infrared (false colour)",
+          "year": 2018,
+          "credit": "ESO / Lagrange / SPHERE consortium",
+          "license": "CC BY 4.0",
+          "source_url": "https://www.eso.org/public/images/potw1846a/",
+          "note": "Twelve real SPHERE frames (2014–2018): in each, the star sits behind the black mask and Beta Pictoris b is the bright point orbiting it. Infrared, false-coloured."
+        }
+      ],
+      "system": {
+        "hostname": "beta Pictoris",
+        "member_count": 1,
+        "siblings": []
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -4005,8 +4176,26 @@
           }
         }
       ],
+      "real_observations": [
+        {
+          "telescope": "VLT",
+          "file": "obs/hd-95086-b.jpg",
+          "instrument": "ESO VLT / NACO",
+          "band": "thermal infrared (L′, ~3.8 µm → false colour)",
+          "year": 2013,
+          "credit": "ESO / J. Rameau",
+          "license": "CC BY 4.0",
+          "source_url": "https://www.eso.org/public/images/eso1324a/",
+          "note": "The planet is the faint blue point at lower-left; the star symbol inside the blue circle marks the subtracted stellar position. Thermal infrared, false-coloured."
+        }
+      ],
+      "system": {
+        "hostname": "HD 95086",
+        "member_count": 1,
+        "siblings": []
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -4339,8 +4528,26 @@
           }
         }
       ],
+      "real_observations": [
+        {
+          "telescope": "Subaru",
+          "file": "obs/gj-504-b.jpg",
+          "instrument": "Subaru Telescope / HiCIAO + AO188",
+          "band": "near-infrared (J+H → false colour)",
+          "year": 2013,
+          "credit": "NAOJ (National Astronomical Observatory of Japan)",
+          "license": "NAOJ terms — credit required",
+          "source_url": "https://subarutelescope.org/en/gallery/pressrelease/galactic/2025/06/18/3566.html",
+          "note": "The planet is the white point at upper-right; the star sits behind the black central mask amid blue/orange speckle noise. Near-infrared, false-coloured."
+        }
+      ],
+      "system": {
+        "hostname": "GJ 504",
+        "member_count": 1,
+        "siblings": []
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -4673,8 +4880,14 @@
           }
         }
       ],
+      "real_observations": [],
+      "system": {
+        "hostname": "47 Ursae Majoris",
+        "member_count": 1,
+        "siblings": []
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -5007,8 +5220,14 @@
           }
         }
       ],
+      "real_observations": [],
+      "system": {
+        "hostname": "upsilon Andromedae",
+        "member_count": 1,
+        "siblings": []
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -5341,8 +5560,14 @@
           }
         }
       ],
+      "real_observations": [],
+      "system": {
+        "hostname": "Kepler-186",
+        "member_count": 1,
+        "siblings": []
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -5675,8 +5900,14 @@
           }
         }
       ],
+      "real_observations": [],
+      "system": {
+        "hostname": "TRAPPIST-1",
+        "member_count": 1,
+        "siblings": []
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -6009,8 +6240,14 @@
           }
         }
       ],
+      "real_observations": [],
+      "system": {
+        "hostname": "Proxima Centauri",
+        "member_count": 1,
+        "siblings": []
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -6343,8 +6580,14 @@
           }
         }
       ],
+      "real_observations": [],
+      "system": {
+        "hostname": "GJ 1214",
+        "member_count": 1,
+        "siblings": []
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -6677,8 +6920,14 @@
           }
         }
       ],
+      "real_observations": [],
+      "system": {
+        "hostname": "OGLE-2005-BLG-390L",
+        "member_count": 1,
+        "siblings": []
+      },
       "meta": {
-        "generated_at": "2026-07-23T08:23:40+00:00",
+        "generated_at": "2026-07-23T14:07:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }

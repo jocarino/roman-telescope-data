@@ -127,12 +127,85 @@ a:hover { text-decoration: underline; }
 .detail-swatch { border-radius: 0; }  /* square in retro */
 .count { font-size: 11px; }
 
+/* "Same system" neighbourhood strip: links to sibling planets of the same host star. */
+.system-strip { margin-top: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.system-lbl {
+  font-family: var(--pixel); font-size: 9px; letter-spacing: .5px; color: var(--fg-dim);
+  text-transform: uppercase;
+}
+.system-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.system-planet {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 11px; border-radius: 0;
+  border: 1px solid var(--line); font-size: 13px; color: var(--fg-dim); background: var(--bg-3);
+  box-shadow: 2px 2px 0 var(--line); transition: border-color .12s, color .12s, box-shadow .04s;
+}
+.system-planet:hover { border-color: var(--accent); color: var(--fg); box-shadow: 2px 2px 0 var(--accent); }
+.system-planet:active { box-shadow: none; transform: translateY(1px); }
+.system-dot {
+  width: 14px; height: 14px; border-radius: 0; flex: none; background: var(--fg-faint);
+  border: 1px solid #000;
+}
+
 /* Detail hero: the planet itself. Pixel by default; smooth sphere when the RENDER knob is turned. */
 .detail-hero {
   width: 160px; height: 160px; display: block; flex: none; background: transparent;
 }
 .detail-hero.pixel { image-rendering: pixelated; image-rendering: crisp-edges; border-radius: 0; }
-.detail-hero:not(.pixel) { border-radius: 50%; }
+canvas.detail-hero:not(.pixel) { border-radius: 50%; }
+/* Real telescope image ("Source: Telescope" knob): a framed photo, never a circle. */
+.hero-stack { flex: none; }
+.hero-obs { margin: 0; display: flex; flex-direction: column; gap: 6px; max-width: 220px; }
+.hero-obs img.detail-hero {
+  border-radius: 3px; object-fit: cover; background: #000;
+  border: 1px solid var(--line); box-shadow: 0 0 0 1px rgba(0, 0, 0, .5);
+}
+/* The image is a button: click to enlarge. Reset native button chrome. */
+.obs-thumb {
+  padding: 0; border: 0; background: none; cursor: zoom-in; position: relative;
+  display: block; line-height: 0; border-radius: 3px;
+}
+.obs-thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.obs-zoom-cue {
+  position: absolute; right: 5px; bottom: 5px; padding: 2px 5px; line-height: 1.2;
+  font-family: var(--pixel); font-size: 7px; letter-spacing: .5px; color: var(--fg);
+  background: rgba(0, 0, 0, .62); border: 1px solid rgba(255, 255, 255, .18); border-radius: 2px;
+  opacity: .0; transition: opacity .14s;
+}
+.obs-thumb:hover .obs-zoom-cue, .obs-thumb:focus-visible .obs-zoom-cue { opacity: 1; }
+/* Per-telescope selector (JWST / Roman / …): shown only when >1 image exists. */
+.obs-tabs { display: flex; gap: 4px; margin-top: 2px; flex-wrap: wrap; }
+.obs-tab {
+  padding: 2px 8px; border: 1px solid var(--line); background: var(--bg-3); cursor: pointer;
+  font-family: var(--pixel); font-size: 8px; letter-spacing: .3px; color: var(--fg-dim); border-radius: 2px;
+}
+.obs-tab:hover { border-color: var(--accent); color: var(--fg); }
+.obs-tab.on { background: var(--accent); color: #05121f; border-color: var(--accent); }
+.obs-credit { font-size: 11px; line-height: 1.55; color: var(--fg-dim); max-width: 240px; }
+/* Lightbox: full-size real image centred over a dimmed backdrop. */
+.obs-lightbox {
+  position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+  padding: 5vmin; background: rgba(3, 5, 9, .88); backdrop-filter: blur(2px); cursor: zoom-out;
+}
+.obs-lightbox-inner {
+  margin: 0; display: flex; flex-direction: column; gap: 10px; align-items: center;
+  max-width: min(92vw, 820px); position: relative; cursor: default;
+}
+.obs-lightbox-inner img {
+  max-width: 100%; max-height: 78vh; object-fit: contain; background: #000;
+  border: 1px solid var(--line); box-shadow: 0 8px 40px rgba(0, 0, 0, .6);
+}
+.obs-credit.lg { font-size: 11px; max-width: 640px; text-align: center; }
+.obs-close {
+  position: absolute; top: -6px; right: -6px; width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid var(--line); background: var(--bg-3); color: var(--fg); font-size: 18px;
+  line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.obs-close:hover { border-color: var(--accent); color: var(--accent); }
+.obs-real {
+  font-family: var(--pixel); font-size: 9px; letter-spacing: .5px;
+  color: var(--accent); display: inline-block; margin-right: 4px;
+}
+.obs-sub { color: var(--fg-faint); }
 /* Pixel-y dashed dividers + tactile button press */
 .params td { border-bottom-style: dashed; }
 .toggle button:active, .segmented button:active, .badge:active,
@@ -354,6 +427,8 @@ body::after {
 }
 .de { font-variant-numeric: tabular-nums; }
 .viewnote { margin: 10px 0 0; font-size: 12.5px; color: var(--fg-dim); max-width: 52ch; }
+.viewnote.obs-note { line-height: 1.6; }
+.viewnote.obs-note .obs-real { font-size: 10px; margin-right: 2px; }
 
 /* Spectrum SVG */
 .spectrum { width: 100%; height: auto; }
@@ -417,15 +492,17 @@ body::after {
 .scope-main { grid-template-columns: 1fr 190px auto; }
 @media (max-width: 760px) { .scope-main { grid-template-columns: 1fr; } .scope-rail { flex-direction: row; flex-wrap: wrap; border-left: 0; border-top: 1px solid var(--line); } }
 .scope-rail {
-  display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 16px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 20px; padding: 22px 20px;
   background: linear-gradient(180deg, #171a22, #0d0f14); border-left: 1px solid var(--line);
 }
-.knob-tag { font-family: var(--pixel); font-size: 7px; letter-spacing: .5px; color: var(--fg-faint); }
-.knob-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.knob-tag { font-family: var(--pixel); font-size: 7px; letter-spacing: .5px; color: var(--fg-dim); text-align: center; margin-bottom: 2px; }
+.knob-tag-sub { color: var(--fg-faint); font-family: var(--sans, inherit); font-size: 10px; letter-spacing: 0; }
+.knob-cell { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
 .knob-name { font-size: 11px; color: var(--fg-dim); display: inline-flex; align-items: center; gap: 4px; }
 .knob-val { font-family: var(--pixel); font-size: 8px; letter-spacing: .3px; color: var(--accent); }
 .knob {
-  width: 34px; height: 34px; border-radius: 50%; position: relative; cursor: pointer;
+  width: 40px; height: 40px; border-radius: 50%; position: relative; cursor: pointer;
   background: radial-gradient(circle at 35% 30%, #3a4150, #14171e 70%);
   border: 1px solid #000; box-shadow: 0 2px 3px rgba(0, 0, 0, .6), inset 0 1px 1px rgba(255, 255, 255, .15);
   transition: box-shadow .12s;
@@ -434,16 +511,12 @@ body::after {
 .knob:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .knob:active { transform: translateY(1px); }
 .knob-dot {
-  position: absolute; top: 3px; left: 50%; width: 2px; height: 9px; background: var(--accent);
-  transform-origin: 50% 14px; transform: translateX(-50%) rotate(var(--a, 0deg));
+  position: absolute; top: 4px; left: 50%; width: 2px; height: 11px; background: var(--accent);
+  transform-origin: 50% 16px; transform: translateX(-50%) rotate(var(--a, 0deg));
   box-shadow: 0 0 3px var(--accent); transition: transform .18s cubic-bezier(.4, 1.4, .6, 1);
 }
-.scope-fbtn {
-  margin-top: 4px; width: 54px; padding: 6px 0; border: 1px solid var(--line); background: var(--bg-3);
-  color: var(--fg-dim); font-family: var(--pixel); font-size: 8px; cursor: pointer; box-shadow: 2px 2px 0 var(--line);
-}
-.scope-fbtn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line); }
-.scope-fbtn.on { background: var(--accent); color: #05121f; border-color: var(--accent); }
+/* "Source" is the special knob (model <-> real photo): a faint accent ring marks it. */
+.knob-cell-source .knob { box-shadow: 0 2px 3px rgba(0, 0, 0, .6), inset 0 1px 1px rgba(255, 255, 255, .15), 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent); }
 
 /* ---- CRT screen curvature + glare ---- */
 .scope-screen { border-radius: 12px / 9px; }
