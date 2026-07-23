@@ -46,7 +46,7 @@
       </button>
       <div class="dd-menu" x-show="open" x-cloak>
         <template x-for="[val, label] in Object.entries(sortLabels)" :key="val">
-          <button :class="sort === val ? 'on' : ''" @click="sort = val; open = false"
+          <button :class="sort === val && !nearId ? 'on' : ''" @click="setSort(val); open = false"
             x-text="label"></button>
         </template>
       </div>
@@ -87,6 +87,23 @@
     </label>
     <div class="spacer"></div>
     <span class="count"><span x-text="count()"></span> shown · long-press for a quick peek</span>
+  </div>
+
+  {# Colour bar: filter by colour family, or show "nearest in colour to X" when similar-sorting. #}
+  <div class="colour-bar" x-show="families().length" x-cloak>
+    <span class="colour-bar-lbl">Colour</span>
+    <button class="cfchip cfchip-all" :class="!family ? 'on' : ''" @click="family = null">All</button>
+    <template x-for="f in families()" :key="f.id">
+      <button class="cfchip" :class="family === f.id ? 'on' : ''"
+        @click="setFamily(f.id)" :aria-label="'Show ' + f.name + ' planets'">
+        <span class="cfchip-dot" :style="{ background: f.colour }"></span><span x-text="f.name"></span>
+      </button>
+    </template>
+    <span class="near-pill" x-show="nearId" x-cloak>
+      <span class="near-dot" :style="{ background: nearHex() }"></span>Nearest in colour to
+      <b x-text="nearName()"></b>
+      <button class="near-x" @click="clearNear()" aria-label="Clear similar-colour sort">×</button>
+    </span>
   </div>
 
   <div class="grid" x-init="$nextTick(() => renderCards())">

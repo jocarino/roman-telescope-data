@@ -18,6 +18,18 @@ document.addEventListener("alpine:init", () => {
       name: "Sort: name", temp: "Sort: hottest", lum: "Sort: brightest",
       dist: "Sort: nearest Earth", de: "Sort: colour lost to Roman",
     },
+    // Colour exploration: a family-chip filter + a "similar to this planet" perceptual sort.
+    family: null,   // selected colour-family chip (e.g. "blue"), or null for all
+    nearId: null,   // "similar colour to this planet" reference id, or null
+    familyMeta: {
+      blue: { n: "Blue", c: "#4a7fd0" }, teal: { n: "Teal", c: "#2fb8b8" },
+      green: { n: "Green", c: "#4caf6a" }, gold: { n: "Gold", c: "#d9b44a" },
+      orange: { n: "Orange", c: "#e08a3c" }, red: { n: "Red", c: "#d0503c" },
+      pink: { n: "Pink", c: "#d06a9c" }, brown: { n: "Brown", c: "#8a6a4a" },
+      grey: { n: "Grey", c: "#9aa0ac" }, white: { n: "White", c: "#dfe3ea" },
+      dark: { n: "Dark", c: "#3a3f4a" },
+    },
+    familyOrder: ["blue", "teal", "green", "gold", "orange", "red", "pink", "brown", "grey", "white", "dark"],
     // Card render style: "smooth" (sphere) or "retro" (pixel). Persisted, default pixel.
     style: localStorage.getItem("planetStyle") || "retro",
     // Render fidelity: "classic" (physics-honest) or "stylised" (restyled for looks). Global, persisted.
@@ -52,6 +64,47 @@ document.addEventListener("alpine:init", () => {
     // Clicking either side of a two-state toggle flips it — including the already-active side.
     toggleStyle() { this.setStyle(this.style === "retro" ? "smooth" : "retro"); },
     toggleFidelity() { this.setFidelity(this.fidelity === "classic" ? "stylised" : "classic"); },
+    // Deep-link support: /?near=<id> (similar-colour sort) and /?family=<f> (colour filter).
+    init() {
+      const p = new URLSearchParams(location.search);
+      const near = p.get("near");
+      if (near) this.nearId = near;
+      const fam = p.get("family");
+      if (fam && this.familyMeta[fam]) this.family = fam;
+    },
+    // Colour families actually present in the data, in canonical order, with a swatch + label.
+    families() {
+      const present = new Set((window.PLANETS || []).map((x) => x.family));
+      return this.familyOrder.filter((f) => present.has(f))
+        .map((f) => ({ id: f, name: this.familyMeta[f].n, colour: this.familyMeta[f].c }));
+    },
+    setFamily(f) { this.family = this.family === f ? null : f; },
+    setSort(v) { this.sort = v; this.nearId = null; },  // an explicit sort cancels similar-colour
+    clearNear() { this.nearId = null; },
+    nearName() {
+      const p = (window.PLANETS || []).find((x) => x.id === this.nearId);
+      return p ? p.name : "";
+    },
+    nearHex() {
+      const p = (window.PLANETS || []).find((x) => x.id === this.nearId);
+      return p ? p.hex : "#000";
+    },
+    // Perceptual colour distance (ΔE76 over CIE Lab), computed from the displayed hex so it
+    // matches exactly what the eye sees. Cheap enough to run over the whole set on each sort.
+    _lab(hex) {
+      const h = hex.replace("#", "");
+      const toLin = (c) => (c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+      const r = toLin(parseInt(h.slice(0, 2), 16) / 255);
+      const g = toLin(parseInt(h.slice(2, 4), 16) / 255);
+      const b = toLin(parseInt(h.slice(4, 6), 16) / 255);
+      let X = (r * 0.4124 + g * 0.3576 + b * 0.1805) / 0.95047;
+      const Y = r * 0.2126 + g * 0.7152 + b * 0.0722;
+      let Z = (r * 0.0193 + g * 0.1192 + b * 0.9505) / 1.08883;
+      const f = (t) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+      const fx = f(X), fy = f(Y), fz = f(Z);
+      return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
+    },
+    _de(a, b) { return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]); },
     renderCards() {
       if (!window.PlanetRender || !window.PLANETS) return;
       var byId = {};
@@ -70,21 +123,30 @@ document.addEventListener("alpine:init", () => {
     get view() {
       let items = (window.PLANETS || []).filter((p) => {
         if (this.prov !== "all" && p.prov !== this.prov) return false;
+        if (this.family && p.family !== this.family) return false;
         if (this.q) {
           const s = (p.name + " " + p.host).toLowerCase();
           if (!s.includes(this.q.toLowerCase())) return false;
         }
         return true;
       });
-      const s = this.sort;
-      items.sort((a, b) => {
-        if (s === "name") return a.name.localeCompare(b.name);
-        if (s === "temp") return (b.temp || 0) - (a.temp || 0);
-        if (s === "lum") return (b.lum || 0) - (a.lum || 0);
-        if (s === "dist") return (a.dist ?? Infinity) - (b.dist ?? Infinity); // nearest first, unknowns last
-        if (s === "de") return (b.de || 0) - (a.de || 0);
-        return 0;
-      });
+      const ref = this.nearId && (window.PLANETS || []).find((x) => x.id === this.nearId);
+      if (ref) {
+        // Similar-colour sort: rank by perceptual distance to the reference planet's colour.
+        const rl = this._lab(ref.hex), dc = {};
+        const dist = (p) => (dc[p.id] ??= this._de(this._lab(p.hex), rl));
+        items.sort((a, b) => dist(a) - dist(b));
+      } else {
+        const s = this.sort;
+        items.sort((a, b) => {
+          if (s === "name") return a.name.localeCompare(b.name);
+          if (s === "temp") return (b.temp || 0) - (a.temp || 0);
+          if (s === "lum") return (b.lum || 0) - (a.lum || 0);
+          if (s === "dist") return (a.dist ?? Infinity) - (b.dist ?? Infinity); // nearest, unknowns last
+          if (s === "de") return (b.de || 0) - (a.de || 0);
+          return 0;
+        });
+      }
       const vis = new Set(items.map((p) => p.id));
       const ord = {};
       items.forEach((p, i) => (ord[p.id] = i));
