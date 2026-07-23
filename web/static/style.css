@@ -172,6 +172,36 @@ body::after {
   opacity: .5;
 }
 
+/* ---- Custom retro dropdowns (replace native selects) ---- */
+.dropdown { position: relative; display: inline-block; }
+.dd-btn {
+  background: var(--bg-3); border: 1px solid var(--line); color: var(--fg);
+  font: inherit; font-size: 13px; padding: 9px 12px; cursor: pointer; min-width: 160px;
+  display: inline-flex; align-items: center; justify-content: space-between; gap: 10px;
+  box-shadow: 3px 3px 0 var(--line);
+}
+.dd-btn:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--line); }
+.dd-arrow { font-size: 10px; color: var(--fg-dim); }
+.dd-menu {
+  position: absolute; top: calc(100% + 5px); left: 0; z-index: 40; min-width: 100%;
+  background: #000; border: 1px solid var(--line); box-shadow: 4px 4px 0 rgba(0, 0, 0, .7);
+  display: flex; flex-direction: column;
+}
+.dd-menu button {
+  background: transparent; border: 0; color: var(--fg-dim); font: inherit; font-size: 13px;
+  text-align: left; padding: 9px 12px; cursor: pointer; white-space: nowrap;
+}
+.dd-menu button:hover { background: var(--bg-3); color: var(--fg); }
+.dd-menu button.on { color: var(--accent); }
+
+/* ---- Sharpen the last rounded boxes on the planet page ---- */
+.assume, .banner, .palette { border-radius: 0; }
+.palette .stop code { border-radius: 0; font-family: var(--pixel); font-size: 8px; }
+
+/* ---- Unify all pills with the chunky 8-bit shadow ---- */
+.badge { box-shadow: 2px 2px 0 var(--line); }
+.badge:active { box-shadow: none; }
+
 /* Badges */
 .badge {
   font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line);

@@ -9,6 +9,15 @@ document.addEventListener("alpine:init", () => {
     q: "",
     prov: "all",
     sort: "name",
+    // Labels for the custom (retro) dropdowns.
+    provLabels: {
+      all: "All provenance", model: "Model", "simulated-cgi": "Roman: simulated",
+      "measured-cgi": "Roman: measured", "model-microlensing": "Microlensing",
+    },
+    sortLabels: {
+      name: "Sort: name", temp: "Sort: hottest", lum: "Sort: brightest",
+      de: "Sort: colour lost to Roman",
+    },
     // Card render style: "smooth" (sphere) or "retro" (pixel). Persisted, default pixel.
     style: localStorage.getItem("planetStyle") || "retro",
     // Render fidelity: "classic" (physics-honest) or "stylised" (restyled for looks). Global, persisted.
