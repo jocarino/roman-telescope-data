@@ -50,6 +50,8 @@
     romanCap: '{% if iview.band_samples.source == 'measured' %}Measured: real Roman photometry in four bands{% if iview.band_samples.epoch %} ({{ iview.band_samples.epoch }}){% endif %}, reconstructed to a colour — real data.{% else %}Simulated: the model pushed through Roman four filters — what Roman would measure, not real data yet.{% endif %}'
   })">
 
+  <a class="back" href="/">← ALL PLANETS</a>
+
   {% if not rec.is_light_isolable %}
   <div class="banner">
     ⚠︎ Discovered by microlensing — no light from this planet is ever isolable by any
@@ -61,7 +63,6 @@
     <canvas class="detail-hero" :class="heroStyle === 'retro' ? 'pixel' : ''" x-ref="cHero"
       width="256" height="256" aria-label="{{ rec.name }} render"></canvas>
     <div class="detail-title">
-      <a class="back" href="/">← all planets</a>
       <h1>{{ rec.name }}</h1>
       <div class="host">{{ rec.host_star.name }}
         {%- if rec.host_star.spectral_type %} · {{ rec.host_star.spectral_type }}{% endif -%}
@@ -73,64 +74,7 @@
     </div>
   </div>
 
-  {# ── Dossier: renders + colour + planet stats in one retro info card, help on an ℹ button ── #}
-  <div class="panel dossier">
-    <div class="dossier-head">
-      <h3>Planet data <span style="color:var(--fg-faint);text-transform:none;font-weight:400">(<span
-        x-text="view === 'full' ? 'full spectrum' : 'Roman 4-band'"></span>)</span></h3>
-      <button class="info-btn" @click="help = !help" :class="help ? 'on' : ''"
-        :aria-expanded="help" title="How to read this" aria-label="How to read this">i</button>
-    </div>
-
-    <div class="dossier-grid">
-      <div class="dossier-stats">
-        <div class="dossier-sub">Colour · <span
-          x-text="view === 'full' ? 'full-spectrum model' : 'Roman four-band'"></span></div>
-        <table class="params">
-          <tr><td>Base hex</td><td><code x-text="view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}'"></code></td></tr>
-          <tr><td>Reflected brightness (Y)</td><td x-text="(view === 'full' ? fullLum : romanLum).toFixed(3)"></td></tr>
-          <tr><td>Confidence</td><td x-text="view === 'full' ? fullConf : romanConf"></td></tr>
-          <tr><td>Out of sRGB gamut</td><td x-text="(view === 'full' ? fullOog : romanOog) ? 'yes' : 'no'"></td></tr>
-        </table>
-      </div>
-      <div class="dossier-stats">
-        <div class="dossier-sub">Planet</div>
-        <table class="params">
-          <tr><td>Equilibrium temp</td><td>{{ (rec.params.equilibrium_temp_k|round|int ~ ' K') if rec.params.equilibrium_temp_k else '—' }}</td></tr>
-          <tr><td>Radius</td><td>{{ (rec.params.radius_r_earth|round(2) ~ ' R⊕') if rec.params.radius_r_earth else '—' }}</td></tr>
-          <tr><td>Mass</td><td>{{ (rec.params.mass_m_earth|round(1) ~ ' M⊕') if rec.params.mass_m_earth else '—' }}</td></tr>
-          <tr><td>Semi-major axis</td><td>{{ (rec.params.semi_major_axis_au|round(3) ~ ' AU') if rec.params.semi_major_axis_au else '—' }}</td></tr>
-          <tr><td>Discovery</td><td>{{ rec.discovery.method }}{{ (' · ' ~ rec.discovery.year) if rec.discovery.year else '' }}</td></tr>
-        </table>
-      </div>
-    </div>
-
-    <div class="dossier-help" x-show="help" x-cloak x-transition>
-      <div class="assume">
-        Both colours are <strong>modelled predictions, not photographs</strong>. The
-        full-spectrum swatch is our most complete model; the Roman view is coarser (four
-        bands).
-        {% if rec.provenance in ['simulated-cgi', 'measured-cgi'] %}
-        For this Roman tech-demo target, the four-band view will be replaced by
-        <strong>real measured data</strong> once Roman observes it — the only real colour
-        data this planet will ever have.
-        {% elif not rec.is_light_isolable %}
-        No telescope can ever isolate this planet's light, so it stays model-only forever.
-        {% else %}
-        This planet's light has never been isolated by any telescope.
-        {% endif %}
-        <br><br>
-        {%- set engine = {'parametric': 'a parametric albedo model', 'cahoy': 'the Cahoy et al. 2010 grid', 'picaso': 'PICASO radiative transfer'} -%}
-        Render fidelity + style are on the scope controls below. Spectrum engine:
-        {{ engine.get(rec.params.spectrum_source, rec.params.spectrum_source) }}.
-        Model assumptions — cloud state: {{ rec.params.assumed_cloud_state }};
-        metallicity: {{ rec.params.assumed_metallicity }}× solar;
-        phase angle: {{ rec.params.assumed_phase_angle_deg|round|int }}°.
-      </div>
-    </div>
-  </div>
-
-  {# ── The oscilloscope: spectrum screen + measurement readouts + palette channels ── #}
+  {# ── The oscilloscope (above the data card): spectrum screen + readouts + palette ── #}
   <div class="scope-unit">
     <div class="scope-top">
       <span class="scope-brand">◼ EXOSCOPE</span>
@@ -212,6 +156,60 @@
         <button class="badge hex" @click="copyCssVars($event)">CSS VARS</button>
         <a class="badge hex" href="/palettes/{{ rec.id }}.ase" download>.ASE</a>
         <span class="copied" x-show="msg" x-text="msg" x-cloak></span>
+      </div>
+    </div>
+  </div>
+
+  {# ── Planet data card: colour + planet stats; provenance & model assumptions on the ℹ ── #}
+  <div class="panel dossier">
+    <div class="dossier-head">
+      <h3>Planet data <span style="color:var(--fg-faint);text-transform:none;font-weight:400">(<span
+        x-text="view === 'full' ? 'full spectrum' : 'Roman 4-band'"></span>)</span></h3>
+      <button class="info-btn" @click="help = !help" :class="help ? 'on' : ''"
+        :aria-expanded="help" title="Data source & model assumptions"
+        aria-label="Data source & model assumptions">i</button>
+    </div>
+
+    <div class="dossier-grid">
+      <div class="dossier-stats">
+        <div class="dossier-sub">Colour · <span
+          x-text="view === 'full' ? 'full-spectrum model' : 'Roman four-band'"></span></div>
+        <table class="params">
+          <tr><td>Base hex</td><td><code x-text="view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}'"></code></td></tr>
+          <tr><td>Reflected brightness (Y)</td><td x-text="(view === 'full' ? fullLum : romanLum).toFixed(3)"></td></tr>
+          <tr><td>Confidence</td><td x-text="view === 'full' ? fullConf : romanConf"></td></tr>
+          <tr><td>Out of sRGB gamut</td><td x-text="(view === 'full' ? fullOog : romanOog) ? 'yes' : 'no'"></td></tr>
+        </table>
+      </div>
+      <div class="dossier-stats">
+        <div class="dossier-sub">Planet</div>
+        <table class="params">
+          <tr><td>Equilibrium temp</td><td>{{ (rec.params.equilibrium_temp_k|round|int ~ ' K') if rec.params.equilibrium_temp_k else '—' }}</td></tr>
+          <tr><td>Radius</td><td>{{ (rec.params.radius_r_earth|round(2) ~ ' R⊕') if rec.params.radius_r_earth else '—' }}</td></tr>
+          <tr><td>Mass</td><td>{{ (rec.params.mass_m_earth|round(1) ~ ' M⊕') if rec.params.mass_m_earth else '—' }}</td></tr>
+          <tr><td>Semi-major axis</td><td>{{ (rec.params.semi_major_axis_au|round(3) ~ ' AU') if rec.params.semi_major_axis_au else '—' }}</td></tr>
+          <tr><td>Discovery</td><td>{{ rec.discovery.method }}{{ (' · ' ~ rec.discovery.year) if rec.discovery.year else '' }}</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="dossier-help" x-show="help" x-cloak x-transition>
+      <div class="assume">
+        {% if rec.provenance in ['simulated-cgi', 'measured-cgi'] %}
+        A Roman tech-demo target: the four-band view will be replaced by <strong>real measured
+        data</strong> once Roman observes it — the only real colour this planet will ever have.
+        {% elif not rec.is_light_isolable %}
+        No telescope can ever isolate this planet's light, so both colours are
+        <strong>model-only, forever</strong>.
+        {% else %}
+        This planet's light has never been isolated by any telescope — both colours are modelled.
+        {% endif %}
+        <br><br>
+        {%- set engine = {'parametric': 'a parametric albedo model', 'cahoy': 'the Cahoy et al. 2010 grid', 'picaso': 'PICASO radiative transfer'} -%}
+        Spectrum engine: {{ engine.get(rec.params.spectrum_source, rec.params.spectrum_source) }}.
+        Model assumptions — cloud state: {{ rec.params.assumed_cloud_state }};
+        metallicity: {{ rec.params.assumed_metallicity }}× solar;
+        phase angle: {{ rec.params.assumed_phase_angle_deg|round|int }}°.
       </div>
     </div>
   </div>
