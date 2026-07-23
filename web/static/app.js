@@ -106,6 +106,8 @@ document.addEventListener("alpine:init", () => {
     fidelity: localStorage.getItem("renderFidelity") || "classic",
     heroStyle: "retro",   // hero render: "retro" (pixel) or "smooth" (sphere)
     heroSource: "model",  // hero shows the "model" render or the real "telescope" image
+    obs: [],              // real telescope images for this planet (0+), injected by init
+    obsIdx: 0,            // which telescope image is selected (when >1 exist)
     obsZoom: false,       // real-image lightbox open?
     msg: "",
     help: false,       // dossier "how to read this" expandable (ℹ button)
@@ -114,28 +116,52 @@ document.addEventListener("alpine:init", () => {
     _t: null,
     _lt: null,
     ...init,
+    // Carry the scope's settings across same-system hops (each planet is its own page).
+    // Every option falls back gracefully when the target planet can't honour it.
+    init() {
+      const v = localStorage.getItem("scopeView");
+      if (v === "full" || v === "roman") this.view = v;
+      const hs = localStorage.getItem("heroStyle");
+      if (hs === "retro" || hs === "smooth") this.heroStyle = hs;
+      // Keep the same telescope selected if this planet was imaged by it too.
+      const tel = localStorage.getItem("obsTelescope");
+      if (tel) { const j = this.obs.findIndex((o) => o.telescope === tel); if (j >= 0) this.obsIdx = j; }
+      // Stay on the real photo only if this planet actually has one; else fall back to model.
+      const src = localStorage.getItem("heroSource");
+      this.heroSource = src === "telescope" && this.obs.length ? "telescope" : "model";
+    },
+    _persist(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } },
     blink() {
       this.ledFlash = true;
       clearTimeout(this._lt);
       this._lt = setTimeout(() => (this.ledFlash = false), 320);
     },
-    // Scope controls — every knob/button drives real state:
-    setView(v) { this.view = v; this.blink(); },
+    // Scope controls — every knob/button drives real state (and persists across hops):
+    setView(v) { this.view = v; this._persist("scopeView", v); this.blink(); },
+    selectObs(i) { this.obsIdx = i; this._persist("obsTelescope", this.curObs().telescope || ""); },
     // Style/Shape act on the modelled render. If the real photo is showing, the first click
     // simply brings the model back (no value change) so the knobs never feel "locked out";
     // a further click then toggles. This is why turning to Telescope doesn't trap you there.
     toggleFidelity() {
-      if (this.heroSource === "telescope") { this.heroSource = "model"; this.blink(); this.renderAll(); return; }
+      if (this.heroSource === "telescope") { this.heroSource = "model"; this._persist("heroSource", "model"); this.blink(); this.renderAll(); return; }
       this.setFidelity(this.fidelity === "classic" ? "stylised" : "classic");
     },
     toggleHeroStyle() {
-      if (this.heroSource === "telescope") { this.heroSource = "model"; this.blink(); this.renderAll(); return; }
+      if (this.heroSource === "telescope") { this.heroSource = "model"; this._persist("heroSource", "model"); this.blink(); this.renderAll(); return; }
       this.heroStyle = this.heroStyle === "retro" ? "smooth" : "retro";
+      this._persist("heroStyle", this.heroStyle);
       this.renderAll();
     },
+    // The currently-selected real image (safe when none exist).
+    curObs() { return this.obs[this.obsIdx] || {}; },
     // Flip the hero between the modelled render and the real telescope photo (only present
     // for directly-imaged planets — the knob is not rendered otherwise).
-    toggleHeroSource() { this.heroSource = this.heroSource === "model" ? "telescope" : "model"; this.blink(); },
+    toggleHeroSource() {
+      if (!this.obs.length) return;
+      this.heroSource = this.heroSource === "model" ? "telescope" : "model";
+      this._persist("heroSource", this.heroSource);
+      this.blink();
+    },
     toggleInfo(k) { this.info = this.info === k ? null : k; },
     setFidelity(f) {
       this.fidelity = f;

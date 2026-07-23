@@ -110,6 +110,7 @@ class RealObservation(BaseModel):
     everything else has no image of its own (microlensing: none ever; RV/transit: not yet).
     The colour on the page is still modelled — this is the actual, usually infrared, dot."""
 
+    telescope: str  # short selector tag: "JWST", "Roman", "VLT", "Subaru"
     file: str  # path under web/static/, e.g. "obs/hr-8799-b.jpg"
     instrument: str  # "Keck II / NIRC2"
     band: str  # "near-infrared (L′, 3.8 µm)"
@@ -158,7 +159,9 @@ class PlanetRecord(BaseModel):
     spectrum: SpectralCurve | None = None
     true_colour: ColourResultModel | None = None
     instrument_views: list[InstrumentViewModel] = Field(default_factory=list)
-    real_observation: RealObservation | None = None
+    # Zero or more genuine telescope images (JWST, Roman, VLT, …), each additive — a new
+    # instrument's image is appended, never substituted. The UI shows a per-telescope toggle.
+    real_observations: list[RealObservation] = Field(default_factory=list)
     system: PlanetSystem | None = None
     meta: RecordMeta
 
