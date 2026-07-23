@@ -9,6 +9,27 @@ document.addEventListener("alpine:init", () => {
     q: "",
     prov: "all",
     sort: "name",
+    // Card render style: "smooth" (sphere) or "retro" (pixel). Persisted, default sphere.
+    style: localStorage.getItem("planetStyle") || "smooth",
+    setStyle(s) {
+      this.style = s;
+      try { localStorage.setItem("planetStyle", s); } catch (e) { /* ignore */ }
+      this.renderCards();
+    },
+    renderCards() {
+      if (!window.PlanetRender || !window.PLANETS) return;
+      var byId = {};
+      window.PLANETS.forEach((p) => (byId[p.id] = p));
+      var style = this.style;
+      document.querySelectorAll(".card-planet").forEach((cv) => {
+        var p = byId[cv.dataset.id];
+        if (!p) return;
+        cv.classList.toggle("pixel", style === "retro");
+        window.PlanetRender.render(cv, {
+          palette: p.palette, radius: p.radius, cloudState: p.cloud, lumY: p.lum, style: style,
+        });
+      });
+    },
     get view() {
       let items = (window.PLANETS || []).filter((p) => {
         if (this.prov !== "all" && p.prov !== this.prov) return false;
