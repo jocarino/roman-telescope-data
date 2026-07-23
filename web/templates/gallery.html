@@ -36,25 +36,26 @@
       <option value="lum">Sort: brightest</option>
       <option value="de">Sort: most colour lost to Roman</option>
     </select>
+    <div class="segmented" role="group" aria-label="Render style">
+      <button :class="style === 'smooth' ? 'on' : ''" @click="setStyle('smooth')">Sphere</button>
+      <button :class="style === 'retro' ? 'on' : ''" @click="setStyle('retro')">Pixel</button>
+    </div>
     <div class="spacer"></div>
     <span class="count"><span x-text="count()"></span> shown · long-press for a quick peek</span>
   </div>
 
-  <div class="grid">
+  <div class="grid" x-init="$nextTick(() => renderCards())">
     {% for p in planets %}
     <a class="card" href="/planet/{{ p.record.id }}.html"
        data-fragment="/fragments/planet/{{ p.record.id }}.html"
        x-show="show('{{ p.record.id }}')" :style="{ order: order('{{ p.record.id }}') }">
-      <div class="swatch" style="background: {{ p.record.true_colour.hex }}">
-        {{ palette_strip(p.record.true_colour.palette) }}
-      </div>
-      <div class="card-body">
-        <div class="name">{{ p.record.name }}</div>
-        <div class="host">{{ p.record.host_star.name }}</div>
-        <div class="card-meta">
-          {{ provenance_badge(p.record) }}
-          <span class="badge hex">{{ p.record.true_colour.hex }}</span>
-        </div>
+      <canvas class="card-planet" data-id="{{ p.record.id }}" width="256" height="256"
+        aria-label="{{ p.record.name }} render"></canvas>
+      <div class="card-name">{{ p.record.name }}</div>
+      <div class="card-host">{{ p.record.host_star.name }}</div>
+      <div class="card-meta">
+        {{ provenance_badge(p.record) }}
+        <span class="badge hex">{{ p.record.true_colour.hex }}</span>
       </div>
     </a>
     {% endfor %}

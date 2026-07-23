@@ -58,6 +58,10 @@ def _index_entry(rec: PlanetRecord) -> dict:
         "lum": rec.true_colour.luminance_y,
         "de": view.reconstruction_error.delta_e2000 if view.reconstruction_error else 0.0,
         "hex": rec.true_colour.hex,
+        # For the card planet renders:
+        "palette": [s.hex for s in rec.true_colour.palette],
+        "radius": rec.params.radius_r_earth,
+        "cloud": rec.params.assumed_cloud_state,
     }
 
 
