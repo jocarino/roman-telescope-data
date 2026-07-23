@@ -1,6 +1,9 @@
 .git
 .venv
+.venv-picaso
+.claude
 dist
+docs
 __pycache__
 **/__pycache__
 *.pyc
