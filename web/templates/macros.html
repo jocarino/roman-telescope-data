@@ -58,8 +58,8 @@
   {% endif %}
 
   <div class="detail-head">
-    <div class="detail-swatch"
-      :style="{ background: view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}' }"></div>
+    <canvas class="detail-hero pixel" x-ref="cHero" width="256" height="256"
+      aria-label="{{ rec.name }} render"></canvas>
     <div class="detail-title">
       <a class="back" href="/">← all planets</a>
       <h1>{{ rec.name }}</h1>
