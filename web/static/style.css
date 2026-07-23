@@ -202,31 +202,69 @@ body::after {
 .badge { box-shadow: 2px 2px 0 var(--line); }
 .badge:active { box-shadow: none; }
 
-/* ---- Retro oscilloscope screen for the spectrum ---- */
-.scope {
-  position: relative; margin-top: 4px; padding: 8px 8px 4px;
-  border: 3px solid var(--line); background: #030a07;
-  box-shadow: inset 0 0 26px rgba(0, 0, 0, .9), 3px 3px 0 var(--line);
-  overflow: hidden;
+/* ---- The oscilloscope instrument: spectrum screen + readouts + palette channels ---- */
+.scope-unit {
+  background: linear-gradient(180deg, #14171e, #0b0d12); border: 1px solid var(--line);
+  box-shadow: 4px 4px 0 var(--line); margin-top: 4px;
 }
-.scope::after {  /* scanlines + screen vignette */
+.scope-top {
+  display: flex; align-items: center; gap: 12px; padding: 8px 12px;
+  border-bottom: 1px solid var(--line); background: #0a0c11;
+  font-family: var(--pixel); font-size: 9px; letter-spacing: .5px;
+}
+.scope-brand { color: var(--accent); }
+.scope-model { color: var(--fg-dim); }
+.scope-leds { margin-left: auto; display: flex; align-items: center; gap: 6px; color: var(--fg-faint); }
+.led { width: 7px; height: 7px; display: inline-block; background: #2a2f3a; border: 1px solid #000; }
+.led.on { background: #4ade80; box-shadow: 0 0 5px #4ade80; }
+.scope-main { display: grid; grid-template-columns: 1fr 200px; }
+.scope-screen {
+  position: relative; background: #04070c; padding: 12px 12px 8px; overflow: hidden;
+  box-shadow: inset 0 0 34px rgba(0, 0, 0, .95); border-right: 1px solid var(--line);
+}
+.scope-screen::after {  /* scanlines + screen vignette */
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background:
-    repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0) 0 2px, rgba(0, 0, 0, .35) 3px),
-    radial-gradient(130% 130% at 50% 45%, transparent 55%, rgba(0, 0, 0, .55));
+    repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0) 0 2px, rgba(0, 0, 0, .32) 3px),
+    radial-gradient(130% 130% at 50% 45%, transparent 55%, rgba(0, 0, 0, .5));
 }
-.scope .spectrum { display: block; }
-.spectrum .grid { stroke: rgba(120, 210, 165, .16); }
+.scope-screen .spectrum { display: block; position: relative; z-index: 1; }
+.scope-side {
+  padding: 12px; display: flex; flex-direction: column; gap: 6px; background: #0a0c11;
+  font-family: var(--mono); font-size: 11px;
+}
+.ro-ch { display: flex; align-items: center; gap: 6px; font-size: 9.5px; letter-spacing: .3px; }
+.ro-ch .sw { width: 9px; height: 9px; display: inline-block; border: 1px solid #000; }
+.ro-ch.ch1 { color: #ffd23f; } .ro-ch.ch1 .sw { background: #ffd23f; }
+.ro-ch.ch2 { color: #3fd0ff; } .ro-ch.ch2 .sw { background: #3fd0ff; }
+.ro-ch code { color: var(--fg-faint); margin-left: auto; font-size: 9.5px; }
+.ro-sep { height: 1px; background: var(--line); margin: 3px 0; }
+.ro-row { display: flex; justify-content: space-between; align-items: baseline; color: var(--fg-dim); }
+.ro-row b { color: var(--fg); font-family: var(--pixel); font-size: 10px; }
+.ro-note { color: var(--fg-faint); font-size: 9px; line-height: 1.5; margin-top: auto; }
+.scope-bottom {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 10px 12px; border-top: 1px solid var(--line); background: #0a0c11;
+}
+.scope-pallabel { font-family: var(--pixel); font-size: 8.5px; color: var(--fg-dim); }
+.scope-pal { flex: 1; min-width: 200px; }
+.scope-pal .palette { border: 1px solid var(--line); }
+.scope-pal .palette .stop { height: 44px; }
+.scope-btns { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* Scope traces: CH1 (full) yellow, CH2 (Roman) cyan — like a real multi-channel scope */
+.spectrum .grid { stroke: rgba(170, 190, 210, .12); }
 .spectrum .line-true {
-  stroke: #7dffb0; stroke-width: 1.5; filter: drop-shadow(0 0 2.5px #7dffb0);
+  stroke: #ffd23f; stroke-width: 1.5; filter: drop-shadow(0 0 3px #ffd23f);
 }
-.spectrum .line-roman { filter: drop-shadow(0 0 2px var(--accent)); }
+.spectrum .line-roman {
+  stroke: #3fd0ff; filter: drop-shadow(0 0 2.5px #3fd0ff);
+}
 .spectrum .ytick, .spectrum .xtick {
-  fill: rgba(125, 255, 176, .75); font-family: var(--pixel); font-size: 7px;
+  fill: rgba(190, 205, 225, .7); font-family: var(--pixel); font-size: 7px;
 }
-.spectrum .hatchline { stroke: rgba(125, 255, 176, .28); }
-.spectrum .hatchlabel { fill: rgba(125, 255, 176, .6); }
-.legend .k.true { border-color: #7dffb0; }
+.spectrum .hatchline { stroke: rgba(190, 205, 225, .22); }
+.spectrum .hatchlabel { fill: rgba(190, 205, 225, .55); }
 
 /* Badges */
 .badge {

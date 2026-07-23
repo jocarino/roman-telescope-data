@@ -103,35 +103,6 @@
         </p>
       </div>
 
-      <div class="panel">
-        <h3>Reflected-light spectrum</h3>
-        <div class="scope">{{ ctx.spectrum_svg|safe }}</div>
-        <div class="legend">
-          <span><span class="k true"></span>Full model spectrum</span>
-          <span><span class="k roman"></span>Roman four-band reconstruction</span>
-        </div>
-        <p class="assume" style="margin-top:14px">
-          How much of the modelled colour survives Roman's four filters:
-          <strong class="de">ΔE₂₀₀₀ = {{ '%.1f'|format(iview.reconstruction_error.delta_e2000) }}</strong>
-          &mdash; the perceptual distance between the full-spectrum model and the four-band
-          reconstruction. Below {{ iview.reconstruction.extrapolated_below_nm|round|int }} nm
-          Roman has no data; that region is a flat-held guess.
-        </p>
-      </div>
-
-      <div class="panel">
-        <h3>Palette <span style="color:var(--fg-faint);text-transform:none;font-weight:400">
-          (<span x-text="view === 'full' ? 'full spectrum' : 'Roman 4-band'"></span> · click a hex to copy)</span></h3>
-        <div x-show="view === 'full'">{{ palette_full(tc.palette) }}</div>
-        <div x-show="view === 'roman'" x-cloak>{{ palette_full(rv.palette) }}</div>
-        <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-          <button class="badge hex" @click="copyBase($event)"
-            x-text="'base ' + (view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}')"></button>
-          <button class="badge hex" @click="copyCssVars($event)">copy CSS variables</button>
-          <a class="badge hex" href="/palettes/{{ rec.id }}.ase" download>download .ase</a>
-          <span class="copied" x-show="msg" x-text="msg" x-cloak></span>
-        </div>
-      </div>
     </div>
 
     <div>
@@ -179,6 +150,50 @@
           metallicity: {{ rec.params.assumed_metallicity }}× solar;
           phase angle: {{ rec.params.assumed_phase_angle_deg|round|int }}°.
         </div>
+      </div>
+    </div>
+  </div>
+
+  {# ── The oscilloscope: spectrum screen + measurement readouts + palette channels ── #}
+  <div class="scope-unit">
+    <div class="scope-top">
+      <span class="scope-brand">◼ EXOSCOPE</span>
+      <span class="scope-model">{{ rec.name }} · reflected-light · 380–780 nm</span>
+      <span class="scope-leds"><i class="led on"></i>RUN<i class="led"></i>SINGLE</span>
+    </div>
+    <div class="scope-main">
+      <div class="scope-screen">{{ ctx.spectrum_svg|safe }}</div>
+      <div class="scope-side">
+        <div class="ro-ch ch1"><span class="sw"></span>CH1 FULL
+          <code x-text="view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}'"></code></div>
+        <div class="ro-ch ch2"><span class="sw"></span>CH2 ROMAN <code>{{ rv.hex }}</code></div>
+        <div class="ro-sep"></div>
+        <div class="ro-row"><span>&#916;E2000</span>
+          <b>{{ '%.1f'|format(iview.reconstruction_error.delta_e2000) }}</b></div>
+        <div class="ro-row"><span>Y BRIGHT</span>
+          <b x-text="(view === 'full' ? fullLum : romanLum).toFixed(3)"></b></div>
+        <div class="ro-row"><span>CONF</span>
+          <b x-text="view === 'full' ? fullConf : romanConf"></b></div>
+        <div class="ro-row"><span>GAMUT</span>
+          <b x-text="(view === 'full' ? fullOog : romanOog) ? 'OOG' : 'OK'"></b></div>
+        <div class="ro-sep"></div>
+        <div class="ro-note">&#916;E = perceptual distance (full vs Roman).
+          &lt;{{ iview.reconstruction.extrapolated_below_nm|round|int }} nm: Roman blind, flat-held.</div>
+      </div>
+    </div>
+    <div class="scope-bottom">
+      <span class="scope-pallabel">PALETTE ▸ <span
+        x-text="view === 'full' ? 'full spectrum' : 'Roman 4-band'"></span></span>
+      <div class="scope-pal">
+        <div x-show="view === 'full'">{{ palette_full(tc.palette) }}</div>
+        <div x-show="view === 'roman'" x-cloak>{{ palette_full(rv.palette) }}</div>
+      </div>
+      <div class="scope-btns">
+        <button class="badge hex" @click="copyBase($event)"
+          x-text="'BASE ' + (view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}')"></button>
+        <button class="badge hex" @click="copyCssVars($event)">CSS VARS</button>
+        <a class="badge hex" href="/palettes/{{ rec.id }}.ase" download>.ASE</a>
+        <span class="copied" x-show="msg" x-text="msg" x-cloak></span>
       </div>
     </div>
   </div>
