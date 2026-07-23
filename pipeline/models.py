@@ -120,6 +120,27 @@ class RealObservation(BaseModel):
     note: str  # which point source is the planet; that the light is IR / false-coloured
 
 
+class SystemSibling(BaseModel):
+    """Another planet orbiting the same host star, for the "same system" neighbourhood links."""
+
+    id: str
+    name: str
+    letter: str | None = None  # the planet letter (b, c, d, …), if the name carries one
+    semi_major_axis_au: float | None = None
+    base_hex: str | None = None  # the sibling's full-spectrum colour, for its swatch
+
+
+class PlanetSystem(BaseModel):
+    """The planet's stellar neighbourhood: every OTHER planet of the same host star that is
+    present in this dataset, sorted inner → outer. `member_count` counts the whole system as
+    we have it (this planet + its siblings). Grouped purely by shared host — never by sky
+    proximity, which mixes unrelated stars at different distances."""
+
+    hostname: str
+    member_count: int  # planets of this host in our data, including this one
+    siblings: list[SystemSibling] = Field(default_factory=list)
+
+
 class RecordMeta(BaseModel):
     generated_at: str
     pipeline_version: str
@@ -138,6 +159,7 @@ class PlanetRecord(BaseModel):
     true_colour: ColourResultModel | None = None
     instrument_views: list[InstrumentViewModel] = Field(default_factory=list)
     real_observation: RealObservation | None = None
+    system: PlanetSystem | None = None
     meta: RecordMeta
 
 
