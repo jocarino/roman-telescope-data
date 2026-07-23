@@ -4,9 +4,22 @@ from __future__ import annotations
 
 import math
 
-from pipeline.catalog import _model_temperature
+from pipeline.catalog import _display_name, _model_temperature
 from pipeline.fetch.archive import ArchiveRecord
 from pipeline.spectrum.parametric import model_for
+
+
+def test_display_name_expands_abbreviations():
+    assert _display_name("51 Peg b") == "51 Pegasi b"
+    assert _display_name("47 UMa b") == "47 Ursae Majoris b"
+    assert _display_name("ups And d") == "upsilon Andromedae d"
+    assert _display_name("Proxima Cen b") == "Proxima Centauri b"
+    assert _display_name("bet Pic b") == "beta Pictoris b"
+
+
+def test_display_name_leaves_catalog_designations_untouched():
+    for n in ["HD 189733 b", "WASP-12 b", "GJ 1214 b", "Kepler-186 f", "TRAPPIST-1 e"]:
+        assert _display_name(n) == n
 
 
 def _rec(**kw) -> ArchiveRecord:

@@ -49,7 +49,7 @@ CURATED_NAMES: list[str] = [
     "HR 8799 b",       # imaged cold giant
     "HR 8799 c",       # imaged cold giant
     "HR 8799 e",       # imaged cold giant
-    "beta Pic b",      # imaged young giant
+    "bet Pic b",       # imaged young giant (Archive uses the abbreviated "bet")
     "HD 95086 b",      # imaged cold giant
     "GJ 504 b",        # imaged cold, low-mass giant
     "47 UMa b",        # RV giant — Roman CGI-style target
@@ -66,6 +66,39 @@ def _slug(name: str) -> str:
     s = name.lower().strip()
     s = re.sub(r"[^a-z0-9]+", "-", s)
     return s.strip("-")
+
+
+# The Archive's canonical pl_name abbreviates constellation genitives ("51 Peg b") and Greek
+# letters ("ups And d"). The friendlier public NASA display expands them ("51 Pegasi b"). We
+# expand only for DISPLAY — the id/slug and data matching still use the raw Archive name.
+_CONSTELLATIONS = {
+    "And": "Andromedae", "Aqr": "Aquarii", "Aql": "Aquilae", "Ari": "Arietis",
+    "Boo": "Bootis", "Cnc": "Cancri", "CVn": "Canum Venaticorum", "CMa": "Canis Majoris",
+    "Cap": "Capricorni", "Cas": "Cassiopeiae", "Cen": "Centauri", "Cet": "Ceti",
+    "Com": "Comae Berenices", "CrB": "Coronae Borealis", "Cyg": "Cygni", "Dra": "Draconis",
+    "Eri": "Eridani", "Gem": "Geminorum", "Her": "Herculis", "Hya": "Hydrae",
+    "Leo": "Leonis", "Lib": "Librae", "Lyr": "Lyrae", "Oph": "Ophiuchi", "Ori": "Orionis",
+    "Peg": "Pegasi", "Per": "Persei", "Psc": "Piscium", "Pic": "Pictoris", "Sco": "Scorpii",
+    "Ser": "Serpentis", "Tau": "Tauri", "Tri": "Trianguli", "UMa": "Ursae Majoris",
+    "UMi": "Ursae Minoris", "Vir": "Virginis", "Vul": "Vulpeculae",
+}
+_GREEK = {
+    "alf": "alpha", "bet": "beta", "gam": "gamma", "del": "delta", "eps": "epsilon",
+    "zet": "zeta", "tet": "theta", "iot": "iota", "kap": "kappa", "lam": "lambda",
+    "ksi": "xi", "omi": "omicron", "sig": "sigma", "ups": "upsilon", "ome": "omega",
+}
+
+
+def _display_name(name: str) -> str:
+    out = []
+    for tok in name.split():
+        if tok in _CONSTELLATIONS:
+            out.append(_CONSTELLATIONS[tok])
+        elif tok.lower() in _GREEK:
+            out.append(_GREEK[tok.lower()])
+        else:
+            out.append(tok)
+    return " ".join(out)
 
 
 def _model_temperature(rec: ArchiveRecord, eq_temp: float | None) -> float | None:
@@ -97,7 +130,7 @@ def _to_input(rec: ArchiveRecord) -> PlanetInput:
     )
 
     host = HostStar(
-        name=rec.hostname or rec.pl_name,
+        name=_display_name(rec.hostname or rec.pl_name),
         teff_k=teff,
         spectral_type=rec.st_spectype,
     )
@@ -118,7 +151,7 @@ def _to_input(rec: ArchiveRecord) -> PlanetInput:
     )
     return PlanetInput(
         id=_slug(rec.pl_name),
-        name=rec.pl_name,
+        name=_display_name(rec.pl_name),
         host_star=host,
         params=params,
         discovery=discovery,
