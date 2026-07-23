@@ -124,27 +124,38 @@ a:hover { text-decoration: underline; }
 .toggle button, .segmented button { font-size: 9.5px; letter-spacing: .4px; padding: 8px 12px; }
 .controls input, .controls select { border-radius: 0; }
 .drawer-close { border-radius: 0; }
-.detail-swatch, .planet-canvas:not(.pixel) { border-radius: 0; }  /* square in retro */
-.planet-canvas { background: transparent; }
+.detail-swatch { border-radius: 0; }  /* square in retro */
 .count { font-size: 11px; }
 
-/* Detail hero: the planet itself, rendered as pixel art */
+/* Detail hero: the planet itself. Pixel by default; smooth sphere when the RENDER knob is turned. */
 .detail-hero {
-  width: 160px; height: 160px; display: block; flex: none;
-  image-rendering: pixelated; image-rendering: crisp-edges; background: transparent;
+  width: 160px; height: 160px; display: block; flex: none; background: transparent;
 }
+.detail-hero.pixel { image-rendering: pixelated; image-rendering: crisp-edges; border-radius: 0; }
+.detail-hero:not(.pixel) { border-radius: 50%; }
 /* Pixel-y dashed dividers + tactile button press */
 .params td { border-bottom-style: dashed; }
 .toggle button:active, .segmented button:active, .badge:active,
 a.badge:active, .drawer-close:active { transform: translateY(1px); }
 .toggle button, .segmented button, .badge { transition: transform .04s; }
 
-/* ---- Accent theme + switcher ---- */
-:root[data-accent="mustard"] { --accent: #e3b23c; }
+/* ---- Accent theme + switcher (retro palettes) ---- */
+:root[data-accent="blue"]    { --accent: #7cc4ff; }  /* default cobalt */
+:root[data-accent="mustard"] { --accent: #e3b23c; }  /* gold */
+:root[data-accent="green"]   { --accent: #3bf07a; }  /* phosphor CRT */
+:root[data-accent="amber"]   { --accent: #ffb000; }  /* amber terminal */
+:root[data-accent="pink"]    { --accent: #ff5fa2; }  /* synthwave */
+:root[data-accent="cyan"]    { --accent: #37e6d6; }  /* teletext */
+:root[data-accent="violet"]  { --accent: #b98cff; }  /* vaporwave */
 .accents { display: inline-flex; gap: 5px; align-items: center; }
 .acc { width: 24px; height: 24px; border: 1px solid var(--line); cursor: pointer; padding: 0; }
-.acc.acc-blue { background: #7cc4ff; }
+.acc.acc-blue    { background: #7cc4ff; }
 .acc.acc-mustard { background: #e3b23c; }
+.acc.acc-green   { background: #3bf07a; }
+.acc.acc-amber   { background: #ffb000; }
+.acc.acc-pink    { background: #ff5fa2; }
+.acc.acc-cyan    { background: #37e6d6; }
+.acc.acc-violet  { background: #b98cff; }
 .acc.on { outline: 2px solid var(--fg); outline-offset: 1px; }
 
 /* ---- Chunky 8-bit depth on toggles + action pills ---- */
@@ -214,9 +225,16 @@ body::after {
 }
 .scope-brand { color: var(--accent); }
 .scope-model { color: var(--fg-dim); }
-.scope-leds { margin-left: auto; display: flex; align-items: center; gap: 6px; color: var(--fg-faint); }
+.scope-leds { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--fg-faint); }
 .led { width: 7px; height: 7px; display: inline-block; background: #2a2f3a; border: 1px solid #000; }
 .led.on { background: #4ade80; box-shadow: 0 0 5px #4ade80; }
+/* Clickable RUN / SINGLE channel selectors. */
+.led-btn {
+  display: inline-flex; align-items: center; gap: 5px; padding: 0; border: 0; background: none;
+  color: var(--fg-faint); font-family: var(--pixel); font-size: 7px; letter-spacing: .5px; cursor: pointer;
+}
+.led-btn.on { color: var(--fg); }
+.led-btn:active { transform: translateY(1px); }
 .scope-main { display: grid; grid-template-columns: 1fr 200px; }
 .scope-screen {
   position: relative; background: #04070c; padding: 12px 12px 8px; overflow: hidden;
@@ -317,17 +335,6 @@ body::after {
 .de { font-variant-numeric: tabular-nums; }
 .viewnote { margin: 10px 0 0; font-size: 12.5px; color: var(--fg-dim); max-width: 52ch; }
 
-/* Planet renders */
-.renders { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
-.renders figure { margin: 0; text-align: center; }
-.planet-canvas {
-  width: 160px; height: 160px; display: block;  /* 80px buffer -> exact 2x, crisp pixels */
-  background: radial-gradient(circle at 50% 45%, #0e1420 0%, #070a10 70%);
-  border-radius: 50%;
-}
-.planet-canvas.pixel { image-rendering: pixelated; image-rendering: crisp-edges; border-radius: 0; background: transparent; }
-.renders figcaption { margin-top: 8px; font-size: 12px; color: var(--fg-dim); }
-
 /* Spectrum SVG */
 .spectrum { width: 100%; height: auto; }
 .spectrum .grid { stroke: var(--line); stroke-width: 1; }
@@ -376,7 +383,6 @@ body::after {
 .dossier-help { overflow: hidden; margin-top: 12px; }
 .dossier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 14px; }
 @media (max-width: 720px) { .dossier-grid { grid-template-columns: 1fr; } }
-.dossier-render .renders { justify-content: flex-start; }
 .dossier-sub {
   font-family: var(--pixel); font-size: 10px; letter-spacing: .05em; text-transform: uppercase;
   color: var(--fg-dim); margin-bottom: 6px;
@@ -390,14 +396,18 @@ body::after {
   background: linear-gradient(180deg, #171a22, #0d0f14); border-left: 1px solid var(--line);
 }
 .knob {
-  width: 34px; height: 34px; border-radius: 50%; position: relative; margin-top: 6px;
+  width: 34px; height: 34px; border-radius: 50%; position: relative; margin-top: 6px; cursor: pointer;
   background: radial-gradient(circle at 35% 30%, #3a4150, #14171e 70%);
   border: 1px solid #000; box-shadow: 0 2px 3px rgba(0, 0, 0, .6), inset 0 1px 1px rgba(255, 255, 255, .15);
+  transition: box-shadow .12s;
 }
+.knob:hover { box-shadow: 0 2px 3px rgba(0, 0, 0, .6), inset 0 1px 1px rgba(255, 255, 255, .15), 0 0 0 2px var(--line); }
+.knob:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.knob:active { transform: translateY(1px); }
 .knob-dot {
   position: absolute; top: 3px; left: 50%; width: 2px; height: 9px; background: var(--accent);
   transform-origin: 50% 14px; transform: translateX(-50%) rotate(var(--a, 0deg));
-  box-shadow: 0 0 3px var(--accent);
+  box-shadow: 0 0 3px var(--accent); transition: transform .18s cubic-bezier(.4, 1.4, .6, 1);
 }
 .knob-lbl { font-family: var(--pixel); font-size: 6.5px; color: var(--fg-faint); letter-spacing: .3px; margin-bottom: 3px; }
 .scope-fbtn {
@@ -405,6 +415,7 @@ body::after {
   color: var(--fg-dim); font-family: var(--pixel); font-size: 7px; cursor: pointer; box-shadow: 2px 2px 0 var(--line);
 }
 .scope-fbtn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line); }
+.scope-fbtn.on { background: var(--accent); color: #05121f; border-color: var(--accent); }
 
 /* ---- CRT screen curvature + glare ---- */
 .scope-screen { border-radius: 12px / 9px; }

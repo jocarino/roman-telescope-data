@@ -24,6 +24,16 @@ document.addEventListener("alpine:init", () => {
     fidelity: localStorage.getItem("renderFidelity") || "classic",
     // Accent theme, persisted and applied site-wide via a data-attribute on <html>.
     accent: localStorage.getItem("accent") || "blue",
+    // Retro accent palettes (id must match CSS [data-accent] + .acc-<id>).
+    accents: [
+      { id: "blue", name: "Cobalt" },
+      { id: "mustard", name: "Gold" },
+      { id: "green", name: "Phosphor" },
+      { id: "amber", name: "Amber" },
+      { id: "pink", name: "Synthwave" },
+      { id: "cyan", name: "Teletext" },
+      { id: "violet", name: "Vaporwave" },
+    ],
     setAccent(a) {
       this.accent = a;
       try { localStorage.setItem("accent", a); } catch (e) { /* ignore */ }
@@ -94,8 +104,9 @@ document.addEventListener("alpine:init", () => {
     view: "full",
     // Render fidelity: "classic" (physics-honest) or "stylised" (restyled for looks). Global, persisted.
     fidelity: localStorage.getItem("renderFidelity") || "classic",
+    heroStyle: "retro",   // hero render: "retro" (pixel) or "smooth" (sphere)
     msg: "",
-    help: false,       // "how to read this" expandable (ℹ button)
+    help: false,       // "how to read this" expandable (ℹ button / MENU)
     ledFlash: false,   // RUN LED blink on view change
     _t: null,
     _lt: null,
@@ -105,6 +116,11 @@ document.addEventListener("alpine:init", () => {
       clearTimeout(this._lt);
       this._lt = setTimeout(() => (this.ledFlash = false), 320);
     },
+    // Scope controls — every knob/button drives real state:
+    setView(v) { this.view = v; this.blink(); },
+    toggleFidelity() { this.setFidelity(this.fidelity === "classic" ? "stylised" : "classic"); },
+    toggleHeroStyle() { this.heroStyle = this.heroStyle === "retro" ? "smooth" : "retro"; this.renderAll(); },
+    resetScope() { this.view = "full"; this.heroStyle = "retro"; this.setFidelity("classic"); this.blink(); },
     setFidelity(f) {
       this.fidelity = f;
       try { localStorage.setItem("renderFidelity", f); } catch (e) { /* ignore */ }
@@ -134,7 +150,7 @@ document.addEventListener("alpine:init", () => {
     },
     // Render the three planet visualisations from the CURRENT view's palette + attributes.
     renderAll() {
-      if (!window.PlanetRender || !this.$refs.cSmooth) return;
+      if (!window.PlanetRender || !this.$refs.cHero) return;
       const opts = {
         palette: this.view === "full" ? this.fullPalette : this.romanPalette,
         radius: this.radius,
@@ -142,10 +158,9 @@ document.addEventListener("alpine:init", () => {
         lumY: this.view === "full" ? this.fullLum : this.romanLum,
         fidelity: this.fidelity,
       };
-      // On the detail page the planets rotate (only a few canvases, so it's cheap).
-      if (this.$refs.cHero) PlanetRender.spin(this.$refs.cHero, { ...opts, style: "retro" });
-      PlanetRender.spin(this.$refs.cSmooth, { ...opts, style: "smooth" });
-      PlanetRender.spin(this.$refs.cRetro, { ...opts, style: "retro" });
+      // Single hero planet, rotating; its style (sphere/pixel) is a scope knob.
+      this.$refs.cHero.classList.toggle("pixel", this.heroStyle === "retro");
+      PlanetRender.spin(this.$refs.cHero, { ...opts, style: this.heroStyle });
     },
   }));
 });

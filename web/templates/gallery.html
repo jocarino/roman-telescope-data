@@ -50,10 +50,10 @@
       <button :class="fidelity === 'stylised' ? 'on' : ''" @click="setFidelity('stylised')">Stylised</button>
     </div>
     <div class="accents" role="group" aria-label="Accent colour">
-      <button class="acc acc-blue" :class="accent === 'blue' ? 'on' : ''"
-        @click="setAccent('blue')" title="Blue" aria-label="Blue accent"></button>
-      <button class="acc acc-mustard" :class="accent === 'mustard' ? 'on' : ''"
-        @click="setAccent('mustard')" title="Mustard" aria-label="Mustard accent"></button>
+      <template x-for="a in accents" :key="a.id">
+        <button class="acc" :class="['acc-' + a.id, accent === a.id ? 'on' : '']"
+          @click="setAccent(a.id)" :title="a.name" :aria-label="a.name + ' accent'"></button>
+      </template>
     </div>
     <div class="spacer"></div>
     <span class="count"><span x-text="count()"></span> shown · long-press for a quick peek</span>

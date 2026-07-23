@@ -5,7 +5,7 @@
     'model': 'Model',
     'simulated-cgi': 'Roman: simulated',
     'measured-cgi': 'Roman: measured',
-    'model-microlensing': 'Model only — never observable',
+    'model-microlensing': 'Model',
     'measured-hwo': 'HWO: measured'
   } -%}
   <span class="badge {{ rec.provenance }}">{{ labels.get(rec.provenance, rec.provenance) }}</span>
@@ -57,9 +57,9 @@
   </div>
   {% endif %}
 
-  <div class="detail-head">
-    <canvas class="detail-hero pixel" x-ref="cHero" width="256" height="256"
-      aria-label="{{ rec.name }} render"></canvas>
+  <div class="detail-head" x-effect="view; fidelity; heroStyle; $nextTick(() => renderAll())">
+    <canvas class="detail-hero" :class="heroStyle === 'retro' ? 'pixel' : ''" x-ref="cHero"
+      width="256" height="256" aria-label="{{ rec.name }} render"></canvas>
     <div class="detail-title">
       <a class="back" href="/">← all planets</a>
       <h1>{{ rec.name }}</h1>
@@ -69,10 +69,6 @@
       </div>
       <div style="margin-top:10px">{{ provenance_badge(rec) }}
         <span class="badge">{{ rec.discovery.method }}</span></div>
-      <div style="margin-top:14px" class="toggle">
-        <button :class="view === 'full' ? 'on' : ''" @click="view='full'; blink()">Full spectrum</button>
-        <button :class="view === 'roman' ? 'on' : ''" @click="view='roman'; blink()">Roman · 4 bands</button>
-      </div>
       <p class="viewnote" x-text="view === 'full' ? fullCap : romanCap"></p>
     </div>
   </div>
@@ -84,6 +80,29 @@
         x-text="view === 'full' ? 'full spectrum' : 'Roman 4-band'"></span>)</span></h3>
       <button class="info-btn" @click="help = !help" :class="help ? 'on' : ''"
         :aria-expanded="help" title="How to read this" aria-label="How to read this">i</button>
+    </div>
+
+    <div class="dossier-grid">
+      <div class="dossier-stats">
+        <div class="dossier-sub">Colour · <span
+          x-text="view === 'full' ? 'full-spectrum model' : 'Roman four-band'"></span></div>
+        <table class="params">
+          <tr><td>Base hex</td><td><code x-text="view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}'"></code></td></tr>
+          <tr><td>Reflected brightness (Y)</td><td x-text="(view === 'full' ? fullLum : romanLum).toFixed(3)"></td></tr>
+          <tr><td>Confidence</td><td x-text="view === 'full' ? fullConf : romanConf"></td></tr>
+          <tr><td>Out of sRGB gamut</td><td x-text="(view === 'full' ? fullOog : romanOog) ? 'yes' : 'no'"></td></tr>
+        </table>
+      </div>
+      <div class="dossier-stats">
+        <div class="dossier-sub">Planet</div>
+        <table class="params">
+          <tr><td>Equilibrium temp</td><td>{{ (rec.params.equilibrium_temp_k|round|int ~ ' K') if rec.params.equilibrium_temp_k else '—' }}</td></tr>
+          <tr><td>Radius</td><td>{{ (rec.params.radius_r_earth|round(2) ~ ' R⊕') if rec.params.radius_r_earth else '—' }}</td></tr>
+          <tr><td>Mass</td><td>{{ (rec.params.mass_m_earth|round(1) ~ ' M⊕') if rec.params.mass_m_earth else '—' }}</td></tr>
+          <tr><td>Semi-major axis</td><td>{{ (rec.params.semi_major_axis_au|round(3) ~ ' AU') if rec.params.semi_major_axis_au else '—' }}</td></tr>
+          <tr><td>Discovery</td><td>{{ rec.discovery.method }}{{ (' · ' ~ rec.discovery.year) if rec.discovery.year else '' }}</td></tr>
+        </table>
+      </div>
     </div>
 
     <div class="dossier-help" x-show="help" x-cloak x-transition>
@@ -102,51 +121,11 @@
         {% endif %}
         <br><br>
         {%- set engine = {'parametric': 'a parametric albedo model', 'cahoy': 'the Cahoy et al. 2010 grid', 'picaso': 'PICASO radiative transfer'} -%}
-        Spectrum engine: {{ engine.get(rec.params.spectrum_source, rec.params.spectrum_source) }}.
+        Render fidelity + style are on the scope controls below. Spectrum engine:
+        {{ engine.get(rec.params.spectrum_source, rec.params.spectrum_source) }}.
         Model assumptions — cloud state: {{ rec.params.assumed_cloud_state }};
         metallicity: {{ rec.params.assumed_metallicity }}× solar;
         phase angle: {{ rec.params.assumed_phase_angle_deg|round|int }}°.
-      </div>
-    </div>
-
-    <div class="dossier-grid">
-      <div class="dossier-render">
-        <div class="toggle" style="margin:0 0 10px"
-          title="Classic: colour derived from the physics. Stylised: restyled for looks, not truer.">
-          <button :class="fidelity === 'classic' ? 'on' : ''" @click="setFidelity('classic')">Classic</button>
-          <button :class="fidelity === 'stylised' ? 'on' : ''" @click="setFidelity('stylised')">Stylised</button>
-        </div>
-        <div class="renders" x-effect="view; fidelity; $nextTick(() => renderAll())">
-          <figure><canvas x-ref="cSmooth" class="planet-canvas" width="256" height="256"></canvas>
-            <figcaption>Sphere</figcaption></figure>
-          <figure><canvas x-ref="cRetro" class="planet-canvas pixel" width="256" height="256"></canvas>
-            <figcaption>Pixel</figcaption></figure>
-        </div>
-        <p class="assume" style="margin-top:10px">
-          <template x-if="fidelity === 'classic'"><span>Artistic impression — colour + brightness
-            from the model, cloud bands schematic. Not a photograph.</span></template>
-          <template x-if="fidelity === 'stylised'"><span>Stylised: derived colour restyled into
-            warm/cool bands + turbulence for looks — prettier, not truer. Palette unchanged.</span></template>
-        </p>
-      </div>
-
-      <div class="dossier-stats">
-        <div class="dossier-sub">Colour · <span
-          x-text="view === 'full' ? 'full-spectrum model' : 'Roman four-band'"></span></div>
-        <table class="params">
-          <tr><td>Base hex</td><td><code x-text="view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}'"></code></td></tr>
-          <tr><td>Reflected brightness (Y)</td><td x-text="(view === 'full' ? fullLum : romanLum).toFixed(3)"></td></tr>
-          <tr><td>Confidence</td><td x-text="view === 'full' ? fullConf : romanConf"></td></tr>
-          <tr><td>Out of sRGB gamut</td><td x-text="(view === 'full' ? fullOog : romanOog) ? 'yes' : 'no'"></td></tr>
-        </table>
-        <div class="dossier-sub" style="margin-top:16px">Planet</div>
-        <table class="params">
-          <tr><td>Equilibrium temp</td><td>{{ (rec.params.equilibrium_temp_k|round|int ~ ' K') if rec.params.equilibrium_temp_k else '—' }}</td></tr>
-          <tr><td>Radius</td><td>{{ (rec.params.radius_r_earth|round(2) ~ ' R⊕') if rec.params.radius_r_earth else '—' }}</td></tr>
-          <tr><td>Mass</td><td>{{ (rec.params.mass_m_earth|round(1) ~ ' M⊕') if rec.params.mass_m_earth else '—' }}</td></tr>
-          <tr><td>Semi-major axis</td><td>{{ (rec.params.semi_major_axis_au|round(3) ~ ' AU') if rec.params.semi_major_axis_au else '—' }}</td></tr>
-          <tr><td>Discovery</td><td>{{ rec.discovery.method }}{{ (' · ' ~ rec.discovery.year) if rec.discovery.year else '' }}</td></tr>
-        </table>
       </div>
     </div>
   </div>
@@ -156,7 +135,12 @@
     <div class="scope-top">
       <span class="scope-brand">◼ EXOSCOPE</span>
       <span class="scope-model">{{ rec.name }} · reflected-light · 380–780 nm</span>
-      <span class="scope-leds"><i class="led on" :class="ledFlash ? 'flash' : ''"></i>RUN<i class="led"></i>SINGLE</span>
+      <span class="scope-leds">
+        <button class="led-btn" @click="setView('full')" :class="view === 'full' ? 'on' : ''"
+          title="Full spectrum"><i class="led" :class="{ on: view === 'full', flash: view === 'full' && ledFlash }"></i>RUN</button>
+        <button class="led-btn" @click="setView('roman')" :class="view === 'roman' ? 'on' : ''"
+          title="Roman four-band"><i class="led" :class="{ on: view === 'roman', flash: view === 'roman' && ledFlash }"></i>SINGLE</button>
+      </span>
     </div>
     <div class="scope-main">
       <div class="scope-screen">{{ ctx.spectrum_svg|safe }}</div>
@@ -178,14 +162,21 @@
           &lt;{{ iview.reconstruction.extrapolated_below_nm|round|int }} nm: Roman blind, flat-held.</div>
       </div>
       <div class="scope-rail">
-        <div class="knob" style="--a:-38deg"><span class="knob-dot"></span></div>
-        <span class="knob-lbl">HORIZ</span>
-        <div class="knob" style="--a:22deg"><span class="knob-dot"></span></div>
-        <span class="knob-lbl">VERT</span>
-        <div class="knob" style="--a:120deg"><span class="knob-dot"></span></div>
-        <span class="knob-lbl">TRIG</span>
-        <button class="scope-fbtn" @click="view='full'; blink()">AUTO</button>
-        <button class="scope-fbtn" @click="help=!help">MENU</button>
+        <div class="knob" role="button" tabindex="0" title="Channel: full spectrum / Roman"
+          @click="setView(view === 'full' ? 'roman' : 'full')"
+          @keydown.enter.prevent="setView(view === 'full' ? 'roman' : 'full')"
+          :style="{ '--a': view === 'full' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
+        <span class="knob-lbl" x-text="view === 'full' ? 'FULL' : 'ROMAN'"></span>
+        <div class="knob" role="button" tabindex="0" title="Fidelity: classic physics / stylised"
+          @click="toggleFidelity()" @keydown.enter.prevent="toggleFidelity()"
+          :style="{ '--a': fidelity === 'classic' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
+        <span class="knob-lbl" x-text="fidelity === 'classic' ? 'CLASSIC' : 'STYLISED'"></span>
+        <div class="knob" role="button" tabindex="0" title="Render: pixel / sphere"
+          @click="toggleHeroStyle()" @keydown.enter.prevent="toggleHeroStyle()"
+          :style="{ '--a': heroStyle === 'retro' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
+        <span class="knob-lbl" x-text="heroStyle === 'retro' ? 'PIXEL' : 'SPHERE'"></span>
+        <button class="scope-fbtn" @click="resetScope()" title="Reset to defaults">AUTO</button>
+        <button class="scope-fbtn" :class="help ? 'on' : ''" @click="help = !help">MENU</button>
       </div>
     </div>
     <div class="scope-bottom">
