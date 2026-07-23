@@ -7,6 +7,7 @@ document.addEventListener("alpine:init", () => {
   // Cards are server-rendered; this toggles their visibility and CSS `order`.
   Alpine.data("gallery", () => ({
     q: "",
+    searchOpen: false,  // the right-side search starts collapsed to a magnifier icon
     prov: "all",
     sort: "name",
     // Labels for the custom (retro) dropdowns.
