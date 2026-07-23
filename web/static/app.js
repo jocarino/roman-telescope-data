@@ -11,22 +11,30 @@ document.addEventListener("alpine:init", () => {
     sort: "name",
     // Card render style: "smooth" (sphere) or "retro" (pixel). Persisted, default sphere.
     style: localStorage.getItem("planetStyle") || "smooth",
+    // Render fidelity: "classic" (physics-honest) or "augmented" (stylised). Global, persisted.
+    fidelity: localStorage.getItem("renderFidelity") || "classic",
     setStyle(s) {
       this.style = s;
       try { localStorage.setItem("planetStyle", s); } catch (e) { /* ignore */ }
+      this.renderCards();
+    },
+    setFidelity(f) {
+      this.fidelity = f;
+      try { localStorage.setItem("renderFidelity", f); } catch (e) { /* ignore */ }
       this.renderCards();
     },
     renderCards() {
       if (!window.PlanetRender || !window.PLANETS) return;
       var byId = {};
       window.PLANETS.forEach((p) => (byId[p.id] = p));
-      var style = this.style;
+      var style = this.style, fidelity = this.fidelity;
       document.querySelectorAll(".card-planet").forEach((cv) => {
         var p = byId[cv.dataset.id];
         if (!p) return;
         cv.classList.toggle("pixel", style === "retro");
         window.PlanetRender.render(cv, {
-          palette: p.palette, radius: p.radius, cloudState: p.cloud, lumY: p.lum, style: style,
+          palette: p.palette, radius: p.radius, cloudState: p.cloud, lumY: p.lum,
+          style: style, fidelity: fidelity,
         });
       });
     },
@@ -68,9 +76,16 @@ document.addEventListener("alpine:init", () => {
   // both are modelled. `init` carries the precomputed colours/palettes.
   Alpine.data("detail", (init) => ({
     view: "full",
+    // Render fidelity: "classic" (physics-honest) or "augmented" (stylised). Global, persisted.
+    fidelity: localStorage.getItem("renderFidelity") || "classic",
     msg: "",
     _t: null,
     ...init,
+    setFidelity(f) {
+      this.fidelity = f;
+      try { localStorage.setItem("renderFidelity", f); } catch (e) { /* ignore */ }
+      this.renderAll();
+    },
     flash(m) {
       this.msg = m;
       clearTimeout(this._t);
@@ -101,6 +116,7 @@ document.addEventListener("alpine:init", () => {
         radius: this.radius,
         cloudState: this.cloudState,
         lumY: this.view === "full" ? this.fullLum : this.romanLum,
+        fidelity: this.fidelity,
       };
       PlanetRender.render(this.$refs.cSmooth, { ...opts, style: "smooth" });
       PlanetRender.render(this.$refs.cRetro, { ...opts, style: "retro" });
