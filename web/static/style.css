@@ -454,9 +454,9 @@ body::after {
 .toggle button.on { background: var(--accent); color: #05121f; }
 
 /* Palette */
-.palette { display: flex; gap: 0; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+.palette { display: flex; gap: 0; border-radius: 0; overflow: hidden; border: 1px solid var(--line); }
 .palette .stop { flex: 1; height: 64px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 6px; }
-.palette .stop code { font-size: 10px; background: rgba(0,0,0,.45); padding: 1px 5px; border-radius: 5px; color: #fff; cursor: pointer; }
+.palette .stop code { font-size: 10px; background: rgba(0,0,0,.45); padding: 1px 5px; border-radius: 0; color: #fff; cursor: pointer; }
 
 /* Params table */
 .params { width: 100%; border-collapse: collapse; font-size: 13.5px; }
