@@ -391,6 +391,10 @@ body::after {
 /* In the slide-in drawer the panel has its own close button — no back link needed. */
 #drawer-body .back { display: none; }
 .detail-head { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; margin: 12px 0 22px; }
+.detail-title { flex: 1 1 340px; min-width: 280px; }
+/* Reserve a stable height so flipping the Source knob (short modelled caption <-> longer
+   real-image credit) fills the width instead of shoving the header up and down. */
+.desc-slot.has-obs { min-height: 5.4em; }
 .detail-swatch { width: 200px; height: 200px; border-radius: var(--radius); border: 1px solid var(--line); flex: none; box-shadow: var(--shadow); }
 .detail-title h1 { margin: 0 0 4px; font-size: 28px; letter-spacing: -0.02em; }
 .detail-title .host { color: var(--fg-dim); }
@@ -426,7 +430,7 @@ body::after {
   background: #241d12; border: 1px solid #6b5330; color: #e6c07a;
 }
 .de { font-variant-numeric: tabular-nums; }
-.viewnote { margin: 10px 0 0; font-size: 12.5px; color: var(--fg-dim); max-width: 52ch; }
+.viewnote { margin: 10px 0 0; font-size: 12.5px; color: var(--fg-dim); max-width: 86ch; }
 .viewnote.obs-note { line-height: 1.6; }
 .viewnote.obs-note .obs-real { font-size: 10px; margin-right: 2px; }
 
