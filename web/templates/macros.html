@@ -91,6 +91,18 @@
       <div style="margin-top:10px">{{ provenance_badge(rec) }}
         <span class="badge">{{ rec.discovery.method }}</span></div>
       <p class="viewnote" x-text="view === 'full' ? fullCap : romanCap"></p>
+      {% if rec.system and rec.system.siblings %}
+      <nav class="system-strip" aria-label="Other planets in this star system">
+        <span class="system-lbl">SAME SYSTEM · {{ rec.host_star.name }}</span>
+        <span class="system-links">
+          {% for sib in rec.system.siblings %}
+          <a class="system-planet" href="/planet/{{ sib.id }}.html"
+            title="{{ sib.name }}{% if sib.semi_major_axis_au %} · {{ '%.3g'|format(sib.semi_major_axis_au) }} AU{% endif %}">
+            <span class="system-dot"{% if sib.base_hex %} style="background:{{ sib.base_hex }}"{% endif %}></span>{{ sib.name }}</a>
+          {% endfor %}
+        </span>
+      </nav>
+      {% endif %}
     </div>
   </div>
 
