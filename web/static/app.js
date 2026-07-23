@@ -49,6 +49,9 @@ document.addEventListener("alpine:init", () => {
       try { localStorage.setItem("renderFidelity", f); } catch (e) { /* ignore */ }
       this.renderCards();
     },
+    // Clicking either side of a two-state toggle flips it — including the already-active side.
+    toggleStyle() { this.setStyle(this.style === "retro" ? "smooth" : "retro"); },
+    toggleFidelity() { this.setFidelity(this.fidelity === "classic" ? "stylised" : "classic"); },
     renderCards() {
       if (!window.PlanetRender || !window.PLANETS) return;
       var byId = {};

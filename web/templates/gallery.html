@@ -52,13 +52,13 @@
       </div>
     </div>
     <div class="segmented" role="group" aria-label="Render style">
-      <button :class="style === 'smooth' ? 'on' : ''" @click="setStyle('smooth')">Sphere</button>
-      <button :class="style === 'retro' ? 'on' : ''" @click="setStyle('retro')">Pixel</button>
+      <button :class="style === 'smooth' ? 'on' : ''" @click="toggleStyle()">Sphere</button>
+      <button :class="style === 'retro' ? 'on' : ''" @click="toggleStyle()">Pixel</button>
     </div>
     <div class="segmented" role="group" aria-label="Render fidelity"
       title="Classic: colour derived from the physics. Stylised: restyled for looks, not truer.">
-      <button :class="fidelity === 'classic' ? 'on' : ''" @click="setFidelity('classic')">Classic</button>
-      <button :class="fidelity === 'stylised' ? 'on' : ''" @click="setFidelity('stylised')">Stylised</button>
+      <button :class="fidelity === 'classic' ? 'on' : ''" @click="toggleFidelity()">Classic</button>
+      <button :class="fidelity === 'stylised' ? 'on' : ''" @click="toggleFidelity()">Stylised</button>
     </div>
     <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
       @click.outside="open=false">
