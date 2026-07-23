@@ -507,6 +507,15 @@ body::after {
   font-family: var(--mono); font-size: 10px; letter-spacing: .05em; text-transform: uppercase;
   color: var(--fg-dim); margin-bottom: 6px;
 }
+/* Per-value origin tags: measured / computed / assumed. Same colour language as provenance. */
+.src {
+  font-family: var(--pixel); font-size: 7px; letter-spacing: .3px; text-transform: uppercase;
+  padding: 1px 4px; margin-left: 5px; border: 1px solid var(--line); vertical-align: middle;
+  white-space: nowrap;
+}
+.src-measured { color: #86e0aa; border-color: #2f6b45; }
+.src-computed { color: #9fc0ef; border-color: #3a4d6b; }
+.src-assumed  { color: #e6c07a; border-color: #6b5330; }
 
 /* ---- Scope control rail: faux knobs + function buttons ---- */
 .scope-main { grid-template-columns: 1fr 190px auto; }

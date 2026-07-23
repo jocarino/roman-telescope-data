@@ -16,7 +16,7 @@ document.addEventListener("alpine:init", () => {
     },
     sortLabels: {
       name: "Sort: name", temp: "Sort: hottest", lum: "Sort: brightest",
-      de: "Sort: colour lost to Roman",
+      dist: "Sort: nearest Earth", de: "Sort: colour lost to Roman",
     },
     // Card render style: "smooth" (sphere) or "retro" (pixel). Persisted, default pixel.
     style: localStorage.getItem("planetStyle") || "retro",
@@ -78,6 +78,7 @@ document.addEventListener("alpine:init", () => {
         if (s === "name") return a.name.localeCompare(b.name);
         if (s === "temp") return (b.temp || 0) - (a.temp || 0);
         if (s === "lum") return (b.lum || 0) - (a.lum || 0);
+        if (s === "dist") return (a.dist ?? Infinity) - (b.dist ?? Infinity); // nearest first, unknowns last
         if (s === "de") return (b.de || 0) - (a.de || 0);
         return 0;
       });

@@ -13,7 +13,7 @@ from datetime import UTC, datetime
 from pipeline.catalog import catalog_planets
 from pipeline.config import INSTRUMENTS, ROMAN_CGI
 from pipeline.demo_planets import demo_planets
-from pipeline.emit.build import build_record
+from pipeline.emit.cache import cached_build_record
 from pipeline.emit.writer import write_planets
 from pipeline.system import attach_systems
 
@@ -33,8 +33,12 @@ def cmd_build(args: argparse.Namespace) -> None:
         inputs = inputs[: args.limit]
 
     records = []
+    hits = 0
     for pin in inputs:
-        rec = build_record(pin, instruments, generated_at)
+        rec, was_hit = cached_build_record(
+            pin, instruments, generated_at, use_cache=not args.no_cache
+        )
+        hits += was_hit
         records.append(rec)
         tc = rec.true_colour
         roman = rec.instrument_views[0]
@@ -51,7 +55,8 @@ def cmd_build(args: argparse.Namespace) -> None:
     attach_systems(records)
 
     out = write_planets(records, generated_at)
-    print(f"\nWrote {len(records)} planet(s) -> {out}")
+    n = len(records)
+    print(f"\nWrote {n} planet(s) -> {out}  ({hits} from cache, {n - hits} rebuilt)")
 
 
 def main() -> None:

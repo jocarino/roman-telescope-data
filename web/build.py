@@ -56,6 +56,7 @@ def _index_entry(rec: PlanetRecord) -> dict:
         "host": rec.host_star.name,
         "prov": rec.provenance,
         "temp": rec.params.equilibrium_temp_k,
+        "dist": rec.params.distance_pc,
         "lum": rec.true_colour.luminance_y,
         "de": view.reconstruction_error.delta_e2000 if view.reconstruction_error else 0.0,
         "hex": rec.true_colour.hex,

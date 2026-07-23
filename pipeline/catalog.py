@@ -14,7 +14,7 @@ import re
 from pipeline.emit.build import PlanetInput
 from pipeline.fetch.archive import ArchiveRecord, fetch_by_names
 from pipeline.illuminant.blackbody import BlackbodyStar
-from pipeline.models import Discovery, HostStar, PlanetParams
+from pipeline.models import Discovery, HostStar, ParamSources, PlanetParams
 from pipeline.spectrum.router import choose_model
 
 # Planets flagged as Roman-CGI-style reflected-light targets (RV giants at wide separation).
@@ -113,6 +113,25 @@ def _model_temperature(rec: ArchiveRecord, eq_temp: float | None) -> float | Non
     return eq_temp
 
 
+def completeness_gate(rec: ArchiveRecord) -> tuple[bool, str | None]:
+    """The minimum real data a planet needs before we will model a colour for it. Below this
+    there is nothing to anchor an archetype to and the result would be pure guesswork, so we
+    exclude it rather than invent it. Returns (ok, reason-if-excluded).
+
+    Requires a SIZE (radius, or a mass we can class by) and a TEMPERATURE (measured, or
+    computable from the star + orbit). Anything genuinely fallbackable — a missing radius on a
+    known giant, an unknown host-star temperature — is filled and tagged "assumed" rather than
+    used to exclude, so the honesty lives in the visible per-field tags, not in silent dropping."""
+    if rec.pl_rade is None and rec.pl_bmasse is None:
+        return False, "no size (neither radius nor mass)"
+    temp_computable = (
+        rec.st_teff is not None and rec.st_rad is not None and rec.pl_orbsmax is not None
+    )
+    if rec.pl_eqt is None and not temp_computable:
+        return False, "no temperature and none computable from star + orbit"
+    return True, None
+
+
 def _to_input(rec: ArchiveRecord) -> PlanetInput:
     eq_temp = rec.equilibrium_temp_k()
     teff = rec.st_teff if rec.st_teff is not None else 5772.0
@@ -134,15 +153,34 @@ def _to_input(rec: ArchiveRecord) -> PlanetInput:
         teff_k=teff,
         spectral_type=rec.st_spectype,
     )
+    # Per-field origin: a real Archive measurement, a value we computed, or an archetype
+    # assumption. Cloud/metallicity/phase are always assumed (we hold no per-planet atmosphere
+    # data); eqt is measured if the Archive gives it, else computed from the star + orbit.
+    eq_source = (
+        "measured" if rec.pl_eqt is not None else ("computed" if eq_temp is not None else "assumed")
+    )
+    sources = ParamSources(
+        equilibrium_temp_k=eq_source,
+        radius_r_earth="measured" if rec.pl_rade is not None else "assumed",
+        mass_m_earth="measured" if rec.pl_bmasse is not None else "assumed",
+        semi_major_axis_au="measured" if rec.pl_orbsmax is not None else "assumed",
+        distance_pc="measured" if rec.sy_dist is not None else "assumed",
+        star_teff_k="measured" if rec.st_teff is not None else "assumed",
+        metallicity="assumed",
+        cloud_state="assumed",
+        phase_angle_deg="assumed",
+    )
     params = PlanetParams(
         equilibrium_temp_k=eq_temp,
         radius_r_earth=rec.pl_rade,
         mass_m_earth=rec.pl_bmasse,
         semi_major_axis_au=rec.pl_orbsmax,
+        distance_pc=rec.sy_dist,
         assumed_cloud_state=model.cloud_state,
         assumed_metallicity=model.metallicity,
         assumed_phase_angle_deg=model.phase_angle_deg,
         spectrum_source=model.source,
+        sources=sources,
     )
     discovery = Discovery(
         method=_method_label(rec.disc_method),
@@ -164,4 +202,16 @@ def _to_input(rec: ArchiveRecord) -> PlanetInput:
 
 def catalog_planets(names: list[str] | None = None, *, use_cache: bool = True) -> list[PlanetInput]:
     records = fetch_by_names(names or CURATED_NAMES, use_cache=use_cache)
-    return [_to_input(rec) for rec in records]
+    kept: list[PlanetInput] = []
+    excluded: list[tuple[str, str]] = []
+    for rec in records:
+        ok, reason = completeness_gate(rec)
+        if not ok:
+            excluded.append((rec.pl_name, reason or "incomplete"))
+            continue
+        kept.append(_to_input(rec))
+    if excluded:
+        print(f"Completeness gate: excluded {len(excluded)} of {len(records)} planet(s):")
+        for name, reason in excluded:
+            print(f"  - {name}: {reason}")
+    return kept
