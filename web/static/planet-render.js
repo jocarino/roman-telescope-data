@@ -3,10 +3,10 @@
 // blits into any target canvas. Three styles: "smooth", "retro" (pixel), "modern" (pixel).
 //
 // Two fidelity modes (opts.fidelity):
-//   "classic"   (default) — bands are a single derived hue at varying lightness; physics-honest.
-//   "augmented"           — stylised: belts/zones split into warm/cool tints, higher band gain,
-//                           and FBM turbulence for mottled cloud edges. Prettier, NOT truer.
-// Either way the swatch/palette/export are the physics-derived colours; augmented only restyles
+//   "classic"  (default) — bands are a single derived hue at varying lightness; physics-honest.
+//   "stylised"           — belts/zones split into warm/cool tints, higher band gain, and FBM
+//                          turbulence for mottled cloud edges. Prettier, NOT truer.
+// Either way the swatch/palette/export are the physics-derived colours; stylised only restyles
 // how this 3D render *interprets* that palette. The base hue and luminance are unchanged.
 //
 // Honest by construction: colour comes from the derived palette; texture (bands) is schematic.
@@ -21,7 +21,7 @@
     "varying vec2 v;",
     "uniform vec3 pal[5];",
     "uniform float bandFreq, bandContrast, haze, brightness, light, dither, levels;",
-    "uniform float turb, warmCool, bandGain;",  // augmented-mode stylisation (0 in classic)
+    "uniform float turb, warmCool, bandGain;",  // stylised-mode restyling (0 in classic)
     "uniform int pixel, outline;",
     "vec3 ramp(float t){",
     "  t = clamp(t,0.,1.)*4.;",
@@ -43,7 +43,7 @@
     "  for(int k=0;k<16;k++){ if(k==i) r=m[k]; }",
     "  return r/16.0 - 0.5;",
     "}",
-    // Value-noise FBM for augmented cloud turbulence (belt-edge warp + tone mottle).
+    // Value-noise FBM for stylised cloud turbulence (belt-edge warp + tone mottle).
     "float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }",
     "float vnoise(vec2 p){",
     "  vec2 i=floor(p); vec2 f=fract(p); f=f*f*(3.0-2.0*f);",
@@ -67,7 +67,7 @@
     "  float lit = smoothstep(-0.08, 0.42, dot(N, L));",
     "  float limb = pow(z, 0.30);",
     "  float shade = (0.34 + 0.66*lit) * limb;",
-    // Augmented: warp the belt phase and mottle the tone with turbulence (0 in classic).
+    // Stylised: warp the belt phase and mottle the tone with turbulence (0 in classic).
     "  float wphase = 0.0, mottle = 0.0;",
     "  if(turb > 0.0){",
     "    wphase = (fbm(vec2(uv.x*2.2 + z*1.5, lat*3.0)) - 0.5) * turb * 1.6;",
@@ -85,7 +85,7 @@
     "    tone = floor(tone*levels + 0.5) / levels;",
     "  }",
     "  vec3 col = ramp(tone);",
-    // Augmented two-tone: nudge bright zones warm (tan) and dark belts cool (lavender) along
+    // Stylised two-tone: nudge bright zones warm (tan) and dark belts cool (lavender) along
     // the blue<->orange axis. This is the belt/zone contrast the eye reads in artistic renders.
     "  if(warmCool > 0.0){",
     "    float belt = clamp((band - 0.5) * 2.0, -1.0, 1.0);",
@@ -164,8 +164,8 @@
       var c = hexToRgb(opts.palette[i] || opts.palette[opts.palette.length - 1]);
       flat.push(c[0], c[1], c[2]);
     }
-    // Augmented mode: stylise this render only (palette/luminance stay physics-derived).
-    var aug = opts.fidelity === "augmented";
+    // Stylised mode: restyle this render only (palette/luminance stay physics-derived).
+    var aug = opts.fidelity === "stylised";
     gl.uniform3fv(U.pal, new Float32Array(flat));
     gl.uniform1f(U.bandFreq, d.bandFreq);
     gl.uniform1f(U.bandContrast, Math.min(1, d.bandContrast * (aug ? 1.2 : 1)));
