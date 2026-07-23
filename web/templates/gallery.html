@@ -37,14 +37,13 @@
       <option value="de">Sort: most colour lost to Roman</option>
     </select>
     <div class="spacer"></div>
-    <span class="count"><span x-text="count()"></span> shown</span>
+    <span class="count"><span x-text="count()"></span> shown · long-press for a quick peek</span>
   </div>
 
   <div class="grid">
     {% for p in planets %}
     <a class="card" href="/planet/{{ p.record.id }}.html"
-       hx-get="/fragments/planet/{{ p.record.id }}.html" hx-target="#drawer-body"
-       hx-swap="innerHTML" @click="$store.drawer.open = true"
+       data-fragment="/fragments/planet/{{ p.record.id }}.html"
        x-show="show('{{ p.record.id }}')" :style="{ order: order('{{ p.record.id }}') }">
       <div class="swatch" style="background: {{ p.record.true_colour.hex }}">
         {{ palette_strip(p.record.true_colour.palette) }}
