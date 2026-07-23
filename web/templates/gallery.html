@@ -18,7 +18,19 @@
 </div>
 
 <div x-data="gallery()">
+  {# Count on the left; search + the other filters clustered on the right. The search grows
+     leftward into the empty space on focus, so it never shoves the filter cluster around. #}
   <div class="controls">
+    <span class="count"><span x-text="count()"></span> shown · long-press for a quick peek</span>
+    <div class="spacer"></div>
+    <label class="search">
+      <svg class="search-mag" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+        <circle cx="7" cy="7" r="4.3" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <input type="search" x-model="q" placeholder="Search planet or star…"
+        aria-label="Search planets">
+    </label>
     <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
       @click.outside="open=false">
       <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
@@ -76,17 +88,6 @@
         </div>
       </div>
     </div>
-    <!-- The magnifier IS the input: collapsed to icon width, it grows rightward on focus. -->
-    <label class="search">
-      <svg class="search-mag" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-        <circle cx="7" cy="7" r="4.3" fill="none" stroke="currentColor" stroke-width="1.6"/>
-        <path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-      </svg>
-      <input type="search" x-model="q" placeholder="Search planet or star…"
-        aria-label="Search planets">
-    </label>
-    <div class="spacer"></div>
-    <span class="count"><span x-text="count()"></span> shown · long-press for a quick peek</span>
   </div>
 
   {# Colour bar: filter by colour family, or show "nearest in colour to X" when similar-sorting. #}
