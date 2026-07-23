@@ -31,6 +31,7 @@ from pipeline.models import (
     RecordMeta,
     SpectralCurve,
 )
+from pipeline.observations import observation_for
 from pipeline.palette.derive import derive_palette
 from pipeline.spectrum.base import SpectrumProvider
 
@@ -163,6 +164,7 @@ def build_record(
         spectrum=SpectralCurve(grid=GRID_ID, values=[float(a) for a in albedo]),
         true_colour=_colour_to_model(true_colour, true_palette),
         instrument_views=views,
+        real_observation=observation_for(pin.id),
         meta=RecordMeta(
             generated_at=generated_at,
             pipeline_version=PIPELINE_VERSION,

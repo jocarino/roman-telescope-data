@@ -105,9 +105,10 @@ document.addEventListener("alpine:init", () => {
     // Render fidelity: "classic" (physics-honest) or "stylised" (restyled for looks). Global, persisted.
     fidelity: localStorage.getItem("renderFidelity") || "classic",
     heroStyle: "retro",   // hero render: "retro" (pixel) or "smooth" (sphere)
+    heroSource: "model",  // hero shows the "model" render or the real "telescope" image
     msg: "",
     help: false,       // dossier "how to read this" expandable (ℹ button)
-    info: null,        // which scope explainer is open: 'view' | 'style' | null
+    info: null,        // which scope explainer is open: 'view' | 'style' | 'source' | null
     ledFlash: false,   // channel LED blink on view change
     _t: null,
     _lt: null,
@@ -121,8 +122,10 @@ document.addEventListener("alpine:init", () => {
     setView(v) { this.view = v; this.blink(); },
     toggleFidelity() { this.setFidelity(this.fidelity === "classic" ? "stylised" : "classic"); },
     toggleHeroStyle() { this.heroStyle = this.heroStyle === "retro" ? "smooth" : "retro"; this.renderAll(); },
+    // Flip the hero between the modelled render and the real telescope photo (only present
+    // for directly-imaged planets — the knob is not rendered otherwise).
+    toggleHeroSource() { this.heroSource = this.heroSource === "model" ? "telescope" : "model"; this.blink(); },
     toggleInfo(k) { this.info = this.info === k ? null : k; },
-    resetScope() { this.view = "full"; this.heroStyle = "retro"; this.info = null; this.setFidelity("classic"); this.blink(); },
     setFidelity(f) {
       this.fidelity = f;
       try { localStorage.setItem("renderFidelity", f); } catch (e) { /* ignore */ }

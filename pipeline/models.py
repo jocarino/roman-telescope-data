@@ -104,6 +104,22 @@ class Discovery(BaseModel):
     facility: str | None = None
 
 
+class RealObservation(BaseModel):
+    """A genuine processed telescope image of the planet — a direct-imaging point source,
+    never an artist's impression. Present ONLY for the handful of directly-imaged planets;
+    everything else has no image of its own (microlensing: none ever; RV/transit: not yet).
+    The colour on the page is still modelled — this is the actual, usually infrared, dot."""
+
+    file: str  # path under web/static/, e.g. "obs/hr-8799-b.jpg"
+    instrument: str  # "Keck II / NIRC2"
+    band: str  # "near-infrared (L′, 3.8 µm)"
+    year: int | None = None
+    credit: str  # attribution string required by the source
+    license: str  # e.g. "CC BY 4.0"
+    source_url: str
+    note: str  # which point source is the planet; that the light is IR / false-coloured
+
+
 class RecordMeta(BaseModel):
     generated_at: str
     pipeline_version: str
@@ -121,6 +137,7 @@ class PlanetRecord(BaseModel):
     spectrum: SpectralCurve | None = None
     true_colour: ColourResultModel | None = None
     instrument_views: list[InstrumentViewModel] = Field(default_factory=list)
+    real_observation: RealObservation | None = None
     meta: RecordMeta
 
 
