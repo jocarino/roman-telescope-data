@@ -140,7 +140,40 @@ canvas.detail-hero:not(.pixel) { border-radius: 50%; }
   border-radius: 3px; object-fit: cover; background: #000;
   border: 1px solid var(--line); box-shadow: 0 0 0 1px rgba(0, 0, 0, .5);
 }
+/* The image is a button: click to enlarge. Reset native button chrome. */
+.obs-thumb {
+  padding: 0; border: 0; background: none; cursor: zoom-in; position: relative;
+  display: block; line-height: 0; border-radius: 3px;
+}
+.obs-thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.obs-zoom-cue {
+  position: absolute; right: 5px; bottom: 5px; padding: 2px 5px; line-height: 1.2;
+  font-family: var(--pixel); font-size: 7px; letter-spacing: .5px; color: var(--fg);
+  background: rgba(0, 0, 0, .62); border: 1px solid rgba(255, 255, 255, .18); border-radius: 2px;
+  opacity: .0; transition: opacity .14s;
+}
+.obs-thumb:hover .obs-zoom-cue, .obs-thumb:focus-visible .obs-zoom-cue { opacity: 1; }
 .obs-credit { font-size: 9px; line-height: 1.5; color: var(--fg-dim); max-width: 220px; }
+/* Lightbox: full-size real image centred over a dimmed backdrop. */
+.obs-lightbox {
+  position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+  padding: 5vmin; background: rgba(3, 5, 9, .88); backdrop-filter: blur(2px); cursor: zoom-out;
+}
+.obs-lightbox-inner {
+  margin: 0; display: flex; flex-direction: column; gap: 10px; align-items: center;
+  max-width: min(92vw, 820px); position: relative; cursor: default;
+}
+.obs-lightbox-inner img {
+  max-width: 100%; max-height: 78vh; object-fit: contain; background: #000;
+  border: 1px solid var(--line); box-shadow: 0 8px 40px rgba(0, 0, 0, .6);
+}
+.obs-credit.lg { font-size: 11px; max-width: 640px; text-align: center; }
+.obs-close {
+  position: absolute; top: -6px; right: -6px; width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid var(--line); background: var(--bg-3); color: var(--fg); font-size: 18px;
+  line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.obs-close:hover { border-color: var(--accent); color: var(--accent); }
 .obs-real {
   font-family: var(--pixel); font-size: 7px; letter-spacing: .5px;
   color: var(--accent); display: inline-block; margin-right: 4px;
@@ -452,9 +485,6 @@ body::after {
   transform-origin: 50% 14px; transform: translateX(-50%) rotate(var(--a, 0deg));
   box-shadow: 0 0 3px var(--accent); transition: transform .18s cubic-bezier(.4, 1.4, .6, 1);
 }
-/* Style/Shape only touch the modelled render — dim them while the real photo is showing. */
-.knob-off { opacity: .38; }
-.knob-off .knob-val { color: var(--fg-faint); }
 /* "Source" is the special knob (model <-> real photo): a faint accent ring marks it. */
 .knob-cell-source .knob { box-shadow: 0 2px 3px rgba(0, 0, 0, .6), inset 0 1px 1px rgba(255, 255, 255, .15), 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent); }
 
