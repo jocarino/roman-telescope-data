@@ -38,7 +38,6 @@
 {%- set rv = iview.colour -%}
 <div class="detail" x-data="detail({
     fullHex: '{{ tc.hex }}', romanHex: '{{ rv.hex }}',
-    fullConf: '{{ tc.confidence }}', romanConf: '{{ rv.confidence }}',
     fullLum: {{ '%.3f'|format(tc.luminance_y) }}, romanLum: {{ '%.3f'|format(rv.luminance_y) }},
     fullOog: {{ 'true' if tc.out_of_gamut else 'false' }},
     romanOog: {{ 'true' if rv.out_of_gamut else 'false' }},
@@ -118,8 +117,6 @@
           <b>{{ '%.1f'|format(iview.reconstruction_error.delta_e2000) }}</b></div>
         <div class="ro-row"><span>Y BRIGHT</span>
           <b x-text="(view === 'full' ? fullLum : romanLum).toFixed(3)"></b></div>
-        <div class="ro-row"><span>CONF</span>
-          <b x-text="view === 'full' ? fullConf : romanConf"></b></div>
         <div class="ro-row"><span>GAMUT</span>
           <b x-text="(view === 'full' ? fullOog : romanOog) ? 'OOG' : 'OK'"></b></div>
         <div class="ro-sep"></div>
@@ -181,7 +178,6 @@
         <table class="params">
           <tr><td>Base hex</td><td><code x-text="view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}'"></code></td></tr>
           <tr><td>Reflected brightness (Y)</td><td x-text="(view === 'full' ? fullLum : romanLum).toFixed(3)"></td></tr>
-          <tr><td>Confidence</td><td x-text="view === 'full' ? fullConf : romanConf"></td></tr>
           <tr><td>Out of sRGB gamut</td><td x-text="(view === 'full' ? fullOog : romanOog) ? 'yes' : 'no'"></td></tr>
         </table>
       </div>
