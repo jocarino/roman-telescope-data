@@ -16,19 +16,30 @@
 <div x-data="gallery()">
   <div class="controls">
     <input type="search" placeholder="Search planet or star…" x-model="q" aria-label="Search">
-    <select x-model="prov" aria-label="Filter by provenance">
-      <option value="all">All provenance</option>
-      <option value="model">Model</option>
-      <option value="simulated-cgi">Roman: simulated</option>
-      <option value="measured-cgi">Roman: measured</option>
-      <option value="model-microlensing">Microlensing (model-only)</option>
-    </select>
-    <select x-model="sort" aria-label="Sort">
-      <option value="name">Sort: name</option>
-      <option value="temp">Sort: hottest</option>
-      <option value="lum">Sort: brightest</option>
-      <option value="de">Sort: most colour lost to Roman</option>
-    </select>
+    <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
+      @click.outside="open=false">
+      <button class="dd-btn" @click="open=!open" :aria-expanded="open">
+        <span x-text="provLabels[prov]"></span><span class="dd-arrow">▾</span>
+      </button>
+      <div class="dd-menu" x-show="open" x-cloak>
+        <template x-for="[val, label] in Object.entries(provLabels)" :key="val">
+          <button :class="prov === val ? 'on' : ''" @click="prov = val; open = false"
+            x-text="label"></button>
+        </template>
+      </div>
+    </div>
+    <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
+      @click.outside="open=false">
+      <button class="dd-btn" @click="open=!open" :aria-expanded="open">
+        <span x-text="sortLabels[sort]"></span><span class="dd-arrow">▾</span>
+      </button>
+      <div class="dd-menu" x-show="open" x-cloak>
+        <template x-for="[val, label] in Object.entries(sortLabels)" :key="val">
+          <button :class="sort === val ? 'on' : ''" @click="sort = val; open = false"
+            x-text="label"></button>
+        </template>
+      </div>
+    </div>
     <div class="segmented" role="group" aria-label="Render style">
       <button :class="style === 'smooth' ? 'on' : ''" @click="setStyle('smooth')">Sphere</button>
       <button :class="style === 'retro' ? 'on' : ''" @click="setStyle('retro')">Pixel</button>
