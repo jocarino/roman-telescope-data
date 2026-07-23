@@ -88,7 +88,7 @@ def spectrum_svg(true_albedo: list[float], roman_recon: list[float], extrap_belo
     true_pts = _stepped(true_a, vmax)
     roman_pts = _stepped(roman_a, vmax)
 
-    # y gridlines
+    # Oscilloscope graticule: horizontal + vertical division lines.
     gridlines = ""
     for frac in (0.25, 0.5, 0.75, 1.0):
         yy = _H - _PAD_B - frac * (_H - _PAD_T - _PAD_B)
@@ -97,6 +97,11 @@ def spectrum_svg(true_albedo: list[float], roman_recon: list[float], extrap_belo
         )
         gridlines += (
             f'<text x="{x0 - 6:.0f}" y="{yy + 3:.1f}" class="ytick">{frac * vmax:.2f}</text>'
+        )
+    for i in range(1, 8):
+        xx = x0 + i / 8.0 * (x1 - x0)
+        gridlines += (
+            f'<line x1="{xx:.1f}" y1="{_PAD_T}" x2="{xx:.1f}" y2="{y_axis:.0f}" class="grid"/>'
         )
 
     return f"""<svg viewBox="0 0 {_W} {_H}" class="spectrum" role="img"
