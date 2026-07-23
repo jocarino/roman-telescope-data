@@ -103,7 +103,11 @@ a:hover { text-decoration: underline; }
 .card:hover { border-color: var(--line); text-decoration: none; }
 .card-planet { width: 160px; height: 160px; display: block; margin: 0 auto 12px; }
 .card-planet.pixel { image-rendering: pixelated; image-rendering: crisp-edges; }
-.card-name { font-size: 13px; font-weight: 480; color: var(--fg); letter-spacing: 0; }
+/* Planet names in the list use the pixel-art font (liked here); other labels stay mono. */
+.card-name {
+  font-family: var(--pixel); -webkit-font-smoothing: none; font-smooth: never;
+  font-size: 12.5px; color: var(--fg); letter-spacing: .3px; line-height: 1.4;
+}
 .card-host { font-size: 11px; color: var(--fg-faint); margin-top: 1px; }
 .card-meta { display: flex; gap: 6px; margin-top: 9px; flex-wrap: wrap; justify-content: center; }
 
@@ -122,7 +126,7 @@ a:hover { text-decoration: underline; }
 .site-head h1 { font-size: 18px; letter-spacing: 0; line-height: 1.3; }
 .tagline { font-size: 12px; }
 .panel h3 { font-size: 11px; letter-spacing: .04em; }
-.card-name { font-size: 13px; letter-spacing: 0; }
+.card-name { font-size: 12.5px; letter-spacing: .3px; }
 .badge {
   border-radius: 0; font-size: 9.5px; padding: 4px 8px; letter-spacing: .4px; text-transform: uppercase;
 }
@@ -236,11 +240,33 @@ a.badge:active, .drawer-close:active { transform: translateY(1px); }
 .acc.acc-cyan,    .acc-swatch.acc-cyan    { background: #37e6d6; }
 .acc.acc-violet,  .acc-swatch.acc-violet  { background: #b98cff; }
 .acc.on { outline: 2px solid var(--fg); outline-offset: 1px; }
-/* Icon-only dropdown trigger (Sort, Accent) + accent-swatch popover. */
-.dd-icon { min-width: 0; padding: 8px 11px; justify-content: center; }
+/* Minimal icon-only dropdown triggers (Filter, Sort, Accent). The double class beats
+   .dd-btn's min-width so these stay square icon buttons, not wide boxes. */
+.dd-btn.dd-icon { min-width: 0; padding: 10px; justify-content: center; position: relative; }
 .dd-icon .ic { color: var(--fg-dim); display: block; }
 .dd-icon:hover .ic { color: var(--fg); }
-.acc-trigger { padding: 7px; }
+/* A small accent dot marks that a non-default filter/sort is active — no labels needed. */
+.dd-icon.active .ic { color: var(--fg); }
+.dd-icon.active::after {
+  content: ""; position: absolute; top: 5px; right: 5px; width: 6px; height: 6px;
+  border-radius: 50%; background: var(--accent); box-shadow: 0 0 4px var(--accent);
+}
+.dd-btn.acc-trigger { padding: 9px; }
+/* In-place morphing search: the magnifier IS the input, collapsed to icon width and growing
+   rightward on focus (or whenever it holds text). No separate button, no reveal. */
+.search { position: relative; display: inline-flex; align-items: center; }
+.search-mag { position: absolute; left: 11px; color: var(--fg-dim); pointer-events: none; }
+.search:focus-within .search-mag { color: var(--fg); }
+.search input {
+  width: 42px; min-width: 0; box-sizing: border-box; padding: 10px 10px 10px 34px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--bg-3); color: var(--fg);
+  font: inherit; font-size: 13px; box-shadow: 3px 3px 0 var(--line);
+  transition: width .22s ease;
+}
+.search input::placeholder { color: transparent; }
+.search:focus-within input,
+.search input:not(:placeholder-shown) { width: 230px; cursor: text; }
+.search:focus-within input::placeholder { color: var(--fg-faint); }
 .acc-swatch { width: 20px; height: 20px; display: block; border: 1px solid rgba(255, 255, 255, .25); }
 .acc-menu { padding: 8px; left: auto; right: 0; }
 .acc-menu .accents { display: grid; grid-template-columns: repeat(4, 24px); gap: 6px; }
