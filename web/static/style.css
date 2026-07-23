@@ -360,8 +360,9 @@ body::after {
 .spectrum .grid { stroke: var(--line); stroke-width: 1; }
 .spectrum .ytick, .spectrum .xtick { fill: var(--fg-faint); font-size: 10px; font-family: ui-monospace, monospace; }
 .spectrum .ytick { text-anchor: end; }
-.spectrum .line-true { fill: none; stroke: var(--fg); stroke-width: 2; }
-.spectrum .line-roman { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 5 4; }
+/* Fixed channel colours (must match the CH1/CH2 legend swatches, theme-independent). */
+.spectrum .line-true { fill: none; stroke: #ffd23f; stroke-width: 2; }
+.spectrum .line-roman { fill: none; stroke: #3fd0ff; stroke-width: 2; stroke-dasharray: 5 4; }
 .spectrum .hatchline { stroke: var(--fg-faint); stroke-width: 1; }
 .spectrum .hatchlabel { fill: var(--fg-faint); font-size: 10px; }
 .legend { display: flex; gap: 16px; font-size: 12px; color: var(--fg-dim); margin-top: 8px; }
