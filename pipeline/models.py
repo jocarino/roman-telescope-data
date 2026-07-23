@@ -104,6 +104,44 @@ class Discovery(BaseModel):
     facility: str | None = None
 
 
+class RealObservation(BaseModel):
+    """A genuine processed telescope image of the planet — a direct-imaging point source,
+    never an artist's impression. Present ONLY for the handful of directly-imaged planets;
+    everything else has no image of its own (microlensing: none ever; RV/transit: not yet).
+    The colour on the page is still modelled — this is the actual, usually infrared, dot."""
+
+    telescope: str  # short selector tag: "JWST", "Roman", "VLT", "Subaru"
+    file: str  # path under web/static/, e.g. "obs/hr-8799-b.jpg"
+    instrument: str  # "Keck II / NIRC2"
+    band: str  # "near-infrared (L′, 3.8 µm)"
+    year: int | None = None
+    credit: str  # attribution string required by the source
+    license: str  # e.g. "CC BY 4.0"
+    source_url: str
+    note: str  # which point source is the planet; that the light is IR / false-coloured
+
+
+class SystemSibling(BaseModel):
+    """Another planet orbiting the same host star, for the "same system" neighbourhood links."""
+
+    id: str
+    name: str
+    letter: str | None = None  # the planet letter (b, c, d, …), if the name carries one
+    semi_major_axis_au: float | None = None
+    base_hex: str | None = None  # the sibling's full-spectrum colour, for its swatch
+
+
+class PlanetSystem(BaseModel):
+    """The planet's stellar neighbourhood: every OTHER planet of the same host star that is
+    present in this dataset, sorted inner → outer. `member_count` counts the whole system as
+    we have it (this planet + its siblings). Grouped purely by shared host — never by sky
+    proximity, which mixes unrelated stars at different distances."""
+
+    hostname: str
+    member_count: int  # planets of this host in our data, including this one
+    siblings: list[SystemSibling] = Field(default_factory=list)
+
+
 class RecordMeta(BaseModel):
     generated_at: str
     pipeline_version: str
@@ -121,6 +159,10 @@ class PlanetRecord(BaseModel):
     spectrum: SpectralCurve | None = None
     true_colour: ColourResultModel | None = None
     instrument_views: list[InstrumentViewModel] = Field(default_factory=list)
+    # Zero or more genuine telescope images (JWST, Roman, VLT, …), each additive — a new
+    # instrument's image is appended, never substituted. The UI shows a per-telescope toggle.
+    real_observations: list[RealObservation] = Field(default_factory=list)
+    system: PlanetSystem | None = None
     meta: RecordMeta
 
 

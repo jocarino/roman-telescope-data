@@ -15,6 +15,7 @@ from pipeline.config import INSTRUMENTS, ROMAN_CGI
 from pipeline.demo_planets import demo_planets
 from pipeline.emit.build import build_record
 from pipeline.emit.writer import write_planets
+from pipeline.system import attach_systems
 
 
 def _now_iso() -> str:
@@ -45,6 +46,9 @@ def cmd_build(args: argparse.Namespace) -> None:
             f"(source={roman.band_samples.source})"
         )
         print(f"  palette     : {' '.join(s.hex for s in tc.palette)}")
+
+    # Batch pass: link planets that share a host star (needs the whole set to group).
+    attach_systems(records)
 
     out = write_planets(records, generated_at)
     print(f"\nWrote {len(records)} planet(s) -> {out}")
