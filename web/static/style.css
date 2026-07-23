@@ -25,13 +25,29 @@
 
 * { box-sizing: border-box; }
 
+/* Black on the html element too, so the overscroll/bounce area isn't white */
+html { background: #000; }
+
 body {
   margin: 0;
-  background: #000;
   color: var(--fg);
   font: 14px/1.55 var(--mono);
   min-height: 100vh;
+  /* Pixel starfield: sparse crisp dots tiled over pure black, fixed behind content. */
+  background-color: #000;
+  background-image:
+    radial-gradient(1px 1px at 24px 32px, #ffffff, transparent),
+    radial-gradient(1px 1px at 88px 220px, #9fb0d6, transparent),
+    radial-gradient(1px 1px at 150px 96px, #cdd8f2, transparent),
+    radial-gradient(2px 2px at 210px 300px, #ffffff, transparent),
+    radial-gradient(1px 1px at 300px 60px, #8ea0c6, transparent),
+    radial-gradient(1px 1px at 350px 200px, #cdd8f2, transparent),
+    radial-gradient(1px 1px at 60px 320px, #9fb0d6, transparent),
+    radial-gradient(1px 1px at 260px 150px, #ffffff, transparent);
+  background-size: 400px 360px;
+  background-attachment: fixed;
 }
+::selection { background: var(--accent); color: #05121f; }
 
 /* Retro pixel-art chrome: pixel font on headings/labels/pills, sharp edges, crisp borders */
 .site-head h1, .card-name, .panel h3, .toggle button, .segmented button, .badge,
@@ -111,6 +127,17 @@ a:hover { text-decoration: underline; }
 .detail-swatch, .planet-canvas:not(.pixel) { border-radius: 0; }  /* square in retro */
 .planet-canvas { background: transparent; }
 .count { font-size: 11px; }
+
+/* Detail hero: the planet itself, rendered as pixel art */
+.detail-hero {
+  width: 160px; height: 160px; display: block; flex: none;
+  image-rendering: pixelated; image-rendering: crisp-edges; background: transparent;
+}
+/* Pixel-y dashed dividers + tactile button press */
+.params td { border-bottom-style: dashed; }
+.toggle button:active, .segmented button:active, .badge:active,
+a.badge:active, .drawer-close:active { transform: translateY(1px); }
+.toggle button, .segmented button, .badge { transition: transform .04s; }
 
 /* Badges */
 .badge {
