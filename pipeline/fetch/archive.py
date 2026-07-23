@@ -30,6 +30,7 @@ _COLUMNS = (
     "st_teff",
     "st_rad",
     "st_spectype",
+    "sy_dist",
     "disc_method",
     "disc_year",
     "disc_facility",
@@ -53,6 +54,7 @@ class ArchiveRecord:
     disc_method: str | None
     disc_year: int | None
     disc_facility: str | None
+    sy_dist: float | None = None  # distance from Earth, parsecs (system distance)
 
     def equilibrium_temp_k(self, bond_albedo: float = 0.3) -> float | None:
         """Archive value if present, else compute from Teff, R_star and a.
@@ -130,6 +132,7 @@ def fetch_by_names(names: list[str], *, use_cache: bool = True) -> list[ArchiveR
                 st_teff=row.get("st_teff"),
                 st_rad=row.get("st_rad"),
                 st_spectype=row.get("st_spectype"),
+                sy_dist=row.get("sy_dist"),
                 disc_method=row.get("disc_method"),
                 disc_year=row.get("disc_year"),
                 disc_facility=row.get("disc_facility"),

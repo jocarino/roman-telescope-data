@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "grid": "cie-vis-380-780-5",
-  "generated_at": "2026-07-23T14:59:05+00:00",
+  "generated_at": "2026-07-23T15:45:29+00:00",
   "planets": [
     {
       "id": "hd-189733-b",
@@ -16,10 +16,22 @@
         "radius_r_earth": 12.66617,
         "mass_m_earth": 359.1479,
         "semi_major_axis_au": 0.03126,
+        "distance_pc": 19.7638,
         "assumed_cloud_state": "hot, cloud-free, alkali (sodium) absorption",
         "assumed_metallicity": 1.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "picaso"
+        "spectrum_source": "picaso",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "measured",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "measured",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "Radial Velocity",
@@ -338,7 +350,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -356,10 +368,22 @@
         "radius_r_earth": 14.1,
         "mass_m_earth": 193.87532827,
         "semi_major_axis_au": 0.052,
+        "distance_pc": 15.4614,
         "assumed_cloud_state": "hot, cloud-free, alkali (sodium) absorption",
         "assumed_metallicity": 1.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "picaso"
+        "spectrum_source": "picaso",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "measured",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "measured",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "Radial Velocity",
@@ -678,7 +702,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -696,10 +720,22 @@
         "radius_r_earth": 15.58051,
         "mass_m_earth": 232.0159,
         "semi_major_axis_au": 0.04707,
+        "distance_pc": 48.3016,
         "assumed_cloud_state": "hot, cloud-free, alkali (sodium) absorption",
         "assumed_metallicity": 1.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "picaso"
+        "spectrum_source": "picaso",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "measured",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "measured",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "Radial Velocity",
@@ -1018,7 +1054,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -1036,10 +1072,22 @@
         "radius_r_earth": 22.02564708,
         "mass_m_earth": 467.2101,
         "semi_major_axis_au": 0.0234,
+        "distance_pc": 427.246,
         "assumed_cloud_state": "ultra-hot, cloud-free, very dark",
         "assumed_metallicity": 1.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "picaso"
+        "spectrum_source": "picaso",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "measured",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "measured",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "Transit",
@@ -1358,7 +1406,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -1376,10 +1424,22 @@
         "radius_r_earth": 19.52604438,
         "mass_m_earth": 371.85923619,
         "semi_major_axis_au": 0.02571,
+        "distance_pc": 269.898,
         "assumed_cloud_state": "ultra-hot, cloud-free, very dark",
         "assumed_metallicity": 1.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "picaso"
+        "spectrum_source": "picaso",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "measured",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "measured",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "Transit",
@@ -1698,7 +1758,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -1716,10 +1776,22 @@
         "radius_r_earth": 10.424,
         "mass_m_earth": 565.714,
         "semi_major_axis_au": 0.0142,
+        "distance_pc": 86.7467,
         "assumed_cloud_state": "hot, cloud-free, alkali (sodium) absorption",
         "assumed_metallicity": 1.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "picaso"
+        "spectrum_source": "picaso",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "measured",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "measured",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "Transit",
@@ -2038,7 +2110,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -2056,10 +2128,22 @@
         "radius_r_earth": null,
         "mass_m_earth": 3464.3296363,
         "semi_major_axis_au": 10.4,
+        "distance_pc": 29.7575,
         "assumed_cloud_state": "cold, thick clouds (ammonia)",
         "assumed_metallicity": 1.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "cahoy"
+        "spectrum_source": "cahoy",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "assumed",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "measured",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "ima",
@@ -2390,7 +2474,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -2408,10 +2492,22 @@
         "radius_r_earth": 13.0,
         "mass_m_earth": 2000.0,
         "semi_major_axis_au": 68.0,
+        "distance_pc": 41.2441,
         "assumed_cloud_state": "cold, thick clouds (ammonia)",
         "assumed_metallicity": 1.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "cahoy"
+        "spectrum_source": "cahoy",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "measured",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "measured",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "ima",
@@ -2757,7 +2853,7 @@
         ]
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -2775,10 +2871,22 @@
         "radius_r_earth": 13.0,
         "mass_m_earth": 3000.0,
         "semi_major_axis_au": 38.0,
+        "distance_pc": 41.2441,
         "assumed_cloud_state": "cold, thick clouds (ammonia)",
         "assumed_metallicity": 1.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "cahoy"
+        "spectrum_source": "cahoy",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "measured",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "measured",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "ima",
@@ -3124,7 +3232,7 @@
         ]
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -3142,10 +3250,22 @@
         "radius_r_earth": 13.11453,
         "mass_m_earth": 3178.3,
         "semi_major_axis_au": 16.4,
+        "distance_pc": 41.2441,
         "assumed_cloud_state": "cold, thick clouds (ammonia)",
         "assumed_metallicity": 1.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "cahoy"
+        "spectrum_source": "cahoy",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "measured",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "measured",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "ima",
@@ -3491,7 +3611,7 @@
         ]
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -3509,10 +3629,22 @@
         "radius_r_earth": 18.49485,
         "mass_m_earth": 2765.1071409,
         "semi_major_axis_au": 10.07,
+        "distance_pc": 19.7442,
         "assumed_cloud_state": "cold, thick clouds (ammonia)",
         "assumed_metallicity": 1.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "cahoy"
+        "spectrum_source": "cahoy",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "measured",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "measured",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "ima",
@@ -3843,7 +3975,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -3861,10 +3993,22 @@
         "radius_r_earth": 12.9,
         "mass_m_earth": 1589.0,
         "semi_major_axis_au": 55.7,
+        "distance_pc": 86.2279,
         "assumed_cloud_state": "cold, thick clouds (ammonia)",
         "assumed_metallicity": 1.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "cahoy"
+        "spectrum_source": "cahoy",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "measured",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "measured",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "ima",
@@ -4195,7 +4339,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -4213,10 +4357,22 @@
         "radius_r_earth": 12.10569916,
         "mass_m_earth": 1271.3,
         "semi_major_axis_au": 43.5,
+        "distance_pc": 17.5299,
         "assumed_cloud_state": "cold, thick clouds (ammonia)",
         "assumed_metallicity": 1.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "cahoy"
+        "spectrum_source": "cahoy",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "measured",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "measured",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "ima",
@@ -4547,7 +4703,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -4565,10 +4721,22 @@
         "radius_r_earth": 13.2,
         "mass_m_earth": 804.08,
         "semi_major_axis_au": 2.1,
+        "distance_pc": 13.7967,
         "assumed_cloud_state": "temperate, water/ammonia clouds",
         "assumed_metallicity": 3.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "cahoy"
+        "spectrum_source": "cahoy",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "measured",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "measured",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "Radial Velocity",
@@ -4887,7 +5055,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -4905,10 +5073,22 @@
         "radius_r_earth": 12.5,
         "mass_m_earth": 3257.74117175,
         "semi_major_axis_au": 2.51329,
+        "distance_pc": 13.4054,
         "assumed_cloud_state": "temperate, water/ammonia clouds",
         "assumed_metallicity": 3.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "cahoy"
+        "spectrum_source": "cahoy",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "measured",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "measured",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "Radial Velocity",
@@ -5227,7 +5407,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -5245,10 +5425,22 @@
         "radius_r_earth": 1.17,
         "mass_m_earth": 1.71,
         "semi_major_axis_au": 0.432,
+        "distance_pc": 177.594,
         "assumed_cloud_state": "rocky / thin atmosphere (grey)",
         "assumed_metallicity": 1.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "parametric"
+        "spectrum_source": "parametric",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "measured",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "measured",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "Transit",
@@ -5567,7 +5759,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -5585,10 +5777,22 @@
         "radius_r_earth": 0.92,
         "mass_m_earth": 0.692,
         "semi_major_axis_au": 0.02925,
+        "distance_pc": 12.42988881,
         "assumed_cloud_state": "rocky / thin atmosphere (grey)",
         "assumed_metallicity": 1.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "parametric"
+        "spectrum_source": "parametric",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "measured",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "measured",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "Transit",
@@ -5907,7 +6111,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -5925,10 +6129,22 @@
         "radius_r_earth": 1.02,
         "mass_m_earth": 1.055,
         "semi_major_axis_au": 0.04848,
+        "distance_pc": 1.30119,
         "assumed_cloud_state": "rocky / thin atmosphere (grey)",
         "assumed_metallicity": 1.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "parametric"
+        "spectrum_source": "parametric",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "measured",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "measured",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "Radial Velocity",
@@ -6247,7 +6463,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -6265,10 +6481,22 @@
         "radius_r_earth": 2.733,
         "mass_m_earth": 8.41,
         "semi_major_axis_au": 0.01505,
+        "distance_pc": 14.6427,
         "assumed_cloud_state": "warm, partial cloud / haze",
         "assumed_metallicity": 1.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "picaso"
+        "spectrum_source": "picaso",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "measured",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "measured",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "Transit",
@@ -6587,7 +6815,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -6605,10 +6833,22 @@
         "radius_r_earth": 2.21,
         "mass_m_earth": 5.5,
         "semi_major_axis_au": 2.6,
+        "distance_pc": 6600.0,
         "assumed_cloud_state": "cold, thick clouds + deep methane (ice giant)",
         "assumed_metallicity": 10.0,
         "assumed_phase_angle_deg": 0.0,
-        "spectrum_source": "cahoy"
+        "spectrum_source": "cahoy",
+        "sources": {
+          "equilibrium_temp_k": "measured",
+          "radius_r_earth": "measured",
+          "mass_m_earth": "measured",
+          "semi_major_axis_au": "measured",
+          "distance_pc": "measured",
+          "star_teff_k": "assumed",
+          "metallicity": "assumed",
+          "cloud_state": "assumed",
+          "phase_angle_deg": "assumed"
+        }
       },
       "discovery": {
         "method": "Microlensing",
@@ -6927,7 +7167,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:59:05+00:00",
+        "generated_at": "2026-07-23T15:45:29+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
