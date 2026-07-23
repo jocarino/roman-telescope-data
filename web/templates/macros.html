@@ -47,7 +47,13 @@
     radius: {{ rec.params.radius_r_earth if rec.params.radius_r_earth else 8 }},
     cloudState: '{{ rec.params.assumed_cloud_state }}',
     fullCap: 'Modelled from the complete reflected-light spectrum (380–780 nm) — a physics prediction, not a photograph.',
-    romanCap: '{% if iview.band_samples.source == 'measured' %}Measured: real Roman photometry in four bands{% if iview.band_samples.epoch %} ({{ iview.band_samples.epoch }}){% endif %}, reconstructed to a colour — real data.{% else %}Simulated: the model pushed through Roman four filters — what Roman would measure, not real data yet.{% endif %}'
+    romanCap: '{% if iview.band_samples.source == 'measured' %}Measured: real Roman photometry in four bands{% if iview.band_samples.epoch %} ({{ iview.band_samples.epoch }}){% endif %}, reconstructed to a colour — real data.{% else %}Simulated: the model pushed through Roman four filters — what Roman would measure, not real data yet.{% endif %}',
+    obs: [{% for o in rec.real_observations %}{
+      telescope: {{ o.telescope|tojson|forceescape }}, file: '/static/{{ o.file }}',
+      instrument: {{ o.instrument|tojson|forceescape }}, band: {{ o.band|tojson|forceescape }},
+      year: {{ o.year if o.year else 'null' }}, credit: {{ o.credit|tojson|forceescape }},
+      license: {{ o.license|tojson|forceescape }}, note: {{ o.note|tojson|forceescape }}, source: {{ o.source_url|tojson|forceescape }}
+    }{{ ',' if not loop.last }}{% endfor %}]
   })">
 
   <a class="back" href="/">← ALL PLANETS</a>
@@ -64,20 +70,28 @@
       <canvas class="detail-hero" x-show="heroSource !== 'telescope'"
         :class="heroStyle === 'retro' ? 'pixel' : ''" x-ref="cHero"
         width="256" height="256" aria-label="{{ rec.name }} modelled render"></canvas>
-      {% if rec.real_observation %}
+      {% if rec.real_observations %}
       <figure class="hero-obs" x-show="heroSource === 'telescope'" x-cloak>
         <button class="obs-thumb" @click="obsZoom = true" title="Click to enlarge the real image"
           aria-label="Enlarge the real telescope image">
-          <img class="detail-hero" src="/static/{{ rec.real_observation.file }}"
-            alt="{{ rec.name }} — real {{ rec.real_observation.band }} telescope image"
+          <img class="detail-hero" :src="curObs().file"
+            :alt="'{{ rec.name }} — real ' + curObs().band + ' image'"
             width="256" height="256" loading="lazy">
           <span class="obs-zoom-cue">⤢ enlarge</span>
         </button>
+        {# Per-telescope selector: only when more than one instrument has imaged this planet. #}
+        <div class="obs-tabs" x-show="obs.length > 1">
+          <template x-for="(o, i) in obs" :key="i">
+            <button class="obs-tab" :class="i === obsIdx ? 'on' : ''"
+              @click="selectObs(i)" x-text="o.telescope"></button>
+          </template>
+        </div>
         <figcaption class="obs-credit">
           <span class="obs-real">◉ REAL IMAGE</span>
-          {{ rec.real_observation.instrument }} · {{ rec.real_observation.band }}{% if rec.real_observation.year %} · {{ rec.real_observation.year }}{% endif %}<br>
-          <span class="obs-sub">{{ rec.real_observation.note }}</span><br>
-          <span class="obs-sub">{{ rec.real_observation.credit }} · {{ rec.real_observation.license }}</span>
+          <span x-text="curObs().instrument"></span> · <span x-text="curObs().band"></span><template
+            x-if="curObs().year"><span> · <span x-text="curObs().year"></span></span></template><br>
+          <span class="obs-sub" x-text="curObs().note"></span><br>
+          <span class="obs-sub"><span x-text="curObs().credit"></span> · <span x-text="curObs().license"></span></span>
         </figcaption>
       </figure>
       {% endif %}
@@ -106,20 +120,20 @@
     </div>
   </div>
 
-  {% if rec.real_observation %}
+  {% if rec.real_observations %}
   {# Lightbox: click the real telescope image to view it large + full credit. #}
   <div class="obs-lightbox" x-show="obsZoom" x-cloak x-transition.opacity
     @click="obsZoom = false" @keydown.escape.window="obsZoom = false">
     <figure class="obs-lightbox-inner" @click.stop>
       <button class="obs-close" @click="obsZoom = false" aria-label="Close">×</button>
-      <img src="/static/{{ rec.real_observation.file }}"
-        alt="{{ rec.name }} — real {{ rec.real_observation.band }} telescope image">
+      <img :src="curObs().file" :alt="'{{ rec.name }} — real ' + curObs().band + ' image'">
       <figcaption class="obs-credit lg">
         <span class="obs-real">◉ REAL IMAGE — {{ rec.name }}</span>
-        {{ rec.real_observation.instrument }} · {{ rec.real_observation.band }}{% if rec.real_observation.year %} · {{ rec.real_observation.year }}{% endif %}<br>
-        <span class="obs-sub">{{ rec.real_observation.note }}</span><br>
-        <span class="obs-sub">{{ rec.real_observation.credit }} · {{ rec.real_observation.license }} ·
-          <a href="{{ rec.real_observation.source_url }}" target="_blank" rel="noopener">source ↗</a></span>
+        <span x-text="curObs().instrument"></span> · <span x-text="curObs().band"></span><template
+          x-if="curObs().year"><span> · <span x-text="curObs().year"></span></span></template><br>
+        <span class="obs-sub" x-text="curObs().note"></span><br>
+        <span class="obs-sub"><span x-text="curObs().credit"></span> · <span x-text="curObs().license"></span> ·
+          <a :href="curObs().source" target="_blank" rel="noopener">source ↗</a></span>
       </figcaption>
     </figure>
   </div>
@@ -165,7 +179,8 @@
           always infrared and false-coloured — the real dot humanity has received, not a
           picture of the surface.</p>
         <p>Only a handful of planets have ever been photographed directly; that is why this
-          knob appears on some pages and not others.</p>
+          knob appears on some pages and not others. When more than one telescope has imaged
+          the same planet (e.g. JWST and, later, Roman), a small tab picks between them.</p>
       </div></template>
     </div>
     <div class="scope-main">
@@ -207,7 +222,7 @@
           <span class="knob-name">Shape</span>
           <span class="knob-val" x-text="heroStyle === 'retro' ? 'Pixel' : 'Sphere'"></span>
         </div>
-        {% if rec.real_observation %}
+        {% if rec.real_observations %}
         <div class="knob-cell knob-cell-source">
           <div class="knob knob-source" role="button" tabindex="0"
             title="Switch between the modelled render and the real telescope photo"
@@ -216,7 +231,7 @@
           <span class="knob-name">Source
             <button class="info-btn xs" @click="toggleInfo('source')" :class="info === 'source' ? 'on' : ''"
               aria-label="What is modelled vs telescope?" title="Modelled vs telescope?">i</button></span>
-          <span class="knob-val" x-text="heroSource === 'model' ? 'Modelled' : 'Telescope'"></span>
+          <span class="knob-val" x-text="heroSource === 'model' ? 'Modelled' : (obs.length > 1 ? curObs().telescope : 'Telescope')"></span>
         </div>
         {% endif %}
       </div>
