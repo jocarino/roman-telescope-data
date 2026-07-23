@@ -106,6 +106,7 @@ document.addEventListener("alpine:init", () => {
     fidelity: localStorage.getItem("renderFidelity") || "classic",
     heroStyle: "retro",   // hero render: "retro" (pixel) or "smooth" (sphere)
     heroSource: "model",  // hero shows the "model" render or the real "telescope" image
+    obsZoom: false,       // real-image lightbox open?
     msg: "",
     help: false,       // dossier "how to read this" expandable (ℹ button)
     info: null,        // which scope explainer is open: 'view' | 'style' | 'source' | null
@@ -120,8 +121,18 @@ document.addEventListener("alpine:init", () => {
     },
     // Scope controls — every knob/button drives real state:
     setView(v) { this.view = v; this.blink(); },
-    toggleFidelity() { this.setFidelity(this.fidelity === "classic" ? "stylised" : "classic"); },
-    toggleHeroStyle() { this.heroStyle = this.heroStyle === "retro" ? "smooth" : "retro"; this.renderAll(); },
+    // Style/Shape act on the modelled render. If the real photo is showing, the first click
+    // simply brings the model back (no value change) so the knobs never feel "locked out";
+    // a further click then toggles. This is why turning to Telescope doesn't trap you there.
+    toggleFidelity() {
+      if (this.heroSource === "telescope") { this.heroSource = "model"; this.blink(); this.renderAll(); return; }
+      this.setFidelity(this.fidelity === "classic" ? "stylised" : "classic");
+    },
+    toggleHeroStyle() {
+      if (this.heroSource === "telescope") { this.heroSource = "model"; this.blink(); this.renderAll(); return; }
+      this.heroStyle = this.heroStyle === "retro" ? "smooth" : "retro";
+      this.renderAll();
+    },
     // Flip the hero between the modelled render and the real telescope photo (only present
     // for directly-imaged planets — the knob is not rendered otherwise).
     toggleHeroSource() { this.heroSource = this.heroSource === "model" ? "telescope" : "model"; this.blink(); },
