@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "grid": "cie-vis-380-780-5",
-  "generated_at": "2026-07-23T14:07:05+00:00",
+  "generated_at": "2026-07-23T14:59:05+00:00",
   "planets": [
     {
       "id": "hd-189733-b",
@@ -338,7 +338,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -678,7 +678,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -1018,7 +1018,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -1358,7 +1358,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -1698,7 +1698,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -2038,7 +2038,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -2381,7 +2381,7 @@
           "credit": "NASA, ESA, CSA, STScI, W. Balmer (JHU), L. Pueyo & M. Perrin (STScI)",
           "license": "CC BY 4.0",
           "source_url": "https://esawebb.org/images/weic2504b/",
-          "note": "The planet is the fuzzy red point labelled “b”, just left of the masked star 51 Eri. Infrared light, false-coloured — not a visible-light photo."
+          "note": "The planet is the fuzzy red point labelled “b”, just left of the masked star 51 Eri. Infrared light, false-coloured, not a visible-light photo."
         }
       ],
       "system": {
@@ -2390,7 +2390,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -2733,7 +2733,7 @@
           "credit": "NASA, ESA, CSA, STScI, W. Balmer (JHU), L. Pueyo & M. Perrin (STScI)",
           "license": "CC BY 4.0",
           "source_url": "https://esawebb.org/images/weic2504a/",
-          "note": "Planet “b” is the blue dot at far left — the outermost of HR 8799’s four planets (~68 AU). Star hidden by the coronagraph; infrared, false-coloured."
+          "note": "Planet “b” is the blue dot at far left, the outermost of HR 8799’s four planets (~68 AU). Star hidden by the coronagraph; infrared, false-coloured."
         }
       ],
       "system": {
@@ -2757,7 +2757,7 @@
         ]
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -3100,7 +3100,7 @@
           "credit": "NASA, ESA, CSA, STScI, W. Balmer (JHU), L. Pueyo & M. Perrin (STScI)",
           "license": "CC BY 4.0",
           "source_url": "https://esawebb.org/images/weic2504a/",
-          "note": "Planet “c” is the bluish-white dot at top (~38 AU). Star hidden by the coronagraph; infrared, false-coloured — not a visible-light photo."
+          "note": "Planet “c” is the bluish-white dot at top (~38 AU). Star hidden by the coronagraph; infrared, false-coloured, not a visible-light photo."
         }
       ],
       "system": {
@@ -3124,7 +3124,7 @@
         ]
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -3467,7 +3467,7 @@
           "credit": "NASA, ESA, CSA, STScI, W. Balmer (JHU), L. Pueyo & M. Perrin (STScI)",
           "license": "CC BY 4.0",
           "source_url": "https://esawebb.org/images/weic2504a/",
-          "note": "Planet “e” is the orange dot nearest the masked star — the innermost of the four (~16 AU). Infrared, false-coloured — not a visible-light photo."
+          "note": "Planet “e” is the orange dot nearest the masked star, the innermost of the four (~16 AU). Infrared, false-coloured, not a visible-light photo."
         }
       ],
       "system": {
@@ -3491,7 +3491,7 @@
         ]
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -3843,7 +3843,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -4195,7 +4195,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -4536,7 +4536,7 @@
           "band": "near-infrared (J+H → false colour)",
           "year": 2013,
           "credit": "NAOJ (National Astronomical Observatory of Japan)",
-          "license": "NAOJ terms — credit required",
+          "license": "NAOJ terms, credit required",
           "source_url": "https://subarutelescope.org/en/gallery/pressrelease/galactic/2025/06/18/3566.html",
           "note": "The planet is the white point at upper-right; the star sits behind the black central mask amid blue/orange speckle noise. Near-infrared, false-coloured."
         }
@@ -4547,7 +4547,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -4887,7 +4887,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -5227,7 +5227,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -5567,7 +5567,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -5907,7 +5907,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -6247,7 +6247,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -6587,7 +6587,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
@@ -6927,7 +6927,7 @@
         "siblings": []
       },
       "meta": {
-        "generated_at": "2026-07-23T14:07:05+00:00",
+        "generated_at": "2026-07-23T14:59:05+00:00",
         "pipeline_version": "0.1.0",
         "schema_version": 1
       }
