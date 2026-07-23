@@ -240,6 +240,38 @@ a.badge:active, .drawer-close:active { transform: translateY(1px); }
 .acc.acc-cyan,    .acc-swatch.acc-cyan    { background: #37e6d6; }
 .acc.acc-violet,  .acc-swatch.acc-violet  { background: #b98cff; }
 .acc.on { outline: 2px solid var(--fg); outline-offset: 1px; }
+
+/* ---- Colour bar: filter planets by colour family + "nearest in colour" pill ---- */
+.colour-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 18px; }
+.colour-bar-lbl {
+  font-family: var(--pixel); font-size: 9px; letter-spacing: .5px; text-transform: uppercase;
+  color: var(--fg-dim); margin-right: 2px;
+}
+.cfchip {
+  display: inline-flex; align-items: center; gap: 7px; padding: 5px 10px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--bg-3); color: var(--fg-dim);
+  font-size: 12px; box-shadow: 2px 2px 0 var(--line); transition: color .12s, border-color .12s;
+}
+.cfchip:hover { color: var(--fg); border-color: var(--accent); }
+.cfchip.on { color: var(--fg); border-color: var(--accent); box-shadow: 2px 2px 0 var(--accent); }
+.cfchip:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line); }
+.cfchip-dot { width: 12px; height: 12px; flex: none; border: 1px solid #000; }
+.cfchip-all { font-family: var(--pixel); font-size: 8px; letter-spacing: .3px; }
+/* "Nearest in colour to X" indicator, shown while the similar-colour sort is active. */
+.near-pill {
+  display: inline-flex; align-items: center; gap: 7px; padding: 5px 6px 5px 10px; margin-left: 4px;
+  border: 1px solid var(--accent); background: var(--bg-3); color: var(--fg-dim); font-size: 12px;
+}
+.near-pill b { color: var(--fg); font-weight: 600; }
+.near-dot { width: 12px; height: 12px; flex: none; border: 1px solid #000; }
+.near-x {
+  border: 0; background: none; color: var(--fg-dim); cursor: pointer; font-size: 15px;
+  line-height: 1; padding: 0 3px;
+}
+.near-x:hover { color: var(--fg); }
+/* "Find similar colours" action shares the palette-action pill look, flagged in the accent. */
+.badge.similar { color: var(--accent); border-color: var(--accent); }
+
 /* Minimal icon-only dropdown triggers (Filter, Sort, Accent). The double class beats
    .dd-btn's min-width so these stay square icon buttons, not wide boxes. */
 .dd-btn.dd-icon { min-width: 0; padding: 10px; justify-content: center; position: relative; }

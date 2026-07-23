@@ -259,6 +259,8 @@
           x-text="'BASE ' + (view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}')"></button>
         <button class="badge hex" @click="copyCssVars($event)">CSS VARS</button>
         <a class="badge hex" href="/palettes/{{ rec.id }}.ase" download>.ASE</a>
+        <a class="badge hex similar" href="/?near={{ rec.id }}"
+          title="Find planets closest in colour to this one">◎ SIMILAR COLOURS</a>
         <span class="copied" x-show="msg" x-text="msg" x-cloak></span>
       </div>
     </div>
