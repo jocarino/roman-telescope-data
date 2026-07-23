@@ -63,6 +63,22 @@ Two-stage design — do NOT run PICASO inside a web request; it is heavy and slo
   palette, and the physical explanation of why it has that colour. Client-side
   interactivity (search/filter/sort) in React state; no backend needed for v1.
 
+## Design principle: dual audience
+
+The site must be **equally enjoyable for someone who knows nothing about exoplanets or this
+project as for an astronomy nerd**. This is a hard requirement, not a nicety. In practice:
+
+- **Labels are self-explanatory.** No cryptic, insider, or costume term is ever the *only*
+  signpost for a control. A real oscilloscope's "RUN / SINGLE" means nothing to a newcomer;
+  "Full spectrum / Roman 4-band" does. The retro/oscilloscope styling is a costume — it must
+  never make a control harder to understand than a plain button would be.
+- **Info buttons where it matters.** Complex or easily-misread ideas (full spectrum vs Roman,
+  modelled vs measured, classic vs stylised render) get an ℹ button **in the accent colour**
+  that reveals a plain-English explanation on demand — present when needed, out of the way
+  otherwise. Don't bury the explanation; don't clutter simple controls with it either.
+- **Honest wording.** Prefer "Modelled" over "Model"; never imply a colour is photographed when
+  it is computed. Honesty about what is model vs measurement is the whole point of the project.
+
 ## Conventions
 
 - Python: 3.11+, `uv` for deps, `ruff` for lint, type hints throughout.

@@ -2,10 +2,10 @@
 
 {% macro provenance_badge(rec) -%}
   {%- set labels = {
-    'model': 'Model',
+    'model': 'Modelled',
     'simulated-cgi': 'Roman: simulated',
     'measured-cgi': 'Roman: measured',
-    'model-microlensing': 'Model',
+    'model-microlensing': 'Modelled',
     'measured-hwo': 'HWO: measured'
   } -%}
   <span class="badge {{ rec.provenance }}">{{ labels.get(rec.provenance, rec.provenance) }}</span>
@@ -135,12 +135,29 @@
     <div class="scope-top">
       <span class="scope-brand">◼ EXOSCOPE</span>
       <span class="scope-model">{{ rec.name }} · reflected-light · 380–780 nm</span>
-      <span class="scope-leds">
-        <button class="led-btn" @click="setView('full')" :class="view === 'full' ? 'on' : ''"
-          title="Full spectrum"><i class="led" :class="{ on: view === 'full', flash: view === 'full' && ledFlash }"></i>RUN</button>
-        <button class="led-btn" @click="setView('roman')" :class="view === 'roman' ? 'on' : ''"
-          title="Roman four-band"><i class="led" :class="{ on: view === 'roman', flash: view === 'roman' && ledFlash }"></i>SINGLE</button>
+      <span class="scope-view">
+        <span class="scope-view-lbl">VIEW</span>
+        <button class="led-btn" @click="setView('full')" :class="view === 'full' ? 'on' : ''">
+          <i class="led" :class="{ on: view === 'full', flash: view === 'full' && ledFlash }"></i>Full spectrum</button>
+        <button class="led-btn" @click="setView('roman')" :class="view === 'roman' ? 'on' : ''">
+          <i class="led" :class="{ on: view === 'roman', flash: view === 'roman' && ledFlash }"></i>Roman 4-band</button>
+        <button class="info-btn sm" @click="toggleInfo('view')" :class="info === 'view' ? 'on' : ''"
+          aria-label="What's the difference between the two views?"
+          title="What's the difference?">i</button>
       </span>
+    </div>
+    <div class="scope-info" x-show="info" x-cloak x-transition>
+      <template x-if="info === 'view'"><span>
+        <strong>Full spectrum</strong> — the colour computed from the complete 380–780&nbsp;nm
+        reflected-light model. <strong>Roman 4-band</strong> — the same light as the Roman Space
+        Telescope's Coronagraph would see it, through just four filters. Both are
+        <strong>modelled, not photographs</strong>; flipping between them shows how much of a
+        planet's colour survives Roman's coarse filter set.</span></template>
+      <template x-if="info === 'style'"><span>
+        <strong>Classic</strong> — surface colour and brightness taken straight from the physics
+        model (cloud bands are schematic). <strong>Stylised</strong> — that same colour restyled
+        into warm/cool bands and turbulence for looks: prettier, not more accurate. The palette
+        below is identical either way — only the picture changes.</span></template>
     </div>
     <div class="scope-main">
       <div class="scope-screen">{{ ctx.spectrum_svg|safe }}</div>
@@ -162,21 +179,24 @@
           &lt;{{ iview.reconstruction.extrapolated_below_nm|round|int }} nm: Roman blind, flat-held.</div>
       </div>
       <div class="scope-rail">
-        <div class="knob" role="button" tabindex="0" title="Channel: full spectrum / Roman"
-          @click="setView(view === 'full' ? 'roman' : 'full')"
-          @keydown.enter.prevent="setView(view === 'full' ? 'roman' : 'full')"
-          :style="{ '--a': view === 'full' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
-        <span class="knob-lbl" x-text="view === 'full' ? 'FULL' : 'ROMAN'"></span>
-        <div class="knob" role="button" tabindex="0" title="Fidelity: classic physics / stylised"
-          @click="toggleFidelity()" @keydown.enter.prevent="toggleFidelity()"
-          :style="{ '--a': fidelity === 'classic' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
-        <span class="knob-lbl" x-text="fidelity === 'classic' ? 'CLASSIC' : 'STYLISED'"></span>
-        <div class="knob" role="button" tabindex="0" title="Render: pixel / sphere"
-          @click="toggleHeroStyle()" @keydown.enter.prevent="toggleHeroStyle()"
-          :style="{ '--a': heroStyle === 'retro' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
-        <span class="knob-lbl" x-text="heroStyle === 'retro' ? 'PIXEL' : 'SPHERE'"></span>
-        <button class="scope-fbtn" @click="resetScope()" title="Reset to defaults">AUTO</button>
-        <button class="scope-fbtn" :class="help ? 'on' : ''" @click="help = !help">MENU</button>
+        <div class="knob-tag">RENDER CONTROLS</div>
+        <div class="knob-cell">
+          <div class="knob" role="button" tabindex="0" title="Switch render style"
+            @click="toggleFidelity()" @keydown.enter.prevent="toggleFidelity()"
+            :style="{ '--a': fidelity === 'classic' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
+          <span class="knob-name">Style
+            <button class="info-btn xs" @click="toggleInfo('style')" :class="info === 'style' ? 'on' : ''"
+              aria-label="What does style change?" title="What does style change?">i</button></span>
+          <span class="knob-val" x-text="fidelity === 'classic' ? 'Classic' : 'Stylised'"></span>
+        </div>
+        <div class="knob-cell">
+          <div class="knob" role="button" tabindex="0" title="Switch pixel / sphere"
+            @click="toggleHeroStyle()" @keydown.enter.prevent="toggleHeroStyle()"
+            :style="{ '--a': heroStyle === 'retro' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
+          <span class="knob-name">Shape</span>
+          <span class="knob-val" x-text="heroStyle === 'retro' ? 'Pixel' : 'Sphere'"></span>
+        </div>
+        <button class="scope-fbtn" @click="resetScope()" title="Reset view + render to defaults">Reset</button>
       </div>
     </div>
     <div class="scope-bottom">

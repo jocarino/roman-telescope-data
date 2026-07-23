@@ -225,16 +225,23 @@ body::after {
 }
 .scope-brand { color: var(--accent); }
 .scope-model { color: var(--fg-dim); }
-.scope-leds { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--fg-faint); }
 .led { width: 7px; height: 7px; display: inline-block; background: #2a2f3a; border: 1px solid #000; }
 .led.on { background: #4ade80; box-shadow: 0 0 5px #4ade80; }
-/* Clickable RUN / SINGLE channel selectors. */
+/* Plain-labelled view selector (the two ways to see a planet's colour). */
+.scope-view { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.scope-view-lbl { font-family: var(--pixel); font-size: 8px; letter-spacing: 1px; color: var(--fg-faint); }
 .led-btn {
-  display: inline-flex; align-items: center; gap: 5px; padding: 0; border: 0; background: none;
-  color: var(--fg-faint); font-family: var(--pixel); font-size: 7px; letter-spacing: .5px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border: 1px solid transparent;
+  background: none; color: var(--fg-dim); font: inherit; font-size: 12px; cursor: pointer;
 }
-.led-btn.on { color: var(--fg); }
+.led-btn.on { color: var(--fg); border-color: var(--line); background: var(--bg-3); }
 .led-btn:active { transform: translateY(1px); }
+/* Explainer bar the ℹ buttons reveal — plain English, accent-flagged. */
+.scope-info {
+  border: 1px solid var(--accent); border-left-width: 4px; background: var(--bg-3);
+  padding: 10px 14px; font-size: 12.5px; line-height: 1.5; color: var(--fg-dim);
+}
+.scope-info strong { color: var(--fg); }
 .scope-main { display: grid; grid-template-columns: 1fr 200px; }
 .scope-screen {
   position: relative; background: #04070c; padding: 12px 12px 8px; overflow: hidden;
@@ -380,6 +387,10 @@ body::after {
 }
 .info-btn.on { background: var(--accent); color: #05121f; }
 .info-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line); }
+/* Accent so the "there's an explanation here" affordance reads at a glance. */
+.info-btn:not(.on) { color: var(--accent); border-color: var(--accent); }
+.info-btn.sm { width: 18px; height: 18px; font-size: 9px; box-shadow: 1px 1px 0 var(--line); }
+.info-btn.xs { width: 13px; height: 13px; font-size: 7px; box-shadow: none; vertical-align: middle; }
 .dossier-help { overflow: hidden; margin-top: 12px; }
 .dossier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 14px; }
 @media (max-width: 720px) { .dossier-grid { grid-template-columns: 1fr; } }
@@ -392,11 +403,15 @@ body::after {
 .scope-main { grid-template-columns: 1fr 190px auto; }
 @media (max-width: 760px) { .scope-main { grid-template-columns: 1fr; } .scope-rail { flex-direction: row; flex-wrap: wrap; border-left: 0; border-top: 1px solid var(--line); } }
 .scope-rail {
-  display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 12px 14px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 16px;
   background: linear-gradient(180deg, #171a22, #0d0f14); border-left: 1px solid var(--line);
 }
+.knob-tag { font-family: var(--pixel); font-size: 7px; letter-spacing: .5px; color: var(--fg-faint); }
+.knob-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.knob-name { font-size: 11px; color: var(--fg-dim); display: inline-flex; align-items: center; gap: 4px; }
+.knob-val { font-family: var(--pixel); font-size: 8px; letter-spacing: .3px; color: var(--accent); }
 .knob {
-  width: 34px; height: 34px; border-radius: 50%; position: relative; margin-top: 6px; cursor: pointer;
+  width: 34px; height: 34px; border-radius: 50%; position: relative; cursor: pointer;
   background: radial-gradient(circle at 35% 30%, #3a4150, #14171e 70%);
   border: 1px solid #000; box-shadow: 0 2px 3px rgba(0, 0, 0, .6), inset 0 1px 1px rgba(255, 255, 255, .15);
   transition: box-shadow .12s;
@@ -409,10 +424,9 @@ body::after {
   transform-origin: 50% 14px; transform: translateX(-50%) rotate(var(--a, 0deg));
   box-shadow: 0 0 3px var(--accent); transition: transform .18s cubic-bezier(.4, 1.4, .6, 1);
 }
-.knob-lbl { font-family: var(--pixel); font-size: 6.5px; color: var(--fg-faint); letter-spacing: .3px; margin-bottom: 3px; }
 .scope-fbtn {
-  margin-top: 8px; width: 46px; padding: 5px 0; border: 1px solid var(--line); background: var(--bg-3);
-  color: var(--fg-dim); font-family: var(--pixel); font-size: 7px; cursor: pointer; box-shadow: 2px 2px 0 var(--line);
+  margin-top: 4px; width: 54px; padding: 6px 0; border: 1px solid var(--line); background: var(--bg-3);
+  color: var(--fg-dim); font-family: var(--pixel); font-size: 8px; cursor: pointer; box-shadow: 2px 2px 0 var(--line);
 }
 .scope-fbtn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line); }
 .scope-fbtn.on { background: var(--accent); color: #05121f; border-color: var(--accent); }

@@ -106,8 +106,9 @@ document.addEventListener("alpine:init", () => {
     fidelity: localStorage.getItem("renderFidelity") || "classic",
     heroStyle: "retro",   // hero render: "retro" (pixel) or "smooth" (sphere)
     msg: "",
-    help: false,       // "how to read this" expandable (ℹ button / MENU)
-    ledFlash: false,   // RUN LED blink on view change
+    help: false,       // dossier "how to read this" expandable (ℹ button)
+    info: null,        // which scope explainer is open: 'view' | 'style' | null
+    ledFlash: false,   // channel LED blink on view change
     _t: null,
     _lt: null,
     ...init,
@@ -120,7 +121,8 @@ document.addEventListener("alpine:init", () => {
     setView(v) { this.view = v; this.blink(); },
     toggleFidelity() { this.setFidelity(this.fidelity === "classic" ? "stylised" : "classic"); },
     toggleHeroStyle() { this.heroStyle = this.heroStyle === "retro" ? "smooth" : "retro"; this.renderAll(); },
-    resetScope() { this.view = "full"; this.heroStyle = "retro"; this.setFidelity("classic"); this.blink(); },
+    toggleInfo(k) { this.info = this.info === k ? null : k; },
+    resetScope() { this.view = "full"; this.heroStyle = "retro"; this.info = null; this.setFidelity("classic"); this.blink(); },
     setFidelity(f) {
       this.fidelity = f;
       try { localStorage.setItem("renderFidelity", f); } catch (e) { /* ignore */ }
