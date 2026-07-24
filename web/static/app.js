@@ -31,13 +31,13 @@ document.addEventListener("alpine:init", () => {
       neptune: "Neptune-like", "gas-giant": "Gas giant", "hot-jupiter": "Hot Jupiter",
       unknown: "Unknown",
     },
-    // Distance bands (parsecs). id -> [label, maxExclusive]; the last band catches the rest.
+    // Distance bands (light-years). id -> [label, maxExclusive in ly]; last band catches the rest.
     distBands: [
       ["all", "Any distance", Infinity],
-      ["near", "≤ 25 pc", 25],
-      ["mid", "25–100 pc", 100],
-      ["far", "100–500 pc", 500],
-      ["remote", "> 500 pc", Infinity],
+      ["near", "≤ 50 ly", 50],
+      ["mid", "50–300 ly", 300],
+      ["far", "300–1,500 ly", 1500],
+      ["remote", "> 1,500 ly", Infinity],
     ],
     sortLabels: {
       name: "Sort: name", temp: "Sort: hottest", lum: "Sort: brightest",
@@ -256,12 +256,12 @@ document.addEventListener("alpine:init", () => {
       const methods = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
       return [["all", "All methods"], ...methods.map((m) => [m, m])];
     },
-    // Which distance band a parsec value falls in (first matching band by ascending max).
-    _distBandOf(pc) {
-      if (pc == null) return "unknown";
+    // Which distance band a light-year value falls in (first matching band by ascending max).
+    _distBandOf(ly) {
+      if (ly == null) return "unknown";
       for (const [id, , max] of this.distBands) {
         if (id === "all" || id === "remote") continue;
-        if (pc <= max) return id;
+        if (ly <= max) return id;
       }
       return "remote";
     },
@@ -305,7 +305,7 @@ document.addEventListener("alpine:init", () => {
         if (this.prov !== "all" && p.prov !== this.prov) return false;
         if (this.ptype !== "all" && p.ptype !== this.ptype) return false;
         if (this.disc !== "all" && p.disc !== this.disc) return false;
-        if (this.distBand !== "all" && this._distBandOf(p.dist) !== this.distBand) return false;
+        if (this.distBand !== "all" && this._distBandOf(p.dist_ly) !== this.distBand) return false;
         if (this.family && p.family !== this.family) return false;
         if (this.q) {
           const s = (p.name + " " + p.host).toLowerCase();
@@ -337,6 +337,165 @@ document.addEventListener("alpine:init", () => {
     },
   }));
 
+  // Compare: two planets side by side, over the same fetched index. Shows the colour-driving
+  // data (temperature, host star, atmosphere, size) plus fun facts (distance, discovery).
+  Alpine.data("compare", (cfg) => ({
+    indexUrl: (cfg && cfg.indexUrl) || null,
+    loaded: false,
+    all: [],
+    byId: {},
+    aId: null, bId: null,
+    // Planet-browser state (the pop-over used to pick a planet for a slot).
+    pickerOpen: false, pickerSlot: null, pq: "", pfam: null, ptypeF: "all",
+    familyMetaC: {
+      teal: { n: "Teal", c: "#2fb8b8" }, azure: { n: "Azure", c: "#3ea5ff" },
+      blue: { n: "Blue", c: "#4a7fd0" }, periwinkle: { n: "Periwinkle", c: "#aab6e6" },
+      green: { n: "Green", c: "#4caf6a" }, gold: { n: "Gold", c: "#d9b44a" },
+      orange: { n: "Orange", c: "#e08a3c" }, red: { n: "Red", c: "#d0503c" },
+      pink: { n: "Pink", c: "#d06a9c" }, violet: { n: "Violet", c: "#9a7fd0" },
+      brown: { n: "Brown", c: "#8a6a4a" }, grey: { n: "Grey", c: "#9aa0ac" },
+      white: { n: "White", c: "#dfe3ea" }, dark: { n: "Dark", c: "#3a3f4a" },
+    },
+    familyOrderC: ["teal", "azure", "blue", "periwinkle", "green", "gold", "orange", "red", "pink", "violet", "brown", "grey", "white", "dark"],
+    async init() {
+      try {
+        const res = await fetch(this.indexUrl);
+        this.all = await res.json();
+        this.all.forEach((p) => { this.byId[p.id] = p; });
+      } catch (e) { /* leave empty */ }
+      const u = new URLSearchParams(location.search);
+      this.aId = u.get("a"); this.bId = u.get("b");
+      this.loaded = true;
+      this.$watch("aId", () => this._render());
+      this.$watch("bId", () => this._render());
+      this.$nextTick(() => this._render());
+    },
+    a() { return this.byId[this.aId] || null; },
+    b() { return this.byId[this.bId] || null; },
+    // --- planet browser ---
+    openPicker(slot) {
+      this.pickerSlot = slot; this.pq = ""; this.pfam = null; this.ptypeF = "all";
+      this.pickerOpen = true;
+      this.$nextTick(() => this.$refs.pickerSearch && this.$refs.pickerSearch.focus());
+    },
+    closePicker() { this.pickerOpen = false; },
+    choose(id) {
+      if (this.pickerSlot === "a") this.aId = id; else this.bId = id;
+      this.closePicker();
+    },
+    pickerFamilies() {
+      const present = new Set(this.all.map((p) => p.family));
+      return this.familyOrderC.filter((f) => present.has(f))
+        .map((f) => ({ id: f, name: this.familyMetaC[f].n, colour: this.familyMetaC[f].c }));
+    },
+    pickerTypes() {
+      const present = new Set(this.all.map((p) => p.ptype));
+      const order = ["rocky", "super-earth", "neptune", "gas-giant", "hot-jupiter"];
+      return [["all", "All"], ...order.filter((t) => present.has(t))
+        .map((t) => [t, this.typeLabelsC[t]])];
+    },
+    pickerResults() {
+      const q = this.pq.toLowerCase().trim();
+      return this.all.filter((p) => {
+        if (this.pfam && p.family !== this.pfam) return false;
+        if (this.ptypeF !== "all" && p.ptype !== this.ptypeF) return false;
+        if (q && !((p.name + " " + p.host).toLowerCase().includes(q))) return false;
+        return true;
+      }).sort((x, y) => x.name.localeCompare(y.name));
+    },
+    fmtLy(p) { return p.dist_ly != null ? p.dist_ly.toLocaleString() + " ly" : "distance n/a"; },
+    swap() { [this.aId, this.bId] = [this.bId, this.aId]; },
+    _render() {
+      const u = new URLSearchParams();
+      if (this.aId) u.set("a", this.aId);
+      if (this.bId) u.set("b", this.bId);
+      history.replaceState(null, "", u.toString() ? "?" + u.toString() : location.pathname);
+      this.$nextTick(() => {
+        [["cA", this.a()], ["cB", this.b()]].forEach(([ref, p]) => {
+          const cv = this.$refs[ref];
+          if (!cv || !p || !window.PlanetRender) return;
+          window.PlanetRender.render(cv, {
+            palette: p.palette, radius: p.radius, cloudState: p.cloud, lumY: p.lum,
+            style: "retro", fidelity: localStorage.getItem("renderFidelity") || "classic",
+          });
+        });
+      });
+    },
+    // --- formatting ---
+    _n(v, unit, dp) {
+      if (v == null) return "n/a";
+      const num = dp != null ? (+v).toFixed(dp) : (+v).toLocaleString();
+      return num + (unit || "");
+    },
+    _star(p) {
+      const t = p.starTeff != null ? Math.round(p.starTeff) + " K" : "";
+      return [t, p.starType].filter(Boolean).join(" · ") || "n/a";
+    },
+    _size(p) {
+      const r = p.radius != null ? (+p.radius).toFixed(1) + " R⊕" : null;
+      let m = null;
+      if (p.mass != null) {
+        const mv = +p.mass;
+        m = (mv >= 100 ? Math.round(mv).toLocaleString() : mv.toFixed(1)) + " M⊕";
+      }
+      return [r, m].filter(Boolean).join(" · ") || "n/a";
+    },
+    _disc(p) { return [p.disc, p.year].filter(Boolean).join(" · ") || "n/a"; },
+    _typeLabel(t) { return (this.typeLabelsC && this.typeLabelsC[t]) || t || "n/a"; },
+    typeLabelsC: {
+      rocky: "Rocky", "super-earth": "Super-Earth", neptune: "Neptune-like",
+      "gas-giant": "Gas giant", "hot-jupiter": "Hot Jupiter", unknown: "Unknown",
+    },
+    // The comparison table, grouped. `diff` flags rows where the two differ, for highlighting.
+    groups() {
+      const A = this.a(), B = this.b();
+      if (!A || !B) return [];
+      const row = (label, fa, fb, diff) => ({ label, a: fa, b: fb, diff });
+      const tempDiff = A.temp != null && B.temp != null && Math.abs(A.temp - B.temp) > 200;
+      return [
+        { title: "What drives the colour", rows: [
+          row("Colour", A.hex, B.hex, A.hex !== B.hex),
+          row("Equilibrium temp", this._n(A.temp, " K", 0), this._n(B.temp, " K", 0), tempDiff),
+          row("Host star", this._star(A), this._star(B),
+            Math.abs((A.starTeff || 0) - (B.starTeff || 0)) > 1200),
+          row("Atmosphere", A.cloud, B.cloud, A.cloud !== B.cloud),
+          row("Metallicity", this._n(A.metal, "× solar", 1), this._n(B.metal, "× solar", 1), false),
+        ] },
+        { title: "The planets", rows: [
+          row("Type", this._typeLabel(A.ptype), this._typeLabel(B.ptype), A.ptype !== B.ptype),
+          row("Size", this._size(A), this._size(B), false),
+          row("Distance from Earth", this._n(A.dist_ly, " ly"), this._n(B.dist_ly, " ly"), false),
+          row("Orbit (semi-major axis)", this._n(A.sma, " AU", 2), this._n(B.sma, " AU", 2), false),
+          row("Discovery", this._disc(A), this._disc(B), false),
+        ] },
+      ];
+    },
+    // One plain-English line on the dominant reason their colours differ.
+    whyDiffer() {
+      const A = this.a(), B = this.b();
+      if (!A || !B) return "";
+      if (A.hex === B.hex) return "These two come out <strong>almost the same colour</strong> — similar temperature, star and atmosphere give a similar reflected-light spectrum.";
+      const hotter = (A.temp || 0) >= (B.temp || 0) ? A : B;
+      const cooler = hotter === A ? B : A;
+      const parts = [];
+      if ((hotter.temp || 0) - (cooler.temp || 0) > 300) {
+        parts.push(`<strong>${hotter.name}</strong> is much hotter (${Math.round(hotter.temp)} K vs ${Math.round(cooler.temp)} K), so sodium absorption drives it bluer and darker, while <strong>${cooler.name}</strong> is cool enough for brighter clouds`);
+      }
+      if (Math.abs((A.starTeff || 0) - (B.starTeff || 0)) > 1200) {
+        const redder = (A.starTeff || 9999) <= (B.starTeff || 9999) ? A : B;
+        parts.push(`their host stars differ a lot in temperature, so <strong>${redder.name}</strong> reflects a warmer, redder light`);
+      }
+      if (!parts.length) {
+        if (A.cloud !== B.cloud) {
+          parts.push(`the main difference is their atmospheres (${A.cloud} vs ${B.cloud})`);
+        } else {
+          return "These two are very similar worlds — close in temperature, host star and atmosphere — so their reflected-light colours come out nearly the same.";
+        }
+      }
+      return parts.join("; ") + ".";
+    },
+  }));
+
   // Detail: full-spectrum <-> Roman toggle + palette export. Neither view is "true colour":
   // both are modelled. `init` carries the precomputed colours/palettes.
   Alpine.data("detail", (init) => ({
@@ -354,8 +513,10 @@ document.addEventListener("alpine:init", () => {
     panel: "palette",  // mobile-only: which info panel shows ('readout' | 'palette' | 'data')
     descOpen: false,   // mobile-only: caption under the planet name expanded?
     ledFlash: false,   // channel LED blink on view change
+    sweep: false,      // CRT redraw sweep on view change
     _t: null,
     _lt: null,
+    _st: null,
     ...init,
     // Carry the scope's settings across same-system hops (each planet is its own page).
     // Every option falls back gracefully when the target planet can't honour it.
@@ -382,7 +543,16 @@ document.addEventListener("alpine:init", () => {
       this._lt = setTimeout(() => (this.ledFlash = false), 320);
     },
     // Scope controls: every knob/button drives real state (and persists across hops):
-    setView(v) { this.view = v; this._persist("scopeView", v); this.blink(); },
+    setView(v) { this.view = v; this._persist("scopeView", v); this.blink(); this._sweep(); },
+    // Restart the CRT sweep animation (drop the class for a frame so CSS re-triggers it).
+    _sweep() {
+      this.sweep = false;
+      requestAnimationFrame(() => {
+        this.sweep = true;
+        clearTimeout(this._st);
+        this._st = setTimeout(() => (this.sweep = false), 550);
+      });
+    },
     selectObs(i) { this.obsIdx = i; this._persist("obsTelescope", this.curObs().telescope || ""); },
     // Style/Shape act on the modelled render. If the real photo is showing, the first click
     // simply brings the model back (no value change) so the knobs never feel "locked out";
