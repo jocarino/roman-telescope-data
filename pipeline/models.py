@@ -84,6 +84,26 @@ class InstrumentViewModel(BaseModel):
     reconstruction_error: ReconstructionError | None = None
 
 
+class PhaseColourModel(BaseModel):
+    """The planet's colour at one orbital phase angle. `hex` is the colour identity
+    (chromaticity at the display luminance); `luminance_y` is the true relative brightness
+    including the phase dimming, so 0° ≈ the base luminance and 180° → 0."""
+
+    phase_deg: int
+    hex: str
+    luminance_y: float
+
+
+class PhaseSetModel(BaseModel):
+    """Phase-resolved colours for the phase slider / animation, 0-180° in 10° steps.
+    `source` states where the phase behaviour comes from: "cahoy-grid" (the planet's own
+    spectra are phase-resolved), "cahoy-ratio" (phase bending borrowed from the nearest
+    Cahoy archetype), or "lambert-grey" (brightness dims, colour held constant)."""
+
+    source: Literal["cahoy-grid", "cahoy-ratio", "lambert-grey"]
+    colours: list[PhaseColourModel]
+
+
 class IlluminantSwapModel(BaseModel):
     """The same albedo spectrum re-lit by a reference star — "this planet around the Sun".
     Separates what the PLANET contributes to its colour from what its host star's light
@@ -198,6 +218,8 @@ class PlanetRecord(BaseModel):
     # Stretch-goal data (milestone 6): the planet re-lit by the Sun, for the host-star
     # illuminant comparison. Optional for back-compat with schema-v1 records.
     sun_swap: IlluminantSwapModel | None = None
+    # Phase-resolved colours (0-180° in 10° steps) for the phase slider / animation.
+    phase_colours: PhaseSetModel | None = None
     instrument_views: list[InstrumentViewModel] = Field(default_factory=list)
     # Zero or more genuine telescope images (JWST, Roman, VLT, …), each additive — a new
     # instrument's image is appended, never substituted. The UI shows a per-telescope toggle.
