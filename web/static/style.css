@@ -353,6 +353,9 @@ button.badge:active, a.badge:active { box-shadow: none; }
   clip-path: polygon(5px 0, calc(100% - 5px) 0, 100% 5px, 100% calc(100% - 5px),
     calc(100% - 5px) 100%, 5px 100%, 0 calc(100% - 5px), 0 5px);
 }
+/* The data card holds the jargon [i] tooltips, which float beyond the card edge; the notch
+   clip-path above would clip them. Square corners here so the tooltips show in full. */
+.panel.dossier { clip-path: none; }
 
 /* ---- Custom retro dropdowns (replace native selects) ---- */
 .dropdown { position: relative; display: inline-block; }
@@ -628,16 +631,16 @@ button.badge:active, a.badge:active { box-shadow: none; }
 .badge.hex { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
 /* Detail page */
-/* Far top-left of the viewport, tucked in the gutter so it steals no vertical space. */
+/* In-flow at the top of the content — identical on every page (planet detail and the
+   explainer). It used to pin fixed in the gutter on wide planet pages only, which made it
+   jump around between pages. */
 .back {
-  position: fixed; top: 16px; left: 18px; z-index: 40; margin: 0; padding: 7px 12px;
+  display: inline-block; margin: 4px 0 16px; padding: 7px 12px;
   font-family: var(--mono); font-size: 9px; letter-spacing: .5px; color: var(--fg-dim);
   border: 1px solid var(--line); background: var(--bg-3); box-shadow: 3px 3px 0 var(--line);
 }
 .back:hover { color: var(--fg); border-color: var(--accent); }
 .back:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--line); }
-/* Below the width where the centred content leaves a gutter, fall back to in-flow. */
-@media (max-width: 1439px) { .back { position: static; display: inline-block; margin: 4px 0 16px; } }
 .detail-head { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; margin: 12px 0 22px; }
 .detail-title { flex: 1 1 340px; min-width: 280px; }
 /* Reserve a stable height so flipping the Source knob (short modelled caption <-> longer
@@ -671,6 +674,10 @@ button.badge:active, a.badge:active { box-shadow: none; }
 .params td { padding: 6px 0; border-bottom: 1px solid var(--line); }
 .params td:first-child { color: var(--fg-dim); }
 .params td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+/* Jargon [i] tooltips in the data card sit in the left label column, so they open
+   rightward (the default opens left, which would clip against the panel edge). */
+.params .tip { margin-left: 5px; }
+.params .tip-body { right: auto; left: -10px; }
 
 /* Assumptions / banner */
 /* Same accent-callout look as .scope-info / .subhead, so all ℹ reveals match. */
@@ -903,7 +910,6 @@ button.badge:active, a.badge:active { box-shadow: none; }
 .hue-trigger .hue-chip { width: 20px; height: 20px; margin: 0; vertical-align: 0; display: block; }
 
 /* ---- "How we get the colours" explainer page ---- */
-.how .back { position: static; display: inline-block; margin: 4px 0 14px; }
 .how .site-head h1 { font-size: 22px; }
 .how-chain {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 22px;
