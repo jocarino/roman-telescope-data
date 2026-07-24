@@ -68,6 +68,10 @@ CURATED_NAMES: list[str] = [
     "Proxima Cen b",   # nearest rocky planet
     "GJ 1214 b",       # warm sub-Neptune
     "OGLE-2005-BLG-390L b",  # microlensing, light never isolable
+    # The only microlensing planet (of 281 in the Archive, 2026-07) whose host star is
+    # characterised well enough to pass the completeness gate — a rare bright-lens event
+    # (Kojima-1). Pinned so the `model-microlensing` path is always exercised end to end.
+    "TCP J05074264+2447555 b",
 ]
 
 

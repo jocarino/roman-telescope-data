@@ -84,6 +84,18 @@ class InstrumentViewModel(BaseModel):
     reconstruction_error: ReconstructionError | None = None
 
 
+class IlluminantSwapModel(BaseModel):
+    """The same albedo spectrum re-lit by a reference star — "this planet around the Sun".
+    Separates what the PLANET contributes to its colour from what its host star's light
+    contributes. `delta_e2000_vs_true` is the perceptual distance from the native colour:
+    ~0 for Sun-like hosts, large for M-dwarf planets whose colour is mostly their star."""
+
+    illuminant: str  # e.g. "sun-blackbody-5772k"
+    teff_k: float
+    colour: ColourResultModel
+    delta_e2000_vs_true: float
+
+
 class HostStar(BaseModel):
     name: str
     teff_k: float
@@ -183,6 +195,9 @@ class PlanetRecord(BaseModel):
     provenance: Provenance
     spectrum: SpectralCurve | None = None
     true_colour: ColourResultModel | None = None
+    # Stretch-goal data (milestone 6): the planet re-lit by the Sun, for the host-star
+    # illuminant comparison. Optional for back-compat with schema-v1 records.
+    sun_swap: IlluminantSwapModel | None = None
     instrument_views: list[InstrumentViewModel] = Field(default_factory=list)
     # Zero or more genuine telescope images (JWST, Roman, VLT, …), each additive — a new
     # instrument's image is appended, never substituted. The UI shows a per-telescope toggle.

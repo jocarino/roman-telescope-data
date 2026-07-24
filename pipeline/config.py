@@ -90,4 +90,4 @@ ROMAN_CGI = Instrument(
 INSTRUMENTS: dict[str, Instrument] = {ROMAN_CGI.id: ROMAN_CGI}
 
 PIPELINE_VERSION = "0.1.0"
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2  # v2: added per-planet `sun_swap` (illuminant-comparison colour)
