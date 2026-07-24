@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "macros.html" import back_link %}
 {% block title %}How we get the colours · Exoplanet Palette{% endblock %}
 {% block content %}
 
@@ -20,8 +21,8 @@
 {% macro maths_close() %}</div></div>{% endmacro %}
 
 <div class="how">
-  <a class="back" href="/">← ALL PLANETS</a>
   <div class="site-head">
+    {{ back_link() }}
     <h1>How we get the colours</h1>
   </div>
   <p class="subhead lede">No telescope has ever photographed these planets in colour — most have
@@ -260,6 +261,6 @@
     spectrum engine — and tags each value as measured, computed or assumed.
     <strong>Modelled, not photographed</strong> — that's the whole point.</p>
 
-  <a class="back" href="/">← ALL PLANETS</a>
+  {{ back_link() }}
 </div>
 {% endblock %}

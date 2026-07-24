@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+{% from "macros.html" import back_link %}
 {% block title %}Colour census · Exoplanet Palette{% endblock %}
 {% block content %}
 <div class="census-page" x-data="{ intro: false, iScatter: false, iRoman: false }">
-  <a class="back" href="/">← ALL PLANETS</a>
   <div class="site-head">
+    {{ back_link() }}
     <h1>Colour census</h1>
     <span class="tagline">every modelled planet, seen as one dataset
       <button class="info-btn sm" @click="intro = !intro" :class="intro ? 'on' : ''"

@@ -1,5 +1,11 @@
 {# Reusable UI pieces. #}
 
+{# The one back-to-gallery control, shared by every page. Place it as the FIRST child of the
+   page's title row (.site-head / .detail-head) so it sits to the LEFT of the title. #}
+{% macro back_link() -%}
+  <a class="back" href="/">← ALL PLANETS</a>
+{%- endmacro %}
+
 {% macro provenance_badge(rec) -%}
   {%- set labels = {
     'model': 'Modelled',
@@ -67,8 +73,6 @@
     }{{ ',' if not loop.last }}{% endfor %}]
   })">
 
-  <a class="back" href="/">← ALL PLANETS</a>
-
   {% if not rec.is_light_isolable %}
   <div class="banner">
     ⚠︎ Discovered by microlensing: no light from this planet is ever isolable by any
@@ -77,6 +81,7 @@
   {% endif %}
 
   <div class="detail-head" x-effect="view; fidelity; heroStyle; $nextTick(() => renderAll())">
+    {{ back_link() }}
     <div class="hero-stack">
       <canvas class="detail-hero" x-show="heroSource !== 'telescope'"
         :class="heroStyle === 'retro' ? 'pixel' : ''" x-ref="cHero"
