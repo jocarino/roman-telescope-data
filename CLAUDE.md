@@ -111,9 +111,12 @@ divergence and merge churn. To avoid it:
   rejected push. Commit small and push often to shrink the collision window.
 - **Never force-push `main`** — the other session's work lives there. On a rejected push,
   fetch + rebase + resolve; force only to overwrite your *own* just-pushed mistake.
-- `data/planets.json` is the committed source of truth (regenerate with
-  `pipeline build --bulk N`); `dist/` is gitignored and built at deploy. Regenerating data is a
-  "data side" change — don't do it from a UI-side session.
+- `data/planets.json` is the source of truth but is NOT committed (too big at 6k planets):
+  it lives on disk locally and is published to GitHub Releases via `scripts/release-data.sh`;
+  the committed `data/RELEASE` names the tag and deploy builds fetch it
+  (`scripts/fetch_data.py`). Regenerate with `pipeline build --bulk N`; `dist/` is gitignored
+  and built at deploy. Regenerating/releasing data is a "data side" change — don't do it from
+  a UI-side session.
 - **Preview servers: use `tools/exohub.py`, not a bare `http.server`.** When several sessions
   each serve their own `dist/`, nobody can tell which `localhost:PORT` is which worktree. Instead:
   - `python3 tools/exohub.py serve --build` — builds `dist/` and serves it on **this worktree's
