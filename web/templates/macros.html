@@ -65,6 +65,8 @@
     cloudState: '{{ rec.params.assumed_cloud_state }}',
     fullCap: 'Modelled from the complete reflected-light spectrum (380–780 nm): a physics prediction, not a photograph.',
     romanCap: '{% if iview.band_samples.source == 'measured' %}Measured: real Roman photometry in four bands{% if iview.band_samples.epoch %} ({{ iview.band_samples.epoch }}){% endif %}, reconstructed to a colour. Real data.{% else %}Simulated: the model pushed through the four Roman filters, i.e. what Roman would measure, not real data yet.{% endif %}',
+    phases: [{% if rec.phase_colours %}{% for c in rec.phase_colours.colours %}{d:{{ c.phase_deg }},h:'{{ c.hex }}',l:{{ '%.4f'|format(c.luminance_y) }}}{{ ',' if not loop.last }}{% endfor %}{% endif %}],
+    phaseSource: '{{ rec.phase_colours.source if rec.phase_colours else '' }}',
     obs: [{% for o in rec.real_observations %}{
       telescope: {{ o.telescope|tojson|forceescape }}, file: '/static/{{ o.file }}',
       instrument: {{ o.instrument|tojson|forceescape }}, band: {{ o.band|tojson|forceescape }},
@@ -215,6 +217,25 @@
           knob appears on some pages and not others. When more than one telescope has imaged
           the same planet (e.g. JWST and, later, Roman), a small tab picks between them.</p>
       </div></template>
+      {% if rec.phase_colours %}
+      <template x-if="info === 'phase'"><div>
+        <p><strong>Phase</strong> works like Moon phases: how much of the planet's lit side
+          faces us. 0° is "full" (fully lit), 90° half lit, 180° "new" (backlit and dark).
+          Both the brightness <em>and the colour</em> change as a planet wanes — and a
+          coronagraph like Roman's can never see 0°, because a fully-lit planet sits right
+          behind its star.</p>
+        {% if rec.phase_colours.source == 'cahoy-grid' %}
+        <p>This planet's phase colours come from <strong>phase-resolved model spectra</strong>
+          (Cahoy et al. 2010) — both the dimming and the colour shift are modelled.</p>
+        {% elif rec.phase_colours.source == 'cahoy-ratio' %}
+        <p>How this colour bends with phase is <strong>borrowed from the closest reference
+          model</strong> (Cahoy et al. 2010); the planet keeps its own full-phase colour.</p>
+        {% else %}
+        <p>No phase-resolved model exists for this world, so we <strong>only dim it</strong>
+          with phase and hold the colour constant — the simplest honest assumption.</p>
+        {% endif %}
+      </div></template>
+      {% endif %}
     </div>
     <div class="scope-main">
       {# The CRT. HUD rows live INSIDE the glass (same background, under the scanlines), so
@@ -312,6 +333,27 @@
             </div>
             {% endif %}
           </div>
+          {% if rec.phase_colours %}
+          {# Phase slider: drag the planet from fully lit (0°) to backlit (180°). Drives the
+             render's terminator, the phase colour chip and the brightness readout. #}
+          <div class="phase-row">
+            <div class="phase-head">
+              <span class="knob-name">Phase
+                <button class="info-btn xs" @click="toggleInfo('phase')"
+                  :class="info === 'phase' ? 'on' : ''"
+                  aria-label="What does phase change?" title="What does phase change?">i</button>
+              </span>
+              <span class="phase-val"><span x-text="phase().d + '°'"></span> ·
+                <span x-text="phaseName()"></span></span>
+            </div>
+            <input type="range" class="phase-slider" min="0" :max="phases.length - 1" step="1"
+              x-model.number="phaseIdx" @input="phaseChanged()"
+              aria-label="Orbital phase: 0° fully lit to 180° backlit">
+            <div class="phase-scale" aria-hidden="true">
+              <span>FULL</span><span>HALF</span><span>NEW</span>
+            </div>
+          </div>
+          {% endif %}
         </section>
       </aside>
       {# Mobile-only function keys: on a phone the measure panel, palette and data card don't

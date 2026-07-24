@@ -509,6 +509,11 @@ document.addEventListener("alpine:init", () => {
     heroSource: "model",  // hero shows the "model" render or the real "telescope" image
     obs: [],              // real telescope images for this planet (0+), injected by init
     obsIdx: 0,            // which telescope image is selected (when >1 exist)
+    phases: [],           // phase-resolved colours ({d, h, l} at 0-180°), injected by init
+    phaseSource: "",      // where the phase behaviour comes from (cahoy-grid/-ratio/lambert)
+    // Slider position into `phases`. Defaults to 20° — the base render's soft day/night
+    // shading already depicts a slightly-off-full planet, so the label matches the picture.
+    phaseIdx: 2,
     obsZoom: false,       // real-image lightbox open?
     msg: "",
     help: false,       // dossier "how to read this" expandable (ℹ button)
@@ -581,6 +586,35 @@ document.addEventListener("alpine:init", () => {
       this.blink();
     },
     toggleInfo(k) { this.info = this.info === k ? null : k; },
+    // Phase slider: the current stop, a plain-English name for it, and the redraw hook.
+    phase() { return this.phases[this.phaseIdx] || { d: 0, h: this.fullHex, l: this.fullLum }; },
+    phaseName() {
+      const d = this.phase().d;
+      if (d === 0) return "fully lit";
+      if (d < 90) return "gibbous";
+      if (d === 90) return "half lit";
+      if (d < 180) return "crescent";
+      return "new (backlit)";
+    },
+    phaseChanged() {
+      // Sliding while the real photo shows brings the model back (photos have their own phase).
+      if (this.heroSource === "telescope") { this.heroSource = "model"; this._persist("heroSource", "model"); }
+      this.renderAll();
+    },
+    // Retint a palette by the per-channel drift of the phase colour vs full phase, so the
+    // render carries the modelled colour shift (subtle blueing/reddening) as it wanes.
+    _phaseTint(palette) {
+      const ph = this.phase();
+      if (!ph.d || !this.phases.length) return palette;
+      const base = this.phases[0].h;
+      const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+      const [br, bg, bb] = rgb(base), [pr, pg, pb] = rgb(ph.h);
+      const ratio = [pr / (br || 1), pg / (bg || 1), pb / (bb || 1)];
+      return palette.map((hex) => {
+        const c = rgb(hex).map((v, i) => Math.max(0, Math.min(255, Math.round(v * ratio[i]))));
+        return "#" + c.map((v) => v.toString(16).padStart(2, "0")).join("");
+      });
+    },
     setFidelity(f) {
       this.fidelity = f;
       try { localStorage.setItem("renderFidelity", f); } catch (e) { /* ignore */ }
@@ -614,11 +648,12 @@ document.addEventListener("alpine:init", () => {
     renderAll() {
       if (!window.PlanetRender || !this.$refs.cHero) return;
       const opts = {
-        palette: this.view === "full" ? this.fullPalette : this.romanPalette,
+        palette: this._phaseTint(this.view === "full" ? this.fullPalette : this.romanPalette),
         radius: this.radius,
         cloudState: this.cloudState,
         lumY: this.view === "full" ? this.fullLum : this.romanLum,
         fidelity: this.fidelity,
+        phase: (this.phase().d * Math.PI) / 180,
       };
       // Single hero planet, rotating; its style (sphere/pixel) is a scope knob.
       this.$refs.cHero.classList.toggle("pixel", this.heroStyle === "retro");
