@@ -596,7 +596,7 @@ button.badge:active, a.badge:active { box-shadow: none; }
 .tip { position: relative; display: inline-flex; }
 .tip-body {
   display: none; position: absolute; bottom: calc(100% + 9px); right: -10px; z-index: 55;
-  width: 230px; padding: 10px 24px 10px 12px; background: #000; border: 1px solid var(--line);
+  width: 230px; padding: 10px 12px; background: #000; border: 1px solid var(--line);
   box-shadow: 4px 4px 0 rgba(0, 0, 0, .7);
   font-family: var(--mono); font-size: 11px; line-height: 1.55; letter-spacing: 0;
   text-transform: none; color: var(--fg-dim); text-align: left; white-space: normal;
