@@ -16,6 +16,13 @@
   {%- if src %}<span class="src src-{{ src }}" title="{{ {'measured': 'Real measurement from the NASA Exoplanet Archive', 'computed': 'Derived from the star + orbit', 'assumed': 'Archetype assumption — no data for this planet'}[src] }}">{{ src }}</span>{% endif -%}
 {%- endmacro %}
 
+{# A small terminal [i] beside a label that reveals a plain-English tooltip (hover or tap). #}
+{% macro jinfo(expl) -%}
+<span class="tip" x-data="{ t: false }" @click.outside="t = false"><button class="info-btn xs"
+  @click="t = !t" :class="t ? 'on' : ''" aria-label="What does this mean?">i</button><span
+  class="tip-body" :class="t ? 'open' : ''">{{ expl }}</span></span>
+{%- endmacro %}
+
 {% macro palette_strip(palette) -%}
   <span class="palette-strip">
     {%- for s in palette %}<span style="background: {{ s.hex }}"></span>{% endfor -%}
@@ -380,20 +387,20 @@
           x-text="view === 'full' ? 'full-spectrum model' : 'Roman four-band'"></span></div>
         <table class="params">
           <tr><td>Base hex</td><td><code x-text="view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}'"></code></td></tr>
-          <tr><td>Reflected brightness (Y)</td><td x-text="(view === 'full' ? fullLum : romanLum).toFixed(3)"></td></tr>
-          <tr><td>Out of sRGB gamut</td><td x-text="(view === 'full' ? fullOog : romanOog) ? 'yes' : 'no'"></td></tr>
+          <tr><td>Reflected brightness (Y){{ jinfo('How much light the colour reflects overall (CIE luminance): 0 = pitch black, 1 = a perfect white reflector. Most planets are dim, so the swatches are shown brightened.') }}</td><td x-text="(view === 'full' ? fullLum : romanLum).toFixed(3)"></td></tr>
+          <tr><td>Out of sRGB gamut{{ jinfo('Whether the modelled colour is more saturated than a screen can show. If so, it is clamped to the nearest colour the display can reproduce.') }}</td><td x-text="(view === 'full' ? fullOog : romanOog) ? 'yes' : 'no'"></td></tr>
         </table>
       </div>
       <div class="dossier-stats">
         <div class="dossier-sub">Planet</div>
         {%- set src = rec.params.sources -%}
         <table class="params">
-          <tr><td>Equilibrium temp</td><td>{{ (rec.params.equilibrium_temp_k|round|int ~ ' K') if rec.params.equilibrium_temp_k else 'n/a' }}{% if src and rec.params.equilibrium_temp_k %} {{ src_tag(src.equilibrium_temp_k) }}{% endif %}</td></tr>
-          <tr><td>Radius</td><td>{{ (rec.params.radius_r_earth|round(2) ~ ' R⊕') if rec.params.radius_r_earth else 'n/a' }}{% if src and rec.params.radius_r_earth %} {{ src_tag(src.radius_r_earth) }}{% endif %}</td></tr>
-          <tr><td>Mass</td><td>{{ (rec.params.mass_m_earth|round(1) ~ ' M⊕') if rec.params.mass_m_earth else 'n/a' }}{% if src and rec.params.mass_m_earth %} {{ src_tag(src.mass_m_earth) }}{% endif %}</td></tr>
-          <tr><td>Semi-major axis</td><td>{{ (rec.params.semi_major_axis_au|round(3) ~ ' AU') if rec.params.semi_major_axis_au else 'n/a' }}{% if src and rec.params.semi_major_axis_au %} {{ src_tag(src.semi_major_axis_au) }}{% endif %}</td></tr>
-          <tr><td>Distance from Earth</td><td>{{ ((rec.params.distance_pc * 3.26156)|round(1) ~ ' ly') if rec.params.distance_pc else 'n/a' }}{% if src and rec.params.distance_pc %} {{ src_tag(src.distance_pc) }}{% endif %}</td></tr>
-          <tr><td>Discovery</td><td>{{ rec.discovery.method }}{{ (' · ' ~ rec.discovery.year) if rec.discovery.year else '' }}</td></tr>
+          <tr><td>Equilibrium temp{{ jinfo('The temperature the planet settles at from the starlight it absorbs, assuming no greenhouse warming. It sets the likely atmosphere and cloud state — a key input to the colour.') }}</td><td>{{ (rec.params.equilibrium_temp_k|round|int ~ ' K') if rec.params.equilibrium_temp_k else 'n/a' }}{% if src and rec.params.equilibrium_temp_k %} {{ src_tag(src.equilibrium_temp_k) }}{% endif %}</td></tr>
+          <tr><td>Radius{{ jinfo('Measured in Earth radii (R⊕): 1 = Earth-sized, ~11 ≈ Jupiter.') }}</td><td>{{ (rec.params.radius_r_earth|round(2) ~ ' R⊕') if rec.params.radius_r_earth else 'n/a' }}{% if src and rec.params.radius_r_earth %} {{ src_tag(src.radius_r_earth) }}{% endif %}</td></tr>
+          <tr><td>Mass{{ jinfo('Measured in Earth masses (M⊕): 1 = Earth, ~318 ≈ Jupiter.') }}</td><td>{{ (rec.params.mass_m_earth|round(1) ~ ' M⊕') if rec.params.mass_m_earth else 'n/a' }}{% if src and rec.params.mass_m_earth %} {{ src_tag(src.mass_m_earth) }}{% endif %}</td></tr>
+          <tr><td>Semi-major axis{{ jinfo('The size of the orbit — the planet’s average distance from its star. 1 AU = the Earth–Sun distance (~150 million km). It sets how much starlight the planet gets, and so its temperature.') }}</td><td>{{ (rec.params.semi_major_axis_au|round(3) ~ ' AU') if rec.params.semi_major_axis_au else 'n/a' }}{% if src and rec.params.semi_major_axis_au %} {{ src_tag(src.semi_major_axis_au) }}{% endif %}</td></tr>
+          <tr><td>Distance from Earth{{ jinfo('How far the whole system is from us, in light-years — the distance light travels in one year (~9.5 trillion km).') }}</td><td>{{ ((rec.params.distance_pc * 3.26156)|round(1) ~ ' ly') if rec.params.distance_pc else 'n/a' }}{% if src and rec.params.distance_pc %} {{ src_tag(src.distance_pc) }}{% endif %}</td></tr>
+          <tr><td>Discovery{{ jinfo('How the planet was first detected: radial velocity (the star’s wobble), transit (a dip in its light), direct imaging (an actual picture), or microlensing (its gravity briefly magnifying a background star).') }}</td><td>{{ rec.discovery.method }}{{ (' · ' ~ rec.discovery.year) if rec.discovery.year else '' }}</td></tr>
         </table>
       </div>
     </div>
