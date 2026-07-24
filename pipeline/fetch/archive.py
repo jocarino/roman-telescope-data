@@ -30,6 +30,7 @@ _COLUMNS = (
     "st_teff",
     "st_rad",
     "st_spectype",
+    "sy_dist",
     "disc_method",
     "disc_year",
     "disc_facility",
@@ -53,6 +54,7 @@ class ArchiveRecord:
     disc_method: str | None
     disc_year: int | None
     disc_facility: str | None
+    sy_dist: float | None = None  # distance from Earth, parsecs (system distance)
 
     def equilibrium_temp_k(self, bond_albedo: float = 0.3) -> float | None:
         """Archive value if present, else compute from Teff, R_star and a.
@@ -89,6 +91,38 @@ def _adql_in_clause(names: list[str]) -> str:
     return f"select {cols} from pscomppars where pl_name in ({quoted})"
 
 
+def _adql_bulk(limit: int) -> str:
+    """The `limit` nearest planets (by distance) with the bare minimum to be worth considering:
+    a size measurement (radius or mass) and a known distance to order by. Everything else — a
+    real host-star temperature, a usable planet temperature — is left to the completeness gate
+    downstream, so the gate does the real filtering and its keep/exclude ratio is meaningful."""
+    cols = ",".join(_COLUMNS)
+    return (
+        f"select top {int(limit)} {cols} from pscomppars "
+        "where sy_dist is not null and (pl_rade is not null or pl_bmasse is not null) "
+        "order by sy_dist asc"
+    )
+
+
+def _row_to_record(row: dict) -> ArchiveRecord:
+    return ArchiveRecord(
+        pl_name=row["pl_name"],
+        hostname=row.get("hostname"),
+        pl_eqt=row.get("pl_eqt"),
+        pl_rade=row.get("pl_rade"),
+        pl_bmasse=row.get("pl_bmasse"),
+        pl_orbsmax=row.get("pl_orbsmax"),
+        pl_orbeccen=row.get("pl_orbeccen"),
+        st_teff=row.get("st_teff"),
+        st_rad=row.get("st_rad"),
+        st_spectype=row.get("st_spectype"),
+        sy_dist=row.get("sy_dist"),
+        disc_method=row.get("disc_method"),
+        disc_year=row.get("disc_year"),
+        disc_facility=row.get("disc_facility"),
+    )
+
+
 def _cache_path(query: str) -> Path:
     digest = hashlib.sha256(query.encode()).hexdigest()[:16]
     return _CACHE_DIR / f"tap_{digest}.json"
@@ -113,26 +147,11 @@ def fetch_by_names(names: list[str], *, use_cache: bool = True) -> list[ArchiveR
     """Fetch a batch of planets by exact `pl_name`. One TAP call, cached to disk."""
     rows = _run_query(_adql_in_clause(names), use_cache=use_cache)
     by_name = {row["pl_name"]: row for row in rows}
-    records: list[ArchiveRecord] = []
-    for name in names:
-        row = by_name.get(name)
-        if row is None:
-            continue
-        records.append(
-            ArchiveRecord(
-                pl_name=row["pl_name"],
-                hostname=row.get("hostname"),
-                pl_eqt=row.get("pl_eqt"),
-                pl_rade=row.get("pl_rade"),
-                pl_bmasse=row.get("pl_bmasse"),
-                pl_orbsmax=row.get("pl_orbsmax"),
-                pl_orbeccen=row.get("pl_orbeccen"),
-                st_teff=row.get("st_teff"),
-                st_rad=row.get("st_rad"),
-                st_spectype=row.get("st_spectype"),
-                disc_method=row.get("disc_method"),
-                disc_year=row.get("disc_year"),
-                disc_facility=row.get("disc_facility"),
-            )
-        )
-    return records
+    return [_row_to_record(by_name[name]) for name in names if name in by_name]
+
+
+def fetch_bulk(limit: int, *, use_cache: bool = True) -> list[ArchiveRecord]:
+    """Fetch up to `limit` well-characterised planets (nearest first) for the scaled catalog.
+    Coarse-filtered in ADQL; the completeness gate applies the real thresholds downstream."""
+    rows = _run_query(_adql_bulk(limit), use_cache=use_cache)
+    return [_row_to_record(row) for row in rows]
