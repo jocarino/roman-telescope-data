@@ -713,31 +713,49 @@ button.badge:active, a.badge:active { box-shadow: none; }
   .spec-wide { display: none; }
   .spec-compact { display: block; }
   .knob-tag { flex-basis: 100%; margin-bottom: 2px; }
-  /* Function keys as physical scope buttons: raised keys on a bezel strip, the
-     active one pressed in and backlit; a tiny LED by the F-number marks state. */
+  /* Function keys as physical scope keycaps (cf. R&S MXO front panel): rounded caps
+     lit from above with real extrusion below, travel on press, active key backlit
+     in the accent like a lit Run/Stop key. Skeuomorphic on purpose — like the knobs,
+     these are physical controls, so they're an exception to the square-corner rule. */
   .scope-fnrow {
-    display: flex; order: 3; gap: 9px; padding: 10px 10px 12px;
-    border-top: 1px solid var(--line); background: #0a0c11;
+    display: flex; order: 3; gap: 14px; padding: 13px 14px 16px;
+    border-top: 1px solid var(--line); background: #0d1017;
   }
   .fn-btn {
-    flex: 1; padding: 7px 4px 8px; cursor: pointer;
-    background: var(--bg-3); border: 1px solid var(--line);
-    box-shadow: 2px 2px 0 var(--line); color: var(--fg-dim);
+    flex: 1; padding: 8px 4px 9px; cursor: pointer;
+    border-radius: 5px; border: 1px solid #05070b; border-top-color: #39414f;
+    background: linear-gradient(180deg, #2a3140 0%, #1c212c 45%, #141821 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .12),
+      inset 0 -2px 3px rgba(0, 0, 0, .45),
+      0 3px 0 #05070b,
+      0 5px 7px rgba(0, 0, 0, .55);
+    color: var(--fg-dim);
     font-family: var(--mono); font-size: 10.5px; letter-spacing: .6px; text-transform: uppercase;
   }
   .fn-btn .fn-key { display: block; font-size: 8px; color: var(--fg-faint); margin-bottom: 3px; }
-  .fn-btn .fn-key::before {
-    content: ""; display: inline-block; width: 4px; height: 4px; border-radius: 50%;
-    background: #1a2230; margin-right: 4px; vertical-align: 1px;
+  .fn-btn:active {
+    transform: translateY(3px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .08),
+      inset 0 2px 4px rgba(0, 0, 0, .5),
+      0 1px 0 #05070b;
   }
-  .fn-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line); }
   .fn-btn.on {
-    background: var(--accent); color: #05121f; border-color: var(--accent);
-    transform: translate(1px, 1px);
-    box-shadow: 1px 1px 0 var(--line), 0 0 9px var(--accent);
+    color: #05121f;
+    border-color: color-mix(in srgb, var(--accent) 45%, black);
+    border-top-color: color-mix(in srgb, var(--accent) 70%, white);
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--accent) 88%, white) 0%,
+      var(--accent) 50%,
+      color-mix(in srgb, var(--accent) 82%, black) 100%);
+    transform: translateY(2px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .35),
+      0 1px 0 #05070b,
+      0 0 13px color-mix(in srgb, var(--accent) 45%, transparent);
   }
-  .fn-btn.on .fn-key { color: #05121f; opacity: .65; }
-  .fn-btn.on .fn-key::before { background: #05121f; }
+  .fn-btn.on .fn-key { color: #05121f; opacity: .6; }
 
   /* One info panel at a time, picked by the function keys. */
   .scope-side { display: none; order: 4; border-top: 1px solid var(--line); }
