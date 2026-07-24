@@ -125,6 +125,20 @@ class HostStar(BaseModel):
     spectral_type: str | None = None
 
 
+class SkyPosition(BaseModel):
+    """Where the host star sits in Earth's sky (J2000), for the "go outside and look at
+    it" star chart. `naked_eye` uses the conventional dark-sky limit (V ≤ 6.5) — honest
+    wording on the page must say "under a dark sky", never promise city visibility. What
+    you would see is always the host STAR; the planet itself is never visible."""
+
+    ra_deg: float
+    dec_deg: float
+    constellation: str  # full IAU name, e.g. "Pegasus"
+    constellation_abbr: str  # 3-letter IAU code, e.g. "Peg"
+    v_mag: float | None = None  # system V magnitude (Archive sy_vmag); None if unmeasured
+    naked_eye: bool = False
+
+
 class ParamSources(BaseModel):
     """Per-parameter data origin, so the page can show exactly which numbers are real
     measurements, which we computed from other measurements, and which are archetype
@@ -228,6 +242,8 @@ class PlanetRecord(BaseModel):
     # instrument's image is appended, never substituted. The UI shows a per-telescope toggle.
     real_observations: list[RealObservation] = Field(default_factory=list)
     system: PlanetSystem | None = None
+    # Optional for back-compat: data releases generated before the sky chart lack it.
+    sky: SkyPosition | None = None
     meta: RecordMeta
 
 

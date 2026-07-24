@@ -31,6 +31,9 @@ _COLUMNS = (
     "st_rad",
     "st_spectype",
     "sy_dist",
+    "ra",
+    "dec",
+    "sy_vmag",
     "disc_method",
     "disc_year",
     "disc_facility",
@@ -55,6 +58,9 @@ class ArchiveRecord:
     disc_year: int | None
     disc_facility: str | None
     sy_dist: float | None = None  # distance from Earth, parsecs (system distance)
+    ra: float | None = None  # J2000 right ascension, degrees
+    dec: float | None = None  # J2000 declination, degrees
+    sy_vmag: float | None = None  # system V (Johnson) magnitude — how bright in our sky
 
     def equilibrium_temp_k(self, bond_albedo: float = 0.3) -> float | None:
         """Archive value if present, else compute from Teff, R_star and a.
@@ -117,6 +123,9 @@ def _row_to_record(row: dict) -> ArchiveRecord:
         st_rad=row.get("st_rad"),
         st_spectype=row.get("st_spectype"),
         sy_dist=row.get("sy_dist"),
+        ra=row.get("ra"),
+        dec=row.get("dec"),
+        sy_vmag=row.get("sy_vmag"),
         disc_method=row.get("disc_method"),
         disc_year=row.get("disc_year"),
         disc_facility=row.get("disc_facility"),

@@ -33,6 +33,7 @@ from pipeline.models import (
     ReconstructionError,
     ReconstructionModel,
     RecordMeta,
+    SkyPosition,
     SpectralCurve,
 )
 from pipeline.observations import observations_for
@@ -52,6 +53,7 @@ class PlanetInput:
     illuminant: Illuminant
     is_light_isolable: bool = True
     is_cgi_target: bool = False
+    sky: SkyPosition | None = None
 
 
 def obtain_band_samples(
@@ -218,6 +220,7 @@ def build_record(
         phase_colours=phase_colours,
         instrument_views=views,
         real_observations=observations_for(pin.id),
+        sky=pin.sky,
         meta=RecordMeta(
             generated_at=generated_at,
             pipeline_version=PIPELINE_VERSION,
