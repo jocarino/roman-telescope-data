@@ -115,7 +115,7 @@ class PlanetParams(BaseModel):
     distance_pc: float | None = None  # distance from Earth, parsecs
     # Model assumptions, surfaced for honesty ("modelled, not photographed").
     assumed_cloud_state: str
-    assumed_metallicity: float
+    assumed_metallicity: float | None = None  # None for rocky worlds (no meaningful metallicity)
     assumed_phase_angle_deg: float
     # Which spectrum engine produced the albedo: "parametric" | "cahoy" | "picaso".
     spectrum_source: str = "parametric"

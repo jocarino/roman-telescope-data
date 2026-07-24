@@ -26,7 +26,7 @@ from pipeline.spectrum.picaso_model import make_picaso
 class ChosenModel:
     provider: SpectrumProvider
     cloud_state: str
-    metallicity: float
+    metallicity: float | None
     phase_angle_deg: float
     source: str  # "parametric" | "cahoy" | "picaso"
 
