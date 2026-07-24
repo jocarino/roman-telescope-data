@@ -624,15 +624,6 @@ button.badge:active, a.badge:active { box-shadow: none; }
 }
 .peek-colour code { font-family: var(--mono); font-size: 13px; color: var(--fg); }
 .peek-colour .peek-step-sub { margin-top: 0; margin-left: auto; }
-.peek-foot {
-  margin: 12px 0 0; padding-top: 10px; border-top: 1px solid var(--line);
-  font-size: 11.5px; color: var(--fg-dim); display: flex; gap: 6px 14px;
-  flex-wrap: wrap; justify-content: space-between; align-items: baseline;
-}
-.peek-foot strong { color: var(--fg); }
-.peek-foot a {
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: .4px; text-transform: uppercase;
-}
 
 
 /* ---- Dossier: combined renders + colour + planet info card ---- */
