@@ -22,6 +22,7 @@
     "uniform vec3 pal[5];",
     "uniform float bandFreq, bandContrast, haze, brightness, light, dither, levels, rot;",
     "uniform float turb, warmCool, bandGain;",  // stylised-mode restyling (0 in classic)
+    "uniform float phase;",  // orbital phase angle in radians: 0 = fully lit, pi = backlit
     "uniform int pixel, outline;",
     "vec3 ramp(float t){",
     "  t = clamp(t,0.,1.)*4.;",
@@ -62,11 +63,22 @@
     "  float z = sqrt(1.0 - r2);",
     "  vec3 N = vec3(uv, z);",
     "  float lat = asin(clamp(uv.y,-1.,1.));",
-    // Near-full phase: single soft day/night term + limb darkening.
+    // Base shading: near-full phase, single soft day/night term + limb darkening. A set
+    // phase angle draws a day/night MASK over it (the terminator sweeping gibbous -> half ->
+    // crescent -> new, like Moon phases). The mask is schematic on purpose: a physically
+    // Lambert-shaded crescent renders near-invisible; the honest brightness number is shown
+    // in the phase readout instead.
     "  vec3 L = normalize(vec3(cos(light)*0.55, 0.28, 0.90));",
+    "  float nightF = 0.34;",
     "  float lit = smoothstep(-0.08, 0.42, dot(N, L));",
     "  float limb = pow(z, 0.30);",
-    "  float shade = (0.34 + 0.66*lit) * limb;",
+    "  if(phase > 0.001){",
+    "    vec3 Lp = normalize(vec3(sin(phase), 0.22, cos(phase)));",
+    "    float day = smoothstep(-0.03, 0.10, dot(N, Lp));",
+    "    lit = lit * day;",
+    "    nightF = mix(0.34, 0.05, clamp(phase*0.55, 0.0, 1.0));",
+    "  }",
+    "  float shade = (nightF + (1.0-nightF)*lit) * limb;",
     // Stylised: warp the belt phase and mottle the tone with turbulence (0 in classic).
     "  float wphase = 0.0, mottle = 0.0;",
     "  if(turb > 0.0){",
@@ -98,7 +110,12 @@
     "    col = clamp(col, 0.0, 1.0);",
     "  }",
     "  if(pixel==0){ col = mix(col, pal[4], rim*haze*0.4); }",  // smooth-only haze tint
-    "  if(outline==1 && r2>0.90){ col *= 0.35; }",
+    // Retro outline ring — but at crescent phases the lit sliver lives exactly on this rim,
+    // so exempt lit pixels when a phase is set (phase 0 keeps the classic full outline).
+    "  if(outline==1 && r2>0.90){",
+    "    float keepLit = (phase > 0.001) ? clamp(lit, 0.0, 1.0) : 0.0;",
+    "    col *= mix(0.35, 0.9, keepLit);",
+    "  }",
     "  gl_FragColor = vec4(col, 1.0);",
     "}",
   ].join("\n");
@@ -122,7 +139,7 @@
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     ["pal","bandFreq","bandContrast","haze","brightness","light","dither","levels","rot",
-     "turb","warmCool","bandGain","pixel","outline"]
+     "turb","warmCool","bandGain","phase","pixel","outline"]
       .forEach(function (n) { U[n] = gl.getUniformLocation(prog, n === "pal" ? "pal[0]" : n); });
     return true;
   }
@@ -178,6 +195,7 @@
     gl.uniform1f(U.warmCool, aug ? 1.0 : 0.0);
     gl.uniform1f(U.bandGain, aug ? 0.66 : 0.44);
     gl.uniform1f(U.light, opts.light == null ? 0.0 : opts.light);
+    gl.uniform1f(U.phase, opts.phase == null ? 0.0 : opts.phase);
     gl.uniform1i(U.pixel, pixel ? 1 : 0);
     // retro = fewer, bolder colour bands + outline; modern = more bands, no outline. Dither
     // amplitude is ~one posterization step so transitions read as clean pixel-art gradients.
