@@ -198,7 +198,10 @@
       </div></template>
     </div>
     <div class="scope-main">
-      <div class="scope-screen">{{ ctx.spectrum_svg|safe }}</div>
+      <div class="scope-screen">
+        <div class="spec-wide">{{ ctx.spectrum_svg|safe }}</div>
+        <div class="spec-compact">{{ ctx.spectrum_svg_compact|safe }}</div>
+      </div>
       <div class="scope-side">
         <div class="ro-ch ch1"><span class="sw"></span>CH1 FULL
           <code x-text="view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}'"></code></div>

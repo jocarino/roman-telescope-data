@@ -592,6 +592,8 @@ body::after {
 
 /* ---- Mobile-only chrome (function keys, caption expander): hidden on desktop ---- */
 .scope-fnrow, .desc-toggle { display: none; }
+/* Two scope faces are emitted; desktop shows the wide one, phones the compact one. */
+.spec-compact { display: none; }
 
 /* ---- Phones: compact stacked instrument + minimal gallery toolbar ---- */
 @media (max-width: 760px) {
@@ -619,13 +621,16 @@ body::after {
   .scope-model { display: none; }
   .scope-view { flex-wrap: wrap; justify-content: flex-end; }
 
-  /* Screen stacked directly above the knobs, then the function keys. */
+  /* Knobs on top, then the screen (compact face, legible labels), then function keys. */
   .scope-main { grid-template-columns: 1fr; min-height: 0; }
-  .scope-screen { order: 1; border-right: 0; border-bottom: 1px solid var(--line); }
   .scope-rail {
-    order: 2; flex-direction: row; flex-wrap: wrap; justify-content: space-evenly;
+    order: 1; flex-direction: row; flex-wrap: wrap; justify-content: space-evenly;
     gap: 8px 14px; padding: 12px 10px 14px; border-left: 0;
+    border-bottom: 1px solid var(--line);
   }
+  .scope-screen { order: 2; border-right: 0; }
+  .spec-wide { display: none; }
+  .spec-compact { display: block; }
   .knob-tag { flex-basis: 100%; margin-bottom: 2px; }
   .scope-fnrow { display: flex; order: 3; border-top: 1px solid var(--line); background: #0a0c11; }
   .fn-btn {

@@ -40,12 +40,17 @@ def _env() -> Environment:
 
 def _planet_ctx(rec: PlanetRecord) -> dict:
     view = rec.instrument_views[0]
-    svg = spectrum_svg(
+    args = dict(
         true_albedo=rec.spectrum.values,
         roman_recon=view.reconstruction.values,
         extrap_below_nm=view.reconstruction.extrapolated_below_nm,
     )
-    return {"record": rec, "spectrum_svg": svg}
+    # Two scope faces: wide for desktop, near-square for phones (CSS picks one).
+    return {
+        "record": rec,
+        "spectrum_svg": spectrum_svg(**args),
+        "spectrum_svg_compact": spectrum_svg(**args, compact=True),
+    }
 
 
 def _index_entry(rec: PlanetRecord) -> dict:
