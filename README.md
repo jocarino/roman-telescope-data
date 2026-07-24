@@ -43,6 +43,29 @@ htmx loads planet-detail fragments into a drawer; Alpine.js drives search / filt
 the true↔Roman toggle; palettes export as hex, CSS variables, or `.ase`. No backend, no build
 toolchain beyond Python.
 
+### Previewing several worktrees at once (`tools/exohub.py`)
+
+When two or more Claude Code sessions each serve their own `dist/`, it's easy to lose track of
+which port is which worktree. `exohub` fixes that — stdlib-only, no deps:
+
+```bash
+python tools/exohub.py serve --build   # serve THIS worktree on its stable port
+python tools/exohub.py dash            # live table: port -> worktree -> URL
+python tools/exohub.py ports           # the stable port each worktree gets
+python tools/exohub.py mprocs          # one labelled pane per worktree, in mprocs
+```
+
+- **Stable ports.** `main` always gets `8799`; every other worktree hashes its branch name to a
+  fixed slot in `8800–8889`, so a given worktree keeps the same port run to run.
+- **A branch badge on every page.** `serve` stamps a small `▟ <worktree> :<port>` badge (bottom-left,
+  a different accent per worktree) into each served page, so the *browser tab itself* tells you
+  which worktree you're looking at. Click it to hide.
+- **`dash`** scans listening ports and maps each back to its worktree by the server's working
+  directory, so it also identifies servers started the old way (`python -m http.server`); those
+  show `⚠ off-slot` since they aren't on the stable port.
+- **`mprocs`** writes a machine-specific `mprocs.yaml` (gitignored) and launches
+  [mprocs](https://github.com/pvolok/mprocs) with a `dash` pane plus one `serve` pane per worktree.
+
 ## Deploy (Dokploy / any static host)
 
 Multi-stage `Dockerfile`: a Python stage renders the site from the committed
