@@ -66,6 +66,7 @@ def _index_entry(rec: PlanetRecord) -> dict:
         "ptype": planet_type(
             rec.params.radius_r_earth, rec.params.mass_m_earth, rec.params.equilibrium_temp_k
         ),
+        "disc": rec.discovery.method,
         # For the card planet renders:
         "palette": [s.hex for s in rec.true_colour.palette],
         "radius": rec.params.radius_r_earth,

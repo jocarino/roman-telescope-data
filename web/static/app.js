@@ -9,6 +9,8 @@ document.addEventListener("alpine:init", () => {
     q: "",
     prov: "all",
     ptype: "all",
+    disc: "all",
+    distBand: "all",
     sort: "name",
     // Labels for the custom (retro) dropdowns.
     provLabels: {
@@ -20,6 +22,14 @@ document.addEventListener("alpine:init", () => {
       neptune: "Neptune-like", "gas-giant": "Gas giant", "hot-jupiter": "Hot Jupiter",
       unknown: "Unknown",
     },
+    // Distance bands (parsecs). id -> [label, maxExclusive]; the last band catches the rest.
+    distBands: [
+      ["all", "Any distance", Infinity],
+      ["near", "≤ 25 pc", 25],
+      ["mid", "25–100 pc", 100],
+      ["far", "100–500 pc", 500],
+      ["remote", "> 500 pc", Infinity],
+    ],
     sortLabels: {
       name: "Sort: name", temp: "Sort: hottest", lum: "Sort: brightest",
       dist: "Sort: nearest Earth", de: "Sort: colour lost to Roman",
@@ -91,6 +101,36 @@ document.addEventListener("alpine:init", () => {
       return [["all", this.typeLabels.all], ...order.filter((t) => present.has(t))
         .map((t) => [t, this.typeLabels[t]])];
     },
+    // Provenance dropdown: "all" + only the provenances present (declutters at scale, where
+    // it's nearly all "Modelled" but the handful of Roman targets are still worth finding).
+    provOptions() {
+      const present = new Set((window.PLANETS || []).map((x) => x.prov));
+      return Object.entries(this.provLabels).filter(([v]) => v === "all" || present.has(v));
+    },
+    // Whether the provenance filter is worth showing at all (more than one real provenance).
+    provWorthShowing() {
+      return new Set((window.PLANETS || []).map((x) => x.prov)).size > 1;
+    },
+    // Discovery-method dropdown: "all" + only the methods present, most-common first.
+    discOptions() {
+      const counts = {};
+      (window.PLANETS || []).forEach((p) => { if (p.disc) counts[p.disc] = (counts[p.disc] || 0) + 1; });
+      const methods = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+      return [["all", "All methods"], ...methods.map((m) => [m, m])];
+    },
+    // Which distance band a parsec value falls in (first matching band by ascending max).
+    _distBandOf(pc) {
+      if (pc == null) return "unknown";
+      for (const [id, , max] of this.distBands) {
+        if (id === "all" || id === "remote") continue;
+        if (pc <= max) return id;
+      }
+      return "remote";
+    },
+    distBandLabel() {
+      const b = this.distBands.find((x) => x[0] === this.distBand);
+      return b ? b[1] : "Any distance";
+    },
     setFamily(f) { this.family = this.family === f ? null : f; },
     setSort(v) { this.sort = v; this.nearId = null; },  // an explicit sort cancels similar-colour
     clearNear() { this.nearId = null; },
@@ -137,6 +177,8 @@ document.addEventListener("alpine:init", () => {
       let items = (window.PLANETS || []).filter((p) => {
         if (this.prov !== "all" && p.prov !== this.prov) return false;
         if (this.ptype !== "all" && p.ptype !== this.ptype) return false;
+        if (this.disc !== "all" && p.disc !== this.disc) return false;
+        if (this.distBand !== "all" && this._distBandOf(p.dist) !== this.distBand) return false;
         if (this.family && p.family !== this.family) return false;
         if (this.q) {
           const s = (p.name + " " + p.host).toLowerCase();
