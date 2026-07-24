@@ -174,6 +174,7 @@
       </span>
     </div>
     <div class="scope-info" x-show="info" x-cloak x-transition>
+      <button class="info-x" @click="info = null" aria-label="Close">&times;</button>
       <template x-if="info === 'view'"><div>
         <p><strong>Full spectrum</strong>: the colour computed from the complete 380–780&nbsp;nm
           reflected-light model.</p>
@@ -215,15 +216,35 @@
           <span class="tip" x-data="{ t: false }" @click.outside="t = false">
             <button class="info-btn xs" @click="t = !t" :class="t ? 'on' : ''"
               aria-label="What does &#916;E2000 mean?">i</button>
-            <span class="tip-body" :class="t ? 'open' : ''">How different the full-spectrum and Roman colours look to
+            <span class="tip-body" :class="t ? 'open' : ''">
+              <button class="info-x" @click="t = false" aria-label="Close">&times;</button>
+              How different the full-spectrum and Roman colours look to
               the eye: 0 = identical, above ~2 is a visible difference. Below
               {{ iview.reconstruction.extrapolated_below_nm|round|int }}&nbsp;nm Roman is
               blind, so the model holds the spectrum flat there.</span>
           </span></span>
           <b>{{ '%.1f'|format(iview.reconstruction_error.delta_e2000) }}</b></div>
-        <div class="ro-row"><span>Y BRIGHT</span>
+        <div class="ro-row"><span>Y BRIGHT
+          <span class="tip" x-data="{ t: false }" @click.outside="t = false">
+            <button class="info-btn xs" @click="t = !t" :class="t ? 'on' : ''"
+              aria-label="What does Y BRIGHT mean?">i</button>
+            <span class="tip-body" :class="t ? 'open' : ''">
+              <button class="info-x" @click="t = false" aria-label="Close">&times;</button>
+              How much light the planet's colour reflects overall (CIE luminance Y):
+              0 = pitch black, 1 = a perfect white reflector. Most planets are dim, so the
+              swatches are brightened for display.</span>
+          </span></span>
           <b x-text="(view === 'full' ? fullLum : romanLum).toFixed(3)"></b></div>
-        <div class="ro-row"><span>GAMUT</span>
+        <div class="ro-row"><span>GAMUT
+          <span class="tip" x-data="{ t: false }" @click.outside="t = false">
+            <button class="info-btn xs" @click="t = !t" :class="t ? 'on' : ''"
+              aria-label="What does GAMUT mean?">i</button>
+            <span class="tip-body" :class="t ? 'open' : ''">
+              <button class="info-x" @click="t = false" aria-label="Close">&times;</button>
+              Whether this colour fits in sRGB, the range screens can show. OOG = out of
+              gamut: the modelled colour is more saturated than a screen can display, so it
+              is clamped to the closest displayable colour.</span>
+          </span></span>
           <b x-text="(view === 'full' ? fullOog : romanOog) ? 'OOG' : 'OK'"></b></div>
       </div>
       <div class="scope-rail">
@@ -301,6 +322,7 @@
 
     <div class="dossier-help" x-show="help" x-cloak>
       <div class="assume">
+        <button class="info-x" @click="help = false" aria-label="Close">&times;</button>
         {% if rec.provenance in ['simulated-cgi', 'measured-cgi'] %}
         A Roman tech-demo target: the four-band view will be replaced by <strong>real measured
         data</strong> once Roman observes it, the only real colour this planet will ever have.
