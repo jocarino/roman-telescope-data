@@ -1121,6 +1121,11 @@ button.badge:active, a.badge:active { box-shadow: none; }
 
 /* Slots: each shows the current selection and opens the planet browser on click. */
 .cmp-slots { display: flex; align-items: stretch; gap: 12px; margin: 8px 0 24px; flex-wrap: wrap; }
+/* On narrow screens two side-by-side slots + vs + swap don't fit; stack them cleanly. */
+@media (max-width: 640px) {
+  .cmp-slots { flex-direction: column; align-items: stretch; gap: 10px; }
+  .cmp-slots .cmp-vs, .cmp-slots .cmp-swap { align-self: center; }
+}
 .cmp-slot {
   flex: 1; min-width: 200px; text-align: left; cursor: pointer; padding: 12px 14px;
   border: 1px solid var(--line); background: var(--bg-3); color: var(--fg-dim);
@@ -1198,7 +1203,6 @@ button.badge:active, a.badge:active { box-shadow: none; }
 .cmp-va { text-align: right; color: var(--fg); }
 .cmp-vb { text-align: left; color: var(--fg); }
 .cmp-mid { font-family: var(--pixel); font-size: 8px; letter-spacing: .3px; text-transform: uppercase; color: var(--fg-faint); white-space: nowrap; text-align: center; align-self: center; }
-.cmp-row.diff .cmp-va, .cmp-row.diff .cmp-vb { color: var(--accent); }
 @media (max-width: 560px) {
   .cmp-planet { width: 120px; height: 120px; }
   .cmp-mid { font-size: 7px; }
