@@ -139,6 +139,7 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
         build_id=build_id,
     )
     (out / "index.html").write_text(gallery_html)
+    (out / "how.html").write_text(env.get_template("how.html").render(build_id=build_id))
 
     page_tpl = env.get_template("planet.html")
     frag_tpl = env.get_template("fragments/planet_detail.html")
