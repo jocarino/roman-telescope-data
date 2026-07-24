@@ -36,7 +36,8 @@ _M_EARTH_PER_M_JUP = 317.8
 class AlbedoModel:
     albedo: SyntheticAlbedo
     cloud_state: str
-    assumed_metallicity: float
+    # None for rocky worlds (no meaningful atmosphere metallicity).
+    assumed_metallicity: float | None
     phase_angle_deg: float
 
 
@@ -69,7 +70,8 @@ def model_for(
 
     if radius < 1.6:
         # Rocky: grey, but albedo + Rayleigh drift a little with temperature so terrestrial
-        # worlds aren't all one colour.
+        # worlds aren't all one colour. Metallicity is left None — a rocky world has no H/He
+        # envelope, so the (giant) mass–metallicity relation is meaningless here and unused.
         cool = _sigmoid(-t, -350, 180)  # 1 for cooler rocky worlds
         return AlbedoModel(
             albedo=SyntheticAlbedo(
@@ -77,7 +79,7 @@ def model_for(
                 rayleigh=0.12 + 0.14 * cool, sodium=0.0, deep_albedo=0.10 + 0.05 * cool,
             ),
             cloud_state="rocky / thin atmosphere (grey)",
-            assumed_metallicity=round(z_rel, 1),
+            assumed_metallicity=None,
             phase_angle_deg=0.0,
         )
 
