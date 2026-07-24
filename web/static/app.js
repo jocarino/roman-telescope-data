@@ -183,7 +183,7 @@ document.addEventListener("alpine:init", () => {
     _makeCard(p) {
       const a = document.createElement("a");
       a.className = "card";
-      a.href = "/planet/" + p.id + ".html";
+      a.href = "/planet/" + p.id;
       a.setAttribute("data-peek", "/fragments/peek/" + p.id + ".html");
       const cv = document.createElement("canvas");
       cv.className = "card-planet" + (this.style === "retro" ? " pixel" : "");

@@ -53,7 +53,7 @@
       <div class="cmp-pal">
         <template x-for="h in a()?.palette || []" :key="h"><span :style="{ background: h }"></span></template>
       </div>
-      <a class="cmp-open" :href="'/planet/' + a()?.id + '.html'">open full page →</a>
+      <a class="cmp-open" :href="'/planet/' + a()?.id">open full page →</a>
     </div>
     <div class="cmp-col">
       <canvas class="cmp-planet pixel" x-ref="cB" width="256" height="256"
@@ -64,7 +64,7 @@
       <div class="cmp-pal">
         <template x-for="h in b()?.palette || []" :key="h"><span :style="{ background: h }"></span></template>
       </div>
-      <a class="cmp-open" :href="'/planet/' + b()?.id + '.html'">open full page →</a>
+      <a class="cmp-open" :href="'/planet/' + b()?.id">open full page →</a>
     </div>
   </div>
 

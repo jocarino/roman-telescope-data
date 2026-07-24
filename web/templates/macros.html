@@ -142,7 +142,7 @@
         <span class="system-lbl">SAME SYSTEM · {{ rec.host_star.name }}</span>
         <span class="system-links">
           {% for sib in rec.system.siblings %}
-          <a class="system-planet" href="/planet/{{ sib.id }}.html"
+          <a class="system-planet" href="/planet/{{ sib.id }}"
             title="{{ sib.name }}{% if sib.semi_major_axis_au %} · {{ '%.3g'|format(sib.semi_major_axis_au) }} AU{% endif %}">
             <span class="system-dot"{% if sib.base_hex %} style="background:{{ sib.base_hex }}"{% endif %}></span>{{ sib.name }}</a>
           {% endfor %}
@@ -381,7 +381,7 @@
         <a class="badge hex" href="/palettes/{{ rec.id }}.ase" download>.ASE</a>
         <a class="badge hex similar" href="/?near={{ rec.id }}"
           title="Find planets closest in colour to this one">◎ SIMILAR COLOURS</a>
-        <a class="badge hex similar" href="/compare.html?a={{ rec.id }}"
+        <a class="badge hex similar" href="/compare?a={{ rec.id }}"
           title="Compare this planet with another">⇄ COMPARE</a>
         <span class="copied" x-show="msg" x-text="msg" x-cloak></span>
       </div>
