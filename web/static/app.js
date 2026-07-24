@@ -342,22 +342,29 @@ document.addEventListener("alpine:init", () => {
   Alpine.data("compare", (cfg) => ({
     indexUrl: (cfg && cfg.indexUrl) || null,
     loaded: false,
+    all: [],
     byId: {},
-    names: [],
-    _byName: {},
     aId: null, bId: null,
-    aInput: "", bInput: "",
+    // Planet-browser state (the pop-over used to pick a planet for a slot).
+    pickerOpen: false, pickerSlot: null, pq: "", pfam: null, ptypeF: "all",
+    familyMetaC: {
+      teal: { n: "Teal", c: "#2fb8b8" }, azure: { n: "Azure", c: "#3ea5ff" },
+      blue: { n: "Blue", c: "#4a7fd0" }, periwinkle: { n: "Periwinkle", c: "#aab6e6" },
+      green: { n: "Green", c: "#4caf6a" }, gold: { n: "Gold", c: "#d9b44a" },
+      orange: { n: "Orange", c: "#e08a3c" }, red: { n: "Red", c: "#d0503c" },
+      pink: { n: "Pink", c: "#d06a9c" }, violet: { n: "Violet", c: "#9a7fd0" },
+      brown: { n: "Brown", c: "#8a6a4a" }, grey: { n: "Grey", c: "#9aa0ac" },
+      white: { n: "White", c: "#dfe3ea" }, dark: { n: "Dark", c: "#3a3f4a" },
+    },
+    familyOrderC: ["teal", "azure", "blue", "periwinkle", "green", "gold", "orange", "red", "pink", "violet", "brown", "grey", "white", "dark"],
     async init() {
       try {
         const res = await fetch(this.indexUrl);
-        const list = await res.json();
-        list.forEach((p) => { this.byId[p.id] = p; this._byName[p.name.toLowerCase()] = p.id; });
-        this.names = list.map((p) => p.name).sort((x, y) => x.localeCompare(y));
+        this.all = await res.json();
+        this.all.forEach((p) => { this.byId[p.id] = p; });
       } catch (e) { /* leave empty */ }
       const u = new URLSearchParams(location.search);
       this.aId = u.get("a"); this.bId = u.get("b");
-      if (this.a()) this.aInput = this.a().name;
-      if (this.b()) this.bInput = this.b().name;
       this.loaded = true;
       this.$watch("aId", () => this._render());
       this.$watch("bId", () => this._render());
@@ -365,15 +372,39 @@ document.addEventListener("alpine:init", () => {
     },
     a() { return this.byId[this.aId] || null; },
     b() { return this.byId[this.bId] || null; },
-    pick(side, input) {
-      const id = this._byName[(input || "").toLowerCase().trim()];
-      if (!id) return;
-      if (side === "a") this.aId = id; else this.bId = id;
+    // --- planet browser ---
+    openPicker(slot) {
+      this.pickerSlot = slot; this.pq = ""; this.pfam = null; this.ptypeF = "all";
+      this.pickerOpen = true;
+      this.$nextTick(() => this.$refs.pickerSearch && this.$refs.pickerSearch.focus());
     },
-    swap() {
-      [this.aId, this.bId] = [this.bId, this.aId];
-      [this.aInput, this.bInput] = [this.bInput, this.aInput];
+    closePicker() { this.pickerOpen = false; },
+    choose(id) {
+      if (this.pickerSlot === "a") this.aId = id; else this.bId = id;
+      this.closePicker();
     },
+    pickerFamilies() {
+      const present = new Set(this.all.map((p) => p.family));
+      return this.familyOrderC.filter((f) => present.has(f))
+        .map((f) => ({ id: f, name: this.familyMetaC[f].n, colour: this.familyMetaC[f].c }));
+    },
+    pickerTypes() {
+      const present = new Set(this.all.map((p) => p.ptype));
+      const order = ["rocky", "super-earth", "neptune", "gas-giant", "hot-jupiter"];
+      return [["all", "All"], ...order.filter((t) => present.has(t))
+        .map((t) => [t, this.typeLabelsC[t]])];
+    },
+    pickerResults() {
+      const q = this.pq.toLowerCase().trim();
+      return this.all.filter((p) => {
+        if (this.pfam && p.family !== this.pfam) return false;
+        if (this.ptypeF !== "all" && p.ptype !== this.ptypeF) return false;
+        if (q && !((p.name + " " + p.host).toLowerCase().includes(q))) return false;
+        return true;
+      }).sort((x, y) => x.name.localeCompare(y.name));
+    },
+    fmtLy(p) { return p.dist_ly != null ? p.dist_ly.toLocaleString() + " ly" : "distance n/a"; },
+    swap() { [this.aId, this.bId] = [this.bId, this.aId]; },
     _render() {
       const u = new URLSearchParams();
       if (this.aId) u.set("a", this.aId);
