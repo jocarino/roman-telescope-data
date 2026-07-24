@@ -1,7 +1,6 @@
-// Alpine components + the htmx->drawer bridge. No build step; plain ES.
+// Alpine components + the gallery hold-to-peek. No build step; plain ES.
 
 document.addEventListener("alpine:init", () => {
-  Alpine.store("drawer", { open: false });
 
   // Gallery: search / filter / sort over the inlined index (window.PLANETS).
   // Cards are server-rendered; this toggles their visibility and CSS `order`.
@@ -10,6 +9,7 @@ document.addEventListener("alpine:init", () => {
     prov: "all",
     sort: "name",
     hue: "all",
+    scrolled: false,  // page scrolled past the header: toolbar is stuck, TOP button shows
     // Labels for the custom (retro) dropdowns.
     provLabels: {
       all: "All", model: "Modelled", "simulated-cgi": "Roman: simulated",
@@ -251,15 +251,9 @@ document.addEventListener("alpine:init", () => {
   }));
 });
 
-// When a detail fragment lands in the drawer, open it.
-document.addEventListener("htmx:afterSwap", (e) => {
-  if (e.detail && e.detail.target && e.detail.target.id === "drawer-body") {
-    if (window.Alpine) Alpine.store("drawer").open = true;
-  }
-});
-
 // Card interaction: a normal click/tap navigates to the full planet page (the <a href>);
-// a long-press (~450ms, held still) opens the side sheet instead. Works with mouse + touch.
+// press-and-HOLD (~450ms, held still) shows a lightweight peek (name, caption, plot) that
+// stays up only while the press is held and vanishes on release. Works with mouse + touch.
 //
 // Robustness: the click decision is DURATION-based and only ever cancels navigation for a
 // genuine long, still press on the same card. Every short/normal click falls through to the
@@ -267,13 +261,25 @@ document.addEventListener("htmx:afterSwap", (e) => {
 (function () {
   var LP_MS = 450, MOVE_TOL = 12;
   var downCard = null, downAt = 0, sx = 0, sy = 0, moved = false, timer = null;
+  var cache = {};  // peek url -> Promise<html>; fragments are static, cache for the session
 
-  function openDrawer(card) {
-    var frag = card.getAttribute("data-fragment");
-    if (!frag || !window.htmx) return;
-    // Cache-bust so the drawer always reflects the current build (avoids stale fragments).
-    window.htmx.ajax("GET", frag + "?_=" + Date.now(), "#drawer-body");
-    if (window.Alpine) window.Alpine.store("drawer").open = true;
+  function fetchPeek(url) {
+    if (!url) return null;
+    if (!cache[url]) cache[url] = fetch(url).then(function (r) { return r.text(); });
+    return cache[url];
+  }
+  function showPeek(card) {
+    var peek = document.getElementById("peek"), body = document.getElementById("peek-body");
+    var p = peek && fetchPeek(card.getAttribute("data-peek"));
+    if (!p) return;
+    p.then(function (html) {
+      // Only if this press is still being held on the same card.
+      if (downCard === card) { body.innerHTML = html; peek.classList.add("on"); }
+    });
+  }
+  function hidePeek() {
+    var peek = document.getElementById("peek");
+    if (peek) peek.classList.remove("on");
   }
 
   var pending = null;  // one-shot {card,longpress} set on release, consumed by the next click
@@ -282,8 +288,10 @@ document.addEventListener("htmx:afterSwap", (e) => {
     var card = e.target.closest && e.target.closest("a.card");
     downCard = card; downAt = Date.now(); moved = false; sx = e.clientX; sy = e.clientY;
     clearTimeout(timer);
-    // Open at the threshold for responsiveness while still holding.
-    if (card) timer = setTimeout(function () { if (!moved && downCard === card) openDrawer(card); }, LP_MS);
+    if (card) {
+      fetchPeek(card.getAttribute("data-peek"));  // warm the cache during the press
+      timer = setTimeout(function () { if (!moved && downCard === card) showPeek(card); }, LP_MS);
+    }
   }, true);
   document.addEventListener("pointermove", function (e) {
     if (downCard && (Math.abs(e.clientX - sx) > MOVE_TOL || Math.abs(e.clientY - sy) > MOVE_TOL)) {
@@ -291,20 +299,21 @@ document.addEventListener("htmx:afterSwap", (e) => {
     }
   }, true);
   document.addEventListener("pointerup", function () {
-    clearTimeout(timer);
+    clearTimeout(timer); hidePeek();
     if (downCard) pending = { card: downCard, longpress: !moved && Date.now() - downAt >= LP_MS };
     downCard = null;
   }, true);
-  document.addEventListener("pointercancel", function () { downCard = null; clearTimeout(timer); }, true);
+  document.addEventListener("pointercancel", function () {
+    downCard = null; clearTimeout(timer); hidePeek();
+  }, true);
 
-  // Only a click that immediately follows a long, still press cancels navigation. Any other
-  // click (short press, keyboard-activated, synthetic) has no pending long-press -> navigates.
+  // Only a click that immediately follows a long, still press cancels navigation (the user
+  // was peeking, not clicking). Any other click has no pending long-press -> navigates.
   document.addEventListener("click", function (e) {
     var card = e.target.closest && e.target.closest("a.card");
     var p = pending; pending = null;
     if (card && p && p.card === card && p.longpress) {
       e.preventDefault(); e.stopPropagation();
-      openDrawer(card);
     }
   }, true);
   document.addEventListener("contextmenu", function (e) {

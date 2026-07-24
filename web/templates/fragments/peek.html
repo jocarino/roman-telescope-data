@@ -1,0 +1,11 @@
+{# Hold-to-peek card: just the planet's identity, honesty caption and the spectrum plot.
+   Deliberately much lighter than the planet page (which a normal tap navigates to). #}
+{%- set rec = ctx.record -%}
+<div class="peek-name">{{ rec.name }}</div>
+<div class="peek-host">{{ rec.host_star.name }}
+  {%- if rec.host_star.spectral_type %} · {{ rec.host_star.spectral_type }}{% endif -%}
+  {%- if rec.host_star.teff_k %} · {{ rec.host_star.teff_k|round|int }} K{% endif -%}
+</div>
+<p class="peek-desc">Modelled from the complete reflected-light spectrum (380–780 nm):
+  a physics prediction, not a photograph.</p>
+<div class="peek-screen">{{ ctx.spectrum_svg_compact|safe }}</div>

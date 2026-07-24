@@ -95,6 +95,7 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
         shutil.rmtree(out)
     (out / "planet").mkdir(parents=True)
     (out / "fragments" / "planet").mkdir(parents=True)
+    (out / "fragments" / "peek").mkdir(parents=True)
     (out / "palettes").mkdir(parents=True)
 
     contexts = [_planet_ctx(r) for r in records]
@@ -122,10 +123,12 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
 
     page_tpl = env.get_template("planet.html")
     frag_tpl = env.get_template("fragments/planet_detail.html")
+    peek_tpl = env.get_template("fragments/peek.html")
     for ctx in contexts:
         pid = ctx["record"].id
         (out / "planet" / f"{pid}.html").write_text(page_tpl.render(ctx=ctx, build_id=build_id))
         (out / "fragments" / "planet" / f"{pid}.html").write_text(frag_tpl.render(ctx=ctx))
+        (out / "fragments" / "peek" / f"{pid}.html").write_text(peek_tpl.render(ctx=ctx))
 
     shutil.copytree(_STATIC, out / "static")
     return out

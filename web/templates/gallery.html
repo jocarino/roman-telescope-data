@@ -13,12 +13,14 @@
     spectrum) via CIE 1931 colour matching. Every planet is shown two ways: the full modelled
     spectrum, and what the Roman Coronagraph would recover from just four bands. <strong>Both are
     modelled predictions, not photographs</strong>. For Roman's ~dozen tech-demo targets, the
-    four-band view will one day be replaced by real measured data.
+    four-band view will one day be replaced by real measured data. Planet and star data:
+    <a href="https://exoplanetarchive.ipac.caltech.edu/" target="_blank" rel="noopener">NASA
+    Exoplanet Archive</a>.
   </p>
 </div>
 
-<div x-data="gallery()">
-  <div class="controls">
+<div x-data="gallery()" @scroll.window.passive="scrolled = window.scrollY > 160">
+  <div class="controls" :class="scrolled ? 'stuck' : ''">
     {# The main filter: by the planet's actual colour family. #}
     <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
       @click.outside="open=false">
@@ -160,7 +162,7 @@
   <div class="grid" x-init="$nextTick(() => renderCards())">
     {% for p in planets %}
     <a class="card" href="/planet/{{ p.record.id }}.html"
-       data-fragment="/fragments/planet/{{ p.record.id }}.html"
+       data-peek="/fragments/peek/{{ p.record.id }}.html"
        x-show="show('{{ p.record.id }}')" :style="{ order: order('{{ p.record.id }}') }">
       <canvas class="card-planet" data-id="{{ p.record.id }}" width="256" height="256"
         aria-label="{{ p.record.name }} render"></canvas>
@@ -172,17 +174,15 @@
     </a>
     {% endfor %}
   </div>
+
+  <button class="to-top" x-show="scrolled" x-cloak
+    @click="window.scrollTo({ top: 0, behavior: 'smooth' })"
+    aria-label="Scroll back to the top">▲ TOP</button>
 </div>
 
-{# Slide-in drawer for htmx-loaded detail (full pages exist too, for direct links). #}
-<div class="drawer" x-data :class="$store.drawer.open ? 'open' : ''"
-     @keydown.escape.window="$store.drawer.open=false">
-  <div class="drawer-backdrop" @click="$store.drawer.open=false"></div>
-  <aside class="drawer-panel">
-    <button class="drawer-close" @click="$store.drawer.open=false" aria-label="Close">×</button>
-    <div id="drawer-body"></div>
-  </aside>
-</div>
+{# Hold-to-peek overlay: appears while a card is long-pressed, gone on release.
+   pointer-events: none throughout, so the release still lands on the card underneath. #}
+<div class="peek" id="peek" aria-hidden="true"><div class="peek-box" id="peek-body"></div></div>
 
 <script>window.PLANETS = {{ index_json|safe }};</script>
 {% endblock %}

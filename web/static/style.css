@@ -83,7 +83,21 @@ a:hover { text-decoration: underline; }
 .stat .l { font-size: 12px; color: var(--fg-dim); }
 
 /* Controls */
-.controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; }
+/* Sticky so the filters stay reachable while scrolling the (long) planet list. */
+.controls {
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 20px;
+  position: sticky; top: 0; z-index: 30; background: #000; padding: 10px 0;
+}
+.controls.stuck { border-bottom: 1px solid var(--line); }
+
+/* Quick way back to the toolbar once it is off past the fold. */
+.to-top {
+  position: fixed; right: 16px; bottom: 16px; z-index: 45; cursor: pointer;
+  background: var(--bg-3); border: 1px solid var(--accent); color: var(--accent);
+  font-family: var(--mono); font-size: 10px; letter-spacing: .5px; padding: 10px 12px;
+  box-shadow: 3px 3px 0 var(--line);
+}
+.to-top:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--line); }
 .controls input, .controls select {
   background: var(--bg-2); border: 1px solid var(--line); color: var(--fg);
   border-radius: 9px; padding: 9px 12px; font-size: 14px;
@@ -133,7 +147,6 @@ a:hover { text-decoration: underline; }
 .toggle, .toggle button, .segmented, .segmented button { border-radius: 0; }
 .toggle button, .segmented button { font-size: 9.5px; letter-spacing: .4px; padding: 8px 12px; }
 .controls input, .controls select { border-radius: 0; }
-.drawer-close { border-radius: 0; }
 .detail-swatch { border-radius: 0; }  /* square in retro */
 .count { font-size: 11px; }
 
@@ -219,7 +232,7 @@ canvas.detail-hero:not(.pixel) { border-radius: 50%; }
 /* Pixel-y dashed dividers + tactile button press */
 .params td { border-bottom-style: dashed; }
 .toggle button:active, .segmented button:active, .badge:active,
-a.badge:active, .drawer-close:active { transform: translateY(1px); }
+a.badge:active { transform: translateY(1px); }
 .toggle button, .segmented button, .badge { transition: transform .04s; }
 
 /* ---- Accent theme + switcher (retro palettes) ---- */
@@ -439,8 +452,6 @@ body::after {
 .back:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--line); }
 /* Below the width where the centred content leaves a gutter, fall back to in-flow. */
 @media (max-width: 1439px) { .back { position: static; display: inline-block; margin: 4px 0 16px; } }
-/* In the slide-in drawer the panel has its own close button — no back link needed. */
-#drawer-body .back { display: none; }
 .detail-head { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; margin: 12px 0 22px; }
 .detail-title { flex: 1 1 340px; min-width: 280px; }
 /* Reserve a stable height so flipping the Source knob (short modelled caption <-> longer
@@ -511,23 +522,25 @@ body::after {
 .foot { margin-top: 40px; color: var(--fg-faint); font-size: 12px; }
 .copied { color: #86e0aa; font-size: 12px; align-self: center; }
 
-/* Drawer */
-.drawer { position: fixed; inset: 0; z-index: 50; pointer-events: none; visibility: hidden; }
-.drawer.open { pointer-events: auto; visibility: visible; }
-.drawer-backdrop { position: absolute; inset: 0; background: rgba(4, 6, 10, 0.6);
-  opacity: 0; transition: opacity .18s; }
-.drawer.open .drawer-backdrop { opacity: 1; }
-.drawer-panel {
-  position: absolute; top: 0; right: 0; height: 100%; width: min(760px, 94vw);
-  background: var(--bg); border-left: 1px solid var(--line); box-shadow: var(--shadow);
-  overflow-y: auto; padding: 24px 26px 60px; transform: translateX(100%);
-  transition: transform .22s cubic-bezier(.2,.7,.2,1);
+/* Hold-to-peek overlay (gallery): up only while a card is pressed, gone on release. */
+.peek {
+  position: fixed; inset: 0; z-index: 60; display: none; align-items: center;
+  justify-content: center; padding: 20px; background: rgba(2, 5, 10, .82);
+  pointer-events: none;  /* the release must land on the page, not the overlay */
 }
-.drawer.open .drawer-panel { transform: translateX(0); }
-.drawer-close {
-  position: sticky; top: 0; float: right; background: var(--bg-3); border: 1px solid var(--line);
-  color: var(--fg); border-radius: 0; width: 34px; height: 34px; font-size: 20px; cursor: pointer;
+.peek.on { display: flex; }
+.peek-box {
+  width: min(480px, 94vw); background: var(--bg-3); border: 1px solid var(--accent);
+  box-shadow: 6px 6px 0 var(--line); padding: 16px 16px 14px;
 }
+.peek-name {
+  font-family: var(--pixel); -webkit-font-smoothing: none; font-smooth: never;
+  font-size: 14px; margin-bottom: 5px;
+}
+.peek-host { font-family: var(--mono); font-size: 11px; color: var(--fg-dim); }
+.peek-desc { font-size: 12px; color: var(--fg-dim); line-height: 1.5; margin: 8px 0 10px; }
+.peek-screen { background: #04070c; border: 1px solid var(--line); padding: 8px; }
+.peek-screen .spectrum { display: block; width: 100%; height: auto; }
 
 
 /* ---- Dossier: combined renders + colour + planet info card ---- */
@@ -621,6 +634,8 @@ body::after {
   /* Only the mobile spacer stretches; the desktop one would split the slack and
      leave search + hamburger floating mid-row instead of flush right. */
   .controls > .spacer:not(.m-spacer) { display: none; }
+  /* On phones the count is a second row; drop it while stuck so the bar stays slim. */
+  .controls.stuck .count { display: none; }
   /* The hamburger is the rightmost control, so its menu hangs left from it. */
   .m-menu { min-width: 232px; left: auto; right: 0; }
   .m-menu .dd-head { border-top: 1px solid var(--line); }
