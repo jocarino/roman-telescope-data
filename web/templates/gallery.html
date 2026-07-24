@@ -4,9 +4,9 @@
 <div x-data="{ intro: false }">
   <div class="site-head">
     <h1>Exoplanet Palette</h1>
-    <span class="tagline">the colour scheme of every known exoplanet, derived from physics</span>
-    <button class="info-btn sm" @click="intro = !intro" :class="intro ? 'on' : ''"
-      aria-label="How these colours are made" title="How these colours are made">i</button>
+    <span class="tagline">the colour scheme of every known exoplanet, derived from physics
+      <button class="info-btn sm" @click="intro = !intro" :class="intro ? 'on' : ''"
+        aria-label="How these colours are made" title="How these colours are made">i</button></span>
   </div>
   <p class="subhead" x-show="intro" x-cloak>
     Each planet's colour is computed from its reflected-light spectrum (albedo model × host-star
@@ -19,17 +19,39 @@
 
 <div x-data="gallery()">
   <div class="controls">
+    {# The main filter: by the planet's actual colour family. #}
     <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
       @click.outside="open=false">
       <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
-        :class="prov !== 'all' ? 'active' : ''" :title="provLabels[prov]"
-        aria-label="Filter by provenance">
+        :class="hue !== 'all' ? 'active' : ''" :title="hueLabels[hue]"
+        aria-label="Filter by colour">
         <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
           <path d="M2 3.5H14L9.5 8.5V13L6.5 14.5V8.5L2 3.5Z" fill="currentColor"/>
         </svg>
       </button>
       <div class="dd-menu" x-show="open" x-cloak>
-        <div class="dd-head">Provenance<span class="dd-sub">how real the colour is</span></div>
+        <div class="dd-head">Colour<span class="dd-sub">filter by palette family</span></div>
+        <template x-for="[val, label] in Object.entries(hueLabels)" :key="val">
+          <button :class="hue === val ? 'on' : ''" @click="hue = val; open = false">
+            <i class="hue-chip" :style="hueSwatch[val] ? 'background:' + hueSwatch[val] : ''"
+              :class="val === 'all' ? 'rainbow' : ''"></i><span x-text="label"></span>
+          </button>
+        </template>
+      </div>
+    </div>
+    {# How real the colour is (modelled / simulated / measured); on mobile it lives in the hamburger. #}
+    <div class="dropdown m-hide" x-data="{ open: false }" @keydown.escape="open=false"
+      @click.outside="open=false">
+      <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
+        :class="prov !== 'all' ? 'active' : ''" :title="provLabels[prov]"
+        aria-label="Filter by how real the colour is">
+        <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M8 2.5 A5.5 5.5 0 0 1 8 13.5 Z" fill="currentColor"/>
+        </svg>
+      </button>
+      <div class="dd-menu" x-show="open" x-cloak>
+        <div class="dd-head">How real<span class="dd-sub">modelled vs measured colour</span></div>
         <template x-for="[val, label] in Object.entries(provLabels)" :key="val">
           <button :class="prov === val ? 'on' : ''" @click="prov = val; open = false"
             x-text="label"></button>
@@ -77,18 +99,32 @@
         </div>
       </div>
     </div>
-    {# Mobile-only hamburger: everything except the main (provenance) filter lives here. #}
+    <div class="spacer m-spacer"></div>
+    <!-- The magnifier IS the input: collapsed to icon width, it grows rightward on focus. -->
+    <label class="search">
+      <svg class="search-mag" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+        <circle cx="7" cy="7" r="4.3" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <input type="search" x-model="q" placeholder="Search planet or star…"
+        aria-label="Search planets">
+    </label>
+    {# Mobile-only hamburger: everything except the colour filter + search lives here. #}
     <div class="dropdown m-only" x-data="{ open: false }" @keydown.escape="open=false"
       @click.outside="open=false">
       <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
-        :class="sort !== 'name' ? 'active' : ''" aria-label="Sort and display options"
-        title="Sort and display options">
+        :class="sort !== 'name' || prov !== 'all' ? 'active' : ''"
+        aria-label="Filter, sort and display options" title="Filter, sort and display options">
         <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
           <path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" stroke-width="1.6"
             fill="none" stroke-linecap="round"/>
         </svg>
       </button>
       <div class="dd-menu m-menu" x-show="open" x-cloak>
+        <div class="dd-head">How real<span class="dd-sub">modelled vs measured colour</span></div>
+        <template x-for="[val, label] in Object.entries(provLabels)" :key="'p' + val">
+          <button :class="prov === val ? 'on' : ''" @click="prov = val" x-text="label"></button>
+        </template>
         <div class="dd-head">Sort by</div>
         <template x-for="[val, label] in Object.entries(sortLabels)" :key="val">
           <button :class="sort === val ? 'on' : ''" @click="sort = val"
@@ -117,15 +153,6 @@
         </div>
       </div>
     </div>
-    <!-- The magnifier IS the input: collapsed to icon width, it grows rightward on focus. -->
-    <label class="search">
-      <svg class="search-mag" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-        <circle cx="7" cy="7" r="4.3" fill="none" stroke="currentColor" stroke-width="1.6"/>
-        <path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-      </svg>
-      <input type="search" x-model="q" placeholder="Search planet or star…"
-        aria-label="Search planets">
-    </label>
     <div class="spacer"></div>
     <span class="count"><span x-text="count()"></span> shown · long-press for a quick peek</span>
   </div>
