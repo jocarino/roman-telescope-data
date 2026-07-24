@@ -47,14 +47,16 @@ document.addEventListener("alpine:init", () => {
     family: null,   // selected colour-family chip (e.g. "blue"), or null for all
     nearId: null,   // "similar colour to this planet" reference id, or null
     familyMeta: {
-      blue: { n: "Blue", c: "#4a7fd0" }, teal: { n: "Teal", c: "#2fb8b8" },
+      blue: { n: "Blue", c: "#4a7fd0" }, periwinkle: { n: "Periwinkle", c: "#aab6e6" },
+      teal: { n: "Teal", c: "#2fb8b8" },
       green: { n: "Green", c: "#4caf6a" }, gold: { n: "Gold", c: "#d9b44a" },
       orange: { n: "Orange", c: "#e08a3c" }, red: { n: "Red", c: "#d0503c" },
-      pink: { n: "Pink", c: "#d06a9c" }, brown: { n: "Brown", c: "#8a6a4a" },
+      pink: { n: "Pink", c: "#d06a9c" }, violet: { n: "Violet", c: "#9a7fd0" },
+      brown: { n: "Brown", c: "#8a6a4a" },
       grey: { n: "Grey", c: "#9aa0ac" }, white: { n: "White", c: "#dfe3ea" },
       dark: { n: "Dark", c: "#3a3f4a" },
     },
-    familyOrder: ["blue", "teal", "green", "gold", "orange", "red", "pink", "brown", "grey", "white", "dark"],
+    familyOrder: ["blue", "periwinkle", "teal", "green", "gold", "orange", "red", "pink", "violet", "brown", "grey", "white", "dark"],
     // Card render style: "smooth" (sphere) or "retro" (pixel). Persisted, default pixel.
     style: localStorage.getItem("planetStyle") || "retro",
     // Render fidelity: "classic" (physics-honest) or "stylised" (restyled for looks). Global, persisted.
