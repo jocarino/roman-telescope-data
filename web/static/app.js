@@ -8,11 +8,17 @@ document.addEventListener("alpine:init", () => {
   Alpine.data("gallery", () => ({
     q: "",
     prov: "all",
+    ptype: "all",
     sort: "name",
     // Labels for the custom (retro) dropdowns.
     provLabels: {
       all: "All", model: "Modelled", "simulated-cgi": "Roman: simulated",
       "measured-cgi": "Roman: measured", "model-microlensing": "Microlensing",
+    },
+    typeLabels: {
+      all: "All types", rocky: "Rocky", "super-earth": "Super-Earth",
+      neptune: "Neptune-like", "gas-giant": "Gas giant", "hot-jupiter": "Hot Jupiter",
+      unknown: "Unknown",
     },
     sortLabels: {
       name: "Sort: name", temp: "Sort: hottest", lum: "Sort: brightest",
@@ -78,6 +84,13 @@ document.addEventListener("alpine:init", () => {
       return this.familyOrder.filter((f) => present.has(f))
         .map((f) => ({ id: f, name: this.familyMeta[f].n, colour: this.familyMeta[f].c }));
     },
+    // Type dropdown options: always "all", then only the types actually present in the data.
+    typeOptions() {
+      const present = new Set((window.PLANETS || []).map((x) => x.ptype));
+      const order = ["rocky", "super-earth", "neptune", "gas-giant", "hot-jupiter", "unknown"];
+      return [["all", this.typeLabels.all], ...order.filter((t) => present.has(t))
+        .map((t) => [t, this.typeLabels[t]])];
+    },
     setFamily(f) { this.family = this.family === f ? null : f; },
     setSort(v) { this.sort = v; this.nearId = null; },  // an explicit sort cancels similar-colour
     clearNear() { this.nearId = null; },
@@ -123,6 +136,7 @@ document.addEventListener("alpine:init", () => {
     get view() {
       let items = (window.PLANETS || []).filter((p) => {
         if (this.prov !== "all" && p.prov !== this.prov) return false;
+        if (this.ptype !== "all" && p.ptype !== this.ptype) return false;
         if (this.family && p.family !== this.family) return false;
         if (this.q) {
           const s = (p.name + " " + p.host).toLowerCase();

@@ -65,6 +65,24 @@
     <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
       @click.outside="open=false">
       <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
+        :class="ptype !== 'all' ? 'active' : ''" :title="typeLabels[ptype]"
+        aria-label="Filter by planet type">
+        <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/>
+          <circle cx="8" cy="8" r="2" fill="currentColor"/>
+        </svg>
+      </button>
+      <div class="dd-menu" x-show="open" x-cloak>
+        <div class="dd-head">Planet type<span class="dd-sub">by size + temperature</span></div>
+        <template x-for="[val, label] in typeOptions()" :key="val">
+          <button :class="ptype === val ? 'on' : ''" @click="ptype = val; open = false"
+            x-text="label"></button>
+        </template>
+      </div>
+    </div>
+    <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
+      @click.outside="open=false">
+      <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
         :class="sort !== 'name' ? 'active' : ''" :title="sortLabels[sort]" aria-label="Sort planets">
         <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
           <path d="M3 4h10M3 8h6.5M3 12h3.5" stroke="currentColor" stroke-width="1.6"
