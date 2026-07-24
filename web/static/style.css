@@ -430,8 +430,8 @@ button.badge:active, a.badge:active { box-shadow: none; }
 .fic-glyph { font-size: 13px; color: #14e0e6; line-height: 1; flex: none; }
 .fic-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .fic-txt {
-  position: relative; font-family: var(--pixel); font-size: 8px; letter-spacing: .12em;
-  text-transform: uppercase; color: inherit; -webkit-font-smoothing: none; font-smooth: never;
+  position: relative; font-family: var(--mono); font-size: 11.5px; font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase; color: inherit;
 }
 /* Two coloured ghosts of the label, stacked exactly over it: idle-invisible, split on hover,
    torn apart while active. */
@@ -444,7 +444,7 @@ button.badge:active, a.badge:active { box-shadow: none; }
 .fic-toggle:hover .fic-txt::before { opacity: .75; transform: translateX(-1.6px); }
 .fic-toggle:hover .fic-txt::after  { opacity: .75; transform: translateX(1.6px); }
 .fic-sub {
-  font-family: var(--mono); font-size: 9px; letter-spacing: .04em; color: var(--fg-faint);
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .03em; color: var(--fg-faint);
   text-transform: none;
 }
 .fic-count {
