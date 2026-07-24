@@ -12,7 +12,7 @@ from __future__ import annotations
 import re
 
 from pipeline.emit.build import PlanetInput
-from pipeline.fetch.archive import ArchiveRecord, fetch_by_names
+from pipeline.fetch.archive import ArchiveRecord, fetch_bulk, fetch_by_names
 from pipeline.illuminant.blackbody import BlackbodyStar
 from pipeline.models import Discovery, HostStar, ParamSources, PlanetParams
 from pipeline.spectrum.router import choose_model
@@ -201,8 +201,8 @@ def _to_input(rec: ArchiveRecord) -> PlanetInput:
     )
 
 
-def catalog_planets(names: list[str] | None = None, *, use_cache: bool = True) -> list[PlanetInput]:
-    records = fetch_by_names(names or CURATED_NAMES, use_cache=use_cache)
+def _apply_gate(records: list[ArchiveRecord], *, verbose: bool = True) -> list[PlanetInput]:
+    """Run each fetched record through the completeness gate; keep passers, log exclusions."""
     kept: list[PlanetInput] = []
     excluded: list[tuple[str, str]] = []
     for rec in records:
@@ -211,8 +211,37 @@ def catalog_planets(names: list[str] | None = None, *, use_cache: bool = True) -
             excluded.append((rec.pl_name, reason or "incomplete"))
             continue
         kept.append(_to_input(rec))
-    if excluded:
+    if excluded and verbose:
         print(f"Completeness gate: excluded {len(excluded)} of {len(records)} planet(s):")
+        # At scale the per-planet list is noise; summarise by reason, show a few examples.
+        by_reason: dict[str, list[str]] = {}
         for name, reason in excluded:
-            print(f"  - {name}: {reason}")
+            by_reason.setdefault(reason, []).append(name)
+        for reason, names in sorted(by_reason.items(), key=lambda kv: -len(kv[1])):
+            sample = ", ".join(names[:4]) + (" …" if len(names) > 4 else "")
+            print(f"  - {len(names):>3}× {reason}  ({sample})")
+    return kept
+
+
+def catalog_planets(names: list[str] | None = None, *, use_cache: bool = True) -> list[PlanetInput]:
+    """The curated set (or an explicit name list), passed through the completeness gate."""
+    records = fetch_by_names(names or CURATED_NAMES, use_cache=use_cache)
+    return _apply_gate(records)
+
+
+def catalog_bulk(limit: int, *, use_cache: bool = True) -> list[PlanetInput]:
+    """A scaled catalog: the curated planets (always pinned) plus the nearest well-characterised
+    planets from the Archive, up to `limit` total, de-duplicated by planet id and gate-checked."""
+    curated = fetch_by_names(CURATED_NAMES, use_cache=use_cache)
+    bulk = fetch_bulk(limit, use_cache=use_cache)
+    seen: set[str] = set()
+    merged: list[ArchiveRecord] = []
+    for rec in [*curated, *bulk]:  # curated first so pinned planets always win a dedupe
+        key = rec.pl_name
+        if key in seen:
+            continue
+        seen.add(key)
+        merged.append(rec)
+    kept = _apply_gate(merged)
+    print(f"Scaled catalog: {len(kept)} planets kept (curated pinned + nearest {limit}).")
     return kept
