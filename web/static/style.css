@@ -236,22 +236,30 @@ a.badge:active { transform: translateY(1px); }
 .toggle button, .segmented button, .badge { transition: transform .04s; }
 
 /* ---- Accent theme + switcher (retro palettes) ---- */
-:root[data-accent="blue"]    { --accent: #7cc4ff; }  /* default cobalt */
-:root[data-accent="mustard"] { --accent: #e3b23c; }  /* gold */
-:root[data-accent="green"]   { --accent: #3bf07a; }  /* phosphor CRT */
-:root[data-accent="amber"]   { --accent: #ffb000; }  /* amber terminal */
-:root[data-accent="pink"]    { --accent: #ff5fa2; }  /* synthwave */
-:root[data-accent="cyan"]    { --accent: #37e6d6; }  /* teletext */
-:root[data-accent="violet"]  { --accent: #b98cff; }  /* vaporwave */
+:root[data-accent="blue"]     { --accent: #7cc4ff; }  /* default cobalt */
+:root[data-accent="electric"] { --accent: #4d8dff; }  /* deep electric blue */
+:root[data-accent="ice"]      { --accent: #b8e4ff; }  /* pale glacier blue */
+:root[data-accent="tron"]     { --accent: #23c4e8; }  /* arcade cyan-blue */
+:root[data-accent="cyan"]     { --accent: #37e6d6; }  /* teletext */
+:root[data-accent="seafoam"]  { --accent: #8df0cf; }  /* pale sea-green */
+:root[data-accent="green"]    { --accent: #3bf07a; }  /* phosphor CRT */
+:root[data-accent="mustard"]  { --accent: #e3b23c; }  /* gold */
+:root[data-accent="amber"]    { --accent: #ffb000; }  /* amber terminal */
+:root[data-accent="pink"]     { --accent: #ff5fa2; }  /* synthwave */
+:root[data-accent="violet"]   { --accent: #b98cff; }  /* vaporwave */
 .accents { display: inline-flex; gap: 5px; align-items: center; }
 .acc { width: 24px; height: 24px; border: 1px solid var(--line); cursor: pointer; padding: 0; }
-.acc.acc-blue,    .acc-swatch.acc-blue    { background: #7cc4ff; }
-.acc.acc-mustard, .acc-swatch.acc-mustard { background: #e3b23c; }
-.acc.acc-green,   .acc-swatch.acc-green   { background: #3bf07a; }
-.acc.acc-amber,   .acc-swatch.acc-amber   { background: #ffb000; }
-.acc.acc-pink,    .acc-swatch.acc-pink    { background: #ff5fa2; }
-.acc.acc-cyan,    .acc-swatch.acc-cyan    { background: #37e6d6; }
-.acc.acc-violet,  .acc-swatch.acc-violet  { background: #b98cff; }
+.acc.acc-blue,     .acc-swatch.acc-blue     { background: #7cc4ff; }
+.acc.acc-electric, .acc-swatch.acc-electric { background: #4d8dff; }
+.acc.acc-ice,      .acc-swatch.acc-ice      { background: #b8e4ff; }
+.acc.acc-tron,     .acc-swatch.acc-tron     { background: #23c4e8; }
+.acc.acc-cyan,     .acc-swatch.acc-cyan     { background: #37e6d6; }
+.acc.acc-seafoam,  .acc-swatch.acc-seafoam  { background: #8df0cf; }
+.acc.acc-green,    .acc-swatch.acc-green    { background: #3bf07a; }
+.acc.acc-mustard,  .acc-swatch.acc-mustard  { background: #e3b23c; }
+.acc.acc-amber,    .acc-swatch.acc-amber    { background: #ffb000; }
+.acc.acc-pink,     .acc-swatch.acc-pink     { background: #ff5fa2; }
+.acc.acc-violet,   .acc-swatch.acc-violet   { background: #b98cff; }
 .acc.on { outline: 2px solid var(--fg); outline-offset: 1px; }
 
 /* ---- Colour bar: filter planets by colour family + "nearest in colour" pill ---- */
