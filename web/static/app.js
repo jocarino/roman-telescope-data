@@ -521,10 +521,9 @@ document.addEventListener("alpine:init", () => {
     // Slider position into `phases`. Defaults to 20° — the base render's soft day/night
     // shading already depicts a slightly-off-full planet, so the label matches the picture.
     phaseIdx: 2,
-    // The phase cycle: like the rotation, the hero smoothly waxes and wanes — a continuous
-    // sweep 0° -> 170°, then reset to full and sweep again (never the black 180°; like a
-    // moon running through its cycle). On by default; touching the
-    // slider pins the chosen phase, the ▶ button resumes the cycle.
+    // The phase cycle: like the rotation, the hero runs a full lunar cycle — full, waning
+    // to dark, then waxing back from the other side to full (0-360°, ~22 s around). On by
+    // default; touching the slider pins the chosen phase, the ▶ button resumes the cycle.
     phasePlay: true,
     _anim: null,          // { deg, dir, last } — continuous animation state
     _PHASE_SPEED: 16,     // degrees per second (~10.6 s per sweep)
@@ -629,18 +628,19 @@ document.addEventListener("alpine:init", () => {
       this.phasePlay = false;
       this._anim = null;
     },
-    // Per-frame animator handed to the spin loop: advances a continuous phase (deg) and
-    // returns that frame's { phase, palette } overrides. Also keeps the slider/readout in
-    // sync at the nearest 10° stop.
+    // Per-frame animator handed to the spin loop: a full lunar cycle. The light orbits
+    // 0-360°: full -> waning (shadow closes in from the left) -> a brief dark moment ->
+    // waxing (light returns on the LEFT and grows) -> full again. The slider/readout track
+    // the effective illumination (0-170°, side-agnostic) at the nearest 10° stop.
     _phaseFrame(t) {
       if (this.heroSource === "telescope") return null;
-      const maxDeg = (this.phases.length - 2) * 10;  // 170°
       if (!this._anim) this._anim = { deg: this.phase().d, last: t };
       const a = this._anim;
       a.deg += this._PHASE_SPEED * (Math.min(t - a.last, 100) / 1000);
       a.last = t;
-      if (a.deg >= maxDeg) a.deg = 0;  // end of the sweep: snap back to full, go again
-      const idx = Math.max(0, Math.min(this.phases.length - 2, Math.round(a.deg / 10)));
+      if (a.deg >= 360) a.deg -= 360;
+      const eff = a.deg <= 180 ? a.deg : 360 - a.deg;  // illumination phase, side-agnostic
+      const idx = Math.max(0, Math.min(this.phases.length - 2, Math.round(eff / 10)));
       if (idx !== this.phaseIdx) this.phaseIdx = idx;
       return {
         phase: (a.deg * Math.PI) / 180,
