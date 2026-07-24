@@ -349,6 +349,16 @@ body::after {
 }
 .dd-menu button:hover { background: var(--bg-3); color: var(--fg); }
 .dd-menu button.on { color: var(--accent); }
+/* Little header explaining what the dropdown filters on. */
+.dd-head {
+  padding: 9px 12px 8px; border-bottom: 1px solid var(--line); cursor: default;
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .5px; text-transform: uppercase;
+  color: var(--fg-dim); white-space: nowrap;
+}
+.dd-sub {
+  display: block; margin-top: 2px; font-size: 10px; letter-spacing: 0;
+  text-transform: none; color: var(--fg-faint);
+}
 
 /* ---- Sharpen the last rounded boxes on the planet page ---- */
 .assume, .banner, .palette { border-radius: 0; }

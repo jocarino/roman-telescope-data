@@ -11,7 +11,7 @@ document.addEventListener("alpine:init", () => {
     sort: "name",
     // Labels for the custom (retro) dropdowns.
     provLabels: {
-      all: "All provenance", model: "Model", "simulated-cgi": "Roman: simulated",
+      all: "All", model: "Modelled", "simulated-cgi": "Roman: simulated",
       "measured-cgi": "Roman: measured", "model-microlensing": "Microlensing",
     },
     sortLabels: {
