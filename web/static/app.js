@@ -224,6 +224,7 @@ document.addEventListener("alpine:init", () => {
       window.PlanetRender.render(cv, {
         palette: p.palette, radius: p.radius, cloudState: p.cloud, lumY: p.lum,
         style: this.style, fidelity: this.fidelity,
+        phase: window.PlanetRender.hashPhase(p.id),
       });
     },
     _redrawAll() {
@@ -704,6 +705,7 @@ document.addEventListener("alpine:init", () => {
         window.PlanetRender.render(cv, {
           palette: pl.palette, radius: pl.radius, cloudState: pl.cloud, lumY: pl.lum,
           style: style, fidelity: localStorage.getItem("renderFidelity") || "classic",
+          phase: window.PlanetRender.hashPhase(pl.id),
         });
       }
       peek.classList.add("on");
@@ -767,6 +769,7 @@ document.addEventListener("alpine:init", () => {
       palette: p.palette, radius: p.radius, cloudState: p.cloud, lumY: p.lum,
       style: localStorage.getItem("planetStyle") || "retro",
       fidelity: localStorage.getItem("renderFidelity") || "classic",
+      phase: window.PlanetRender.hashPhase(p.id),
     };
   }
   document.addEventListener("mouseover", function (e) {

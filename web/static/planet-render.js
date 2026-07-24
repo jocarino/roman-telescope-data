@@ -237,5 +237,15 @@
     if (canvas && canvas.__spin) { cancelAnimationFrame(canvas.__spin.raf); canvas.__spin = null; }
   }
 
-  window.PlanetRender = { render: render, spin: spin, stop: stop };
+  // Deterministic per-planet phase for the gallery: hash the id into 10-140 deg (radians).
+  // Stable across visits and re-renders (filters, scroll), so a planet keeps its phase —
+  // the grid reads as a sky of worlds caught at different points in their orbits.
+  function hashPhase(id) {
+    var h = 2166136261;
+    for (var i = 0; i < id.length; i++) { h ^= id.charCodeAt(i); h = (h * 16777619) >>> 0; }
+    var t = (h % 1000) / 999;
+    return ((10 + 130 * t) * Math.PI) / 180;
+  }
+
+  window.PlanetRender = { render: render, spin: spin, stop: stop, hashPhase: hashPhase };
 })();
