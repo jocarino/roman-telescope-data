@@ -164,16 +164,18 @@
   </div>
   {% endif %}
 
-  {# ── The oscilloscope (above the data card): spectrum screen + readouts + palette ── #}
+  {# ── EXOSCOPE: the bench instrument. Bezel header with the VIEW selector, CRT screen
+     with an on-glass HUD (channel chips + RUN), a MEASURE + PLANET DISPLAY rail, and the
+     PALETTE OUT bar. Phones page the panels with the F1–F3 keys. ── #}
   <div class="scope-unit">
     <div class="scope-top">
-      <span class="scope-brand">◼ EXOSCOPE</span>
-      <span class="scope-model">{{ rec.name }} · reflected-light · 380–780 nm</span>
+      <span class="scope-brand">EXOSCOPE</span>
+      <span class="scope-model">{{ rec.name }} · reflected light · 380–780 nm</span>
       <span class="scope-view">
         <span class="scope-view-lbl">VIEW</span>
-        <button class="led-btn" @click="setView('full')" :class="view === 'full' ? 'on' : ''">
+        <button class="led-btn ch1" @click="setView('full')" :class="view === 'full' ? 'on' : ''">
           <i class="led" :class="{ on: view === 'full', flash: view === 'full' && ledFlash }"></i>Full spectrum</button>
-        <button class="led-btn" @click="setView('roman')" :class="view === 'roman' ? 'on' : ''">
+        <button class="led-btn ch2" @click="setView('roman')" :class="view === 'roman' ? 'on' : ''">
           <i class="led" :class="{ on: view === 'roman', flash: view === 'roman' && ledFlash }"></i>Roman 4-band</button>
         <button class="info-btn sm" @click="toggleInfo('view')" :class="info === 'view' ? 'on' : ''"
           aria-label="What's the difference between the two views?"
@@ -210,85 +212,108 @@
       </div></template>
     </div>
     <div class="scope-main">
-      <div class="scope-screen">
+      {# The CRT. HUD rows live INSIDE the glass (same background, under the scanlines), so
+         they read as on-screen readouts without ever overlapping the plot. The channel chips
+         double as view switches; the active channel is lit, the other dimmed. #}
+      <div class="scope-screen" :class="[view, sweep ? 'sweeping' : '']">
+        <div class="hud hud-top">
+          <button class="hud-ch ch1" :class="view === 'full' ? 'live' : ''"
+            @click="setView('full')" title="Show the full-spectrum colour">
+            <span class="sw"></span>CH1 FULL <code>{{ tc.hex }}</code></button>
+          <button class="hud-ch ch2" :class="view === 'roman' ? 'live' : ''"
+            @click="setView('roman')" title="Show the Roman four-band colour">
+            <span class="sw"></span>CH2 ROMAN <code>{{ rv.hex }}</code></button>
+          <span class="hud-run"><i class="led on" :class="{ flash: ledFlash }"></i>RUN</span>
+        </div>
         <div class="spec-wide">{{ ctx.spectrum_svg|safe }}</div>
         <div class="spec-compact">{{ ctx.spectrum_svg_compact|safe }}</div>
-      </div>
-      <div class="scope-side">
-        <div class="ro-ch ch1"><span class="sw"></span>CH1 FULL
-          <code x-text="view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}'"></code></div>
-        <div class="ro-ch ch2"><span class="sw"></span>CH2 ROMAN <code>{{ rv.hex }}</code></div>
-        <div class="ro-sep"></div>
-        <div class="ro-row"><span>&#916;E2000
-          <span class="tip" x-data="{ t: false }" @click.outside="t = false">
-            <button class="info-btn xs" @click="t = !t" :class="t ? 'on' : ''"
-              aria-label="What does &#916;E2000 mean?">i</button>
-            <span class="tip-body" :class="t ? 'open' : ''">
-              How different the full-spectrum and Roman colours look to
-              the eye: 0 = identical, above ~2 is a visible difference. Below
-              {{ iview.reconstruction.extrapolated_below_nm|round|int }}&nbsp;nm Roman is
-              blind, so the model holds the spectrum flat there.</span>
-          </span></span>
-          <b>{{ '%.1f'|format(iview.reconstruction_error.delta_e2000) }}</b></div>
-        <div class="ro-row"><span>Y BRIGHT
-          <span class="tip" x-data="{ t: false }" @click.outside="t = false">
-            <button class="info-btn xs" @click="t = !t" :class="t ? 'on' : ''"
-              aria-label="What does Y BRIGHT mean?">i</button>
-            <span class="tip-body" :class="t ? 'open' : ''">
-              How much light the planet's colour reflects overall (CIE luminance Y):
-              0 = pitch black, 1 = a perfect white reflector. Most planets are dim, so the
-              swatches are brightened for display.</span>
-          </span></span>
-          <b x-text="(view === 'full' ? fullLum : romanLum).toFixed(3)"></b></div>
-        <div class="ro-row"><span>GAMUT
-          <span class="tip" x-data="{ t: false }" @click.outside="t = false">
-            <button class="info-btn xs" @click="t = !t" :class="t ? 'on' : ''"
-              aria-label="What does GAMUT mean?">i</button>
-            <span class="tip-body" :class="t ? 'open' : ''">
-              Whether this colour fits in sRGB, the range screens can show. OOG = out of
-              gamut: the modelled colour is more saturated than a screen can display, so it
-              is clamped to the closest displayable colour.</span>
-          </span></span>
-          <b x-text="(view === 'full' ? fullOog : romanOog) ? 'OOG' : 'OK'"></b></div>
-      </div>
-      <div class="scope-rail">
-        <div class="knob-tag"><span class="knob-tag-main">PLANET DISPLAY</span><span class="knob-tag-sub">the picture up top</span></div>
-        <div class="knob-cell">
-          <div class="knob" role="button" tabindex="0"
-            title="Switch render style (shows the modelled planet)"
-            @click="toggleFidelity()" @keydown.enter.prevent="toggleFidelity()"
-            :style="{ '--a': fidelity === 'classic' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
-          <span class="knob-name">Style
-            <button class="info-btn xs" @click="toggleInfo('style')" :class="info === 'style' ? 'on' : ''"
-              aria-label="What does style change?" title="What does style change?">i</button></span>
-          <span class="knob-val" x-text="fidelity === 'classic' ? 'Classic' : 'Stylised'"></span>
+        <div class="hud hud-bot">
+          <span>A(λ)<span class="m-hide"> — share of starlight reflected, per wavelength</span></span>
+          <span class="hud-div"><span class="w">50</span><span class="c">100</span> nm/div</span>
         </div>
-        <div class="knob-cell">
-          <div class="knob" role="button" tabindex="0"
-            title="Switch pixel / sphere (shows the modelled planet)"
-            @click="toggleHeroStyle()" @keydown.enter.prevent="toggleHeroStyle()"
-            :style="{ '--a': heroStyle === 'retro' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
-          <span class="knob-name">Shape</span>
-          <span class="knob-val" x-text="heroStyle === 'retro' ? 'Pixel' : 'Sphere'"></span>
-        </div>
-        {% if rec.real_observations %}
-        <div class="knob-cell knob-cell-source">
-          <div class="knob knob-source" role="button" tabindex="0"
-            title="Switch between the modelled render and the real telescope photo"
-            @click="toggleHeroSource()" @keydown.enter.prevent="toggleHeroSource()"
-            :style="{ '--a': heroSource === 'model' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
-          <span class="knob-name">Source
-            <button class="info-btn xs" @click="toggleInfo('source')" :class="info === 'source' ? 'on' : ''"
-              aria-label="What is modelled vs telescope?" title="Modelled vs telescope?">i</button></span>
-          <span class="knob-val" x-text="heroSource === 'model' ? 'Modelled' : (obs.length > 1 ? curObs().telescope : 'Telescope')"></span>
-        </div>
-        {% endif %}
+        <i class="sweep-line" aria-hidden="true"></i>
       </div>
-      {# Mobile-only function keys: on a phone the readouts, palette and data card don't all
-         fit stacked, so these switch which one is shown. Hidden on desktop (all visible). #}
+      <aside class="scope-rail">
+        <section class="rail-mod rail-measure">
+          <h4 class="rail-lbl">Measure</h4>
+          <div class="meas-hero">
+            <span class="meas-lbl">&#916;E2000
+              <span class="tip" x-data="{ t: false }" @click.outside="t = false">
+                <button class="info-btn xs" @click="t = !t" :class="t ? 'on' : ''"
+                  aria-label="What does &#916;E2000 mean?">i</button>
+                <span class="tip-body" :class="t ? 'open' : ''">
+                  How different the full-spectrum and Roman colours look to
+                  the eye: 0 = identical, above ~2 is a visible difference. Below
+                  {{ iview.reconstruction.extrapolated_below_nm|round|int }}&nbsp;nm Roman is
+                  blind, so the model holds the spectrum flat there.</span>
+              </span></span>
+            <b class="meas-num">{{ '%.1f'|format(iview.reconstruction_error.delta_e2000) }}</b>
+            <span class="meas-sub">colour lost to Roman's 4 bands</span>
+          </div>
+          <div class="ro-row"><span>Y BRIGHT
+            <span class="tip" x-data="{ t: false }" @click.outside="t = false">
+              <button class="info-btn xs" @click="t = !t" :class="t ? 'on' : ''"
+                aria-label="What does Y BRIGHT mean?">i</button>
+              <span class="tip-body" :class="t ? 'open' : ''">
+                How much light the planet's colour reflects overall (CIE luminance Y):
+                0 = pitch black, 1 = a perfect white reflector. Most planets are dim, so the
+                swatches are brightened for display.</span>
+            </span></span>
+            <b x-text="(view === 'full' ? fullLum : romanLum).toFixed(3)"></b></div>
+          <div class="ro-row"><span>GAMUT
+            <span class="tip" x-data="{ t: false }" @click.outside="t = false">
+              <button class="info-btn xs" @click="t = !t" :class="t ? 'on' : ''"
+                aria-label="What does GAMUT mean?">i</button>
+              <span class="tip-body" :class="t ? 'open' : ''">
+                Whether this colour fits in sRGB, the range screens can show. OOG = out of
+                gamut: the modelled colour is more saturated than a screen can display, so it
+                is clamped to the closest displayable colour.</span>
+            </span></span>
+            <b><i class="gled" :class="(view === 'full' ? fullOog : romanOog) ? 'bad' : ''"></i><span
+              x-text="(view === 'full' ? fullOog : romanOog) ? 'OOG' : 'OK'"></span></b></div>
+        </section>
+        <i class="rail-vent" aria-hidden="true"></i>
+        <section class="rail-mod rail-display">
+          <h4 class="rail-lbl">Planet display <span class="rail-sub">the picture up top</span></h4>
+          <div class="knob-row">
+            <div class="knob-cell">
+              <div class="knob" role="button" tabindex="0"
+                title="Switch render style (shows the modelled planet)"
+                @click="toggleFidelity()" @keydown.enter.prevent="toggleFidelity()"
+                :style="{ '--a': fidelity === 'classic' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
+              <span class="knob-name">Style
+                <button class="info-btn xs" @click="toggleInfo('style')" :class="info === 'style' ? 'on' : ''"
+                  aria-label="What does style change?" title="What does style change?">i</button></span>
+              <span class="knob-val" x-text="fidelity === 'classic' ? 'Classic' : 'Stylised'"></span>
+            </div>
+            <div class="knob-cell">
+              <div class="knob" role="button" tabindex="0"
+                title="Switch pixel / sphere (shows the modelled planet)"
+                @click="toggleHeroStyle()" @keydown.enter.prevent="toggleHeroStyle()"
+                :style="{ '--a': heroStyle === 'retro' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
+              <span class="knob-name">Shape</span>
+              <span class="knob-val" x-text="heroStyle === 'retro' ? 'Pixel' : 'Sphere'"></span>
+            </div>
+            {% if rec.real_observations %}
+            <div class="knob-cell knob-cell-source">
+              <div class="knob knob-source" role="button" tabindex="0"
+                title="Switch between the modelled render and the real telescope photo"
+                @click="toggleHeroSource()" @keydown.enter.prevent="toggleHeroSource()"
+                :style="{ '--a': heroSource === 'model' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
+              <span class="knob-name">Source
+                <button class="info-btn xs" @click="toggleInfo('source')" :class="info === 'source' ? 'on' : ''"
+                  aria-label="What is modelled vs telescope?" title="Modelled vs telescope?">i</button></span>
+              <span class="knob-val" x-text="heroSource === 'model' ? 'Modelled' : (obs.length > 1 ? curObs().telescope : 'Telescope')"></span>
+            </div>
+            {% endif %}
+          </div>
+        </section>
+      </aside>
+      {# Mobile-only function keys: on a phone the measure panel, palette and data card don't
+         all fit stacked, so these switch which one is shown. Hidden on desktop (all visible). #}
       <div class="scope-fnrow" role="group" aria-label="Which panel to show">
         <button class="fn-btn" :class="panel === 'readout' ? 'on' : ''" @click="panel = 'readout'">
-          <span class="fn-key">F1</span>Readout</button>
+          <span class="fn-key">F1</span>Measure</button>
         <button class="fn-btn" :class="panel === 'palette' ? 'on' : ''" @click="panel = 'palette'">
           <span class="fn-key">F2</span>Palette</button>
         <button class="fn-btn" :class="panel === 'data' ? 'on' : ''" @click="panel = 'data'">
@@ -296,7 +321,7 @@
       </div>
     </div>
     <div class="scope-bottom">
-      <span class="scope-pallabel">PALETTE ▸ <span
+      <span class="scope-pallabel">PALETTE OUT ▸ <span class="pv"
         x-text="view === 'full' ? 'full spectrum' : 'Roman 4-band'"></span></span>
       <div class="scope-pal">
         <div x-show="view === 'full'">{{ palette_full(tc.palette) }}</div>
@@ -309,6 +334,8 @@
         <a class="badge hex" href="/palettes/{{ rec.id }}.ase" download>.ASE</a>
         <a class="badge hex similar" href="/?near={{ rec.id }}"
           title="Find planets closest in colour to this one">◎ SIMILAR COLOURS</a>
+        <a class="badge hex similar" href="/compare.html?a={{ rec.id }}"
+          title="Compare this planet with another">⇄ COMPARE</a>
         <span class="copied" x-show="msg" x-text="msg" x-cloak></span>
       </div>
     </div>
@@ -372,7 +399,7 @@
           <tr><td>Radius{{ jinfo('Measured in Earth radii (R⊕): 1 = Earth-sized, ~11 ≈ Jupiter.') }}</td><td>{{ (rec.params.radius_r_earth|round(2) ~ ' R⊕') if rec.params.radius_r_earth else 'n/a' }}{% if src and rec.params.radius_r_earth %} {{ src_tag(src.radius_r_earth) }}{% endif %}</td></tr>
           <tr><td>Mass{{ jinfo('Measured in Earth masses (M⊕): 1 = Earth, ~318 ≈ Jupiter.') }}</td><td>{{ (rec.params.mass_m_earth|round(1) ~ ' M⊕') if rec.params.mass_m_earth else 'n/a' }}{% if src and rec.params.mass_m_earth %} {{ src_tag(src.mass_m_earth) }}{% endif %}</td></tr>
           <tr><td>Semi-major axis{{ jinfo('The size of the orbit — the planet’s average distance from its star. 1 AU = the Earth–Sun distance (~150 million km). It sets how much starlight the planet gets, and so its temperature.') }}</td><td>{{ (rec.params.semi_major_axis_au|round(3) ~ ' AU') if rec.params.semi_major_axis_au else 'n/a' }}{% if src and rec.params.semi_major_axis_au %} {{ src_tag(src.semi_major_axis_au) }}{% endif %}</td></tr>
-          <tr><td>Distance from Earth{{ jinfo('How far the whole system is from us. Measured in parsecs (pc); 1 pc ≈ 3.26 light-years.') }}</td><td>{{ (rec.params.distance_pc|round(2) ~ ' pc') if rec.params.distance_pc else 'n/a' }}{% if src and rec.params.distance_pc %} {{ src_tag(src.distance_pc) }}{% endif %}</td></tr>
+          <tr><td>Distance from Earth{{ jinfo('How far the whole system is from us, in light-years — the distance light travels in one year (~9.5 trillion km).') }}</td><td>{{ ((rec.params.distance_pc * 3.26156)|round(1) ~ ' ly') if rec.params.distance_pc else 'n/a' }}{% if src and rec.params.distance_pc %} {{ src_tag(src.distance_pc) }}{% endif %}</td></tr>
           <tr><td>Discovery{{ jinfo('How the planet was first detected: radial velocity (the star’s wobble), transit (a dip in its light), direct imaging (an actual picture), or microlensing (its gravity briefly magnifying a background star).') }}</td><td>{{ rec.discovery.method }}{{ (' · ' ~ rec.discovery.year) if rec.discovery.year else '' }}</td></tr>
         </table>
       </div>
