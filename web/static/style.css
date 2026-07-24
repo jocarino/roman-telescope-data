@@ -1033,17 +1033,18 @@ button.badge:active, a.badge:active { box-shadow: none; }
   .scope-view { flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
   .led-btn { padding: 6px 8px; font-size: 11px; }
 
-  /* Stacked instrument: screen first (compact face, legible labels), knobs under it,
-     then the F1–F3 keys paging measure / palette / planet data. display:contents lets the
-     rail's modules re-order independently inside the one-column grid. */
+  /* Stacked instrument: the PLANET DISPLAY knobs first (right under the planet picture
+     they control), then the screen (compact face, legible labels), then the F1–F3 keys
+     paging measure / palette / planet data. display:contents lets the rail's modules
+     re-order independently inside the one-column grid. */
   .scope-main { grid-template-columns: 1fr; min-height: 0; }
   .scope-rail { display: contents; }
-  .scope-screen { order: 1; margin: 12px 12px 0; }
+  .rail-display { order: 1; margin: 12px 12px 0; }
+  .scope-screen { order: 2; margin: 10px 12px 12px; }
   .spec-wide { display: none; }
   .spec-compact { display: flex; }
   .hud-div .w { display: none; } .hud-div .c { display: inline; }
   .rail-vent { display: none; }
-  .rail-display { order: 2; margin: 10px 12px 12px; }
   .rail-display .knob-row { justify-content: space-evenly; }
   .rail-measure { display: none; order: 4; margin: 12px; }
   .detail[data-panel="readout"] .rail-measure { display: block; }
