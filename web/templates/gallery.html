@@ -18,10 +18,10 @@
 </div>
 
 <div x-data="gallery()">
-  {# Count on the left; search + the other filters clustered on the right. The search grows
-     leftward into the empty space on focus, so it never shoves the filter cluster around. #}
+  {# Search + the other filters clustered on the right, on one line. The search grows leftward
+     into the empty space on focus, so it never shoves the filter cluster around. The count +
+     hint caption sits on its own line beneath them (right-aligned under the cluster). #}
   <div class="controls">
-    <span class="count"><span x-text="count()"></span> shown · long-press for a quick peek</span>
     <div class="spacer"></div>
     <label class="search">
       <svg class="search-mag" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
@@ -89,6 +89,9 @@
         </div>
       </div>
     </div>
+  </div>
+  <div class="count-line">
+    <span class="count"><span x-text="count()"></span> shown · long-press for a quick peek</span>
   </div>
 
   {# Colour bar: filter by colour family, or show "nearest in colour to X" when similar-sorting. #}
