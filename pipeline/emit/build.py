@@ -16,12 +16,14 @@ from pipeline.colour.cie import ColourResult, reflected_flux_to_colour
 from pipeline.config import GRID_ID, GRID_NM, Instrument
 from pipeline.fetch.targets import load_measured_samples
 from pipeline.illuminant.base import Illuminant
+from pipeline.illuminant.blackbody import SUN
 from pipeline.models import (
     BandSampleModel,
     BandSampleSetModel,
     ColourResultModel,
     Discovery,
     HostStar,
+    IlluminantSwapModel,
     InstrumentViewModel,
     PaletteStopModel,
     PlanetParams,
@@ -108,6 +110,20 @@ def build_record(
     )
     true_palette = derive_palette(true_colour)
 
+    # Illuminant swap: the same albedo under the Sun. Same pipeline, different S(lambda) —
+    # isolates the planet's own contribution to its colour from its host star's tint.
+    sun_spectrum = SUN.spectrum(GRID_NM)
+    sun_colour = reflected_flux_to_colour(
+        albedo * sun_spectrum, method="full-spectrum", illuminant_flux=sun_spectrum,
+        confidence="high",
+    )
+    sun_swap = IlluminantSwapModel(
+        illuminant=f"sun-blackbody-{SUN.teff_k:.0f}k",
+        teff_k=SUN.teff_k,
+        colour=_colour_to_model(sun_colour, derive_palette(sun_colour)),
+        delta_e2000_vs_true=_delta_e2000(true_colour, sun_colour),
+    )
+
     views: list[InstrumentViewModel] = []
     for inst in instruments:
         band_set = obtain_band_samples(pin.id, pin.provider, pin.illuminant, inst)
@@ -163,6 +179,7 @@ def build_record(
         provenance=provenance,  # type: ignore[arg-type]
         spectrum=SpectralCurve(grid=GRID_ID, values=[float(a) for a in albedo]),
         true_colour=_colour_to_model(true_colour, true_palette),
+        sun_swap=sun_swap,
         instrument_views=views,
         real_observations=observations_for(pin.id),
         meta=RecordMeta(
