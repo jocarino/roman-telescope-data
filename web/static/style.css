@@ -596,15 +596,27 @@ body::after {
 .led.flash { animation: ledflash .32s ease-out; }
 @keyframes ledflash { 0% { background: #fff; box-shadow: 0 0 9px #fff; } 100% { background: #4ade80; } }
 
-/* ---- Mobile-only chrome (function keys, caption expander): hidden on desktop ---- */
-.scope-fnrow, .desc-toggle { display: none; }
+/* ---- Mobile-only chrome (function keys, caption expander, hamburger): hidden on desktop ---- */
+.scope-fnrow, .desc-toggle, .m-only { display: none; }
 /* Two scope faces are emitted; desktop shows the wide one, phones the compact one. */
 .spec-compact { display: none; }
 
 /* ---- Phones: compact stacked instrument + minimal gallery toolbar ---- */
 @media (max-width: 760px) {
-  /* Gallery: only the accent picker + search survive; filter/sort/render toggles hide. */
+  /* Gallery toolbar: the main (provenance) filter + search stay; everything else folds
+     into the hamburger menu. */
   .m-hide { display: none; }
+  .m-only { display: inline-block; }
+  .m-menu { min-width: 232px; }
+  .m-menu .dd-head { border-top: 1px solid var(--line); }
+  .m-menu .dd-head:first-child { border-top: 0; }
+  .m-menu-row { padding: 10px 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .m-menu .accents { display: grid; grid-template-columns: repeat(4, 24px); gap: 6px; }
+  /* Generic .dd-menu button.on paints text in the accent, which would vanish on the
+     segmented toggles' accent background; restore their dark-on-accent look. */
+  .m-menu .segmented button { padding: 8px 12px; }
+  .m-menu .segmented button.on,
+  .m-menu .segmented button.on:hover { background: var(--accent); color: #05121f; }
   .grid { grid-template-columns: repeat(2, 1fr); }
   .count { flex-basis: 100%; }
   /* Two 160px-canvas cards don't fit 390px minus paddings; let the planet shrink to its
