@@ -153,8 +153,8 @@ Milestones 1–5 are DONE; the catalog is the full archive pull (5,759 planets l
    received from them, so their swatches are model-only, marked as such.
 5. Palette export (copy hex, CSS variables, maybe .ase file). (DONE — .ase + CSS vars.)
 6. Stretch: phase-angle slider (DONE — colour vs. orbital phase), host-star illuminant
-   comparison (`sun_swap` data DONE; UI in progress in another session); post-launch,
-   ingest real CGI photometry for the tech-demo targets (future — runbook:
+   comparison (DONE — `sun_swap` data + the "Light source" knob on the planet page);
+   post-launch, ingest real CGI photometry for the tech-demo targets (future — runbook:
    `docs/roman-measured-data.md`).
 
 ## Gotchas
