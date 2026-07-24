@@ -193,6 +193,14 @@ def make_handler(directory: Path, label: str, port: int):
 
         def send_head(self):
             path = self.translate_path(self.path)
+            # Clean URLs: /foo -> /foo.html, /foo -> /foo/index.html. Mirrors the production
+            # nginx `try_files $uri $uri.html $uri/index.html` so local preview matches deploy.
+            if not os.path.exists(path):
+                if os.path.isfile(path + ".html"):
+                    return self._serve_html(path + ".html")
+                idx = os.path.join(path, "index.html")
+                if os.path.isfile(idx):
+                    return self._serve_html(idx)
             if os.path.isdir(path):
                 for idx in ("index.html", "index.htm"):
                     if os.path.exists(os.path.join(path, idx)):
