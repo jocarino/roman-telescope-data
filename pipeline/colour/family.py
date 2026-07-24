@@ -8,7 +8,8 @@ from __future__ import annotations
 
 # Canonical chip order; only families that have members are shown.
 FAMILY_ORDER = [
-    "blue", "teal", "green", "gold", "orange", "red", "pink", "brown", "grey", "white", "dark",
+    "blue", "periwinkle", "teal", "green", "gold", "orange", "red", "pink", "violet",
+    "brown", "grey", "white", "dark",
 ]
 
 
@@ -53,6 +54,11 @@ def colour_family(rgb: tuple[int, int, int]) -> str:
         return "green"
     if h < 200:
         return "teal"
-    if h < 290:  # blue through violet fold into blue (violet is rare; keeps chips tidy)
-        return "blue"
+    if h < 255:
+        # The blue range is the biggest by far, and splits into two visually distinct groups:
+        # pale blue-lavender (the Rayleigh-scattering cool giants / sub-Neptunes) reads as
+        # "periwinkle", while the deeper, more saturated cobalt/azure stays "blue".
+        return "periwinkle" if lightness > 0.70 else "blue"
+    if h < 300:
+        return "violet"
     return "pink"
