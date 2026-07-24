@@ -1000,9 +1000,14 @@ button.badge:active, a.badge:active { box-shadow: none; }
 .src-assumed  { color: #e6c07a; border-color: #6b5330; }
 
 /* ---- PLANET DISPLAY knobs: skeuomorphic on purpose (physical controls) ---- */
-.knob-row { display: flex; justify-content: space-around; align-items: flex-start; gap: 8px; }
+/* 2-per-row grid: with all four knobs present (Style/Shape/Light source/Source) a single
+   flex row gets cramped and the two-word names wrap and misalign the row. */
+.knob-row { display: grid; grid-template-columns: 1fr 1fr; justify-items: center; row-gap: 16px; column-gap: 8px; }
+/* An odd knob count (no Source knob on most planets) leaves a lone knob on the last row:
+   let it span both columns so it sits centred instead of hugging the left. */
+.knob-row .knob-cell:nth-child(odd):last-child { grid-column: 1 / -1; }
 .knob-cell { display: flex; flex-direction: column; align-items: center; gap: 5px; text-align: center; }
-.knob-name { font-size: 11.5px; color: var(--fg-dim); display: inline-flex; align-items: center; gap: 4px; }
+.knob-name { font-size: 11.5px; color: var(--fg-dim); display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 .knob-val { font-family: var(--mono); font-size: 9px; letter-spacing: .3px; color: var(--accent); text-transform: uppercase; }
 
 /* Phase slider (in the Planet display rail): drag the planet full -> crescent -> new. */
