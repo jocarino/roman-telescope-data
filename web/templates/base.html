@@ -9,7 +9,6 @@
   <script>try{var a=localStorage.getItem("accent");if(a)document.documentElement.setAttribute("data-accent",a);}catch(e){}</script>
   <link rel="stylesheet" href="/static/style.css?v={{ build_id }}">
   <style>[x-cloak]{display:none !important}</style>
-  <script src="/static/vendor/htmx.min.js" defer></script>
   <script src="/static/planet-render.js?v={{ build_id }}"></script>
   <script src="/static/vendor/alpine.min.js" defer></script>
   <script src="/static/app.js?v={{ build_id }}"></script>
@@ -17,12 +16,6 @@
 <body>
   <div class="wrap">
     {% block content %}{% endblock %}
-    <div class="foot">
-      Colours derived from reflected-light albedo models × host-star spectra via CIE 1931
-      colour matching. Modelled, not photographed. Data:
-      <a href="https://exoplanetarchive.ipac.caltech.edu/" target="_blank" rel="noopener">NASA
-      Exoplanet Archive</a>.
-    </div>
   </div>
 </body>
 </html>
