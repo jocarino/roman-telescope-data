@@ -1158,7 +1158,6 @@ button.badge:active, a.badge:active { box-shadow: none; }
 }
 .cmp-phead-l em { font-style: normal; color: var(--fg-dim); }
 .cmp-phead-r { display: flex; }
-.cmp-phead-r .cmp-mi + .cmp-mi { margin-left: 12px; }
 .cmp-picker-list { overflow-y: auto; }
 .cmp-prow {
   display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; cursor: pointer;
@@ -1170,11 +1169,11 @@ button.badge:active, a.badge:active { box-shadow: none; }
 .cmp-prow-sw { width: 20px; height: 20px; flex: none; border: 1px solid #000; }
 .cmp-prow-name { font-size: 13px; flex: none; }
 .cmp-prow-meta { font-size: 11px; color: var(--fg-faint); margin-left: auto; white-space: nowrap; }
-/* ✦ = host star, ⊕ = distance from Earth (⊕ matches the R⊕/M⊕ Earth symbol used elsewhere). */
-.cmp-mi + .cmp-mi { margin-left: 12px; }
-.mi-ic { color: var(--accent); font-style: normal; margin-right: 4px; }
+/* host star | distance from Earth — a pipe separates the two values (and the two labels). */
+.cmp-mi + .cmp-mi::before { content: "|"; margin: 0 8px; color: var(--fg-faint); }
 @media (max-width: 560px) {
   .cmp-prow-meta .cmp-mi:first-child, .cmp-phead-r .cmp-mi:first-child { display: none; }
+  .cmp-prow-meta .cmp-mi::before, .cmp-phead-r .cmp-mi::before { content: none; }
 }
 .cmp-heads { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 22px; }
 .cmp-col { text-align: center; }

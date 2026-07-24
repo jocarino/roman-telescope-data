@@ -116,8 +116,8 @@
       <div class="cmp-phead">
         <span class="cmp-phead-l">Planet <em x-text="'· ' + pickerResults().length"></em></span>
         <span class="cmp-phead-r">
-          <span class="cmp-mi"><i class="mi-ic">✦</i>Star</span>
-          <span class="cmp-mi"><i class="mi-ic">⊕</i>Distance from Earth</span>
+          <span class="cmp-mi">Star</span>
+          <span class="cmp-mi">Distance from Earth</span>
         </span>
       </div>
       <div class="cmp-picker-list">
@@ -127,8 +127,8 @@
             <span class="cmp-prow-sw" :style="{ background: p.hex }"></span>
             <span class="cmp-prow-name" x-text="p.name"></span>
             <span class="cmp-prow-meta">
-              <span class="cmp-mi" title="Host star"><i class="mi-ic">✦</i><span x-text="p.host"></span></span>
-              <span class="cmp-mi" title="Distance from Earth"><i class="mi-ic">⊕</i><span x-text="fmtLy(p)"></span></span>
+              <span class="cmp-mi" title="Host star" x-text="p.host"></span>
+              <span class="cmp-mi" title="Distance from Earth" x-text="fmtLy(p)"></span>
             </span>
           </button>
         </template>
