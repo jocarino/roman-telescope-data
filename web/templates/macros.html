@@ -302,6 +302,8 @@
         <a class="badge hex" href="/palettes/{{ rec.id }}.ase" download>.ASE</a>
         <a class="badge hex similar" href="/?near={{ rec.id }}"
           title="Find planets closest in colour to this one">◎ SIMILAR COLOURS</a>
+        <a class="badge hex similar" href="/compare.html?a={{ rec.id }}"
+          title="Compare this planet with another">⇄ COMPARE</a>
         <span class="copied" x-show="msg" x-text="msg" x-cloak></span>
       </div>
     </div>
@@ -365,7 +367,7 @@
           <tr><td>Radius</td><td>{{ (rec.params.radius_r_earth|round(2) ~ ' R⊕') if rec.params.radius_r_earth else 'n/a' }}{% if src and rec.params.radius_r_earth %} {{ src_tag(src.radius_r_earth) }}{% endif %}</td></tr>
           <tr><td>Mass</td><td>{{ (rec.params.mass_m_earth|round(1) ~ ' M⊕') if rec.params.mass_m_earth else 'n/a' }}{% if src and rec.params.mass_m_earth %} {{ src_tag(src.mass_m_earth) }}{% endif %}</td></tr>
           <tr><td>Semi-major axis</td><td>{{ (rec.params.semi_major_axis_au|round(3) ~ ' AU') if rec.params.semi_major_axis_au else 'n/a' }}{% if src and rec.params.semi_major_axis_au %} {{ src_tag(src.semi_major_axis_au) }}{% endif %}</td></tr>
-          <tr><td>Distance from Earth</td><td>{{ (rec.params.distance_pc|round(2) ~ ' pc') if rec.params.distance_pc else 'n/a' }}{% if src and rec.params.distance_pc %} {{ src_tag(src.distance_pc) }}{% endif %}</td></tr>
+          <tr><td>Distance from Earth</td><td>{{ ((rec.params.distance_pc * 3.26156)|round(1) ~ ' ly') if rec.params.distance_pc else 'n/a' }}{% if src and rec.params.distance_pc %} {{ src_tag(src.distance_pc) }}{% endif %}</td></tr>
           <tr><td>Discovery</td><td>{{ rec.discovery.method }}{{ (' · ' ~ rec.discovery.year) if rec.discovery.year else '' }}</td></tr>
         </table>
       </div>

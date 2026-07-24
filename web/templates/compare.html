@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Compare planets · Exoplanet Palette{% endblock %}
+{% block content %}
+<a class="back" href="/">← all planets</a>
+<div class="site-head">
+  <h1>Compare planets</h1>
+  <span class="tagline">two worlds side by side — what makes their colours differ</span>
+</div>
+
+<div class="compare" x-data="compare({ indexUrl: '{{ index_url }}' })" x-cloak>
+  {# Two searchable pickers (native datalist autocomplete over all planet names). #}
+  <div class="cmp-pickers">
+    <label class="cmp-pick">
+      <span class="cmp-pick-lbl">Planet A</span>
+      <input class="cmp-search" list="cmp-names" x-model="aInput"
+        @change="pick('a', aInput)" placeholder="Search a planet…" aria-label="First planet">
+    </label>
+    <span class="cmp-vs">vs</span>
+    <label class="cmp-pick">
+      <span class="cmp-pick-lbl">Planet B</span>
+      <input class="cmp-search" list="cmp-names" x-model="bInput"
+        @change="pick('b', bInput)" placeholder="Search a planet…" aria-label="Second planet">
+    </label>
+    <button class="cmp-swap" @click="swap()" x-show="a() && b()" title="Swap sides"
+      aria-label="Swap the two planets">⇄</button>
+  </div>
+  <datalist id="cmp-names">
+    <template x-for="n in names" :key="n"><option :value="n"></option></template>
+  </datalist>
+
+  <p class="cmp-empty" x-show="loaded && !(a() && b())" x-cloak>
+    Pick two planets above to compare their colours and the data behind them.</p>
+
+  {# Two swatches + palettes. #}
+  <div class="cmp-heads" x-show="a() && b()" x-cloak>
+    <div class="cmp-col">
+      <canvas class="cmp-planet pixel" x-ref="cA" width="256" height="256"
+        :aria-label="(a()?.name || '') + ' render'"></canvas>
+      <h2 x-text="a()?.name"></h2>
+      <div class="cmp-host" x-text="a()?.host"></div>
+      <code class="cmp-hex" x-text="a()?.hex"></code>
+      <div class="cmp-pal">
+        <template x-for="h in a()?.palette || []" :key="h"><span :style="{ background: h }"></span></template>
+      </div>
+      <a class="cmp-open" :href="'/planet/' + a()?.id + '.html'">open full page →</a>
+    </div>
+    <div class="cmp-col">
+      <canvas class="cmp-planet pixel" x-ref="cB" width="256" height="256"
+        :aria-label="(b()?.name || '') + ' render'"></canvas>
+      <h2 x-text="b()?.name"></h2>
+      <div class="cmp-host" x-text="b()?.host"></div>
+      <code class="cmp-hex" x-text="b()?.hex"></code>
+      <div class="cmp-pal">
+        <template x-for="h in b()?.palette || []" :key="h"><span :style="{ background: h }"></span></template>
+      </div>
+      <a class="cmp-open" :href="'/planet/' + b()?.id + '.html'">open full page →</a>
+    </div>
+  </div>
+
+  {# Plain-English one-liner: what most drives the colour difference. #}
+  <p class="cmp-why" x-show="a() && b()" x-cloak x-html="whyDiffer()"></p>
+
+  {# The comparison table: A value | metric | B value, grouped. #}
+  <div class="cmp-table" x-show="a() && b()" x-cloak>
+    <template x-for="grp in groups()" :key="grp.title">
+      <div class="cmp-group">
+        <div class="cmp-group-head" x-text="grp.title"></div>
+        <template x-for="row in grp.rows" :key="row.label">
+          <div class="cmp-row" :class="{ diff: row.diff }">
+            <div class="cmp-va" x-text="row.a"></div>
+            <div class="cmp-mid" x-text="row.label"></div>
+            <div class="cmp-vb" x-text="row.b"></div>
+          </div>
+        </template>
+      </div>
+    </template>
+  </div>
+</div>
+{% endblock %}
