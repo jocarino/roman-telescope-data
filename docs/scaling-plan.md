@@ -1,4 +1,4 @@
-# Scaling plan: 20 → 200 → the broad catalog
+# Scaling plan: 20 → 200 → ~1,000 → the broad catalog
 
 The gallery is a deliberately curated set of 20 well-characterised planets. Scaling toward the
 ~6,000 known exoplanets is not "more of the same": most planets are only partially characterised,
@@ -71,13 +71,45 @@ surfaces the real problems, *without* committing to a full front-end rebuild bli
 - **Provenance filter decluttered** — now lists only provenances present in the data, and
   auto-hides entirely when only one exists (future-proof: it returns when Roman-measured lands).
 
-## Phase 3 — broad catalog (toward the full set)
+## Phase 3 — broad catalog (IN PROGRESS)
 
-- Whole-archive pull behind the gate; a large fraction will be excluded — surface the count so
-  "modelled N of M known planets" is stated honestly.
-- Client-side search may need a prebuilt index or server-side search once the set is large.
-- A small type/metallicity archetype grid so colours vary by planet class, not temperature alone.
-- Incremental builds are essential here (already in place).
+Real archive scale (measured): **6,324** confirmed planets, of which **~5,785 (91%)** pass the
+completeness gate. Pre-generating detail pages + fragments for all of those is ~230 MB of static
+HTML — impractical to commit and deploy. So Phase 3 splits into "make the front-end scale to any
+N" (done) and "how big a set we actually ship" (a deployment cap, not a pipeline limit).
+
+- **Scaled data + honest count — DONE.** `--bulk 1000` builds a **956-planet** catalog (nearest
+  gated + curated pins). The gallery states it honestly: *"Modelling 956 of the ~6,300 known
+  exoplanets — the nearest that pass our data-completeness gate."* (`KNOWN_TOTAL_APPROX` in
+  `web/build.py`.) `data/planets.json` at 956 is 9.6 MB (committed); `dist/` (gitignored, built
+  at deploy) is ~43 MB.
+- **Front-end rebuild — DONE.** The gallery no longer inlines the index or server-renders every
+  card. Instead: build writes `dist/planets.index.<build>.json`; the gallery **fetches** it, then
+  renders cards **incrementally** from JS (60/batch, infinite-scroll via a sentinel
+  IntersectionObserver) and **draws each planet lazily** on a rAF-throttled scroll pass (only
+  in-viewport, not-yet-drawn cards). Long-press hold-to-peek and hover-spin both still work on
+  the JS-generated cards. (Rebased onto the parallel mobile-UI branch: their sticky toolbar,
+  hold-to-peek, and accent themes are the base; the scale layer was re-applied on top.)
+
+  Measured at 956, current approach → new:
+  | metric            | before (inlined + all cards) | after (fetched + incremental) |
+  |-------------------|------------------------------|-------------------------------|
+  | index.html        | 890 KB                       | **11 KB** (+322 KB fetched index) |
+  | full load         | 3.9 s                        | **0.5 s**                     |
+  | cards in DOM      | 956                          | **60** (a batch)              |
+  | DOM nodes         | 6,832                        | **770**                       |
+  | JS heap           | 44 MB                        | **29 MB**                     |
+
+- **Incremental builds** — already in place (`emit/cache.py`); a 1000-planet rebuild is seconds.
+
+### Still open (Phase 3 remainder)
+- **How big to ship.** 956 is a deployable default; the pipeline handles any N. Going to the full
+  ~5,785 needs a lighter per-planet detail footprint (or client-rendered detail) to keep `dist`
+  sane — decide before widening.
+- **Type/metallicity archetype grid** so colour varies by planet *class*, not temperature alone
+  (currently metallicity is a single assumed value). Not yet done.
+- **Prebuilt/served search** — not needed at 956 (client filter over the fetched index is instant);
+  revisit past a few thousand.
 
 ## Settled decisions
 

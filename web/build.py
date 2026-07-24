@@ -40,6 +40,11 @@ def _env() -> Environment:
     )
 
 
+# Approximate count of confirmed exoplanets, for the honest "modelling N of ~M" line. Rounded
+# so it doesn't go stale precisely; refresh occasionally from the Archive's pscomppars count.
+KNOWN_TOTAL_APPROX = 6300
+
+
 def _planet_ctx(rec: PlanetRecord) -> dict:
     view = rec.instrument_views[0]
     args = dict(
@@ -121,10 +126,16 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
         ]
         (out / "palettes" / f"{rec.id}.ase").write_bytes(ase_bytes(entries))
 
+    # The gallery index is fetched at runtime (not inlined) so index.html stays tiny and the
+    # grid scales to thousands of planets. Cache-busted by build_id.
+    (out / f"planets.index.{build_id}.json").write_text(
+        json.dumps([_index_entry(r) for r in records], separators=(",", ":"))
+    )
     gallery_html = env.get_template("gallery.html").render(
-        planets=contexts,
         stats=_stats(records),
-        index_json=json.dumps([_index_entry(r) for r in records]),
+        index_url=f"/planets.index.{build_id}.json",
+        n_modelled=len(records),
+        known_total=KNOWN_TOTAL_APPROX,
         build_id=build_id,
     )
     (out / "index.html").write_text(gallery_html)
