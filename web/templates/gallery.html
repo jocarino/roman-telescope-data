@@ -9,6 +9,7 @@
         aria-label="How these colours are made" title="How these colours are made">i</button></span>
   </div>
   <p class="subhead" x-show="intro" x-cloak>
+    <button class="info-x" @click="intro = false" aria-label="Close">&times;</button>
     Each planet's colour is computed from its reflected-light spectrum (albedo model × host-star
     spectrum) via CIE 1931 colour matching. Every planet is shown two ways: the full modelled
     spectrum, and what the Roman Coronagraph would recover from just four bands. <strong>Both are
