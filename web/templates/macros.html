@@ -271,8 +271,8 @@
         <div x-show="view === 'roman'" x-cloak>{{ palette_full(rv.palette) }}</div>
       </div>
       <div class="scope-btns">
-        <button class="badge hex" @click="copyBase($event)"
-          x-text="'BASE ' + (view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}')"></button>
+        <button class="badge hex" @click="copyAll()"
+          title="Copy all five palette colours, comma-separated">COPY ALL</button>
         <button class="badge hex" @click="copyCssVars($event)">CSS VARS</button>
         <a class="badge hex" href="/palettes/{{ rec.id }}.ase" download>.ASE</a>
         <span class="copied" x-show="msg" x-text="msg" x-cloak></span>
@@ -288,6 +288,26 @@
       <button class="info-btn" @click="help = !help" :class="help ? 'on' : ''"
         :aria-expanded="help" title="Data source & model assumptions"
         aria-label="Data source & model assumptions">i</button>
+    </div>
+
+    <div class="dossier-help" x-show="help" x-cloak>
+      <div class="assume">
+        {% if rec.provenance in ['simulated-cgi', 'measured-cgi'] %}
+        A Roman tech-demo target: the four-band view will be replaced by <strong>real measured
+        data</strong> once Roman observes it, the only real colour this planet will ever have.
+        {% elif not rec.is_light_isolable %}
+        No telescope can ever isolate this planet's light, so both colours are
+        <strong>model-only, forever</strong>.
+        {% else %}
+        This planet's light has never been isolated by any telescope; both colours are modelled.
+        {% endif %}
+        <br><br>
+        {%- set engine = {'parametric': 'a parametric albedo model', 'cahoy': 'the Cahoy et al. 2010 grid', 'picaso': 'PICASO radiative transfer'} -%}
+        Spectrum engine: {{ engine.get(rec.params.spectrum_source, rec.params.spectrum_source) }}.
+        Model assumptions. Cloud state: {{ rec.params.assumed_cloud_state }};
+        metallicity: {{ rec.params.assumed_metallicity }}× solar;
+        phase angle: {{ rec.params.assumed_phase_angle_deg|round|int }}°.
+      </div>
     </div>
 
     <div class="dossier-grid">
@@ -313,25 +333,6 @@
       </div>
     </div>
 
-    <div class="dossier-help" x-show="help" x-cloak x-transition>
-      <div class="assume">
-        {% if rec.provenance in ['simulated-cgi', 'measured-cgi'] %}
-        A Roman tech-demo target: the four-band view will be replaced by <strong>real measured
-        data</strong> once Roman observes it, the only real colour this planet will ever have.
-        {% elif not rec.is_light_isolable %}
-        No telescope can ever isolate this planet's light, so both colours are
-        <strong>model-only, forever</strong>.
-        {% else %}
-        This planet's light has never been isolated by any telescope; both colours are modelled.
-        {% endif %}
-        <br><br>
-        {%- set engine = {'parametric': 'a parametric albedo model', 'cahoy': 'the Cahoy et al. 2010 grid', 'picaso': 'PICASO radiative transfer'} -%}
-        Spectrum engine: {{ engine.get(rec.params.spectrum_source, rec.params.spectrum_source) }}.
-        Model assumptions. Cloud state: {{ rec.params.assumed_cloud_state }};
-        metallicity: {{ rec.params.assumed_metallicity }}× solar;
-        phase angle: {{ rec.params.assumed_phase_angle_deg|round|int }}°.
-      </div>
-    </div>
   </div>
 </div>
 {%- endmacro %}
