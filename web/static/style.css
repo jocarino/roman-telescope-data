@@ -566,19 +566,28 @@ button.badge:active, a.badge:active { box-shadow: none; }
 
 /* ---- Dossier: combined renders + colour + planet info card ---- */
 .dossier-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-/* Info buttons: a circled-i "silkscreened" onto the panel in the accent colour — a printed
-   symbol, not a boxed key (round on purpose, like the knobs and LEDs: it's panel print). */
 .info-btn {
-  width: 20px; height: 20px; flex: none; border: 1px solid var(--accent); border-radius: 50%;
-  background: transparent; color: var(--accent); opacity: .75; padding: 0;
-  font-family: var(--mono); font-size: 11px; line-height: 1; cursor: pointer;
-  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; flex: none; border: 1px solid var(--line); background: var(--bg-3);
+  color: var(--fg-dim); font-family: var(--mono); font-size: 11px; line-height: 1; cursor: pointer;
+  box-shadow: 2px 2px 0 var(--line);
 }
-.info-btn:hover { opacity: 1; }
-.info-btn.on { background: var(--accent); color: #05121f; opacity: 1; }
-.info-btn:active { transform: translateY(1px); }
-.info-btn.sm { width: 16px; height: 16px; font-size: 9.5px; }
-.info-btn.xs { width: 14px; height: 14px; font-size: 8.5px; vertical-align: -2px; }
+.info-btn.on { background: var(--accent); color: #05121f; }
+.info-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line); }
+/* Accent so the "there's an explanation here" affordance reads at a glance. */
+.info-btn:not(.on) { color: var(--accent); border-color: var(--accent); }
+.info-btn.sm { width: 18px; height: 18px; font-size: 9px; box-shadow: 1px 1px 0 var(--line); }
+/* The smallest info button drops the box entirely — a bare terminal-style [i] beside the
+   label: faint brackets, accent i. A 13px box crowded the tiny labels it sits next to. */
+.info-btn.xs {
+  width: auto; height: auto; border: 0; background: none; box-shadow: none;
+  padding: 0 1px; font-size: 9.5px; vertical-align: middle;
+}
+.info-btn.xs::before { content: "["; color: var(--fg-faint); }
+.info-btn.xs::after { content: "]"; color: var(--fg-faint); }
+.info-btn.xs:hover::before, .info-btn.xs:hover::after { color: var(--accent); }
+.info-btn.xs.on { background: var(--accent); color: #05121f; }
+.info-btn.xs.on::before, .info-btn.xs.on::after { color: #05121f; }
+.info-btn.xs:active { transform: translateY(1px); box-shadow: none; }
 
 /* Hover/tap tooltip: pairs an info button with a floating explanation. Hover shows it
    (desktop); tapping the button pins it open (touch). */
