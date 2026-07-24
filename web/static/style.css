@@ -424,7 +424,6 @@ button.badge:active, a.badge:active { box-shadow: none; }
 .ro-sep { height: 1px; background: var(--line); margin: 4px 0; }
 .ro-row { display: flex; justify-content: space-between; align-items: baseline; color: var(--fg-dim); }
 .ro-row b { color: var(--fg); font-family: var(--mono); font-size: 12px; }
-.ro-note { color: var(--fg-faint); font-size: 10.5px; line-height: 1.55; margin-top: auto; }
 .scope-bottom {
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   padding: 10px 12px; border-top: 1px solid var(--line); background: #0a0c11;
@@ -567,17 +566,31 @@ button.badge:active, a.badge:active { box-shadow: none; }
 
 /* ---- Dossier: combined renders + colour + planet info card ---- */
 .dossier-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+/* Info buttons: a circled-i "silkscreened" onto the panel in the accent colour — a printed
+   symbol, not a boxed key (round on purpose, like the knobs and LEDs: it's panel print). */
 .info-btn {
-  width: 22px; height: 22px; flex: none; border: 1px solid var(--line); background: var(--bg-3);
-  color: var(--fg-dim); font-family: var(--mono); font-size: 11px; line-height: 1; cursor: pointer;
-  box-shadow: 2px 2px 0 var(--line);
+  width: 20px; height: 20px; flex: none; border: 1px solid var(--accent); border-radius: 50%;
+  background: transparent; color: var(--accent); opacity: .75; padding: 0;
+  font-family: var(--mono); font-size: 11px; line-height: 1; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
 }
-.info-btn.on { background: var(--accent); color: #05121f; }
-.info-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line); }
-/* Accent so the "there's an explanation here" affordance reads at a glance. */
-.info-btn:not(.on) { color: var(--accent); border-color: var(--accent); }
-.info-btn.sm { width: 18px; height: 18px; font-size: 9px; box-shadow: 1px 1px 0 var(--line); }
-.info-btn.xs { width: 13px; height: 13px; font-size: 7px; box-shadow: none; vertical-align: middle; }
+.info-btn:hover { opacity: 1; }
+.info-btn.on { background: var(--accent); color: #05121f; opacity: 1; }
+.info-btn:active { transform: translateY(1px); }
+.info-btn.sm { width: 16px; height: 16px; font-size: 9.5px; }
+.info-btn.xs { width: 14px; height: 14px; font-size: 8.5px; vertical-align: -2px; }
+
+/* Hover/tap tooltip: pairs an info button with a floating explanation. Hover shows it
+   (desktop); tapping the button pins it open (touch). */
+.tip { position: relative; display: inline-flex; }
+.tip-body {
+  display: none; position: absolute; bottom: calc(100% + 9px); right: -10px; z-index: 55;
+  width: 230px; padding: 10px 12px; background: #000; border: 1px solid var(--line);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, .7);
+  font-family: var(--mono); font-size: 11px; line-height: 1.55; letter-spacing: 0;
+  text-transform: none; color: var(--fg-dim); text-align: left; white-space: normal;
+}
+.tip:hover .tip-body, .tip-body.open { display: block; }
 .dossier-help { overflow: hidden; margin-top: 12px; }
 .dossier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 14px; }
 @media (max-width: 720px) { .dossier-grid { grid-template-columns: 1fr; } }
@@ -701,6 +714,8 @@ button.badge:active, a.badge:active { box-shadow: none; }
   /* On phones the count is a second row; drop it while stuck so the bar stays slim. */
   .controls.stuck .count { display: none; }
   .count { text-align: left; }
+  /* Tooltips hang right on phones: their trigger sits near the left screen edge. */
+  .tip-body { right: auto; left: -10px; }
   .grid { grid-template-columns: repeat(2, 1fr); }
   .count { flex-basis: 100%; }
   /* Two 160px-canvas cards don't fit 390px minus paddings; let the planet shrink to its
