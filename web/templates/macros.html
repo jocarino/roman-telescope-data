@@ -3,7 +3,7 @@
 {# The one back-to-gallery control, shared by every page. Place it as the FIRST child of the
    page's title row (.site-head / .detail-head) so it sits to the LEFT of the title. #}
 {% macro back_link() -%}
-  <a class="back" href="/">← ALL PLANETS</a>
+  <a class="back" href="/" aria-label="Back to all planets">←<span class="back-txt"> ALL PLANETS</span></a>
 {%- endmacro %}
 
 {% macro provenance_badge(rec) -%}
@@ -88,21 +88,6 @@
       <canvas class="detail-hero" x-show="heroSource !== 'telescope'"
         :class="heroStyle === 'retro' ? 'pixel' : ''" x-ref="cHero"
         width="256" height="256" aria-label="{{ rec.name }} modelled render"></canvas>
-      {% if rec.phase_colours %}
-      {# The phase fan: this planet at 0-150°, each a mini render; click to set the phase.
-         180° is deliberately excluded — a fully backlit planet is just a black disc. #}
-      <div class="phase-fan" x-show="heroSource !== 'telescope'" role="group"
-        aria-label="The same planet at other orbital phases">
-        <template x-for="i in fanIdxs()" :key="'f' + i">
-          <button class="fan-cell" :class="phaseIdx === i ? 'on' : ''"
-            @click="setPhaseIdx(i)" :title="phases[i].d + '°'"
-            :aria-label="'Show at ' + phases[i].d + '° phase'">
-            <canvas width="48" height="48" :data-fan="i"
-              :class="heroStyle === 'retro' ? 'pixel' : ''"></canvas>
-          </button>
-        </template>
-      </div>
-      {% endif %}
       {% if rec.real_observations %}
       <figure class="hero-obs" x-show="heroSource === 'telescope'" x-cloak>
         <button class="obs-thumb" @click="obsZoom = true" title="Click to enlarge the real image"
@@ -358,7 +343,12 @@
                   :class="info === 'phase' ? 'on' : ''"
                   aria-label="What does phase change?" title="What does phase change?">i</button>
               </span>
-              <span class="phase-val"><span x-text="phase().d + '°'"></span> ·
+              <span class="phase-val">
+                <button class="phase-play" @click="togglePhasePlay()" :class="phasePlay ? 'on' : ''"
+                  :aria-pressed="phasePlay" aria-label="Cycle through the phases automatically"
+                  :title="phasePlay ? 'Pause the phase cycle' : 'Cycle through the phases'"
+                  x-text="phasePlay ? '❚❚' : '▶'"></button>
+                <span x-text="phase().d + '°'"></span> ·
                 <span x-text="phaseName()"></span></span>
             </div>
             {# max stops at 170°: a fully backlit (180°) planet is just a black disc. #}

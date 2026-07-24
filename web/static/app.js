@@ -521,6 +521,12 @@ document.addEventListener("alpine:init", () => {
     // Slider position into `phases`. Defaults to 20° — the base render's soft day/night
     // shading already depicts a slightly-off-full planet, so the label matches the picture.
     phaseIdx: 2,
+    // The phase cycle: like the rotation, the hero smoothly waxes and wanes — a continuous
+    // sweep 0° -> 170° -> 0° (ping-pong; never the black 180°). On by default; touching the
+    // slider pins the chosen phase, the ▶ button resumes the cycle.
+    phasePlay: true,
+    _anim: null,          // { deg, dir, last } — continuous animation state
+    _PHASE_SPEED: 16,     // degrees per second (~10.6 s per sweep)
     obsZoom: false,       // real-image lightbox open?
     msg: "",
     help: false,       // dossier "how to read this" expandable (ℹ button)
@@ -550,6 +556,7 @@ document.addEventListener("alpine:init", () => {
       const fromPlanet = document.referrer.includes("/planet/");
       this.heroSource =
         src === "telescope" && fromPlanet && this.obs.length ? "telescope" : "model";
+      this._phaseLoop();  // start the wax/wane phase cycle (on by default)
     },
     _persist(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } },
     blink() {
@@ -604,16 +611,42 @@ document.addEventListener("alpine:init", () => {
       return "new (backlit)";
     },
     phaseChanged() {
-      // Sliding while the real photo shows brings the model back (photos have their own phase).
+      // A manual phase pick pins it (pauses the cycle); sliding while the real photo shows
+      // brings the model back (photos have their own phase).
+      this._pinPhase();
       if (this.heroSource === "telescope") { this.heroSource = "model"; this._persist("heroSource", "model"); }
       this.renderAll();
     },
-    // The phase fan under the hero: this planet at 0-150° in 30° steps. 180° is excluded
-    // on purpose — a fully backlit planet is just a black disc.
-    fanIdxs() {
-      return [0, 3, 6, 9, 12, 15].filter((i) => i < this.phases.length);
+    _phaseLoop() { this.renderAll(); },  // (re)issue the spin with/without the animator
+    togglePhasePlay() {
+      this.phasePlay = !this.phasePlay;
+      this._anim = null;  // restart the sweep from the current slider phase
+      this.renderAll();
     },
-    setPhaseIdx(i) { this.phaseIdx = i; this.phaseChanged(); },
+    _pinPhase() {
+      if (!this.phasePlay) return;
+      this.phasePlay = false;
+      this._anim = null;
+    },
+    // Per-frame animator handed to the spin loop: advances a continuous phase (deg) and
+    // returns that frame's { phase, palette } overrides. Also keeps the slider/readout in
+    // sync at the nearest 10° stop.
+    _phaseFrame(t) {
+      if (this.heroSource === "telescope") return null;
+      const maxDeg = (this.phases.length - 2) * 10;  // 170°
+      if (!this._anim) this._anim = { deg: this.phase().d, dir: 1, last: t };
+      const a = this._anim;
+      a.deg += a.dir * this._PHASE_SPEED * (Math.min(t - a.last, 100) / 1000);
+      a.last = t;
+      if (a.deg >= maxDeg) { a.deg = maxDeg; a.dir = -1; }
+      if (a.deg <= 0) { a.deg = 0; a.dir = 1; }
+      const idx = Math.max(0, Math.min(this.phases.length - 2, Math.round(a.deg / 10)));
+      if (idx !== this.phaseIdx) this.phaseIdx = idx;
+      return {
+        phase: (a.deg * Math.PI) / 180,
+        palette: this._phaseTint(this.view === "full" ? this.fullPalette : this.romanPalette, idx),
+      };
+    },
     // Retint a palette by the per-channel drift of the phase colour vs full phase, so the
     // render carries the modelled colour shift (subtle blueing/reddening) as it wanes.
     _phaseTint(palette, idx) {
@@ -668,21 +701,11 @@ document.addEventListener("alpine:init", () => {
         fidelity: this.fidelity,
         phase: (this.phase().d * Math.PI) / 180,
       };
-      // Single hero planet, rotating; its style (sphere/pixel) is a scope knob.
+      // Single hero planet, rotating; its style (sphere/pixel) is a scope knob. When the
+      // phase cycle is playing, the animator supplies a smoothly-advancing phase per frame.
       this.$refs.cHero.classList.toggle("pixel", this.heroStyle === "retro");
-      PlanetRender.spin(this.$refs.cHero, { ...opts, style: this.heroStyle });
-      // The phase fan: static mini renders of the same planet at each fan phase.
-      this.$el.querySelectorAll("canvas[data-fan]").forEach((cv) => {
-        const i = +cv.dataset.fan;
-        const ph = this.phases[i];
-        if (!ph) return;
-        PlanetRender.render(cv, {
-          ...opts,
-          palette: this._phaseTint(this.view === "full" ? this.fullPalette : this.romanPalette, i),
-          phase: (ph.d * Math.PI) / 180,
-          style: this.heroStyle,
-        });
-      });
+      const frame = this.phasePlay && this.phases.length > 1 ? (t) => this._phaseFrame(t) : null;
+      PlanetRender.spin(this.$refs.cHero, { ...opts, style: this.heroStyle, frame: frame });
     },
   }));
 });
