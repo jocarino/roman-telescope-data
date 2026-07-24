@@ -63,9 +63,13 @@ surfaces the real problems, *without* committing to a full front-end rebuild bli
 - The committed `data/planets.json` is the 205-planet pilot set. Regenerate with
   `uv run python -m pipeline build --bulk 200`.
 
-### Still open for Phase 2.5 (cheap, optional)
-- Distance-band and discovery-method/year filters (data already in the index or one field away).
-- Deprioritise/hide the provenance filter at scale (≈all "model").
+### Phase 2.5 (DONE)
+- **Distance-band filter** — buckets (≤25 / 25–100 / 100–500 / >500 pc) computed in JS from the
+  indexed `dist`. At 205: 13 / 27 / 65 / 100.
+- **Discovery-method filter** — present-only, most-common first (Transit 168, RV 29, Imaging 7,
+  TTV 1). Fixed the `ima → Imaging` label along the way.
+- **Provenance filter decluttered** — now lists only provenances present in the data, and
+  auto-hides entirely when only one exists (future-proof: it returns when Roman-measured lands).
 
 ## Phase 3 — broad catalog (toward the full set)
 

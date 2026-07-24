@@ -25,6 +25,7 @@ _METHOD_LABELS = {
     "rv": "Radial Velocity",
     "tran": "Transit",
     "micro": "Microlensing",
+    "ima": "Imaging",
     "imag": "Imaging",
     "ttv": "Transit Timing Variations",
     "ast": "Astrometry",

@@ -46,7 +46,7 @@
         aria-label="Search planets">
     </label>
     <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
-      @click.outside="open=false">
+      @click.outside="open=false" x-show="provWorthShowing()">
       <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
         :class="prov !== 'all' ? 'active' : ''" :title="provLabels[prov]"
         aria-label="Filter by provenance">
@@ -56,7 +56,7 @@
       </button>
       <div class="dd-menu" x-show="open" x-cloak>
         <div class="dd-head">Provenance<span class="dd-sub">how real the colour is</span></div>
-        <template x-for="[val, label] in Object.entries(provLabels)" :key="val">
+        <template x-for="[val, label] in provOptions()" :key="val">
           <button :class="prov === val ? 'on' : ''" @click="prov = val; open = false"
             x-text="label"></button>
         </template>
@@ -76,6 +76,42 @@
         <div class="dd-head">Planet type<span class="dd-sub">by size + temperature</span></div>
         <template x-for="[val, label] in typeOptions()" :key="val">
           <button :class="ptype === val ? 'on' : ''" @click="ptype = val; open = false"
+            x-text="label"></button>
+        </template>
+      </div>
+    </div>
+    <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
+      @click.outside="open=false">
+      <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
+        :class="distBand !== 'all' ? 'active' : ''" :title="distBandLabel()"
+        aria-label="Filter by distance from Earth">
+        <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <path d="M2 8h12M2 8l3-3M2 8l3 3M14 8l-3-3M14 8l-3 3" stroke="currentColor"
+            stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="dd-menu" x-show="open" x-cloak>
+        <div class="dd-head">Distance<span class="dd-sub">from Earth (parsecs)</span></div>
+        <template x-for="[val, label] in distBands" :key="val">
+          <button :class="distBand === val ? 'on' : ''" @click="distBand = val; open = false"
+            x-text="label"></button>
+        </template>
+      </div>
+    </div>
+    <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
+      @click.outside="open=false">
+      <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
+        :class="disc !== 'all' ? 'active' : ''" :title="disc === 'all' ? 'All methods' : disc"
+        aria-label="Filter by discovery method">
+        <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <path d="M8 1.5l1.6 4.9H14l-3.5 2.6 1.3 4.9L8 11.1 4.2 13.9l1.3-4.9L2 6.4h4.4z"
+            fill="currentColor"/>
+        </svg>
+      </button>
+      <div class="dd-menu" x-show="open" x-cloak>
+        <div class="dd-head">Discovery<span class="dd-sub">how it was found</span></div>
+        <template x-for="[val, label] in discOptions()" :key="val">
+          <button :class="disc === val ? 'on' : ''" @click="disc = val; open = false"
             x-text="label"></button>
         </template>
       </div>
