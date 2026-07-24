@@ -63,20 +63,22 @@
     "  float z = sqrt(1.0 - r2);",
     "  vec3 N = vec3(uv, z);",
     "  float lat = asin(clamp(uv.y,-1.,1.));",
-    // Base shading: near-full phase, single soft day/night term + limb darkening. A set
-    // phase angle draws a day/night MASK over it (the terminator sweeping gibbous -> half ->
-    // crescent -> new, like Moon phases). The mask is schematic on purpose: a physically
-    // Lambert-shaded crescent renders near-invisible; the honest brightness number is shown
-    // in the phase readout instead.
+    // Two lighting modes. phase < 0 (no phase control, e.g. gallery cards): the classic
+    // fixed soft day/night term. phase >= 0 (slider-driven): the light physically tracks
+    // the phase angle — 0 = frontal "full moon" (label FULLY LIT matches the picture),
+    // pi/2 = half, pi = backlit — with a visibility boost at crescent angles, because a
+    // strictly Lambert-shaded crescent reads as black at this size.
     "  vec3 L = normalize(vec3(cos(light)*0.55, 0.28, 0.90));",
     "  float nightF = 0.34;",
-    "  float lit = smoothstep(-0.08, 0.42, dot(N, L));",
+    "  float lit;",
     "  float limb = pow(z, 0.30);",
-    "  if(phase > 0.001){",
-    "    vec3 Lp = normalize(vec3(sin(phase), 0.22, cos(phase)));",
-    "    float day = smoothstep(-0.03, 0.10, dot(N, Lp));",
-    "    lit = lit * day;",
-    "    nightF = mix(0.34, 0.05, clamp(phase*0.55, 0.0, 1.0));",
+    "  if(phase >= 0.0){",
+    "    vec3 Lp = normalize(vec3(sin(phase), 0.25, cos(phase)));",
+    "    lit = smoothstep(-0.06, 0.34, dot(N, Lp));",
+    "    lit = min(1.0, lit * (1.0 + 2.2*clamp((phase-1.4)*0.7, 0.0, 1.0)));",
+    "    nightF = mix(0.20, 0.05, clamp(phase*0.55, 0.0, 1.0));",
+    "  } else {",
+    "    lit = smoothstep(-0.08, 0.42, dot(N, L));",
     "  }",
     "  float shade = (nightF + (1.0-nightF)*lit) * limb;",
     // Stylised: warp the belt phase and mottle the tone with turbulence (0 in classic).
@@ -110,10 +112,11 @@
     "    col = clamp(col, 0.0, 1.0);",
     "  }",
     "  if(pixel==0){ col = mix(col, pal[4], rim*haze*0.4); }",  // smooth-only haze tint
-    // Retro outline ring — but at crescent phases the lit sliver lives exactly on this rim,
-    // so exempt lit pixels when a phase is set (phase 0 keeps the classic full outline).
+    // Retro outline ring — but at crescent phases (beyond ~70°) the lit sliver lives
+    // exactly on this rim, so exempt lit pixels there; nearer full phase the classic
+    // outline stays intact.
     "  if(outline==1 && r2>0.90){",
-    "    float keepLit = (phase > 0.001) ? clamp(lit, 0.0, 1.0) : 0.0;",
+    "    float keepLit = clamp(lit, 0.0, 1.0) * clamp((phase-1.2)*1.2, 0.0, 1.0);",
     "    col *= mix(0.35, 0.9, keepLit);",
     "  }",
     "  gl_FragColor = vec4(col, 1.0);",
@@ -195,7 +198,7 @@
     gl.uniform1f(U.warmCool, aug ? 1.0 : 0.0);
     gl.uniform1f(U.bandGain, aug ? 0.66 : 0.44);
     gl.uniform1f(U.light, opts.light == null ? 0.0 : opts.light);
-    gl.uniform1f(U.phase, opts.phase == null ? 0.0 : opts.phase);
+    gl.uniform1f(U.phase, opts.phase == null ? -1.0 : opts.phase);  // -1 = no phase control
     gl.uniform1i(U.pixel, pixel ? 1 : 0);
     // retro = fewer, bolder colour bands + outline; modern = more bands, no outline. Dither
     // amplitude is ~one posterization step so transitions read as clean pixel-art gradients.
