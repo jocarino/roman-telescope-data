@@ -64,19 +64,22 @@
     "  vec3 N = vec3(uv, z);",
     "  float lat = asin(clamp(uv.y,-1.,1.));",
     // Two lighting modes. phase < 0 (no phase control, e.g. gallery cards): the classic
-    // fixed soft day/night term. phase >= 0 (slider-driven): the light physically tracks
-    // the phase angle — 0 = frontal "full moon" (label FULLY LIT matches the picture),
-    // pi/2 = half, pi = backlit — with a visibility boost at crescent angles, because a
-    // strictly Lambert-shaded crescent reads as black at this size.
+    // fixed soft day/night term. phase >= 0 (slider/cycle-driven): the light physically
+    // orbits with the phase angle — 0 = frontal full moon, pi/2 = half (lit right),
+    // pi = backlit/dark, 3pi/2 = half lit from the LEFT (the waxing side of a full lunar
+    // cycle) — with a visibility boost at crescent angles, because a strictly
+    // Lambert-shaded crescent reads as black at this size. `pe` is the effective
+    // illumination phase (0..pi, side-agnostic) used for the night floor and the boost.
     "  vec3 L = normalize(vec3(cos(light)*0.55, 0.28, 0.90));",
     "  float nightF = 0.34;",
     "  float lit;",
     "  float limb = pow(z, 0.30);",
     "  if(phase >= 0.0){",
     "    vec3 Lp = normalize(vec3(sin(phase), 0.25, cos(phase)));",
+    "    float pe = min(phase, 6.28319 - phase);",
     "    lit = smoothstep(-0.06, 0.34, dot(N, Lp));",
-    "    lit = min(1.0, lit * (1.0 + 2.2*clamp((phase-1.4)*0.7, 0.0, 1.0)));",
-    "    nightF = mix(0.20, 0.05, clamp(phase*0.55, 0.0, 1.0));",
+    "    lit = min(1.0, lit * (1.0 + 2.2*clamp((pe-1.4)*0.7, 0.0, 1.0)));",
+    "    nightF = mix(0.20, 0.05, clamp(pe*0.55, 0.0, 1.0));",
     "  } else {",
     "    lit = smoothstep(-0.08, 0.42, dot(N, L));",
     "  }",
@@ -116,7 +119,7 @@
     // exactly on this rim, so exempt lit pixels there; nearer full phase the classic
     // outline stays intact.
     "  if(outline==1 && r2>0.90){",
-    "    float keepLit = clamp(lit, 0.0, 1.0) * clamp((phase-1.2)*1.2, 0.0, 1.0);",
+    "    float keepLit = clamp(lit, 0.0, 1.0) * clamp((min(phase, 6.28319-phase)-1.2)*1.2, 0.0, 1.0);",
     "    col *= mix(0.35, 0.9, keepLit);",
     "  }",
     "  gl_FragColor = vec4(col, 1.0);",
