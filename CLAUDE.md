@@ -111,6 +111,17 @@ divergence and merge churn. To avoid it:
 - `data/planets.json` is the committed source of truth (regenerate with
   `pipeline build --bulk N`); `dist/` is gitignored and built at deploy. Regenerating data is a
   "data side" change — don't do it from a UI-side session.
+- **Preview servers: use `tools/exohub.py`, not a bare `http.server`.** When several sessions
+  each serve their own `dist/`, nobody can tell which `localhost:PORT` is which worktree. Instead:
+  - `python3 tools/exohub.py serve --build` — builds `dist/` and serves it on **this worktree's
+    stable port** (`main`→8799; every other worktree hashes its branch into 8800–8889, same port
+    every run). It also injects a `▟ <worktree> :<port>` badge into every page so the browser tab
+    itself says which worktree you're viewing. **Always tell the user the resulting URL/port.**
+  - `python3 tools/exohub.py dash` — a live table of every running preview server mapped back to
+    its worktree (works even for servers started the old way, flagged `⚠ off-slot`).
+  - `python3 tools/exohub.py mprocs` — one labelled pane per worktree (plus a dash pane) in
+    [mprocs](https://github.com/pvolok/mprocs), for watching them all at once.
+  Note: the machine only has `python3` (no bare `python`). See the README for the full rundown.
 
 ## Milestones
 
