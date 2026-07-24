@@ -102,7 +102,7 @@
       <div class="desc-slot{% if rec.real_observations %} has-obs{% endif %}">
         {# Mobile-only expander (hidden on desktop, where everything below is always visible). #}
         <button class="desc-toggle" @click="descOpen = !descOpen" :class="descOpen ? 'on' : ''"
-          :aria-expanded="descOpen">what am I looking at <span x-text="descOpen ? '▴' : '▾'"></span></button>
+          :aria-expanded="descOpen">more <span x-text="descOpen ? '▴' : '▾'"></span></button>
         <div class="desc-body" :class="descOpen ? 'open' : ''">
           <div class="title-badges">{{ provenance_badge(rec) }}
             <span class="badge">{{ rec.discovery.method }}</span></div>
