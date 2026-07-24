@@ -28,8 +28,11 @@ _METHOD_LABELS = {
     "ima": "Imaging",
     "imag": "Imaging",
     "ttv": "Transit Timing Variations",
+    "etv": "Eclipse Timing Variations",
     "ast": "Astrometry",
     "puls": "Pulsar Timing",
+    "dkin": "Disk Kinematics",
+    "obm": "Orbital Brightness Modulation",
 }
 
 
