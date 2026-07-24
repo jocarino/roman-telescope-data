@@ -639,18 +639,11 @@ button.badge:active, a.badge:active { box-shadow: none; }
 }
 .rail-lbl::after { content: ""; flex: 1; height: 1px; background: var(--line); align-self: center; }
 .rail-sub { font-size: 8px; letter-spacing: .4px; color: var(--fg-faint); }
-/* ΔE is the signature number (how much colour Roman's filter set loses): the big readout. */
-.meas-hero { display: flex; flex-direction: column; gap: 1px; margin-bottom: 11px; }
-.meas-lbl {
-  font-family: var(--mono); font-size: 10px; letter-spacing: .5px; color: var(--fg-dim);
-  display: inline-flex; align-items: center; gap: 5px;
-}
-.meas-num {
-  font-family: var(--mono); font-size: 31px; line-height: 1.15; font-weight: 700;
-  letter-spacing: -.5px; color: var(--fg); font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 12px color-mix(in srgb, var(--accent) 35%, transparent);
-}
+/* ΔE (how much colour Roman's filter set loses): same compact row as the other readouts;
+   the first row sits directly under the MEASURE heading, so no dashed divider above it. */
+.meas-row { border-top: 0; margin-top: 0; padding-top: 0; }
 .meas-sub {
+  display: block; margin-top: 2px;
   font-family: var(--mono); font-size: 8.5px; letter-spacing: .4px; color: var(--fg-faint);
   text-transform: uppercase;
 }

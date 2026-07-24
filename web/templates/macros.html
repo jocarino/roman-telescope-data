@@ -298,8 +298,8 @@
       <aside class="scope-rail">
         <section class="rail-mod rail-measure">
           <h4 class="rail-lbl">Measure</h4>
-          <div class="meas-hero">
-            <span class="meas-lbl">&#916;E2000
+          <div class="ro-row meas-row">
+            <span>&#916;E2000
               <span class="tip" x-data="{ t: false }" @click.outside="t = false">
                 <button class="info-btn xs" @click="t = !t" :class="t ? 'on' : ''"
                   aria-label="What does &#916;E2000 mean?">i</button>
@@ -309,9 +309,9 @@
                   {{ iview.reconstruction.extrapolated_below_nm|round|int }}&nbsp;nm Roman is
                   blind, so the model holds the spectrum flat there.</span>
               </span></span>
-            <b class="meas-num">{{ '%.1f'|format(iview.reconstruction_error.delta_e2000) }}</b>
-            <span class="meas-sub">colour lost to Roman's 4 bands</span>
+            <b>{{ '%.1f'|format(iview.reconstruction_error.delta_e2000) }}</b>
           </div>
+          <span class="meas-sub">colour lost to Roman's 4 bands</span>
           <div class="ro-row"><span>Y BRIGHT
             <span class="tip" x-data="{ t: false }" @click.outside="t = false">
               <button class="info-btn xs" @click="t = !t" :class="t ? 'on' : ''"
