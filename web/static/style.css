@@ -1068,6 +1068,32 @@ button.badge:active, a.badge:active { box-shadow: none; }
 /* "Source" is the special knob (model <-> real photo): a faint accent ring marks it. */
 .knob-cell-source .knob { box-shadow: 0 3px 5px rgba(0, 0, 0, .65), inset 0 1px 1px rgba(255, 255, 255, .18), inset 0 -2px 3px rgba(0, 0, 0, .5), 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent); }
 
+/* "Light source" knob (its own star <-> the Sun). The Roman 4-band channel has no Sun-swap,
+   so on CH2 the knob + value read as inert (.na); clicking it brings back the full-spectrum
+   channel instead of being locked out (same forgiveness as Style under the telescope photo). */
+.knob.na { opacity: .45; }
+.knob.na .knob-dot { background: var(--fg-faint); box-shadow: none; }
+.knob-val.na { color: var(--fg-faint); }
+/* One-line ΔE readout under the knob row: how far the colour moves if the Sun were its star. */
+.illum-note {
+  margin-top: 9px; text-align: center; font-family: var(--mono); font-size: 8.5px;
+  letter-spacing: .4px; text-transform: uppercase; color: var(--fg-faint);
+}
+.illum-note .illum-de {
+  color: var(--fg-dim); background: var(--bg-3); border: 1px solid var(--line);
+  padding: 1px 4px; margin-right: 5px;
+}
+/* Inline Sun-lit swatch inside the Light-source explainer prose. */
+.illum-swatch {
+  display: inline-block; width: 11px; height: 11px; border: 1px solid #000;
+  vertical-align: -1px; margin: 0 4px 0 2px;
+}
+/* On-glass tag beside the CH1 hex while the Sun-lit variant is showing. */
+.hud-sun {
+  font-family: var(--pixel); font-size: 6.5px; letter-spacing: .4px; padding: 1px 3px;
+  border: 1px solid currentColor; margin-left: 2px;
+}
+
 /* ---- RUN LED: slow pulse for life, quick white flash on view change ---- */
 .led.on { animation: ledpulse 2.4s ease-in-out infinite; }
 @keyframes ledpulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
