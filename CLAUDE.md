@@ -28,8 +28,11 @@ of every known exoplanet, derived from physics."
 3. **Cahoy et al. 2010 albedo model grids** — precomputed Jupiter/Neptune-class
    albedo spectra at varying star-planet distances, metallicities, and cloud states.
    Good fallback/validation set; these are what the Roman Coronagraph community uses.
-4. **Host-star illuminants** — approximate stars as blackbodies from Teff for v1;
-   upgrade to PHOENIX/Kurucz model spectra later if needed.
+4. **Host-star illuminants** — stars are blackbodies from Teff. DECIDED (2026-07): this is
+   the v1 convention, not a stopgap — no PHOENIX/Kurucz upgrade planned. A blackbody captures
+   the first-order effect (the star's tint, which dominates for cool hosts); model spectra
+   would only refine M-dwarf band structure, and swapping illuminants means regenerating
+   every colour. The per-planet `sun_swap` field makes the illuminant's role explicit instead.
 5. **Roman Coronagraph (CGI) bandpasses** — the Roman hook. CGI observes in four
    visible bands: imaging/polarimetry at 575 nm (10% bandwidth) and 835 nm (15%),
    slit spectroscopy at 660 nm and 730 nm (6% each, R~50). Model these as top-hat
