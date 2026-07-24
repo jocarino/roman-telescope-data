@@ -9,10 +9,42 @@ document.addEventListener("alpine:init", () => {
     q: "",
     prov: "all",
     sort: "name",
+    hue: "all",
     // Labels for the custom (retro) dropdowns.
     provLabels: {
       all: "All", model: "Modelled", "simulated-cgi": "Roman: simulated",
       "measured-cgi": "Roman: measured", "model-microlensing": "Microlensing",
+    },
+    // Filter-by-colour families, derived client-side from each planet's base hex.
+    hueLabels: {
+      all: "All colours", blue: "Blues", teal: "Teals & greens", gold: "Golds & browns",
+      cream: "Creams & whites", pink: "Pinks & violets", dark: "Near-black",
+    },
+    hueSwatch: {
+      all: "", blue: "#5b8fd6", teal: "#3fbfa0", gold: "#c9a35c",
+      cream: "#e8e2d4", pink: "#d06bb0", dark: "#171b22",
+    },
+    // Bucket a hex into one of the families above (HSL heuristics; display taxonomy only).
+    hueOf(hex) {
+      const r = parseInt(hex.slice(1, 3), 16) / 255;
+      const g = parseInt(hex.slice(3, 5), 16) / 255;
+      const b = parseInt(hex.slice(5, 7), 16) / 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      const l = (max + min) / 2, d = max - min;
+      const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+      let h = 0;
+      if (d > 0) {
+        if (max === r) h = ((g - b) / d + 6) % 6;
+        else if (max === g) h = (b - r) / d + 2;
+        else h = (r - g) / d + 4;
+        h *= 60;
+      }
+      if (l < 0.14) return "dark";
+      if (s < 0.15) return l > 0.4 ? "cream" : "dark";
+      if (h < 20 || h >= 270) return "pink";
+      if (h < 70) return "gold";
+      if (h < 190) return "teal";
+      return "blue";
     },
     sortLabels: {
       name: "Sort: name", temp: "Sort: hottest", lum: "Sort: brightest",
@@ -70,6 +102,7 @@ document.addEventListener("alpine:init", () => {
     get view() {
       let items = (window.PLANETS || []).filter((p) => {
         if (this.prov !== "all" && p.prov !== this.prov) return false;
+        if (this.hue !== "all" && this.hueOf(p.hex) !== this.hue) return false;
         if (this.q) {
           const s = (p.name + " " + p.host).toLowerCase();
           if (!s.includes(this.q.toLowerCase())) return false;

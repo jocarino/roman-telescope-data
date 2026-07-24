@@ -597,7 +597,17 @@ body::after {
 @keyframes ledflash { 0% { background: #fff; box-shadow: 0 0 9px #fff; } 100% { background: #4ade80; } }
 
 /* ---- Mobile-only chrome (function keys, caption expander, hamburger): hidden on desktop ---- */
-.scope-fnrow, .desc-toggle, .m-only { display: none; }
+.scope-fnrow, .desc-toggle, .m-only, .m-spacer { display: none; }
+
+/* Colour-family filter menu: little swatch chips beside each family name. */
+.hue-chip {
+  width: 13px; height: 13px; display: inline-block; border: 1px solid #000;
+  margin-right: 9px; vertical-align: -2px; background: #333a48;
+}
+.hue-chip.rainbow { background: linear-gradient(90deg, #d06bb0, #c9a35c, #3fbfa0, #5b8fd6); }
+
+/* The gallery ℹ rides inline at the end of the tagline. */
+.tagline .info-btn { vertical-align: middle; margin-left: 6px; }
 /* Two scope faces are emitted; desktop shows the wide one, phones the compact one. */
 .spec-compact { display: none; }
 
@@ -607,7 +617,9 @@ body::after {
      into the hamburger menu. */
   .m-hide { display: none; }
   .m-only { display: inline-block; }
-  .m-menu { min-width: 232px; }
+  .m-spacer { display: block; }
+  /* The hamburger is the rightmost control, so its menu hangs left from it. */
+  .m-menu { min-width: 232px; left: auto; right: 0; }
   .m-menu .dd-head { border-top: 1px solid var(--line); }
   .m-menu .dd-head:first-child { border-top: 0; }
   .m-menu-row { padding: 10px 12px; display: flex; gap: 8px; flex-wrap: wrap; }
