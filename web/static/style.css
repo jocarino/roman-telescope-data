@@ -748,6 +748,11 @@ button.badge:active, a.badge:active { box-shadow: none; }
   .site-head .back:active { transform: translateY(-50%) translate(1px, 1px); }
   .detail-head .back { top: 6px; margin-top: 0; }
 }
+/* Phones: the back control collapses to just the arrow. */
+@media (max-width: 560px) {
+  .back .back-txt { display: none; }
+  .back { padding: 7px 11px; font-size: 11px; }
+}
 .detail-head { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; margin: 12px 0 22px; }
 .detail-title { flex: 1 1 340px; min-width: 280px; }
 /* Reserve a stable height so flipping the Source knob (short modelled caption <-> longer
@@ -1002,7 +1007,18 @@ button.badge:active, a.badge:active { box-shadow: none; }
 /* Phase slider (in the Planet display rail): drag the planet full -> crescent -> new. */
 .phase-row { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
 .phase-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.phase-val { font-family: var(--mono); font-size: 9px; letter-spacing: .3px; color: var(--accent); text-transform: uppercase; }
+.phase-val {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .3px; color: var(--accent);
+  text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px;
+}
+/* Play/pause for the wax-wane phase cycle. */
+.phase-play {
+  font-family: var(--mono); font-size: 7.5px; line-height: 1; padding: 3px 4px;
+  color: var(--fg-dim); background: var(--bg-3); border: 1px solid var(--line);
+  border-radius: 0; cursor: pointer;
+}
+.phase-play:hover { border-color: var(--accent); color: var(--fg); }
+.phase-play.on { color: var(--accent); border-color: var(--accent); }
 .phase-slider {
   -webkit-appearance: none; appearance: none; width: 100%; height: 4px; margin: 4px 0 2px;
   background: var(--line); outline: none; cursor: pointer; border-radius: 0;
@@ -1020,16 +1036,6 @@ button.badge:active, a.badge:active { box-shadow: none; }
   display: flex; justify-content: space-between;
   font-family: var(--mono); font-size: 8.5px; letter-spacing: .5px; color: var(--fg-faint);
 }
-/* Phase fan under the hero render: the same planet at 0-150°, click to set the phase. */
-.phase-fan { display: flex; gap: 3px; margin-top: 8px; }
-.fan-cell {
-  padding: 1px; border: 1px solid var(--line); background: var(--bg-3); cursor: pointer;
-  line-height: 0; border-radius: 0;
-}
-.fan-cell:hover { border-color: var(--accent); }
-.fan-cell.on { border-color: var(--accent); box-shadow: 2px 2px 0 var(--accent); }
-.fan-cell canvas { width: 20px; height: 20px; display: block; }
-.fan-cell canvas.pixel { image-rendering: pixelated; image-rendering: crisp-edges; }
 .knob {
   width: 44px; height: 44px; border-radius: 50%; position: relative; cursor: pointer;
   margin: 7px;  /* room for the tick ring */

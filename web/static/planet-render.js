@@ -220,12 +220,17 @@
   // Rotation: a rAF loop that re-renders with an advancing `rot`. Throttled to ~30fps.
   // Only ever run for a few canvases at once (detail page + hovered card), so it's cheap.
   function spin(canvas, opts) {
+    // Re-spinning an already-spinning canvas (e.g. the phase cycle re-issuing options)
+    // carries the rotation over, so the globe keeps turning smoothly instead of jumping.
+    var prev = canvas.__spin;
     stop(canvas);
-    var st = { rot: Math.random() * 6.283, last: 0 };
+    var st = { rot: prev ? prev.rot : Math.random() * 6.283, last: 0 };
     function frame(t) {
       if (t - st.last > 33) {
         st.rot += 0.05;
-        render(canvas, Object.assign({}, opts, { rot: st.rot }));
+        // opts.frame(t) may return per-frame overrides (e.g. an animated phase + tint).
+        var extra = opts.frame ? opts.frame(t) : null;
+        render(canvas, Object.assign({}, opts, extra || {}, { rot: st.rot }));
         st.last = t;
       }
       st.raf = requestAnimationFrame(frame);
@@ -237,11 +242,12 @@
     if (canvas && canvas.__spin) { cancelAnimationFrame(canvas.__spin.raf); canvas.__spin = null; }
   }
 
-  // Deterministic per-planet phase for the gallery: hash the id into 10-140 deg (radians).
-  // Stable across visits and re-renders (filters, scroll), so a planet keeps its phase —
-  // the grid reads as a sky of worlds caught at different points in their orbits.
+  // Per-planet gallery phase in 10-140 deg (radians): a per-page-load random seed mixed
+  // with the planet id. Every refresh deals new phases across the grid; within one load a
+  // planet's phase is stable, so filters / scrolling / hover never make cards flicker.
+  var PHASE_SEED = (Math.random() * 0xffffffff) >>> 0;
   function hashPhase(id) {
-    var h = 2166136261;
+    var h = 2166136261 ^ PHASE_SEED;
     for (var i = 0; i < id.length; i++) { h ^= id.charCodeAt(i); h = (h * 16777619) >>> 0; }
     var t = (h % 1000) / 999;
     return ((10 + 130 * t) * Math.PI) / 180;
