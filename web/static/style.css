@@ -666,6 +666,10 @@ button.badge:active, a.badge:active { box-shadow: none; }
 }
 .back:hover { color: var(--fg); border-color: var(--accent); }
 .back:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--line); }
+/* Inside a title row (.site-head / .detail-head) the back button sits to the LEFT of the
+   page title, vertically centred on it, instead of stacked above. */
+.site-head .back { margin: 0; align-self: center; }
+.detail-head .back { margin: 4px 0 0; }
 .detail-head { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; margin: 12px 0 22px; }
 .detail-title { flex: 1 1 340px; min-width: 280px; }
 /* Reserve a stable height so flipping the Source knob (short modelled caption <-> longer

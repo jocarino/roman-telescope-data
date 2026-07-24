@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+{% from "macros.html" import back_link %}
 {% block title %}Compare planets · Exoplanet Palette{% endblock %}
 {% block content %}
-<a class="back" href="/">← all planets</a>
 <div class="compare-page">
 <div class="site-head">
+  {{ back_link() }}
   <h1>Compare planets</h1>
   <span class="tagline">two worlds side by side — what makes their colours differ</span>
 </div>
