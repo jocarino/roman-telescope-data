@@ -15,7 +15,7 @@
   --fg: #e8ecf4;
   --fg-dim: #97a1b4;
   --fg-faint: #6b7488;
-  --accent: #7cc4ff;
+  --accent: #23c4e8;  /* Tron — the default accent (see [data-accent] themes below) */
   --radius: 0px;
   --shadow: 0 0 0 rgba(0, 0, 0, 0);
   --pixel: "Silkscreen", ui-monospace, monospace;
@@ -275,6 +275,11 @@ a.badge:active { transform: translateY(1px); }
 :root[data-accent="amber"]    { --accent: #ffb000; }  /* amber terminal */
 :root[data-accent="pink"]     { --accent: #ff5fa2; }  /* synthwave */
 :root[data-accent="violet"]   { --accent: #b98cff; }  /* vaporwave */
+:root[data-accent="lime"]     { --accent: #c3f53a; }  /* radar lime */
+:root[data-accent="ember"]    { --accent: #ff8a3d; }  /* ember orange */
+:root[data-accent="crimson"]  { --accent: #ff5555; }  /* terminal red */
+:root[data-accent="magenta"]  { --accent: #ff4fd8; }  /* hot magenta */
+:root[data-accent="mono"]     { --accent: #e2e9f3; }  /* monochrome white */
 .accents { display: inline-flex; gap: 5px; align-items: center; }
 .acc { width: 24px; height: 24px; border: 1px solid var(--line); cursor: pointer; padding: 0; }
 .acc.acc-blue,     .acc-swatch.acc-blue     { background: #7cc4ff; }
@@ -288,7 +293,15 @@ a.badge:active { transform: translateY(1px); }
 .acc.acc-amber,    .acc-swatch.acc-amber    { background: #ffb000; }
 .acc.acc-pink,     .acc-swatch.acc-pink     { background: #ff5fa2; }
 .acc.acc-violet,   .acc-swatch.acc-violet   { background: #b98cff; }
+.acc.acc-lime,     .acc-swatch.acc-lime     { background: #c3f53a; }
+.acc.acc-ember,    .acc-swatch.acc-ember    { background: #ff8a3d; }
+.acc.acc-crimson,  .acc-swatch.acc-crimson  { background: #ff5555; }
+.acc.acc-magenta,  .acc-swatch.acc-magenta  { background: #ff4fd8; }
+.acc.acc-mono,     .acc-swatch.acc-mono     { background: #e2e9f3; }
 .acc.on { outline: 2px solid var(--fg); outline-offset: 1px; }
+/* Hover just rings the swatch in the accent — the generic .dd-menu button:hover below
+   would otherwise repaint the swatch background near-black. */
+.acc:hover { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 /* ---- Colour bar: filter planets by colour family + "nearest in colour" pill ---- */
 /* "Nearest in colour to X" indicator, shown while the similar-colour sort is active. */
@@ -376,7 +389,8 @@ button.badge:active, a.badge:active { box-shadow: none; }
   background: transparent; border: 0; color: var(--fg-dim); font: inherit; font-size: 13px;
   text-align: left; padding: 9px 12px; cursor: pointer; white-space: nowrap;
 }
-.dd-menu button:hover { background: var(--bg-3); color: var(--fg); }
+/* Exclude the colour swatches: repainting their background near-black on hover hid the colour. */
+.dd-menu button:not(.acc):hover { background: var(--bg-3); color: var(--fg); }
 .dd-menu button.on { color: var(--accent); }
 /* Little header explaining what the dropdown filters on. */
 .dd-head {
@@ -384,6 +398,17 @@ button.badge:active, a.badge:active { box-shadow: none; }
   font-family: var(--mono); font-size: 9.5px; letter-spacing: .5px; text-transform: uppercase;
   color: var(--fg-dim); white-space: nowrap;
 }
+/* Collapsible section header in the hamburger menu: the whole bar toggles its group,
+   with a chevron marking open/closed. Expanded by default (see gallery template). */
+.dd-sec {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%; background: none; border-left: 0; border-right: 0;
+  cursor: pointer; text-align: left;
+}
+.dd-sec:hover, .dd-sec:hover .dd-chev { color: var(--fg); }
+.dd-chev { flex: none; color: var(--fg-faint); font-size: 9px; }
+/* Options stack full-width (the .dd-menu flex column no longer reaches them directly). */
+.dd-sec-body { display: flex; flex-direction: column; }
 .dd-sub {
   display: block; margin-top: 2px; font-size: 10px; letter-spacing: 0;
   text-transform: none; color: var(--fg-faint);
