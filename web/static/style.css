@@ -530,6 +530,10 @@ button.badge:active, a.badge:active { box-shadow: none; }
 .params td { padding: 6px 0; border-bottom: 1px solid var(--line); }
 .params td:first-child { color: var(--fg-dim); }
 .params td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+/* Jargon [i] tooltips in the data card sit in the left label column, so they open
+   rightward (the default opens left, which would clip against the panel edge). */
+.params .tip { margin-left: 5px; }
+.params .tip-body { right: auto; left: -10px; }
 
 /* Assumptions / banner */
 /* Same accent-callout look as .scope-info / .subhead, so all ℹ reveals match. */
