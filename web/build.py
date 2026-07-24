@@ -44,6 +44,9 @@ def _env() -> Environment:
 # so it doesn't go stale precisely; refresh occasionally from the Archive's pscomppars count.
 KNOWN_TOTAL_APPROX = 6300
 
+# Distance is stored in parsecs but shown in light-years everywhere (friendlier to non-astronomers).
+_LY_PER_PC = 3.26156
+
 
 def _planet_ctx(rec: PlanetRecord) -> dict:
     view = rec.instrument_views[0]
@@ -81,6 +84,16 @@ def _index_entry(rec: PlanetRecord) -> dict:
         "palette": [s.hex for s in rec.true_colour.palette],
         "radius": rec.params.radius_r_earth,
         "cloud": rec.params.assumed_cloud_state,
+        # Extra fields for the compare page (the colour-driving data + fun facts).
+        "dist_ly": (
+            round(rec.params.distance_pc * _LY_PER_PC, 1) if rec.params.distance_pc else None
+        ),
+        "starTeff": rec.host_star.teff_k,
+        "starType": rec.host_star.spectral_type,
+        "metal": rec.params.assumed_metallicity,
+        "mass": rec.params.mass_m_earth,
+        "sma": rec.params.semi_major_axis_au,
+        "year": rec.discovery.year,
     }
 
 
@@ -140,6 +153,12 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     )
     (out / "index.html").write_text(gallery_html)
     (out / "how.html").write_text(env.get_template("how.html").render(build_id=build_id))
+    # Compare page: consumes the same fetched index; deep-linkable via ?a=&b=.
+    (out / "compare.html").write_text(
+        env.get_template("compare.html").render(
+            index_url=f"/planets.index.{build_id}.json", build_id=build_id
+        )
+    )
 
     page_tpl = env.get_template("planet.html")
     frag_tpl = env.get_template("fragments/planet_detail.html")
