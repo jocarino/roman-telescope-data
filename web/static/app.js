@@ -26,6 +26,7 @@ document.addEventListener("alpine:init", () => {
     provLabels: {
       all: "All", model: "Modelled", "simulated-cgi": "Roman: simulated",
       "measured-cgi": "Roman: measured", "model-microlensing": "Microlensing",
+      "measured-albedo": "Spectrum: measured",
     },
     typeLabels: {
       all: "All types", rocky: "Rocky", "super-earth": "Super-Earth",
@@ -213,7 +214,7 @@ document.addEventListener("alpine:init", () => {
       const m = {
         model: "Modelled", "model-microlensing": "Modelled",
         "simulated-cgi": "Roman: simulated", "measured-cgi": "Roman: measured",
-        "measured-hwo": "HWO: measured",
+        "measured-hwo": "HWO: measured", "measured-albedo": "Spectrum: measured",
       };
       return m[prov] || prov;
     },

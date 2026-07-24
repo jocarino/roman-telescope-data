@@ -54,6 +54,8 @@ class PlanetInput:
     is_light_isolable: bool = True
     is_cgi_target: bool = False
     sky: SkyPosition | None = None
+    # Solar system anchors: the provider holds a real measured albedo spectrum, not a model.
+    has_measured_albedo: bool = False
 
 
 def obtain_band_samples(
@@ -94,6 +96,8 @@ def _delta_e2000(a: ColourResult, b: ColourResult) -> float:
 def _determine_provenance(pin: PlanetInput, views: list[InstrumentViewModel]) -> str:
     if any(v.band_samples.source == "measured" for v in views):
         return "measured-cgi"
+    if pin.has_measured_albedo:
+        return "measured-albedo"
     if not pin.is_light_isolable:
         return "model-microlensing"
     if pin.is_cgi_target:

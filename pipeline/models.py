@@ -17,6 +17,10 @@ Provenance = Literal[
     "simulated-cgi",
     "measured-cgi",
     "measured-hwo",
+    # Solar system anchors: the albedo spectrum is a real measurement (Karkoschka 1998 /
+    # Payne et al. 2026), only the solar illuminant is modelled. The one provenance whose
+    # colour can be checked against an actual photograph.
+    "measured-albedo",
 ]
 ColourMethod = Literal["full-spectrum", "band-reconstruction"]
 Confidence = Literal["high", "medium", "low"]
@@ -179,10 +183,11 @@ class Discovery(BaseModel):
 
 
 class RealObservation(BaseModel):
-    """A genuine processed telescope image of the planet — a direct-imaging point source,
-    never an artist's impression. Present ONLY for the handful of directly-imaged planets;
-    everything else has no image of its own (microlensing: none ever; RV/transit: not yet).
-    The colour on the page is still modelled — this is the actual, usually infrared, dot."""
+    """A genuine processed image of the planet — never an artist's impression. Present only
+    for the handful of directly-imaged exoplanets (infrared point-source dots; the page
+    colour is still modelled) and the solar system anchors (real visible-light spacecraft
+    photographs — the ground truth for the measured-albedo swatch). Everything else has no
+    image of its own (microlensing: none ever; RV/transit: not yet)."""
 
     telescope: str  # short selector tag: "JWST", "Roman", "VLT", "Subaru"
     file: str  # path under web/static/, e.g. "obs/hr-8799-b.jpg"

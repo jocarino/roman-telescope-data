@@ -15,6 +15,7 @@ from pipeline.config import INSTRUMENTS, ROMAN_CGI
 from pipeline.demo_planets import demo_planets
 from pipeline.emit.cache import cached_build_record
 from pipeline.emit.writer import write_planets
+from pipeline.solar_system import solar_system_planets
 from pipeline.system import attach_systems
 
 
@@ -28,9 +29,9 @@ def cmd_build(args: argparse.Namespace) -> None:
     if args.source == "demo":
         inputs = demo_planets()
     elif args.bulk is not None:
-        inputs = catalog_bulk(args.bulk, use_cache=not args.no_cache)
+        inputs = solar_system_planets() + catalog_bulk(args.bulk, use_cache=not args.no_cache)
     else:
-        inputs = catalog_planets(use_cache=not args.no_cache)
+        inputs = solar_system_planets() + catalog_planets(use_cache=not args.no_cache)
     if args.limit is not None:
         inputs = inputs[: args.limit]
 
