@@ -1,10 +1,14 @@
 # Scaling plan: 20 → 200 → ~1,000 → the broad catalog
 
-The gallery is a deliberately curated set of 20 well-characterised planets. Scaling toward the
-~6,000 known exoplanets is not "more of the same": most planets are only partially characterised,
-so the pipeline must (a) refuse to invent colours it can't justify, (b) fall back to archetype
-assumptions *transparently*, and (c) survive the front-end load. This doc records what is already
-built and the staged path to a broad catalog.
+**Status: COMPLETE (2026-07-24).** The full catalog is live in production: **5,759 planets**
+(full archive pull: 6,290 fetched, 531 excluded by the completeness gate). Final numbers are
+recorded in the Phase 3 completion section below; the rest of the doc is the staged path that
+got there.
+
+The gallery began as a deliberately curated set of 20 well-characterised planets. Scaling toward
+the ~6,000 known exoplanets was not "more of the same": most planets are only partially
+characterised, so the pipeline must (a) refuse to invent colours it can't justify, (b) fall back
+to archetype assumptions *transparently*, and (c) survive the front-end load.
 
 ## Phase 1 — data-layer foundations (DONE)
 
@@ -60,8 +64,8 @@ surfaces the real problems, *without* committing to a full front-end rebuild bli
   green 1) — validating the colour filter, which at 19 planets was ~⅔ blue.
 - Spectrum engines spread across the set (≈parametric 158 / cahoy 40 / picaso 7); no `#0000ff`
   clipping artifacts.
-- The committed `data/planets.json` is the 205-planet pilot set. Regenerate with
-  `uv run python -m pipeline build --bulk 200`.
+- At this phase the committed `data/planets.json` was the 205-planet pilot set (the file was
+  still small enough to commit then; it is release-hosted now).
 
 ### Phase 2.5 (DONE)
 - **Distance-band filter** — buckets (≤25 / 25–100 / 100–500 / >500 pc) computed in JS from the
@@ -71,18 +75,20 @@ surfaces the real problems, *without* committing to a full front-end rebuild bli
 - **Provenance filter decluttered** — now lists only provenances present in the data, and
   auto-hides entirely when only one exists (future-proof: it returns when Roman-measured lands).
 
-## Phase 3 — broad catalog (IN PROGRESS)
+## Phase 3 — broad catalog (DONE)
 
-Real archive scale (measured): **6,324** confirmed planets, of which **~5,785 (91%)** pass the
-completeness gate. Pre-generating detail pages + fragments for all of those is ~230 MB of static
-HTML — impractical to commit and deploy. So Phase 3 splits into "make the front-end scale to any
-N" (done) and "how big a set we actually ship" (a deployment cap, not a pipeline limit).
+Real archive scale at the time of the pilot: ~6,300 confirmed planets, of which ~91% pass the
+completeness gate. Pre-generating detail pages + fragments for all of those looked impractical
+to commit and deploy, so Phase 3 split into "make the front-end scale to any N" and "how big a
+set we actually ship". Both halves are now resolved: the front-end scales, `dist/` is never
+committed (built at deploy), and the data artifact moved out of git to GitHub Releases — see
+the completion section below.
 
-- **Scaled data + honest count — DONE.** `--bulk 1000` builds a **956-planet** catalog (nearest
-  gated + curated pins). The gallery states it honestly: *"Modelling 956 of the ~6,300 known
-  exoplanets — the nearest that pass our data-completeness gate."* (`KNOWN_TOTAL_APPROX` in
-  `web/build.py`.) `data/planets.json` at 956 is 9.6 MB (committed); `dist/` (gitignored, built
-  at deploy) is ~43 MB.
+- **Scaled data + honest count — DONE.** `--bulk 1000` built a **956-planet** interim catalog
+  (nearest gated + curated pins). The gallery states the count honestly: *"Modelling N of the
+  ~6,300 known exoplanets…"* (`KNOWN_TOTAL_APPROX` in `web/build.py`.) At 956,
+  `data/planets.json` was 9.6 MB (then committed); `dist/` (gitignored, built at deploy) was
+  ~43 MB.
 - **Front-end rebuild — DONE.** The gallery no longer inlines the index or server-renders every
   card. Instead: build writes `dist/planets.index.<build>.json`; the gallery **fetches** it, then
   renders cards **incrementally** from JS (60/batch, infinite-scroll via a sentinel
@@ -102,22 +108,33 @@ N" (done) and "how big a set we actually ship" (a deployment cap, not a pipeline
 
 - **Incremental builds** — already in place (`emit/cache.py`); a 1000-planet rebuild is seconds.
 
-### Still open (Phase 3 remainder)
-- **How big to ship.** 956 is a deployable default; the pipeline handles any N. Going to the full
-  ~5,785 needs a lighter per-planet detail footprint (or client-rendered detail) to keep `dist`
-  sane — decide before widening.
+### Phase 3 completion (2026-07-24) — final numbers
+- **How big to ship — RESOLVED: everything.** The full archive pull is deployed: **6,290
+  fetched, 531 excluded** by the gate (288 no host-star Teff, 229 no computable temperature,
+  14 stellar-remnant hosts) → **5,759 planets live**. Engines: 4,439 parametric, 1,320 Cahoy,
+  PICASO for selected targets. 1 microlensing planet (TCP J05074264+2447555 b), 3
+  simulated-cgi targets.
+- **The "impractical to commit and deploy" problem dissolved**, in two moves:
+  - `data/planets.json` (~82 MB) is no longer committed — it is a GitHub Release asset
+    published by `scripts/release-data.sh`; the committed one-line `data/RELEASE` names the
+    tag and clean builds fetch it via `scripts/fetch_data.py` (no token needed, public repo).
+    The Dockerfile fetches the release before rendering; Dokploy builds it on a push webhook.
+  - `web.build` streams one planet at a time: all 5,759 pages render in ~7 s locally, peak
+    RSS ~780 MB (dominated by the parsed dataset). `dist/` ≈ 477 MB (gitignored, built at
+    deploy); the runtime gallery index ≈ 2.5 MB.
 - **Type/metallicity archetype grid** so colour varies by planet *class*, not temperature alone
-  (currently metallicity is a single assumed value). Not yet done.
-- **Prebuilt/served search** — not needed at 956 (client filter over the fetched index is instant);
-  revisit past a few thousand.
+  (currently metallicity is a single assumed value). Still open.
+- **Prebuilt/served search** — still client-side over the fetched index at 5,759; revisit only
+  if it degrades.
 
 ## Settled decisions
 
 - **Unknown host star (e.g. OGLE microlensing) — EXCLUDE.** The illuminant *is* the colour, so a
   made-up star produces a made-up colour with no point in showing it. The gate now requires a
   real host-star temperature; planets without one are dropped (and logged). This drops the OGLE
-  microlensing example from the curated set; the microlensing badge/banner code remains for any
-  future planet that *does* have a characterised host.
+  microlensing example from the curated set; the microlensing badge/banner code remains for
+  planets that *do* have a characterised host (exactly one in the full catalog:
+  TCP J05074264+2447555 b).
 - **Missing radius on giants — keep `n/a`, don't fabricate.** The model uses a generic default
   internally for routing only; radius barely affects reflected-light colour, and inventing a
   displayed value would add nothing.

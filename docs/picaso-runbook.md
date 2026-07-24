@@ -223,8 +223,10 @@ uv run python -m pipeline build                # hot Jupiters / off-grid now rou
 # spot-check: spectrum_source == "picaso" for hot Jupiters; cool giants stay "cahoy"
 uv run python -m web.build --out dist
 ```
-Commit `data/planets.json` (+ cached spectra, or regenerate in CI). No web/template changes
-needed — the "How to read this" panel already reports the engine.
+Commit the cached spectra (`data/picaso_spectra/*.npz` — small, IS committed) and release
+the data: `scripts/release-data.sh` → commit `data/RELEASE` (`planets.json` itself is
+release-hosted, not committed). No web/template changes needed — the "How to read this"
+panel already reports the engine.
 
 ---
 

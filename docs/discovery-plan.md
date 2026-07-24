@@ -1,7 +1,7 @@
 # Plan — Discovery stage (finding your own planets)
 
-Status: **planned, not started.** Sequenced *after* the PICASO/Cahoy spectrum router.
-This is a future milestone; nothing here is built yet.
+Status: **planned, not started.** Was sequenced *after* the PICASO/Cahoy spectrum router,
+which has since shipped — this is now unblocked, but nothing here is built yet.
 
 ## Context
 
