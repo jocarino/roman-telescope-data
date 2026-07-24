@@ -114,6 +114,18 @@ def test_gate_excludes_unknown_star():
     assert not ok and "host star" in reason
 
 
+def test_gate_excludes_stellar_remnant_host():
+    # Eclipse-timing planet around a hot subdwarf / white dwarf (host far too hot for a star).
+    ok, reason = completeness_gate(_rec(pl_rade=13.0, pl_eqt=300.0, st_teff=40000.0))
+    assert not ok and "too hot" in reason
+
+
+def test_gate_keeps_hot_main_sequence_star():
+    # A genuine hot A-star (e.g. beta Pic ~8000 K) must still pass.
+    ok, _ = completeness_gate(_rec(pl_bmasse=3000.0, pl_eqt=1700.0, st_teff=8000.0))
+    assert ok
+
+
 def test_gate_excludes_no_temperature():
     ok, reason = completeness_gate(_rec(pl_rade=1.0, st_teff=5772.0))  # nothing to compute from
     assert not ok and "temperature" in reason
