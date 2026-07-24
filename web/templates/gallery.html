@@ -8,18 +8,29 @@
       <button class="info-btn sm" @click="intro = !intro" :class="intro ? 'on' : ''"
         aria-label="How these colours are made" title="How these colours are made">i</button></span>
   </div>
-  <p class="subhead" x-show="intro" x-cloak>
+  <div class="subhead intro-box" x-show="intro" x-cloak>
     <button class="info-x" @click="intro = false" aria-label="Close">&times;</button>
-    Each planet's colour is computed from its reflected-light spectrum (albedo model × host-star
-    spectrum) via CIE 1931 colour matching. Every planet is shown two ways: the full modelled
-    spectrum, and what the Roman Coronagraph would recover from just four bands. <strong>Both are
-    modelled predictions, not photographs</strong>. For Roman's ~dozen tech-demo targets, the
-    four-band view will one day be replaced by real measured data. Planet and star data:
-    <a href="https://exoplanetarchive.ipac.caltech.edu/" target="_blank" rel="noopener">NASA
-    Exoplanet Archive</a>.
-    <strong>Want the whole journey from starlight to hex code?</strong>
-    <a href="/how.html">How we get the colours →</a>
-  </p>
+    <div class="intro-row">
+      <span class="intro-lbl">The colour</span>
+      <p>Computed from each planet's reflected-light spectrum (albedo model × host-star spectrum)
+        via CIE 1931 colour matching — no photographs involved.</p>
+    </div>
+    <div class="intro-row">
+      <span class="intro-lbl">Two views</span>
+      <p>Every planet is shown both ways: the full modelled spectrum, and what the Roman
+        Coronagraph would recover from just four bands. For Roman's ~dozen tech-demo targets,
+        the four-band view will one day be replaced by real measured data.</p>
+    </div>
+    <div class="intro-row">
+      <span class="intro-lbl">Honesty</span>
+      <p><strong>Both are modelled predictions, not photographs.</strong></p>
+    </div>
+    <div class="intro-foot">
+      <span>Planet &amp; star data: <a href="https://exoplanetarchive.ipac.caltech.edu/"
+        target="_blank" rel="noopener">NASA Exoplanet Archive</a></span>
+      <a class="intro-link" href="/how.html">How we get the colours →</a>
+    </div>
+  </div>
   <p class="subhead lede">Modelling <strong>{{ n_modelled }}</strong> of the ~{{ known_total }}
     known exoplanets — the nearest that pass our data-completeness gate.
     <a class="lede-link" href="/compare.html">⇄ Compare two planets →</a></p>
