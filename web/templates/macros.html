@@ -61,6 +61,13 @@
     romanOog: {{ 'true' if rv.out_of_gamut else 'false' }},
     fullPalette: [{% for s in tc.palette %}'{{ s.hex }}'{{ ',' if not loop.last }}{% endfor %}],
     romanPalette: [{% for s in rv.palette %}'{{ s.hex }}'{{ ',' if not loop.last }}{% endfor %}],
+    {%- if rec.sun_swap %}{% set ss = rec.sun_swap %}
+    hasSun: true, sunHex: '{{ ss.colour.hex }}',
+    sunLum: {{ '%.3f'|format(ss.colour.luminance_y) }},
+    sunOog: {{ 'true' if ss.colour.out_of_gamut else 'false' }},
+    sunDe: {{ '%.1f'|format(ss.delta_e2000_vs_true) }},
+    sunPalette: [{% for s in ss.colour.palette %}'{{ s.hex }}'{{ ',' if not loop.last }}{% endfor %}],
+    {%- endif %}
     radius: {{ rec.params.radius_r_earth if rec.params.radius_r_earth else 8 }},
     cloudState: '{{ rec.params.assumed_cloud_state }}',
     fullCap: 'Modelled from the complete reflected-light spectrum (380–780 nm): a physics prediction, not a photograph.',
@@ -82,7 +89,7 @@
   </div>
   {% endif %}
 
-  <div class="detail-head" x-effect="view; fidelity; heroStyle; $nextTick(() => renderAll())">
+  <div class="detail-head" x-effect="view; fidelity; heroStyle; illum; $nextTick(() => renderAll())">
     {{ back_link() }}
     <div class="hero-stack">
       <canvas class="detail-hero" x-show="heroSource !== 'telescope'"
@@ -218,6 +225,32 @@
           knob appears on some pages and not others. When more than one telescope has imaged
           the same planet (e.g. JWST and, later, Roman), a small tab picks between them.</p>
       </div></template>
+      {% if rec.sun_swap %}
+      <template x-if="info === 'illum'"><div>
+        <p><strong>Light source</strong>: same planet, same atmosphere — a different lamp. A
+          planet's colour is its reflectivity times the light falling on it, so part of every
+          colour here belongs to the star, not the planet.</p>
+        <p><strong>Its own star</strong>: lit by {{ rec.host_star.name }}
+          ({{ rec.host_star.teff_k|round|int }}&nbsp;K, modelled as a blackbody).
+          <strong>The Sun</strong>: the identical planet re-lit by our Sun (5772&nbsp;K) —
+          around the Sun this world would come out
+          <span class="illum-swatch" style="background: {{ rec.sun_swap.colour.hex }}"></span><code>{{ rec.sun_swap.colour.hex }}</code>.</p>
+        <p>The shift is <strong>&#916;E {{ '%.1f'|format(rec.sun_swap.delta_e2000_vs_true) }}</strong>
+          (0 = identical, above ~2 is visible to the eye).
+          {% if rec.sun_swap.delta_e2000_vs_true < 2 %}
+          Barely any change: this colour belongs to the <strong>planet itself</strong>, and its
+          host is close enough to Sun-like that swapping lamps does nothing — that is the point.
+          {% elif rec.sun_swap.delta_e2000_vs_true < 10 %}
+          A visible change: some of this planet's native colour is really its
+          <strong>star's tint</strong>, the rest is the planet's own.
+          {% else %}
+          A big change: most of this planet's native colour is really its
+          <strong>star's light</strong>, not the planet — cool red stars tint everything they shine on.
+          {% endif %}</p>
+        <p>Both are <strong>modelled, not photographed</strong>. The Roman 4-band channel has no
+          Sun-lit version, so this knob acts on the full-spectrum view only.</p>
+      </div></template>
+      {% endif %}
       {% if rec.phase_colours %}
       <template x-if="info === 'phase'"><div>
         <p><strong>Phase</strong> works like Moon phases: how much of the planet's lit side
@@ -246,7 +279,8 @@
         <div class="hud hud-top">
           <button class="hud-ch ch1" :class="view === 'full' ? 'live' : ''"
             @click="setView('full')" title="Show the full-spectrum colour">
-            <span class="sw"></span>CH1 FULL <code>{{ tc.hex }}</code></button>
+            <span class="sw"></span>CH1 FULL <code x-text="sunSet() ? sunHex : '{{ tc.hex }}'">{{ tc.hex }}</code><span
+              class="hud-sun" x-show="sunSet()" x-cloak title="Re-lit by the Sun">&#9737; SUN-LIT</span></button>
           <button class="hud-ch ch2" :class="view === 'roman' ? 'live' : ''"
             @click="setView('roman')" title="Show the Roman four-band colour">
             <span class="sw"></span>CH2 ROMAN <code>{{ rv.hex }}</code></button>
@@ -286,7 +320,7 @@
                 0 = pitch black, 1 = a perfect white reflector. Most planets are dim, so the
                 swatches are brightened for display.</span>
             </span></span>
-            <b x-text="(view === 'full' ? fullLum : romanLum).toFixed(3)"></b></div>
+            <b x-text="curLum().toFixed(3)"></b></div>
           <div class="ro-row"><span>GAMUT
             <span class="tip" x-data="{ t: false }" @click.outside="t = false">
               <button class="info-btn xs" @click="t = !t" :class="t ? 'on' : ''"
@@ -296,8 +330,8 @@
                 gamut: the modelled colour is more saturated than a screen can display, so it
                 is clamped to the closest displayable colour.</span>
             </span></span>
-            <b><i class="gled" :class="(view === 'full' ? fullOog : romanOog) ? 'bad' : ''"></i><span
-              x-text="(view === 'full' ? fullOog : romanOog) ? 'OOG' : 'OK'"></span></b></div>
+            <b><i class="gled" :class="curOog() ? 'bad' : ''"></i><span
+              x-text="curOog() ? 'OOG' : 'OK'"></span></b></div>
         </section>
         <i class="rail-vent" aria-hidden="true"></i>
         <section class="rail-mod rail-display">
@@ -321,6 +355,20 @@
               <span class="knob-name">Shape</span>
               <span class="knob-val" x-text="heroStyle === 'retro' ? 'Pixel' : 'Sphere'"></span>
             </div>
+            {% if rec.sun_swap %}
+            <div class="knob-cell knob-cell-illum">
+              <div class="knob" role="button" tabindex="0"
+                title="Re-light this planet with the Sun instead of its own star"
+                @click="toggleIlluminant()" @keydown.enter.prevent="toggleIlluminant()"
+                :class="view === 'roman' ? 'na' : ''"
+                :style="{ '--a': illum === 'native' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
+              <span class="knob-name">Light source
+                <button class="info-btn xs" @click="toggleInfo('illum')" :class="info === 'illum' ? 'on' : ''"
+                  aria-label="What does light source change?" title="What does light source change?">i</button></span>
+              <span class="knob-val" :class="view === 'roman' ? 'na' : ''"
+                x-text="view === 'roman' ? 'Full spectrum only' : (illum === 'native' ? 'Its own star' : 'The Sun')"></span>
+            </div>
+            {% endif %}
             {% if rec.real_observations %}
             <div class="knob-cell knob-cell-source">
               <div class="knob knob-source" role="button" tabindex="0"
@@ -334,6 +382,12 @@
             </div>
             {% endif %}
           </div>
+          {% if rec.sun_swap %}
+          {# One honest number for the swap: how far the colour moves if the Sun were its star.
+             ~0 for Sun-like hosts (flipping changes nothing — that IS the point). #}
+          <div class="illum-note"><span class="illum-de">&#916;E {{ '%.1f'|format(rec.sun_swap.delta_e2000_vs_true) }}</span>
+            colour shift if the Sun were its star</div>
+          {% endif %}
           {% if rec.phase_colours %}
           {# Phase slider: drag the planet from fully lit (0°) to a thin crescent (170°).
              Drives the render's terminator and the phase fan under the hero. #}
@@ -375,10 +429,12 @@
       </div>
     </div>
     <div class="scope-bottom">
-      <span class="scope-pallabel">PALETTE OUT ▸ <span class="pv"
-        x-text="view === 'full' ? 'full spectrum' : 'Roman 4-band'"></span></span>
+      <span class="scope-pallabel">PALETTE OUT ▸ <span class="pv" x-text="viewName()"></span></span>
       <div class="scope-pal">
-        <div x-show="view === 'full'">{{ palette_full(tc.palette) }}</div>
+        <div x-show="view === 'full' && !sunlit()">{{ palette_full(tc.palette) }}</div>
+        {% if rec.sun_swap %}
+        <div x-show="sunlit()" x-cloak>{{ palette_full(rec.sun_swap.colour.palette) }}</div>
+        {% endif %}
         <div x-show="view === 'roman'" x-cloak>{{ palette_full(rv.palette) }}</div>
       </div>
       <div class="scope-btns">
@@ -399,7 +455,7 @@
   <div class="panel dossier">
     <div class="dossier-head">
       <h3>Planet data <span style="color:var(--fg-faint);text-transform:none;font-weight:400">(<span
-        x-text="view === 'full' ? 'full spectrum' : 'Roman 4-band'"></span>)</span></h3>
+        x-text="viewName()"></span>)</span></h3>
       <button class="info-btn" @click="help = !help" :class="help ? 'on' : ''"
         :aria-expanded="help" title="Data source & model assumptions"
         aria-label="Data source & model assumptions">i</button>
@@ -438,11 +494,11 @@
     <div class="dossier-grid">
       <div class="dossier-stats">
         <div class="dossier-sub">Colour · <span
-          x-text="view === 'full' ? 'full-spectrum model' : 'Roman four-band'"></span></div>
+          x-text="view === 'roman' ? 'Roman four-band' : (sunlit() ? 'full-spectrum model, lit by the Sun' : 'full-spectrum model')"></span></div>
         <table class="params">
-          <tr><td>Base hex</td><td><code x-text="view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}'"></code></td></tr>
-          <tr><td>Reflected brightness (Y){{ jinfo('How much light the colour reflects overall (CIE luminance): 0 = pitch black, 1 = a perfect white reflector. Most planets are dim, so the swatches are shown brightened.') }}</td><td x-text="(view === 'full' ? fullLum : romanLum).toFixed(3)"></td></tr>
-          <tr><td>Out of sRGB gamut{{ jinfo('Whether the modelled colour is more saturated than a screen can show. If so, it is clamped to the nearest colour the display can reproduce.') }}</td><td x-text="(view === 'full' ? fullOog : romanOog) ? 'yes' : 'no'"></td></tr>
+          <tr><td>Base hex</td><td><code x-text="curHex()">{{ tc.hex }}</code></td></tr>
+          <tr><td>Reflected brightness (Y){{ jinfo('How much light the colour reflects overall (CIE luminance): 0 = pitch black, 1 = a perfect white reflector. Most planets are dim, so the swatches are shown brightened.') }}</td><td x-text="curLum().toFixed(3)"></td></tr>
+          <tr><td>Out of sRGB gamut{{ jinfo('Whether the modelled colour is more saturated than a screen can show. If so, it is clamped to the nearest colour the display can reproduce.') }}</td><td x-text="curOog() ? 'yes' : 'no'"></td></tr>
         </table>
       </div>
       <div class="dossier-stats">

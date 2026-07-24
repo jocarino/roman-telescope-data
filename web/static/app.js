@@ -514,6 +514,11 @@ document.addEventListener("alpine:init", () => {
     fidelity: localStorage.getItem("renderFidelity") || "classic",
     heroStyle: "retro",   // hero render: "retro" (pixel) or "smooth" (sphere)
     heroSource: "model",  // hero shows the "model" render or the real "telescope" image
+    // Illuminant swap ("Light source" knob): "native" = the planet's own star, "sun" = the
+    // same albedo re-lit by the Sun. Data injected by init when the record carries it.
+    illum: "native",
+    hasSun: false,
+    sunHex: null, sunLum: 0, sunOog: false, sunPalette: null, sunDe: null,
     obs: [],              // real telescope images for this planet (0+), injected by init
     obsIdx: 0,            // which telescope image is selected (when >1 exist)
     phases: [],           // phase-resolved colours ({d, h, l} at 0-180°), injected by init
@@ -544,6 +549,10 @@ document.addEventListener("alpine:init", () => {
     init() {
       const v = localStorage.getItem("scopeView");
       if (v === "full" || v === "roman") this.view = v;
+      // The Light-source knob position also survives hops — but only onto planets that
+      // carry a Sun-swap (all should; the guard keeps a missing one from wedging the UI).
+      const il = localStorage.getItem("scopeIllum");
+      if (il === "sun" && this.hasSun) this.illum = "sun";
       // Shape shares the gallery's Sphere/Pixel key so both pages always agree.
       const hs = localStorage.getItem("planetStyle");
       if (hs === "retro" || hs === "smooth") this.heroStyle = hs;
@@ -600,6 +609,33 @@ document.addEventListener("alpine:init", () => {
       this.blink();
     },
     toggleInfo(k) { this.info = this.info === k ? null : k; },
+    // --- Illuminant swap ("Light source" knob) ------------------------------------------
+    // True when the Sun-lit variant is what's on screen (full-spectrum channel only: the
+    // Roman 4-band channel has no Sun-swap, so on CH2 the native data always shows).
+    sunSet() { return this.hasSun && this.illum === "sun"; },      // the knob's position
+    sunlit() { return this.sunSet() && this.view === "full"; },    // ...and it's on screen
+    // The active channel's palette/colour/etc — one source of truth for the hero render,
+    // the readouts, the dossier and the palette exports.
+    curPalette() { return this.view === "roman" ? this.romanPalette : (this.sunlit() ? this.sunPalette : this.fullPalette); },
+    curHex() { return this.view === "roman" ? this.romanHex : (this.sunlit() ? this.sunHex : this.fullHex); },
+    curLum() { return this.view === "roman" ? this.romanLum : (this.sunlit() ? this.sunLum : this.fullLum); },
+    curOog() { return this.view === "roman" ? this.romanOog : (this.sunlit() ? this.sunOog : this.fullOog); },
+    // What the palette-out / dossier headers call the current output.
+    viewName() {
+      if (this.view === "roman") return "Roman 4-band";
+      return this.sunlit() ? "full spectrum · Sun-lit" : "full spectrum";
+    },
+    // Flip the lamp. On the Roman channel the knob isn't locked out: the first click brings
+    // back the full-spectrum channel (where the swap lives), a further click then flips it —
+    // the same forgiving pattern as the Style knob while the telescope photo is showing.
+    toggleIlluminant() {
+      if (!this.hasSun) return;
+      if (this.view === "roman") { this.setView("full"); return; }
+      this.illum = this.illum === "native" ? "sun" : "native";
+      this._persist("scopeIllum", this.illum);
+      this.blink();
+      this._sweep();
+    },
     // Phase slider: the current stop, a plain-English name for it, and the redraw hook.
     phase() { return this.phases[this.phaseIdx] || { d: 0, h: this.fullHex, l: this.fullLum }; },
     phaseName() {
@@ -644,7 +680,7 @@ document.addEventListener("alpine:init", () => {
       if (idx !== this.phaseIdx) this.phaseIdx = idx;
       return {
         phase: (a.deg * Math.PI) / 180,
-        palette: this._phaseTint(this.view === "full" ? this.fullPalette : this.romanPalette, idx),
+        palette: this._phaseTint(this.curPalette(), idx),
       };
     },
     // Retint a palette by the per-channel drift of the phase colour vs full phase, so the
@@ -678,12 +714,12 @@ document.addEventListener("alpine:init", () => {
     // All five stops of the current view's palette, comma-joined (dark -> light);
     // single stops are click-to-copy on the chips, CSS vars / .ASE cover the rest.
     copyAll() {
-      const pal = this.view === "full" ? this.fullPalette : this.romanPalette;
+      const pal = this.curPalette();
       navigator.clipboard?.writeText(pal.join(", "));
       this.flash("copied all " + pal.length + " colours");
     },
     copyCssVars() {
-      const pal = this.view === "full" ? this.fullPalette : this.romanPalette;
+      const pal = this.curPalette();
       const roles = ["shade-2", "shade-1", "base", "tint-1", "tint-2"];
       const lines = pal.map((h, i) => `  --planet-${roles[i] || i}: ${h};`);
       const css = ":root {\n" + lines.join("\n") + "\n}";
@@ -694,10 +730,10 @@ document.addEventListener("alpine:init", () => {
     renderAll() {
       if (!window.PlanetRender || !this.$refs.cHero) return;
       const opts = {
-        palette: this._phaseTint(this.view === "full" ? this.fullPalette : this.romanPalette),
+        palette: this._phaseTint(this.curPalette()),
         radius: this.radius,
         cloudState: this.cloudState,
-        lumY: this.view === "full" ? this.fullLum : this.romanLum,
+        lumY: this.curLum(),
         fidelity: this.fidelity,
         phase: (this.phase().d * Math.PI) / 180,
       };
