@@ -39,11 +39,15 @@ document.addEventListener("alpine:init", () => {
     // Retro accent palettes (id must match CSS [data-accent] + .acc-<id>).
     accents: [
       { id: "blue", name: "Cobalt" },
-      { id: "mustard", name: "Gold" },
+      { id: "electric", name: "Electric" },
+      { id: "ice", name: "Ice" },
+      { id: "tron", name: "Tron" },
+      { id: "cyan", name: "Teletext" },
+      { id: "seafoam", name: "Seafoam" },
       { id: "green", name: "Phosphor" },
+      { id: "mustard", name: "Gold" },
       { id: "amber", name: "Amber" },
       { id: "pink", name: "Synthwave" },
-      { id: "cyan", name: "Teletext" },
       { id: "violet", name: "Vaporwave" },
     ],
     setAccent(a) {
