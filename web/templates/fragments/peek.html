@@ -42,3 +42,17 @@
     <span class="peek-step-sub">via CIE 1931 colour matching</span>
   </div>
 </div>
+
+{# Compact pop-culture tag, only for planets in the fiction overlay. Same cyan/magenta glitch
+   language as the gallery filter, but lighter — just the works, no notes. #}
+{% if ctx.fiction %}
+{%- set media = {'book': '📖', 'film': '🎬', 'tv': '📺', 'game': '🎮'} -%}
+<div class="peek-fiction">
+  <div class="peek-fiction-lbl"><span class="peek-fiction-glyph">◈</span> Seen in fiction</div>
+  <ul class="peek-fiction-list">
+    {% for r in ctx.fiction.references %}
+    <li><span class="peek-fic-med">{{ media.get(r.medium, '◈') }}</span><span class="peek-fic-work">{{ r.work }}</span>{% if r.year %}<span class="peek-fic-yr"> · {{ r.year }}</span>{% endif %}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}

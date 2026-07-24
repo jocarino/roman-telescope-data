@@ -880,6 +880,23 @@ button.badge:active, a.badge:active { box-shadow: none; }
 .peek-colour code { font-family: var(--mono); font-size: 13px; color: var(--fg); }
 .peek-colour .peek-step-sub { margin-top: 0; margin-left: auto; }
 
+/* Compact "seen in fiction" tag in the hold-to-peek — its own cyan/magenta palette (not the
+   accent), matching the gallery filter so the feature reads as one thing. */
+.peek-fiction {
+  margin-top: 12px; padding: 9px 11px; border: 1px solid #2b2b3d; border-left: 3px solid #ff2e97;
+  background: #0a0a12;
+}
+.peek-fiction-lbl {
+  display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: .8px; text-transform: uppercase; color: #14e0e6; margin-bottom: 6px;
+}
+.peek-fiction-glyph { color: #ff2e97; font-size: 11px; line-height: 1; }
+.peek-fiction-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.peek-fiction-list li { font-size: 12px; color: var(--fg-dim); line-height: 1.4; }
+.peek-fic-med { margin-right: 6px; }
+.peek-fic-work { color: var(--fg); }
+.peek-fic-yr { font-family: var(--mono); font-size: 10px; color: var(--fg-faint); }
+
 
 /* ---- Dossier: combined renders + colour + planet info card ---- */
 .dossier-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
