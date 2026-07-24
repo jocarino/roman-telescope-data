@@ -522,7 +522,8 @@ document.addEventListener("alpine:init", () => {
     // shading already depicts a slightly-off-full planet, so the label matches the picture.
     phaseIdx: 2,
     // The phase cycle: like the rotation, the hero smoothly waxes and wanes — a continuous
-    // sweep 0° -> 170° -> 0° (ping-pong; never the black 180°). On by default; touching the
+    // sweep 0° -> 170°, then reset to full and sweep again (never the black 180°; like a
+    // moon running through its cycle). On by default; touching the
     // slider pins the chosen phase, the ▶ button resumes the cycle.
     phasePlay: true,
     _anim: null,          // { deg, dir, last } — continuous animation state
@@ -634,12 +635,11 @@ document.addEventListener("alpine:init", () => {
     _phaseFrame(t) {
       if (this.heroSource === "telescope") return null;
       const maxDeg = (this.phases.length - 2) * 10;  // 170°
-      if (!this._anim) this._anim = { deg: this.phase().d, dir: 1, last: t };
+      if (!this._anim) this._anim = { deg: this.phase().d, last: t };
       const a = this._anim;
-      a.deg += a.dir * this._PHASE_SPEED * (Math.min(t - a.last, 100) / 1000);
+      a.deg += this._PHASE_SPEED * (Math.min(t - a.last, 100) / 1000);
       a.last = t;
-      if (a.deg >= maxDeg) { a.deg = maxDeg; a.dir = -1; }
-      if (a.deg <= 0) { a.deg = 0; a.dir = 1; }
+      if (a.deg >= maxDeg) a.deg = 0;  // end of the sweep: snap back to full, go again
       const idx = Math.max(0, Math.min(this.phases.length - 2, Math.round(a.deg / 10)));
       if (idx !== this.phaseIdx) this.phaseIdx = idx;
       return {
