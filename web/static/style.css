@@ -618,6 +618,9 @@ body::after {
   .m-hide { display: none; }
   .m-only { display: inline-block; }
   .m-spacer { display: block; }
+  /* Only the mobile spacer stretches; the desktop one would split the slack and
+     leave search + hamburger floating mid-row instead of flush right. */
+  .controls > .spacer:not(.m-spacer) { display: none; }
   /* The hamburger is the rightmost control, so its menu hangs left from it. */
   .m-menu { min-width: 232px; left: auto; right: 0; }
   .m-menu .dd-head { border-top: 1px solid var(--line); }

@@ -159,14 +159,18 @@ document.addEventListener("alpine:init", () => {
     init() {
       const v = localStorage.getItem("scopeView");
       if (v === "full" || v === "roman") this.view = v;
-      const hs = localStorage.getItem("heroStyle");
+      // Shape shares the gallery's Sphere/Pixel key so both pages always agree.
+      const hs = localStorage.getItem("planetStyle");
       if (hs === "retro" || hs === "smooth") this.heroStyle = hs;
       // Keep the same telescope selected if this planet was imaged by it too.
       const tel = localStorage.getItem("obsTelescope");
       if (tel) { const j = this.obs.findIndex((o) => o.telescope === tel); if (j >= 0) this.obsIdx = j; }
-      // Stay on the real photo only if this planet actually has one; else fall back to model.
+      // The real photo persists only across planet-to-planet hops (same-system links);
+      // arriving from the gallery or a fresh visit always opens on the modelled render.
       const src = localStorage.getItem("heroSource");
-      this.heroSource = src === "telescope" && this.obs.length ? "telescope" : "model";
+      const fromPlanet = document.referrer.includes("/planet/");
+      this.heroSource =
+        src === "telescope" && fromPlanet && this.obs.length ? "telescope" : "model";
     },
     _persist(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } },
     blink() {
@@ -187,7 +191,7 @@ document.addEventListener("alpine:init", () => {
     toggleHeroStyle() {
       if (this.heroSource === "telescope") { this.heroSource = "model"; this._persist("heroSource", "model"); this.blink(); this.renderAll(); return; }
       this.heroStyle = this.heroStyle === "retro" ? "smooth" : "retro";
-      this._persist("heroStyle", this.heroStyle);
+      this._persist("planetStyle", this.heroStyle);
       this.renderAll();
     },
     // The currently-selected real image (safe when none exist).
