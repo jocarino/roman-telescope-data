@@ -548,5 +548,57 @@
     </ul>
   </div>
   {% endif %}
+
+  {# ── Where in the sky: the "go outside and look at it" chart. The crosshair is this
+     planet's host star at its real J2000 position; every faint dot is another host star
+     from this catalog. Only renders when the data release carries sky positions. #}
+  {% if rec.sky and ctx.sky_svg %}
+  {%- set sky = rec.sky -%}
+  <div class="panel skypanel" x-data="{ sh: false }">
+    <div class="dossier-head">
+      <h3>Where in the sky</h3>
+      <button class="info-btn" @click="sh = !sh" :class="sh ? 'on' : ''" :aria-expanded="sh"
+        title="How to read this chart" aria-label="How to read this chart">i</button>
+    </div>
+    <div class="dossier-help" x-show="sh" x-cloak>
+      <div class="assume">
+        <button class="info-x" @click="sh = false" aria-label="Close">&times;</button>
+        The whole sky flattened into one map, in the coordinates printed star charts use:
+        <strong>right ascension</strong> (the sky's longitude, in hours — running right to
+        left, as on a chart held overhead) and <strong>declination</strong> (the sky's
+        latitude — positive means northern sky, negative southern). The
+        <strong>crosshair</strong> marks {{ rec.host_star.name }}, this planet's host star.
+        Every faint dot is another star in this catalog with a modelled planet.
+        <br><br>
+        What you could ever see from your backyard is the <strong>star</strong> — no
+        exoplanet is visible to the eye through any telescope. But the planet is physically
+        there, inside that point of light.
+      </div>
+    </div>
+    <div class="sky-wide">{{ ctx.sky_svg|safe }}</div>
+    <div class="sky-compact">{{ ctx.sky_svg_compact|safe }}</div>
+    <div class="sky-facts">
+      <span>Constellation <b>{{ sky.constellation }}</b></span>
+      <span>RA <b>{{ ctx.sky_ra }}</b> · Dec <b>{{ ctx.sky_dec }}</b></span>
+      <span>Star brightness{{ jinfo("Apparent V magnitude — astronomers' brightness scale, where SMALLER is brighter: Sirius, the brightest star, is −1.5; the naked-eye limit under a dark sky is about 6.5.") }}
+        <b>{{ ('V ' ~ sky.v_mag|round(1)) if sky.v_mag is not none else 'unmeasured' }}</b></span>
+    </div>
+    {% if sky.naked_eye %}
+    <p class="sky-note vis"><span class="sky-eye">◉ NAKED-EYE STAR</span> — at magnitude
+      {{ sky.v_mag|round(1) }}, {{ rec.host_star.name }} is bright enough to find without a
+      telescope under a dark sky. Look toward {{ sky.constellation }}: the planet is far too
+      faint for any eye, but it is really there, in that point of light.</p>
+    {% elif sky.v_mag is not none %}
+    <p class="sky-note">At magnitude {{ sky.v_mag|round(1) }} this star is below the
+      naked-eye limit (≈ 6.5 under a dark sky) —
+      {{ 'binoculars' if sky.v_mag <= 9.5 else 'telescope' }} territory. It still sits at
+      these coordinates, in {{ sky.constellation }}.</p>
+    {% else %}
+    <p class="sky-note">No brightness measurement for this star
+      {%- if not rec.is_light_isolable %} — a microlensing host, glimpsed only by its
+      gravity{% endif %}. Its position in {{ sky.constellation }} is still known.</p>
+    {% endif %}
+  </div>
+  {% endif %}
 </div>
 {%- endmacro %}
