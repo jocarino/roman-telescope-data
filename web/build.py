@@ -159,6 +159,12 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
             index_url=f"/planets.index.{build_id}.json", build_id=build_id
         )
     )
+    # Colour census: the whole catalog as one dataset (same fetched index).
+    (out / "census.html").write_text(
+        env.get_template("census.html").render(
+            index_url=f"/planets.index.{build_id}.json", build_id=build_id
+        )
+    )
 
     page_tpl = env.get_template("planet.html")
     frag_tpl = env.get_template("fragments/planet_detail.html")

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Colour census · Exoplanet Palette{% endblock %}
+{% block content %}
+<a class="back" href="/">← all planets</a>
+<div class="census-page" x-data="{ intro: false, iScatter: false, iRoman: false }">
+  <div class="site-head">
+    <h1>Colour census</h1>
+    <span class="tagline">every modelled planet, seen as one dataset
+      <button class="info-btn sm" @click="intro = !intro" :class="intro ? 'on' : ''"
+        aria-label="What is this page?" title="What is this page?">i</button></span>
+  </div>
+  <div class="subhead intro-box" x-show="intro" x-cloak>
+    <button class="info-x" @click="intro = false" aria-label="Close">&times;</button>
+    <div class="intro-row">
+      <span class="intro-lbl">The idea</span>
+      <p>Each planet page shows one world. This page shows all of them at once — every modelled
+        colour in the catalog, plotted together, so the patterns physics carves into the whole
+        population become visible.</p>
+    </div>
+    <div class="intro-row">
+      <span class="intro-lbl">Honesty</span>
+      <p><strong>Every colour here is a modelled prediction, not a photograph</strong> — the same
+        swatches as the gallery, computed from each planet's reflected-light spectrum.</p>
+    </div>
+  </div>
+
+  <div class="census-stats" id="census-stats" aria-label="Census totals"></div>
+
+  {# ── 1 · Hue strip ─────────────────────────────────────────────────────── #}
+  <section class="panel census-panel">
+    <h3>The spectrum of worlds</h3>
+    <p class="census-sub">One stripe per planet, sorted by hue — the whole catalog as a single
+      band of colour. Hover to identify a stripe; click to visit that planet.</p>
+    <div class="census-canvas-wrap">
+      <canvas id="census-strip" height="110" aria-label="All planet colours side by side as one
+        hue-sorted strip"></canvas>
+    </div>
+  </section>
+
+  {# ── 2 · Temperature vs brightness scatter ─────────────────────────────── #}
+  <section class="panel census-panel">
+    <h3>Temperature × brightness
+      <button class="info-btn xs" @click="iScatter = !iScatter" :class="iScatter ? 'on' : ''"
+        aria-label="How to read this chart">i</button></h3>
+    <div class="census-info" x-show="iScatter" x-cloak>
+      <p>Each dot is a planet, drawn in its own modelled colour: left–right is how hot it is,
+        up–down is how much of its star's light it reflects. The clusters are chemistry, not
+        chance — cold gas giants keep their methane and reflect blue-green; temperate worlds
+        wear bright water clouds; the hottest Jupiters are cloud-free and dark, tinted deep
+        blue by light scattering off bare gas; orange dots are worlds around small red stars,
+        tinted by their star's own light.</p>
+    </div>
+    <p class="census-sub">Every planet by temperature and reflectivity, coloured as itself.
+      Hover to identify; click to visit.</p>
+    <div class="census-canvas-wrap">
+      <canvas id="census-scatter" height="430" aria-label="Scatter plot of planet equilibrium
+        temperature against reflected brightness, each point in its modelled colour"></canvas>
+    </div>
+  </section>
+
+  {# ── 3 · What Roman keeps ──────────────────────────────────────────────── #}
+  <section class="panel census-panel">
+    <h3>How much colour survives Roman
+      <button class="info-btn xs" @click="iRoman = !iRoman" :class="iRoman ? 'on' : ''"
+        aria-label="What is delta-E?">i</button></h3>
+    <div class="census-info" x-show="iRoman" x-cloak>
+      <p>The Roman Space Telescope's coronagraph sees visible light in only four bands, so it
+        recovers an approximation of each planet's colour. ΔE ("delta-E") measures how far that
+        approximation lands from the full-spectrum colour, in units of human perception: below
+        ~2 the eye can't tell the difference, around 10 it reads as a clearly different shade,
+        beyond 20 it's a different colour altogether.</p>
+    </div>
+    <p class="census-sub">Distribution of the colour error in Roman's four-band view, across the
+      whole catalog.</p>
+    <div class="census-canvas-wrap">
+      <canvas id="census-de" height="240" aria-label="Histogram of delta-E colour error between
+        each planet's full-spectrum colour and its Roman four-band reconstruction"></canvas>
+    </div>
+  </section>
+
+  <div class="census-tip" id="census-tip" role="status" aria-live="polite"></div>
+</div>
+
+<style>
+  /* Page-scoped styles (kept out of style.css to avoid cross-session merge churn). */
+  .census-page { max-width: 1040px; margin: 0 auto; }
+  .census-panel { margin-top: 18px; padding: 16px 18px 18px; }
+  .census-panel h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; }
+  .census-sub {
+    margin: 2px 0 12px; font-family: var(--mono); font-size: 11.5px; color: var(--fg-dim);
+  }
+  .census-info {
+    border: 1px solid var(--line); border-left: 4px solid var(--accent);
+    background: var(--bg-3); padding: 8px 12px; margin: 6px 0 10px;
+  }
+  .census-info p { margin: 0; font-size: 12.5px; color: var(--fg-dim); }
+  .census-canvas-wrap { position: relative; width: 100%; }
+  .census-canvas-wrap canvas { display: block; width: 100%; cursor: crosshair; }
+  .census-stats {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .5px; text-transform: uppercase;
+  }
+  .census-stats .cs-tile {
+    border: 1px solid var(--line); background: var(--bg-3); padding: 6px 10px; color: var(--fg-dim);
+  }
+  .census-stats .cs-tile b { color: var(--fg); font-weight: 700; margin-right: 6px; }
+  .census-tip {
+    position: fixed; z-index: 40; display: none; pointer-events: none;
+    border: 1px solid var(--accent); background: var(--bg-3); box-shadow: 3px 3px 0 #000;
+    padding: 6px 9px; font-family: var(--mono); font-size: 11px; color: var(--fg);
+    max-width: 240px;
+  }
+  .census-tip .ct-sw {
+    display: inline-block; width: 10px; height: 10px; margin-right: 6px;
+    border: 1px solid var(--line); vertical-align: -1px;
+  }
+  .census-tip .ct-dim { color: var(--fg-dim); }
+</style>
+<script src="/static/census.js?v={{ build_id }}"></script>
+<script>window.addEventListener("DOMContentLoaded", function () {
+  window.censusInit({ indexUrl: "{{ index_url }}" });
+});</script>
+{% endblock %}
