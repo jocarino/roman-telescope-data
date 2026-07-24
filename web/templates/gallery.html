@@ -28,6 +28,7 @@
        Desktop: expanded horizontally as one-click chips. Mobile: collapsed dropdown whose
        trigger shows the current colour (rainbow = all). Everything else is in the hamburger. #}
     <div class="hue-bar m-hide" role="group" aria-label="Filter by colour family">
+      <span class="hue-lbl">Filter by colour</span>
       <button class="hue-cell rainbow" :class="!family ? 'on' : ''" @click="family = null"
         title="All colours" aria-label="All colours"></button>
       <template x-for="f in families()" :key="f.id">
@@ -121,7 +122,6 @@
         </div>
       </div>
     </div>
-    <div class="spacer"></div>
     <span class="count" x-show="loaded" x-cloak><span x-text="count()"></span> shown ·
       long-press for a quick peek</span>
     <span class="count" x-show="!loaded">loading…</span>
