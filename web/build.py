@@ -160,7 +160,6 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     (out / "palettes").mkdir(parents=True)
 
     fiction = _load_fiction()
-    contexts = [_planet_ctx(r, fiction) for r in records]
     # Cache-bust static assets on every build so browsers never serve a stale JS/CSS.
     build_id = str(int(time.time()))
 
@@ -205,8 +204,12 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     page_tpl = env.get_template("planet.html")
     frag_tpl = env.get_template("fragments/planet_detail.html")
     peek_tpl = env.get_template("fragments/peek.html")
-    for ctx in contexts:
-        pid = ctx["record"].id
+    # Stream one planet at a time: each context carries two rendered SVG spectra, so
+    # materialising all of them first is ~1 GB of strings at 6k planets — enough to push a
+    # small VPS into swap during deploy. Peak memory is now one context, not N.
+    for rec in records:
+        ctx = _planet_ctx(rec, fiction)
+        pid = rec.id
         (out / "planet" / f"{pid}.html").write_text(page_tpl.render(ctx=ctx, build_id=build_id))
         (out / "fragments" / "planet" / f"{pid}.html").write_text(frag_tpl.render(ctx=ctx))
         (out / "fragments" / "peek" / f"{pid}.html").write_text(peek_tpl.render(ctx=ctx))
