@@ -648,15 +648,48 @@ button.badge:active, a.badge:active { box-shadow: none; }
 }
 .hue-chip.rainbow { background: linear-gradient(90deg, #d06bb0, #c9a35c, #3fbfa0, #5b8fd6); }
 
+/* Desktop colour-family filter, expanded horizontally: one clickable chip per family
+   (click again to clear). The rainbow chip is "all colours". */
+.hue-bar { display: inline-flex; align-items: center; gap: 9px; padding: 0 2px; }
+.hue-cell {
+  width: 21px; height: 21px; padding: 0; cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, .28); background: #333a48;
+  box-shadow: 2px 2px 0 var(--line);
+}
+.hue-cell:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--line); }
+.hue-cell:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line); }
+.hue-cell.on { outline: 2px solid var(--accent); outline-offset: 2px; }
+.hue-cell.rainbow { background: linear-gradient(90deg, #d06bb0, #c9a35c, #3fbfa0, #5b8fd6); }
+
+/* Mobile colour-filter trigger: the button face IS the current colour (rainbow = all). */
+.dd-btn.hue-trigger { padding: 9px; }
+.hue-trigger .hue-chip { width: 20px; height: 20px; margin: 0; vertical-align: 0; display: block; }
+
 /* The gallery ℹ rides inline at the end of the tagline. */
 .tagline .info-btn { vertical-align: middle; margin-left: 6px; }
 /* Two scope faces are emitted; desktop shows the wide one, phones the compact one. */
 .spec-compact { display: none; }
 
+/* The hamburger menu (all viewports): filters, sort, render and accent live here.
+   The hamburger is the rightmost control, so its menu hangs left from it. */
+.m-menu {
+  min-width: 232px; left: auto; right: 0;
+  max-height: min(72vh, 640px); overflow-y: auto;
+}
+.m-menu .dd-head { border-top: 1px solid var(--line); }
+.m-menu .dd-head:first-child { border-top: 0; }
+.m-menu-row { padding: 10px 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+.m-menu .accents { display: grid; grid-template-columns: repeat(4, 24px); gap: 6px; }
+/* Generic .dd-menu button.on paints text in the accent, which would vanish on the
+   segmented toggles' accent background; restore their dark-on-accent look. */
+.m-menu .segmented button { padding: 8px 12px; }
+.m-menu .segmented button.on,
+.m-menu .segmented button.on:hover { background: var(--accent); color: #05121f; }
+
 /* ---- Phones: compact stacked instrument + minimal gallery toolbar ---- */
 @media (max-width: 760px) {
-  /* Gallery toolbar: the main (provenance) filter + search stay; everything else folds
-     into the hamburger menu. */
+  /* Gallery toolbar: the colour filter (collapsed to its current-colour swatch) + search
+     + hamburger; the expanded desktop chip bar is hidden. */
   .m-hide { display: none; }
   .m-only { display: inline-block; }
   .m-spacer { display: block; }
@@ -665,17 +698,6 @@ button.badge:active, a.badge:active { box-shadow: none; }
   .controls > .spacer:not(.m-spacer) { display: none; }
   /* On phones the count is a second row; drop it while stuck so the bar stays slim. */
   .controls.stuck .count { display: none; }
-  /* The hamburger is the rightmost control, so its menu hangs left from it. */
-  .m-menu { min-width: 232px; left: auto; right: 0; }
-  .m-menu .dd-head { border-top: 1px solid var(--line); }
-  .m-menu .dd-head:first-child { border-top: 0; }
-  .m-menu-row { padding: 10px 12px; display: flex; gap: 8px; flex-wrap: wrap; }
-  .m-menu .accents { display: grid; grid-template-columns: repeat(4, 24px); gap: 6px; }
-  /* Generic .dd-menu button.on paints text in the accent, which would vanish on the
-     segmented toggles' accent background; restore their dark-on-accent look. */
-  .m-menu .segmented button { padding: 8px 12px; }
-  .m-menu .segmented button.on,
-  .m-menu .segmented button.on:hover { background: var(--accent); color: #05121f; }
   .grid { grid-template-columns: repeat(2, 1fr); }
   .count { flex-basis: 100%; }
   /* Two 160px-canvas cards don't fit 390px minus paddings; let the planet shrink to its
