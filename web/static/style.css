@@ -1149,8 +1149,17 @@ button.badge:active, a.badge:active { box-shadow: none; }
   font-size: 11px; cursor: pointer;
 }
 .cmp-tchip.on { border-color: var(--accent); color: var(--fg); }
-.cmp-picker-count { font-family: var(--pixel); font-size: 8px; color: var(--fg-faint); margin: 12px 0 6px; }
-.cmp-picker-list { overflow-y: auto; border-top: 1px solid var(--line); }
+/* Column labels for the list (replaces a bare count; the count folds in on the left). */
+.cmp-phead {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  margin-top: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--line);
+  font-family: var(--pixel); font-size: 8px; letter-spacing: .3px; text-transform: uppercase;
+  color: var(--fg-faint);
+}
+.cmp-phead-l em { font-style: normal; color: var(--fg-dim); }
+.cmp-phead-r { display: flex; }
+.cmp-phead-r .cmp-mi + .cmp-mi { margin-left: 12px; }
+.cmp-picker-list { overflow-y: auto; }
 .cmp-prow {
   display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; cursor: pointer;
   padding: 8px 6px; border: 0; border-bottom: 1px dashed var(--line); background: none; color: var(--fg);
@@ -1164,7 +1173,9 @@ button.badge:active, a.badge:active { box-shadow: none; }
 /* ✦ = host star, ⊕ = distance from Earth (⊕ matches the R⊕/M⊕ Earth symbol used elsewhere). */
 .cmp-mi + .cmp-mi { margin-left: 12px; }
 .mi-ic { color: var(--accent); font-style: normal; margin-right: 4px; }
-@media (max-width: 560px) { .cmp-prow-meta .cmp-mi:first-child { display: none; } }
+@media (max-width: 560px) {
+  .cmp-prow-meta .cmp-mi:first-child, .cmp-phead-r .cmp-mi:first-child { display: none; }
+}
 .cmp-heads { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 22px; }
 .cmp-col { text-align: center; }
 .cmp-planet { width: 150px; height: 150px; image-rendering: pixelated; image-rendering: crisp-edges; background: transparent; }
