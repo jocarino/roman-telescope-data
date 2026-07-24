@@ -115,6 +115,8 @@ document.addEventListener("alpine:init", () => {
     msg: "",
     help: false,       // dossier "how to read this" expandable (ℹ button)
     info: null,        // which scope explainer is open: 'view' | 'style' | 'source' | null
+    panel: "palette",  // mobile-only: which info panel shows ('readout' | 'palette' | 'data')
+    descOpen: false,   // mobile-only: caption under the planet name expanded?
     ledFlash: false,   // channel LED blink on view change
     _t: null,
     _lt: null,

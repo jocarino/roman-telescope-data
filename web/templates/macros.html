@@ -36,7 +36,7 @@
 {%- set tc = rec.true_colour -%}
 {%- set iview = rec.instrument_views[0] -%}
 {%- set rv = iview.colour -%}
-<div class="detail" x-data="detail({
+<div class="detail" :data-panel="panel" x-data="detail({
     fullHex: '{{ tc.hex }}', romanHex: '{{ rv.hex }}',
     fullConf: '{{ tc.confidence }}', romanConf: '{{ rv.confidence }}',
     fullLum: {{ '%.3f'|format(tc.luminance_y) }}, romanLum: {{ '%.3f'|format(rv.luminance_y) }},
@@ -102,17 +102,22 @@
          The slot reserves a stable height and fills the width so toggling the Source knob
          doesn't shove the header up and down. #}
       <div class="desc-slot{% if rec.real_observations %} has-obs{% endif %}">
-        <p class="viewnote" x-show="heroSource !== 'telescope'"
-          x-text="view === 'full' ? fullCap : romanCap"></p>
-        {% if rec.real_observations %}
-        <p class="viewnote obs-note" x-show="heroSource === 'telescope'" x-cloak>
-          <span class="obs-real">◉ REAL IMAGE</span>
-          <span x-text="curObs().instrument"></span> · <span x-text="curObs().band"></span><template
-            x-if="curObs().year"><span> · <span x-text="curObs().year"></span></span></template> ·
-          <span x-text="curObs().note"></span>
-          <span class="obs-sub">· <span x-text="curObs().credit"></span> · <span x-text="curObs().license"></span></span>
-        </p>
-        {% endif %}
+        {# Mobile-only expander (hidden on desktop, where the caption is always visible). #}
+        <button class="desc-toggle" @click="descOpen = !descOpen" :class="descOpen ? 'on' : ''"
+          :aria-expanded="descOpen">about this picture <span x-text="descOpen ? '▴' : '▾'"></span></button>
+        <div class="desc-body" :class="descOpen ? 'open' : ''">
+          <p class="viewnote" x-show="heroSource !== 'telescope'"
+            x-text="view === 'full' ? fullCap : romanCap"></p>
+          {% if rec.real_observations %}
+          <p class="viewnote obs-note" x-show="heroSource === 'telescope'" x-cloak>
+            <span class="obs-real">◉ REAL IMAGE</span>
+            <span x-text="curObs().instrument"></span> · <span x-text="curObs().band"></span><template
+              x-if="curObs().year"><span> · <span x-text="curObs().year"></span></span></template> ·
+            <span x-text="curObs().note"></span>
+            <span class="obs-sub">· <span x-text="curObs().credit"></span> · <span x-text="curObs().license"></span></span>
+          </p>
+          {% endif %}
+        </div>
       </div>
       {% if rec.system and rec.system.siblings %}
       <nav class="system-strip" aria-label="Other planets in this star system">
@@ -243,6 +248,16 @@
           <span class="knob-val" x-text="heroSource === 'model' ? 'Modelled' : (obs.length > 1 ? curObs().telescope : 'Telescope')"></span>
         </div>
         {% endif %}
+      </div>
+      {# Mobile-only function keys: on a phone the readouts, palette and data card don't all
+         fit stacked, so these switch which one is shown. Hidden on desktop (all visible). #}
+      <div class="scope-fnrow" role="group" aria-label="Which panel to show">
+        <button class="fn-btn" :class="panel === 'readout' ? 'on' : ''" @click="panel = 'readout'">
+          <span class="fn-key">F1</span>Readout</button>
+        <button class="fn-btn" :class="panel === 'palette' ? 'on' : ''" @click="panel = 'palette'">
+          <span class="fn-key">F2</span>Palette</button>
+        <button class="fn-btn" :class="panel === 'data' ? 'on' : ''" @click="panel = 'data'">
+          <span class="fn-key">F3</span>Planet data</button>
       </div>
     </div>
     <div class="scope-bottom">

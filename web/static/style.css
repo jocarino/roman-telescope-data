@@ -547,7 +547,7 @@ body::after {
 
 /* ---- Scope control rail: faux knobs + function buttons ---- */
 .scope-main { grid-template-columns: 1fr 190px auto; }
-@media (max-width: 760px) { .scope-main { grid-template-columns: 1fr; } .scope-rail { flex-direction: row; flex-wrap: wrap; border-left: 0; border-top: 1px solid var(--line); } }
+/* (Phone layout for the scope lives in the mobile block at the end of this file.) */
 .scope-rail {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 20px; padding: 22px 20px;
@@ -589,3 +589,65 @@ body::after {
 @keyframes ledpulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
 .led.flash { animation: ledflash .32s ease-out; }
 @keyframes ledflash { 0% { background: #fff; box-shadow: 0 0 9px #fff; } 100% { background: #4ade80; } }
+
+/* ---- Mobile-only chrome (function keys, caption expander): hidden on desktop ---- */
+.scope-fnrow, .desc-toggle { display: none; }
+
+/* ---- Phones: compact stacked instrument + minimal gallery toolbar ---- */
+@media (max-width: 760px) {
+  /* Gallery: only the accent picker + search survive; filter/sort/render toggles hide. */
+  .m-hide { display: none; }
+  .grid { grid-template-columns: repeat(2, 1fr); }
+  .count { flex-basis: 100%; }
+
+  /* Detail header: tighter; the long caption collapses behind a toggle. */
+  .detail-head { gap: 14px; margin: 8px 0 16px; }
+  .detail-title h1 { font-size: 24px; }
+  .desc-slot.has-obs { min-height: 0; }
+  .desc-toggle {
+    display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; padding: 5px 9px;
+    background: var(--bg-3); border: 1px solid var(--accent); color: var(--accent);
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: .6px; text-transform: uppercase;
+    cursor: pointer; box-shadow: 2px 2px 0 var(--line);
+  }
+  .desc-toggle:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line); }
+  .desc-body:not(.open) { display: none; }
+  .viewnote { margin-top: 8px; }
+
+  /* Scope header: the model line duplicates the page title, so drop it; let the rest wrap. */
+  .scope-top { flex-wrap: wrap; row-gap: 4px; }
+  .scope-model { display: none; }
+  .scope-view { flex-wrap: wrap; justify-content: flex-end; }
+
+  /* Screen stacked directly above the knobs, then the function keys. */
+  .scope-main { grid-template-columns: 1fr; min-height: 0; }
+  .scope-screen { order: 1; border-right: 0; border-bottom: 1px solid var(--line); }
+  .scope-rail {
+    order: 2; flex-direction: row; flex-wrap: wrap; justify-content: space-evenly;
+    gap: 8px 14px; padding: 12px 10px 14px; border-left: 0;
+  }
+  .knob-tag { flex-basis: 100%; margin-bottom: 2px; }
+  .scope-fnrow { display: flex; order: 3; border-top: 1px solid var(--line); background: #0a0c11; }
+  .fn-btn {
+    flex: 1; padding: 8px 4px 9px; background: none; border: 0; cursor: pointer;
+    border-right: 1px solid var(--line); color: var(--fg-dim);
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .6px; text-transform: uppercase;
+  }
+  .fn-btn:last-child { border-right: 0; }
+  .fn-btn .fn-key { display: block; font-size: 8px; color: var(--fg-faint); margin-bottom: 3px; }
+  .fn-btn.on { background: var(--accent); color: #05121f; }
+  .fn-btn.on .fn-key { color: #05121f; opacity: .65; }
+  .fn-btn:active { transform: translateY(1px); }
+
+  /* One info panel at a time, picked by the function keys. */
+  .scope-side { display: none; order: 4; border-top: 1px solid var(--line); }
+  .detail[data-panel="readout"] .scope-side { display: flex; }
+  .scope-bottom { display: none; }
+  .detail[data-panel="palette"] .scope-bottom { display: flex; }
+  .dossier { display: none; }
+  .detail[data-panel="data"] .dossier { display: block; }
+  /* The colour table duplicates the F1 readout (hex / Y / conf / gamut): planet facts only. */
+  .dossier-grid { grid-template-columns: 1fr; }
+  .dossier-grid .dossier-stats:first-child { display: none; }
+  .dossier-head h3 span { display: none; }
+}
