@@ -182,10 +182,12 @@ document.addEventListener("alpine:init", () => {
       navigator.clipboard?.writeText(hex);
       this.flash("copied " + hex);
     },
-    copyBase() {
-      const h = this.view === "full" ? this.fullHex : this.romanHex;
-      navigator.clipboard?.writeText(h);
-      this.flash("copied " + h);
+    // All five stops of the current view's palette, comma-joined (dark -> light);
+    // single stops are click-to-copy on the chips, CSS vars / .ASE cover the rest.
+    copyAll() {
+      const pal = this.view === "full" ? this.fullPalette : this.romanPalette;
+      navigator.clipboard?.writeText(pal.join(", "));
+      this.flash("copied all " + pal.length + " colours");
     },
     copyCssVars() {
       const pal = this.view === "full" ? this.fullPalette : this.romanPalette;

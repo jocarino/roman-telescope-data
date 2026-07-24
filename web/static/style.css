@@ -476,7 +476,12 @@ body::after {
 .params td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
 
 /* Assumptions / banner */
-.assume { font-size: 12.5px; color: var(--fg-dim); background: var(--bg-3); border: 1px dashed var(--line); border-radius: 10px; padding: 10px 12px; }
+/* Same accent-callout look as .scope-info / .subhead, so all ℹ reveals match. */
+.assume {
+  font-size: 12.5px; line-height: 1.5; color: var(--fg-dim); background: var(--bg-3);
+  border: 1px solid var(--accent); border-left-width: 4px; border-radius: 0; padding: 10px 14px;
+}
+.assume strong { color: var(--fg); }
 .banner {
   border-radius: 10px; padding: 11px 14px; font-size: 13px; margin-bottom: 16px;
   background: #241d12; border: 1px solid #6b5330; color: #e6c07a;
@@ -602,6 +607,10 @@ body::after {
   .m-hide { display: none; }
   .grid { grid-template-columns: repeat(2, 1fr); }
   .count { flex-basis: 100%; }
+  /* Two 160px-canvas cards don't fit 390px minus paddings; let the planet shrink to its
+     column (fixed width made the cards overflow right, so nothing looked centred). */
+  .card { padding: 12px 6px; }
+  .card-planet { width: min(160px, 100%); height: auto; aspect-ratio: 1 / 1; }
 
   /* Detail header: tighter; the long caption collapses behind a toggle. */
   .detail-head { gap: 14px; margin: 8px 0 16px; }
