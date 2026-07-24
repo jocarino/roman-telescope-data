@@ -26,10 +26,9 @@
       <span class="colour-bar-lbl">Colour</span>
       <button class="cfchip cfchip-all" :class="!family ? 'on' : ''" @click="family = null">All</button>
       <template x-for="f in families()" :key="f.id">
-        <button class="cfchip" :class="family === f.id ? 'on' : ''"
-          @click="setFamily(f.id)" :aria-label="'Show ' + f.name + ' planets'">
-          <span class="cfchip-dot" :style="{ background: f.colour }"></span><span x-text="f.name"></span>
-        </button>
+        <button class="cfchip cfchip-swatch" :class="family === f.id ? 'on' : ''"
+          @click="setFamily(f.id)" :title="f.name" :aria-label="'Show ' + f.name + ' planets'"
+          :style="{ background: f.colour }"></button>
       </template>
       <span class="near-pill" x-show="nearId" x-cloak>
         <span class="near-dot" :style="{ background: nearHex() }"></span>Nearest in colour to
