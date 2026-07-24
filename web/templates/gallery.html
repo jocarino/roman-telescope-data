@@ -24,15 +24,26 @@
 <div x-data="gallery({ indexUrl: '{{ index_url }}' })"
   @scroll.window.passive="scrolled = window.scrollY > 160">
   <div class="controls" :class="scrolled ? 'stuck' : ''">
-    {# The main filter: by the planet's colour family (computed in the pipeline). #}
-    <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
+    {# The main filter: by the planet's colour family (computed in the pipeline).
+       Desktop: expanded horizontally as one-click chips. Mobile: collapsed dropdown whose
+       trigger shows the current colour (rainbow = all). Everything else is in the hamburger. #}
+    <div class="hue-bar m-hide" role="group" aria-label="Filter by colour family">
+      <span class="hue-lbl">Filter by colour</span>
+      <button class="hue-cell rainbow" :class="!family ? 'on' : ''" @click="family = null"
+        title="All colours" aria-label="All colours"></button>
+      <template x-for="f in families()" :key="f.id">
+        <button class="hue-cell" :class="family === f.id ? 'on' : ''"
+          :style="'background:' + f.colour" @click="family = family === f.id ? null : f.id"
+          :title="f.name" :aria-label="'Only ' + f.name.toLowerCase() + ' planets'"></button>
+      </template>
+    </div>
+    <div class="dropdown m-only" x-data="{ open: false }" @keydown.escape="open=false"
       @click.outside="open=false">
-      <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
+      <button class="dd-btn dd-icon hue-trigger" @click="open=!open" :aria-expanded="open"
         :class="family ? 'active' : ''" :title="family ? familyMeta[family].n : 'All colours'"
         aria-label="Filter by colour">
-        <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-          <path d="M2 3.5H14L9.5 8.5V13L6.5 14.5V8.5L2 3.5Z" fill="currentColor"/>
-        </svg>
+        <span class="hue-chip" :class="family ? '' : 'rainbow'"
+          :style="family ? 'background:' + familyMeta[family].c : ''"></span>
       </button>
       <div class="dd-menu" x-show="open" x-cloak>
         <div class="dd-head">Colour<span class="dd-sub">filter by colour family</span></div>
@@ -45,123 +56,6 @@
         </template>
       </div>
     </div>
-    {# How real the colour is (modelled / simulated / measured); on mobile it lives in the hamburger. #}
-    <div class="dropdown m-hide" x-data="{ open: false }" @keydown.escape="open=false"
-      @click.outside="open=false">
-      <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
-        :class="prov !== 'all' ? 'active' : ''" :title="provLabels[prov]"
-        aria-label="Filter by how real the colour is">
-        <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-          <circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M8 2.5 A5.5 5.5 0 0 1 8 13.5 Z" fill="currentColor"/>
-        </svg>
-      </button>
-      <div class="dd-menu" x-show="open" x-cloak>
-        <div class="dd-head">How real<span class="dd-sub">modelled vs measured colour</span></div>
-        <template x-for="[val, label] in provOptions()" :key="val">
-          <button :class="prov === val ? 'on' : ''" @click="prov = val; open = false"
-            x-text="label"></button>
-        </template>
-      </div>
-    </div>
-    <div class="dropdown m-hide" x-data="{ open: false }" @keydown.escape="open=false"
-      @click.outside="open=false">
-      <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
-        :class="sort !== 'name' ? 'active' : ''" :title="sortLabels[sort]" aria-label="Sort planets">
-        <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-          <path d="M3 4h10M3 8h6.5M3 12h3.5" stroke="currentColor" stroke-width="1.6"
-            fill="none" stroke-linecap="round"/>
-        </svg>
-      </button>
-      <div class="dd-menu" x-show="open" x-cloak>
-        <template x-for="[val, label] in Object.entries(sortLabels)" :key="val">
-          <button :class="sort === val && !nearId ? 'on' : ''" @click="setSort(val); open = false"
-            x-text="label"></button>
-        </template>
-      </div>
-    </div>
-    {# Planet type (rocky / Neptune / hot-Jupiter …), by size + temperature. #}
-    <div class="dropdown m-hide" x-data="{ open: false }" @keydown.escape="open=false"
-      @click.outside="open=false">
-      <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
-        :class="ptype !== 'all' ? 'active' : ''" :title="typeLabels[ptype]"
-        aria-label="Filter by planet type">
-        <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-          <circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/>
-          <circle cx="8" cy="8" r="2" fill="currentColor"/>
-        </svg>
-      </button>
-      <div class="dd-menu" x-show="open" x-cloak>
-        <div class="dd-head">Planet type<span class="dd-sub">by size + temperature</span></div>
-        <template x-for="[val, label] in typeOptions()" :key="val">
-          <button :class="ptype === val ? 'on' : ''" @click="ptype = val; open = false"
-            x-text="label"></button>
-        </template>
-      </div>
-    </div>
-    {# Distance from Earth, banded. #}
-    <div class="dropdown m-hide" x-data="{ open: false }" @keydown.escape="open=false"
-      @click.outside="open=false">
-      <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
-        :class="distBand !== 'all' ? 'active' : ''" :title="distBandLabel()"
-        aria-label="Filter by distance from Earth">
-        <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-          <path d="M2 8h12M2 8l3-3M2 8l3 3M14 8l-3-3M14 8l-3 3" stroke="currentColor"
-            stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <div class="dd-menu" x-show="open" x-cloak>
-        <div class="dd-head">Distance<span class="dd-sub">from Earth (parsecs)</span></div>
-        <template x-for="[val, label] in distBands" :key="val">
-          <button :class="distBand === val ? 'on' : ''" @click="distBand = val; open = false"
-            x-text="label"></button>
-        </template>
-      </div>
-    </div>
-    {# Discovery method (how the planet was found). #}
-    <div class="dropdown m-hide" x-data="{ open: false }" @keydown.escape="open=false"
-      @click.outside="open=false">
-      <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
-        :class="disc !== 'all' ? 'active' : ''" :title="disc === 'all' ? 'All methods' : disc"
-        aria-label="Filter by discovery method">
-        <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-          <path d="M8 1.5l1.6 4.9H14l-3.5 2.6 1.3 4.9L8 11.1 4.2 13.9l1.3-4.9L2 6.4h4.4z"
-            fill="currentColor"/>
-        </svg>
-      </button>
-      <div class="dd-menu" x-show="open" x-cloak>
-        <div class="dd-head">Discovery<span class="dd-sub">how it was found</span></div>
-        <template x-for="[val, label] in discOptions()" :key="val">
-          <button :class="disc === val ? 'on' : ''" @click="disc = val; open = false"
-            x-text="label"></button>
-        </template>
-      </div>
-    </div>
-    <div class="segmented m-hide" role="group" aria-label="Render style">
-      <button :class="style === 'smooth' ? 'on' : ''" @click="toggleStyle()">Sphere</button>
-      <button :class="style === 'retro' ? 'on' : ''" @click="toggleStyle()">Pixel</button>
-    </div>
-    <div class="segmented m-hide" role="group" aria-label="Render fidelity"
-      title="Classic: colour derived from the physics. Stylised: restyled for looks, not truer.">
-      <button :class="fidelity === 'classic' ? 'on' : ''" @click="toggleFidelity()">Classic</button>
-      <button :class="fidelity === 'stylised' ? 'on' : ''" @click="toggleFidelity()">Stylised</button>
-    </div>
-    <div class="dropdown m-hide" x-data="{ open: false }" @keydown.escape="open=false"
-      @click.outside="open=false">
-      <button class="dd-btn dd-icon acc-trigger" @click="open=!open" :aria-expanded="open"
-        title="Accent colour" aria-label="Accent colour">
-        <span class="acc-swatch" :class="'acc-' + accent"></span>
-      </button>
-      <div class="dd-menu acc-menu" x-show="open" x-cloak>
-        <div class="accents" role="group" aria-label="Accent colour">
-          <template x-for="a in accents" :key="a.id">
-            <button class="acc" :class="['acc-' + a.id, accent === a.id ? 'on' : '']"
-              @click="setAccent(a.id); open = false" :title="a.name"
-              :aria-label="a.name + ' accent'"></button>
-          </template>
-        </div>
-      </div>
-    </div>
     <div class="spacer m-spacer"></div>
     <!-- The magnifier IS the input: collapsed to icon width, it grows rightward on focus. -->
     <label class="search">
@@ -172,8 +66,8 @@
       <input type="search" x-model="q" placeholder="Search planet or star…"
         aria-label="Search planets">
     </label>
-    {# Mobile-only hamburger: everything except the colour filter + search lives here. #}
-    <div class="dropdown m-only" x-data="{ open: false }" @keydown.escape="open=false"
+    {# The hamburger (all viewports): everything except the colour filter + search lives here. #}
+    <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
       @click.outside="open=false">
       <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
         :class="sort !== 'name' || prov !== 'all' || ptype !== 'all' || disc !== 'all' || distBand !== 'all' ? 'active' : ''"
@@ -228,7 +122,6 @@
         </div>
       </div>
     </div>
-    <div class="spacer"></div>
     <span class="count" x-show="loaded" x-cloak><span x-text="count()"></span> shown ·
       long-press for a quick peek</span>
     <span class="count" x-show="!loaded">loading…</span>
