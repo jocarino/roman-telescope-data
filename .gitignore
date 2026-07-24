@@ -6,8 +6,12 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 
-# Pipeline caches (regenerable; not the committed planets.json artifact)
+# Pipeline caches (regenerable)
 data/cache/
+
+# The data artifact lives in GitHub Releases, not git (a 6k build is ~90 MB).
+# data/RELEASE (committed) names the release tag; scripts/fetch_data.py downloads it.
+data/planets.json
 
 # Built static site (regenerable via `python -m web.build`; the Dockerfile builds it)
 dist/

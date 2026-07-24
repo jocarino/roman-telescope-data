@@ -68,11 +68,22 @@ python3 tools/exohub.py mprocs          # one labelled pane per worktree, in mpr
 
 ## Deploy (Dokploy / any static host)
 
-Multi-stage `Dockerfile`: a Python stage renders the site from the committed
-`data/planets.json`, an nginx stage serves it. `nginx.conf` handles clean URLs and `.ase`
-downloads. On Dokploy: Application → connect the repo → Build Type `Dockerfile` → domain +
-container port 80 + HTTPS → enable the auto-deploy webhook. A data refresh is just a new
-`data/planets.json` committed and pushed.
+Multi-stage `Dockerfile`: a Python stage renders the site from `data/planets.json`, an
+nginx stage serves it. `nginx.conf` handles clean URLs and `.ase` downloads. On Dokploy:
+Application → connect the repo → Build Type `Dockerfile` → domain + container port 80 +
+HTTPS → enable the auto-deploy webhook (if the repo is private, add build arg
+`GH_TOKEN=<read token>`).
+
+**The data artifact is NOT in git** (a 6k-planet build is ~90 MB): each pipeline run's
+`planets.json` is published as a GitHub Release asset, and the committed one-line
+`data/RELEASE` names the tag. Clean builds download it (`scripts/fetch_data.py`); local
+checkouts with the file on disk use it as-is. A data refresh is:
+
+```bash
+uv run python -m pipeline build --bulk N     # regenerate data/planets.json
+scripts/release-data.sh                      # upload as a release, update data/RELEASE
+git add data/RELEASE && git commit && git push   # webhook redeploys from the new tag
+```
 
 ```bash
 docker build -t exoplanet-palette .             # reproduce the deploy image locally
