@@ -80,6 +80,63 @@
         </template>
       </div>
     </div>
+    {# Planet type (rocky / Neptune / hot-Jupiter …), by size + temperature. #}
+    <div class="dropdown m-hide" x-data="{ open: false }" @keydown.escape="open=false"
+      @click.outside="open=false">
+      <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
+        :class="ptype !== 'all' ? 'active' : ''" :title="typeLabels[ptype]"
+        aria-label="Filter by planet type">
+        <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/>
+          <circle cx="8" cy="8" r="2" fill="currentColor"/>
+        </svg>
+      </button>
+      <div class="dd-menu" x-show="open" x-cloak>
+        <div class="dd-head">Planet type<span class="dd-sub">by size + temperature</span></div>
+        <template x-for="[val, label] in typeOptions()" :key="val">
+          <button :class="ptype === val ? 'on' : ''" @click="ptype = val; open = false"
+            x-text="label"></button>
+        </template>
+      </div>
+    </div>
+    {# Distance from Earth, banded. #}
+    <div class="dropdown m-hide" x-data="{ open: false }" @keydown.escape="open=false"
+      @click.outside="open=false">
+      <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
+        :class="distBand !== 'all' ? 'active' : ''" :title="distBandLabel()"
+        aria-label="Filter by distance from Earth">
+        <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <path d="M2 8h12M2 8l3-3M2 8l3 3M14 8l-3-3M14 8l-3 3" stroke="currentColor"
+            stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="dd-menu" x-show="open" x-cloak>
+        <div class="dd-head">Distance<span class="dd-sub">from Earth (parsecs)</span></div>
+        <template x-for="[val, label] in distBands" :key="val">
+          <button :class="distBand === val ? 'on' : ''" @click="distBand = val; open = false"
+            x-text="label"></button>
+        </template>
+      </div>
+    </div>
+    {# Discovery method (how the planet was found). #}
+    <div class="dropdown m-hide" x-data="{ open: false }" @keydown.escape="open=false"
+      @click.outside="open=false">
+      <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
+        :class="disc !== 'all' ? 'active' : ''" :title="disc === 'all' ? 'All methods' : disc"
+        aria-label="Filter by discovery method">
+        <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <path d="M8 1.5l1.6 4.9H14l-3.5 2.6 1.3 4.9L8 11.1 4.2 13.9l1.3-4.9L2 6.4h4.4z"
+            fill="currentColor"/>
+        </svg>
+      </button>
+      <div class="dd-menu" x-show="open" x-cloak>
+        <div class="dd-head">Discovery<span class="dd-sub">how it was found</span></div>
+        <template x-for="[val, label] in discOptions()" :key="val">
+          <button :class="disc === val ? 'on' : ''" @click="disc = val; open = false"
+            x-text="label"></button>
+        </template>
+      </div>
+    </div>
     <div class="segmented m-hide" role="group" aria-label="Render style">
       <button :class="style === 'smooth' ? 'on' : ''" @click="toggleStyle()">Sphere</button>
       <button :class="style === 'retro' ? 'on' : ''" @click="toggleStyle()">Pixel</button>
@@ -119,7 +176,7 @@
     <div class="dropdown m-only" x-data="{ open: false }" @keydown.escape="open=false"
       @click.outside="open=false">
       <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
-        :class="sort !== 'name' || prov !== 'all' ? 'active' : ''"
+        :class="sort !== 'name' || prov !== 'all' || ptype !== 'all' || disc !== 'all' || distBand !== 'all' ? 'active' : ''"
         aria-label="Filter, sort and display options" title="Filter, sort and display options">
         <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
           <path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" stroke-width="1.6"
@@ -130,6 +187,18 @@
         <div class="dd-head">How real<span class="dd-sub">modelled vs measured colour</span></div>
         <template x-for="[val, label] in provOptions()" :key="'p' + val">
           <button :class="prov === val ? 'on' : ''" @click="prov = val" x-text="label"></button>
+        </template>
+        <div class="dd-head">Planet type<span class="dd-sub">by size + temperature</span></div>
+        <template x-for="[val, label] in typeOptions()" :key="'t' + val">
+          <button :class="ptype === val ? 'on' : ''" @click="ptype = val" x-text="label"></button>
+        </template>
+        <div class="dd-head">Distance<span class="dd-sub">from Earth</span></div>
+        <template x-for="[val, label] in distBands" :key="'d' + val">
+          <button :class="distBand === val ? 'on' : ''" @click="distBand = val" x-text="label"></button>
+        </template>
+        <div class="dd-head">Discovery</div>
+        <template x-for="[val, label] in discOptions()" :key="'m' + val">
+          <button :class="disc === val ? 'on' : ''" @click="disc = val" x-text="label"></button>
         </template>
         <div class="dd-head">Sort by</div>
         <template x-for="[val, label] in Object.entries(sortLabels)" :key="val">
