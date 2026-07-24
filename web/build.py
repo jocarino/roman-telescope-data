@@ -23,6 +23,8 @@ from pipeline.classify import planet_type
 from pipeline.colour.family import colour_family
 from pipeline.models import PlanetRecord, PlanetsFile
 from pipeline.palette.export import ase_bytes
+from pipeline.sky import format_dec, format_ra
+from web.sky import sky_chart_svg
 from web.svg import spectrum_svg
 
 _HERE = Path(__file__).parent
@@ -75,7 +77,11 @@ KNOWN_TOTAL_APPROX = 6300
 _LY_PER_PC = 3.26156
 
 
-def _planet_ctx(rec: PlanetRecord, fiction: dict[str, dict] | None = None) -> dict:
+def _planet_ctx(
+    rec: PlanetRecord,
+    fiction: dict[str, dict] | None = None,
+    sky_points: list[tuple[float, float]] | None = None,
+) -> dict:
     view = rec.instrument_views[0]
     args = dict(
         true_albedo=rec.spectrum.values,
@@ -88,6 +94,13 @@ def _planet_ctx(rec: PlanetRecord, fiction: dict[str, dict] | None = None) -> di
         "spectrum_svg": spectrum_svg(**args),
         "spectrum_svg_compact": spectrum_svg(**args, compact=True),
         "fiction": (fiction or {}).get(rec.name),
+        # None (no chart) for records without a sky position, e.g. pre-sky data releases.
+        "sky_svg": sky_chart_svg(rec.sky, sky_points or []) if rec.sky else None,
+        "sky_svg_compact": (
+            sky_chart_svg(rec.sky, sky_points or [], compact=True) if rec.sky else None
+        ),
+        "sky_ra": format_ra(rec.sky.ra_deg) if rec.sky else None,
+        "sky_dec": format_dec(rec.sky.dec_deg) if rec.sky else None,
     }
 
 
@@ -204,11 +217,13 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     page_tpl = env.get_template("planet.html")
     frag_tpl = env.get_template("fragments/planet_detail.html")
     peek_tpl = env.get_template("fragments/peek.html")
+    # Every host with a known position becomes a faint dot on every planet's sky chart.
+    sky_points = [(r.sky.ra_deg, r.sky.dec_deg) for r in records if r.sky]
     # Stream one planet at a time: each context carries two rendered SVG spectra, so
     # materialising all of them first is ~1 GB of strings at 6k planets — enough to push a
     # small VPS into swap during deploy. Peak memory is now one context, not N.
     for rec in records:
-        ctx = _planet_ctx(rec, fiction)
+        ctx = _planet_ctx(rec, fiction, sky_points)
         pid = rec.id
         (out / "planet" / f"{pid}.html").write_text(page_tpl.render(ctx=ctx, build_id=build_id))
         (out / "fragments" / "planet" / f"{pid}.html").write_text(frag_tpl.render(ctx=ctx))

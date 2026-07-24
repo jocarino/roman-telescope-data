@@ -15,6 +15,7 @@ from pipeline.emit.build import PlanetInput
 from pipeline.fetch.archive import ArchiveRecord, fetch_bulk, fetch_by_names
 from pipeline.illuminant.blackbody import BlackbodyStar
 from pipeline.models import Discovery, HostStar, ParamSources, PlanetParams
+from pipeline.sky import build_sky
 from pipeline.spectrum.router import choose_model
 
 # Planets flagged as Roman-CGI-style reflected-light targets (RV giants at wide separation).
@@ -207,6 +208,13 @@ def _to_input(rec: ArchiveRecord) -> PlanetInput:
         year=rec.disc_year,
         facility=rec.disc_facility,
     )
+    # Sky position for the "go outside and look at it" chart. RA/dec are essentially
+    # always present in pscomppars; guard anyway so a sparse row degrades to "no chart".
+    sky = (
+        build_sky(rec.ra, rec.dec, rec.sy_vmag)
+        if rec.ra is not None and rec.dec is not None
+        else None
+    )
     return PlanetInput(
         id=_slug(rec.pl_name),
         name=_display_name(rec.pl_name),
@@ -217,6 +225,7 @@ def _to_input(rec: ArchiveRecord) -> PlanetInput:
         illuminant=BlackbodyStar(teff_k=teff),
         is_light_isolable=not is_microlensing,
         is_cgi_target=rec.pl_name in _CGI_TARGETS,
+        sky=sky,
     )
 
 

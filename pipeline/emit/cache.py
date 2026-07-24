@@ -32,6 +32,7 @@ def _key(pin: PlanetInput, instruments: list[Instrument]) -> str:
         "discovery": pin.discovery.model_dump(),
         "is_light_isolable": pin.is_light_isolable,
         "is_cgi_target": pin.is_cgi_target,
+        "sky": pin.sky.model_dump() if pin.sky else None,
         "instruments": [i.id for i in instruments],
         "pipeline_version": PIPELINE_VERSION,
         "schema_version": SCHEMA_VERSION,

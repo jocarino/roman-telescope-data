@@ -97,4 +97,5 @@ INSTRUMENTS: dict[str, Instrument] = {ROMAN_CGI.id: ROMAN_CGI}
 CGI_OBSERVATION_PHASE_DEG = 90.0
 
 PIPELINE_VERSION = "0.1.0"
-SCHEMA_VERSION = 4  # v4: Roman view at quadrature + observed_phase_deg; v3: phase_colours; v2: sun_swap
+# v4: Roman view at quadrature + observed_phase_deg; v3: phase_colours; v2: sun_swap
+SCHEMA_VERSION = 4
