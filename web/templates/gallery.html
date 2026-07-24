@@ -81,8 +81,10 @@
       <input type="search" x-model="q" placeholder="Search planet or star…"
         aria-label="Search planets">
     </label>
-    {# The hamburger (all viewports): everything except the colour filter + search lives here. #}
-    <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
+    {# The hamburger (all viewports): everything except the colour filter + search lives here.
+       Each section collapses (expanded by default) so the menu isn't one long scroll; `shut`
+       tracks which sections the user has folded, and persists while the page is open. #}
+    <div class="dropdown" x-data="{ open: false, shut: {} }" @keydown.escape="open=false"
       @click.outside="open=false">
       <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
         :class="sort !== 'name' || prov !== 'all' || ptype !== 'all' || disc !== 'all' || distBand !== 'all' ? 'active' : ''"
@@ -93,46 +95,74 @@
         </svg>
       </button>
       <div class="dd-menu m-menu" x-show="open" x-cloak>
-        <div class="dd-head">How real<span class="dd-sub">modelled vs measured colour</span></div>
-        <template x-for="[val, label] in provOptions()" :key="'p' + val">
-          <button :class="prov === val ? 'on' : ''" @click="prov = val" x-text="label"></button>
-        </template>
-        <div class="dd-head">Planet type<span class="dd-sub">by size + temperature</span></div>
-        <template x-for="[val, label] in typeOptions()" :key="'t' + val">
-          <button :class="ptype === val ? 'on' : ''" @click="ptype = val" x-text="label"></button>
-        </template>
-        <div class="dd-head">Distance<span class="dd-sub">from Earth</span></div>
-        <template x-for="[val, label] in distBands" :key="'d' + val">
-          <button :class="distBand === val ? 'on' : ''" @click="distBand = val" x-text="label"></button>
-        </template>
-        <div class="dd-head">Discovery</div>
-        <template x-for="[val, label] in discOptions()" :key="'m' + val">
-          <button :class="disc === val ? 'on' : ''" @click="disc = val" x-text="label"></button>
-        </template>
-        <div class="dd-head">Sort by</div>
-        <template x-for="[val, label] in Object.entries(sortLabels)" :key="val">
-          <button :class="sort === val && !nearId ? 'on' : ''" @click="setSort(val)"
-            x-text="label.replace('Sort: ', '')"></button>
-        </template>
-        <div class="dd-head">Planet render</div>
-        <div class="m-menu-row">
-          <div class="segmented" role="group" aria-label="Render style">
-            <button :class="style === 'smooth' ? 'on' : ''" @click="toggleStyle()">Sphere</button>
-            <button :class="style === 'retro' ? 'on' : ''" @click="toggleStyle()">Pixel</button>
-          </div>
-          <div class="segmented" role="group" aria-label="Render fidelity"
-            title="Classic: colour derived from the physics. Stylised: restyled for looks, not truer.">
-            <button :class="fidelity === 'classic' ? 'on' : ''" @click="toggleFidelity()">Classic</button>
-            <button :class="fidelity === 'stylised' ? 'on' : ''" @click="toggleFidelity()">Stylised</button>
+        <button type="button" class="dd-head dd-sec" @click="shut.prov = !shut.prov"
+          :aria-expanded="!shut.prov"><span>How real<span class="dd-sub">modelled vs measured colour</span></span>
+          <span class="dd-chev" x-text="shut.prov ? '▸' : '▾'"></span></button>
+        <div class="dd-sec-body" x-show="!shut.prov">
+          <template x-for="[val, label] in provOptions()" :key="'p' + val">
+            <button :class="prov === val ? 'on' : ''" @click="prov = val" x-text="label"></button>
+          </template>
+        </div>
+        <button type="button" class="dd-head dd-sec" @click="shut.ptype = !shut.ptype"
+          :aria-expanded="!shut.ptype"><span>Planet type<span class="dd-sub">by size + temperature</span></span>
+          <span class="dd-chev" x-text="shut.ptype ? '▸' : '▾'"></span></button>
+        <div class="dd-sec-body" x-show="!shut.ptype">
+          <template x-for="[val, label] in typeOptions()" :key="'t' + val">
+            <button :class="ptype === val ? 'on' : ''" @click="ptype = val" x-text="label"></button>
+          </template>
+        </div>
+        <button type="button" class="dd-head dd-sec" @click="shut.dist = !shut.dist"
+          :aria-expanded="!shut.dist"><span>Distance<span class="dd-sub">from Earth</span></span>
+          <span class="dd-chev" x-text="shut.dist ? '▸' : '▾'"></span></button>
+        <div class="dd-sec-body" x-show="!shut.dist">
+          <template x-for="[val, label] in distBands" :key="'d' + val">
+            <button :class="distBand === val ? 'on' : ''" @click="distBand = val" x-text="label"></button>
+          </template>
+        </div>
+        <button type="button" class="dd-head dd-sec" @click="shut.disc = !shut.disc"
+          :aria-expanded="!shut.disc"><span>Discovery</span>
+          <span class="dd-chev" x-text="shut.disc ? '▸' : '▾'"></span></button>
+        <div class="dd-sec-body" x-show="!shut.disc">
+          <template x-for="[val, label] in discOptions()" :key="'m' + val">
+            <button :class="disc === val ? 'on' : ''" @click="disc = val" x-text="label"></button>
+          </template>
+        </div>
+        <button type="button" class="dd-head dd-sec" @click="shut.sort = !shut.sort"
+          :aria-expanded="!shut.sort"><span>Sort by</span>
+          <span class="dd-chev" x-text="shut.sort ? '▸' : '▾'"></span></button>
+        <div class="dd-sec-body" x-show="!shut.sort">
+          <template x-for="[val, label] in Object.entries(sortLabels)" :key="val">
+            <button :class="sort === val && !nearId ? 'on' : ''" @click="setSort(val)"
+              x-text="label.replace('Sort: ', '')"></button>
+          </template>
+        </div>
+        <button type="button" class="dd-head dd-sec" @click="shut.render = !shut.render"
+          :aria-expanded="!shut.render"><span>Planet render</span>
+          <span class="dd-chev" x-text="shut.render ? '▸' : '▾'"></span></button>
+        <div class="dd-sec-body" x-show="!shut.render">
+          <div class="m-menu-row">
+            <div class="segmented" role="group" aria-label="Render style">
+              <button :class="style === 'smooth' ? 'on' : ''" @click="toggleStyle()">Sphere</button>
+              <button :class="style === 'retro' ? 'on' : ''" @click="toggleStyle()">Pixel</button>
+            </div>
+            <div class="segmented" role="group" aria-label="Render fidelity"
+              title="Classic: colour derived from the physics. Stylised: restyled for looks, not truer.">
+              <button :class="fidelity === 'classic' ? 'on' : ''" @click="toggleFidelity()">Classic</button>
+              <button :class="fidelity === 'stylised' ? 'on' : ''" @click="toggleFidelity()">Stylised</button>
+            </div>
           </div>
         </div>
-        <div class="dd-head">Accent colour</div>
-        <div class="m-menu-row">
-          <div class="accents" role="group" aria-label="Accent colour">
-            <template x-for="a in accents" :key="a.id">
-              <button class="acc" :class="['acc-' + a.id, accent === a.id ? 'on' : '']"
-                @click="setAccent(a.id)" :title="a.name" :aria-label="a.name + ' accent'"></button>
-            </template>
+        <button type="button" class="dd-head dd-sec" @click="shut.accent = !shut.accent"
+          :aria-expanded="!shut.accent"><span>Accent colour</span>
+          <span class="dd-chev" x-text="shut.accent ? '▸' : '▾'"></span></button>
+        <div class="dd-sec-body" x-show="!shut.accent">
+          <div class="m-menu-row">
+            <div class="accents" role="group" aria-label="Accent colour">
+              <template x-for="a in accents" :key="a.id">
+                <button class="acc" :class="['acc-' + a.id, accent === a.id ? 'on' : '']"
+                  @click="setAccent(a.id)" :title="a.name" :aria-label="a.name + ' accent'"></button>
+              </template>
+            </div>
           </div>
         </div>
       </div>

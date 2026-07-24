@@ -6,7 +6,7 @@
   <title>{% block title %}Exoplanet Palette{% endblock %}</title>
   <meta name="description" content="The colour scheme of every known exoplanet, derived from physics.">
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-  <script>try{var a=localStorage.getItem("accent");if(a)document.documentElement.setAttribute("data-accent",a);}catch(e){}</script>
+  <script>try{document.documentElement.setAttribute("data-accent",localStorage.getItem("accent")||"tron");}catch(e){}</script>
   <link rel="stylesheet" href="/static/style.css?v={{ build_id }}">
   <style>[x-cloak]{display:none !important}</style>
   <script src="/static/planet-render.js?v={{ build_id }}"></script>
