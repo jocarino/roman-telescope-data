@@ -6,10 +6,15 @@ Each planet's visible colour is computed from its reflected-light spectrum
 (geometric albedo × host-star spectrum) via CIE 1931 colour matching, then presented as a
 designer palette. Every planet is shown two ways: its **true colour** (full model
 spectrum) and **as Roman would see it** (reconstructed from the four Roman Coronagraph
-bands) — the signature feature is how much colour identity survives that filter set.
+bands, both computed at quadrature — a coronagraph never sees full phase) — the signature
+feature is how much colour identity survives that filter set.
 
-See `CLAUDE.md` for the domain background and the full architecture; the working plan is in
-`PLAN.md`.
+The production catalog models **5,759 planets** — every confirmed exoplanet in the NASA
+Exoplanet Archive that passes the data-completeness gate (6,290 fetched, 531 excluded
+because no colour could honestly be derived).
+
+See `CLAUDE.md` for the domain background and the full architecture; plans and runbooks
+live in `docs/`.
 
 ## Setup
 
@@ -40,8 +45,12 @@ python3 -m http.server 8799 --directory dist    # preview at http://localhost:87
 ```
 
 htmx loads planet-detail fragments into a drawer; Alpine.js drives search / filter / sort and
-the true↔Roman toggle; palettes export as hex, CSS variables, or `.ase`. No backend, no build
-toolchain beyond Python.
+the true↔Roman toggle; palettes export as hex, CSS variables, or `.ase`. Also on the site: a
+colour census of the whole catalog (`/census`), a phase slider with an automatic full
+lunar-cycle animation in the EXOSCOPE (per-planet random phases on the gallery), a "Seen in
+fiction" overlay, and clean extensionless URLs. No backend, no build toolchain beyond Python.
+`web.build` streams one planet at a time, so rendering all 5,759 pages takes ~7 s locally
+(`dist/` ≈ 477 MB; the runtime gallery index ≈ 2.5 MB).
 
 ### Previewing several worktrees at once (`tools/exohub.py`)
 
@@ -106,13 +115,15 @@ should — enforced by `tests/test_sanity_gate.py`:
 - **`pipeline/`** — Python. Turns planet params into a reflected-flux curve on a fixed
   380–780 nm / 5 nm grid, converts it to a colour + palette, integrates it through the
   Roman CGI bands, reconstructs a colour from just those bands, and emits
-  `data/planets.json`. The albedo source is behind a `SpectrumProvider` protocol: v1 uses a
-  parametric **synthetic** provider (`pipeline/spectrum/synthetic.py`); the Cahoy 2010 grid
-  and PICASO slot in later without touching anything downstream.
+  `data/planets.json`. The albedo source is behind a `SpectrumProvider` protocol; a router
+  picks the best available engine per planet — the parametric engine (4,439 planets), the
+  Cahoy 2010 grid (1,320), or PICASO (selected targets, via a committed spectrum cache).
+  See `docs/spectrum-engines.md`.
 - **The swap seam** (`pipeline/emit/build.py` → `pipeline/fetch/targets.py`): if a real
   measured file `data/cgi_measured/{id}.roman-cgi.json` exists it replaces the simulated
   band samples with zero downstream change; the planet's provenance flips
-  `simulated`→`measured` automatically. Empty at v1.
+  `simulated`→`measured` automatically. Empty until Roman reports; the full ingestion
+  procedure is `docs/roman-measured-data.md`.
 - **`web/`** — Jinja2 static-site generator + htmx + Alpine.js, a pure static consumer of
   `planets.json` (no colour maths client-side). Renders a gallery, per-planet detail pages,
   and htmx drawer fragments into `dist/`.

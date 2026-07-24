@@ -24,7 +24,9 @@ of every known exoplanet, derived from physics."
    Teff/type. Use the TAP API (`pscomppars` table). Free, no key needed.
 2. **PICASO** (`pip install picaso`) — NASA's open-source Python package that
    generates reflected-light albedo spectra from planet parameters (gravity,
-   temperature, metallicity, clouds, phase angle). This is the core spectrum engine.
+   temperature, metallicity, clouds, phase angle). In production it is used for
+   selected hot/exotic targets via a committed spectrum cache; most of the catalog
+   uses the parametric engine or the Cahoy grid (see `docs/spectrum-engines.md`).
 3. **Cahoy et al. 2010 albedo model grids** — precomputed Jupiter/Neptune-class
    albedo spectra at varying star-planet distances, metallicities, and cloud states.
    Good fallback/validation set; these are what the Roman Coronagraph community uses.
@@ -61,10 +63,10 @@ Two-stage design — do NOT run PICASO inside a web request; it is heavy and slo
 - `pipeline/` — Python. Batch script: pull N planets from the archive, generate
   spectra, compute colours, emit `data/planets.json` (one record per planet:
   params, downsampled spectrum, base hex, palette stops). Runs offline/CI.
-- `web/` — Next.js (App Router, TypeScript). Statically consumes `planets.json`.
-  Pages: gallery grid of planet swatches; per-planet page with the spectrum plot,
-  palette, and the physical explanation of why it has that colour. Client-side
-  interactivity (search/filter/sort) in React state; no backend needed for v1.
+- `web/` — Jinja2 static-site generator + htmx + Alpine.js. Statically consumes
+  `planets.json`. Pages: gallery grid of planet swatches; per-planet page with the
+  spectrum plot, palette, and the physical explanation of why it has that colour.
+  Client-side interactivity (search/filter/sort) in Alpine/vanilla JS; no backend.
 
 ## Design principle: dual audience
 
@@ -85,8 +87,8 @@ project as for an astronomy nerd**. This is a hard requirement, not a nicety. In
 ## Conventions
 
 - Python: 3.11+, `uv` for deps, `ruff` for lint, type hints throughout.
-- TypeScript: strict mode. Spectrum plots with a lightweight canvas/SVG component
-  (no heavy chart lib needed for a single line plot).
+- Web: Jinja2 templates + htmx + Alpine.js, vanilla JS. Spectrum plots with a
+  lightweight canvas/SVG component (no heavy chart lib needed for a single line plot).
 - All displayed numbers rounded sensibly; store spectra downsampled to 5 nm steps.
 - Keep the science honest: every palette page must state model assumptions
   (cloud state, metallicity, phase angle) — these are modelled, not photographed.
@@ -131,29 +133,34 @@ divergence and merge churn. To avoid it:
 
 ## Milestones
 
-1. **Validate the pipeline on one planet.** Script that generates a Jupiter-analog
+Milestones 1–5 are DONE; the catalog is the full archive pull (5,759 planets live).
+
+1. **Validate the pipeline on one planet.** (DONE) Script that generates a Jupiter-analog
    albedo spectrum (PICASO quickstart or a Cahoy grid file), runs the CIE conversion,
    prints a hex code. Sanity check: a cloudy Jupiter analog should come out warm
    off-white/cream; a deep methane Neptune-like should come out blue-green;
    cutting clouds and methane should go dark.
-2. Batch: 20 well-characterised planets → `planets.json`.
-3. Next.js gallery + planet detail page.
-4. **Roman view.** For each planet, integrate the reflected-light spectrum through
+2. Batch: 20 well-characterised planets → `planets.json`. (DONE; since scaled to the
+   full catalog — see `docs/scaling-plan.md`.)
+3. Gallery + planet detail page. (DONE — built as the Jinja2/htmx static site, not Next.js.)
+4. **Roman view.** (DONE — computed at quadrature, schema v4.) For each planet, integrate
+   the reflected-light spectrum through
    the four CGI bandpasses only, then reconstruct a colour from those four samples
    (interpolate between band centres before the CIE step). Show side by side:
    "true colour" (full spectrum) vs "as Roman would see it" (four bands). This is
    the project's signature feature — how much colour identity survives Roman's
    filter set. Flag microlensing-discovered planets honestly: no light is ever
    received from them, so their swatches are model-only, marked as such.
-5. Palette export (copy hex, CSS variables, maybe .ase file).
-6. Stretch: phase-angle slider (colour vs. orbital phase), host-star illuminant
-   comparison ("this planet around a red dwarf vs. the Sun"); post-launch, ingest
-   real CGI photometry for the tech-demo targets.
+5. Palette export (copy hex, CSS variables, maybe .ase file). (DONE — .ase + CSS vars.)
+6. Stretch: phase-angle slider (DONE — colour vs. orbital phase), host-star illuminant
+   comparison (`sun_swap` data DONE; UI in progress in another session); post-launch,
+   ingest real CGI photometry for the tech-demo targets (future — runbook:
+   `docs/roman-measured-data.md`).
 
 ## Gotchas
 
-- PICASO needs reference data files downloaded on first run (see its docs); cache
-  them and document the setup step in the README.
+- PICASO needs reference data files downloaded on first run; it also cannot share the
+  main venv (numba/NumPy conflict). Setup is documented in `docs/picaso-runbook.md`.
 - sRGB clamping: many planet colours are low-luminance; normalise luminance before
   gamma encoding or everything renders near-black. Decide and document a consistent
   brightness convention (e.g. normalise Y to 0.6 for the base swatch).

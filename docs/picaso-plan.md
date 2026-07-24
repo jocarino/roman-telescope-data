@@ -1,8 +1,8 @@
 # Plan — Activating PICASO
 
-Status: **planned, not started.** The router + a guarded PICASO wrapper already exist
-(`pipeline/spectrum/picaso_model.py`); this doc is about making PICASO actually produce
-trustworthy colours.
+Status: **DONE (2026-07).** Implemented and verified — the as-built record (which refines
+several details below, notably the separate-venv install and the blackbody-star shortcut)
+is in `docs/picaso-runbook.md` §AS-BUILT. This doc is kept as the original plan.
 
 ## Reframe: the engine is already validated — we configure it, we don't calibrate it
 
@@ -14,8 +14,8 @@ and **validated against the Cahoy et al. 2010 grid**. So:
   profile, cloud model, and chemistry using the community's *published recipes* — and then
   **verify our usage** against known answers.
 
-The crude isothermal profile currently in `picaso_model.py` is a placeholder; the real work
-is replacing it with a standard setup (below).
+The crude isothermal profile that was in `picaso_model.py` was a placeholder; the real work
+was replacing it with a standard setup (below — done, see the runbook).
 
 ## Where PICASO actually adds value
 
@@ -68,10 +68,10 @@ All build-time only — never enters the Docker image or the VPS.
 3. **Anchor verification** (the checks above), as pytest cases where feasible:
    - PICASO cool-Jupiter vs our Cahoy `Jupiter_1x` — ΔE within a threshold.
    - HD 189733 b comes out blue (b-channel dominant).
-4. **Cache + batch.** Computed spectra already cache to `data/cache/spectra/`. Run the full
-   catalog; hot Jupiters and off-grid planets now route to PICASO (recorded as
-   `spectrum_source: picaso`). Commit the resulting `planets.json` + cached spectra (or
-   regenerate in CI).
+4. **Cache + batch.** Computed spectra cache to disk. Run the full catalog; hot Jupiters
+   and off-grid planets now route to PICASO (recorded as `spectrum_source: picaso`).
+   Commit the cached spectra and release the data (`scripts/release-data.sh`;
+   `planets.json` is release-hosted, not committed).
 5. **UI.** No changes needed — the "How to read this" panel already reports the engine.
 
 ## Disk / performance

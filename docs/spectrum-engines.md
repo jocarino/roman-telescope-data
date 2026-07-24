@@ -16,7 +16,9 @@ shown in the "How to read this" panel — a run with no grid/opacity data simply
 | everything else | `parametric` |
 
 `parametric` is always available, so there is always an answer. Cahoy/PICASO "light up"
-automatically once their data is installed — **no code changes.**
+automatically once their data is installed — **no code changes.** In the deployed full
+catalog (5,759 planets) the mix is **4,439 parametric / 1,320 cahoy**, with PICASO active
+for selected targets via its committed spectrum cache (see Provider 3).
 
 ## Provider 1 — parametric (always on)
 
@@ -48,33 +50,28 @@ giants (Z≈10) to the Neptunes — and interpolates onto the CIE grid. (Bilinea
 across the four surrounding points is a straightforward upgrade from the v1 nearest-neighbour.)
 
 Note on scope: Cahoy models *cool, reflected-light-dominated* giants. Hot young imaged giants
-(HR 8799, etc., T_eq ~1000 K+) are correctly **not** routed to Cahoy — they need PICASO — so
-they fall to parametric until PICASO is active.
+(HR 8799, etc.) look hot in the archive (`pl_eqt` ~1000 K+), but that is *internal* heat, not
+irradiation — the router now selects by the **irradiation** temperature in such cases, so at
+their true ~45 K they route to Cahoy and render the correct cold-giant colours (see the
+ARTIFACT — FIXED entry in `docs/picaso-runbook.md`). Genuinely hot irradiated giants go to
+PICASO.
 
-## Provider 3 — PICASO
+## Provider 3 — PICASO  ✅ ACTIVE (selected targets)
 
 `pipeline/spectrum/picaso_model.py`. NASA's radiative-transfer package; the engine for
-hot/exotic giants Cahoy does not cover.
+hot/exotic giants Cahoy does not cover. **As built** (full detail in
+`docs/picaso-runbook.md`): PICASO cannot share the main venv (numba requires NumPy ≤ 2.4,
+the project runs 2.5), so `pipeline/spectrum/picaso_runner.py` runs in a separate
+`.venv-picaso` and writes small resampled `.npz` spectra to `data/picaso_spectra/`
+(**committed**); `picaso_model.py` in the main venv just loads that cache and raises
+`ProviderUnavailable` on a miss. The main pipeline, tests, and deploy therefore need
+neither PICASO nor its opacity DB.
 
-**Activate:**
-```bash
-uv pip install -e '.[picaso]'         # picaso + astropy + pandas
-# then download PICASO's reference/opacity data (multi-GB) per its install guide,
-# and point PICASO at it (e.g. the picaso_refdata / opacity env vars it documents).
-```
-
-Disk: reference data ~0.2–1 GB; the **opacity database ~2–15 GB** depending on resolution —
-verify the exact size from PICASO's install guide before downloading. All of this is
-**build-time only**; it never enters the Docker image or the VPS. Computed spectra are cached
-to `data/cache/spectra/` (PICASO is slow), keyed by planet + engine.
-
-**⚠ Validation required on install.** The atmosphere setup in `picaso_model.py` (TP profile +
-chemistry) is a *starting point*, not a validated model. Once the opacity data is present:
-1. Run the pipeline and check a known planet (HD 189733 b should trend blue).
-2. Tune the TP profile / cloud treatment / chemistry against published spectra.
-3. Only then trust the colours. The wrapper is the integration seam; the atmospheric physics
-   is the part that needs a human validation pass. Any failure (missing lib, missing opacity
-   DB, run error) degrades cleanly to `ProviderUnavailable` → the router falls back.
+Disk (runner venv only): reference data ~179 MB; opacity DB ~7.34 GB (Zenodo record
+14861730). All **build-time only**; it never enters the Docker image or the VPS. Verified
+against both anchors: HD 189733 b comes out blue, and a cool Jupiter reproduces the Cahoy
+grid. Any failure (missing lib, missing cache entry, run error) degrades cleanly to
+`ProviderUnavailable` → the router falls back.
 
 ## Why the fallback design
 
