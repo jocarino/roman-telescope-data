@@ -241,12 +241,17 @@ document.addEventListener("alpine:init", () => {
       return this.familyOrder.filter((f) => present.has(f))
         .map((f) => ({ id: f, name: this.familyMeta[f].n, colour: this.familyMeta[f].c }));
     },
-    // Provenance dropdown: "all" + only the provenances present (declutters at scale, where
-    // it's nearly all "Modelled" but the handful of Roman targets are still worth finding).
+    // Provenance dropdown: "all" + only the provenances present, each with its planet count.
+    // The counts are load-bearing UX at scale: 5,755 of 5,759 planets are "Modelled", so
+    // picking it barely changes the grid — without the number the filter looks broken.
     provOptions() {
       if (!this.loaded) return [["all", this.provLabels.all]];
-      const present = new Set(window.PLANETS.map((x) => x.prov));
-      return Object.entries(this.provLabels).filter(([v]) => v === "all" || present.has(v));
+      const counts = {};
+      window.PLANETS.forEach((x) => (counts[x.prov] = (counts[x.prov] || 0) + 1));
+      return Object.entries(this.provLabels)
+        .filter(([v]) => v === "all" || counts[v])
+        .map(([v, label]) =>
+          [v, v === "all" ? label : label + " · " + counts[v].toLocaleString()]);
     },
     // Type dropdown options: always "all", then only the types actually present in the data.
     typeOptions() {
