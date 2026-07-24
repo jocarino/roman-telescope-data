@@ -75,7 +75,7 @@
       <div class="cmp-group">
         <div class="cmp-group-head" x-text="grp.title"></div>
         <template x-for="row in grp.rows" :key="row.label">
-          <div class="cmp-row" :class="{ diff: row.diff }">
+          <div class="cmp-row">
             <div class="cmp-va" x-text="row.a"></div>
             <div class="cmp-mid" x-text="row.label"></div>
             <div class="cmp-vb" x-text="row.b"></div>
