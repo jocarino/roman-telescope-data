@@ -20,6 +20,11 @@ from pipeline.spectrum.router import choose_model
 # Planets flagged as Roman-CGI-style reflected-light targets (RV giants at wide separation).
 _CGI_TARGETS = {"47 UMa b", "ups And d", "upsilon And d", "47 UMa c"}
 
+# Above this host temperature the "star" is a stellar remnant (hot subdwarf / white dwarf),
+# not a normal star; its UV-dominated light makes a reflected visible colour meaningless. The
+# cut sits above every genuine hot main-sequence star in the set (the hottest A/B are ~9,200 K).
+_MAX_HOST_TEFF_K = 12000.0
+
 # The Archive returns abbreviated discovery-method codes; map to readable labels.
 _METHOD_LABELS = {
     "rv": "Radial Velocity",
@@ -131,6 +136,12 @@ def completeness_gate(rec: ArchiveRecord) -> tuple[bool, str | None]:
         return False, "no size (neither radius nor mass)"
     if rec.st_teff is None:
         return False, "unknown host star (no stellar temperature; the illuminant is the colour)"
+    if rec.st_teff > _MAX_HOST_TEFF_K:
+        # A host this hot is a stellar remnant — a hot subdwarf or white dwarf, the exposed
+        # cinder of a dead star (these are eclipse-timing "planets" around evolved binaries).
+        # Its light is UV-dominated, not a normal star's, so a reflected *visible* colour is
+        # meaningless. The cut sits above every genuine hot main-sequence star (A/early-B).
+        return False, "host too hot (stellar remnant / hot subdwarf — not a normal star)"
     temp_computable = rec.st_rad is not None and rec.pl_orbsmax is not None
     if rec.pl_eqt is None and not temp_computable:
         return False, "no temperature and none computable from star + orbit"

@@ -121,3 +121,11 @@ N" (done) and "how big a set we actually ship" (a deployment cap, not a pipeline
 - **Missing radius on giants — keep `n/a`, don't fabricate.** The model uses a generic default
   internally for routing only; radius barely affects reflected-light colour, and inventing a
   displayed value would add nothing.
+- **Stellar-remnant hosts (> 12,000 K) — EXCLUDE.** A host that hot is a hot subdwarf or white
+  dwarf — the cinder of a dead star, UV-dominated, usually in an eclipse-timing binary with a
+  disputed circumbinary planet. A reflected *visible* colour is meaningless there. The 12,000 K
+  cut sits above every genuine hot main-sequence star (hottest A/B in the set ≈ 9,200 K), so it
+  drops only the remnants (NSVS 14256825, 2MASS J19383260, DP Leo, NN Ser, …).
+- **Metallicity on rocky worlds — `n/a`, not the giant relation.** The mass–metallicity relation
+  is a giant-planet relation; rocky worlds have no H/He envelope, so it's meaningless and unused
+  for their (grey) colour. Parametric leaves metallicity `None` for rocky planets.
