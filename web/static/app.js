@@ -450,23 +450,21 @@ document.addEventListener("alpine:init", () => {
     groups() {
       const A = this.a(), B = this.b();
       if (!A || !B) return [];
-      const row = (label, fa, fb, diff) => ({ label, a: fa, b: fb, diff });
-      const tempDiff = A.temp != null && B.temp != null && Math.abs(A.temp - B.temp) > 200;
+      const row = (label, fa, fb) => ({ label, a: fa, b: fb });
       return [
         { title: "What drives the colour", rows: [
-          row("Colour", A.hex, B.hex, A.hex !== B.hex),
-          row("Equilibrium temp", this._n(A.temp, " K", 0), this._n(B.temp, " K", 0), tempDiff),
-          row("Host star", this._star(A), this._star(B),
-            Math.abs((A.starTeff || 0) - (B.starTeff || 0)) > 1200),
-          row("Atmosphere", A.cloud, B.cloud, A.cloud !== B.cloud),
-          row("Metallicity", this._n(A.metal, "× solar", 1), this._n(B.metal, "× solar", 1), false),
+          row("Colour", A.hex, B.hex),
+          row("Equilibrium temp", this._n(A.temp, " K", 0), this._n(B.temp, " K", 0)),
+          row("Host star", this._star(A), this._star(B)),
+          row("Atmosphere", A.cloud, B.cloud),
+          row("Metallicity", this._n(A.metal, "× solar", 1), this._n(B.metal, "× solar", 1)),
         ] },
         { title: "The planets", rows: [
-          row("Type", this._typeLabel(A.ptype), this._typeLabel(B.ptype), A.ptype !== B.ptype),
-          row("Size", this._size(A), this._size(B), false),
-          row("Distance from Earth", this._n(A.dist_ly, " ly"), this._n(B.dist_ly, " ly"), false),
-          row("Orbit (semi-major axis)", this._n(A.sma, " AU", 2), this._n(B.sma, " AU", 2), false),
-          row("Discovery", this._disc(A), this._disc(B), false),
+          row("Type", this._typeLabel(A.ptype), this._typeLabel(B.ptype)),
+          row("Size", this._size(A), this._size(B)),
+          row("Distance from Earth", this._n(A.dist_ly, " ly"), this._n(B.dist_ly, " ly")),
+          row("Orbit (semi-major axis)", this._n(A.sma, " AU", 2), this._n(B.sma, " AU", 2)),
+          row("Discovery", this._disc(A), this._disc(B)),
         ] },
       ];
     },
