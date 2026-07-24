@@ -513,8 +513,10 @@ document.addEventListener("alpine:init", () => {
     panel: "palette",  // mobile-only: which info panel shows ('readout' | 'palette' | 'data')
     descOpen: false,   // mobile-only: caption under the planet name expanded?
     ledFlash: false,   // channel LED blink on view change
+    sweep: false,      // CRT redraw sweep on view change
     _t: null,
     _lt: null,
+    _st: null,
     ...init,
     // Carry the scope's settings across same-system hops (each planet is its own page).
     // Every option falls back gracefully when the target planet can't honour it.
@@ -541,7 +543,16 @@ document.addEventListener("alpine:init", () => {
       this._lt = setTimeout(() => (this.ledFlash = false), 320);
     },
     // Scope controls: every knob/button drives real state (and persists across hops):
-    setView(v) { this.view = v; this._persist("scopeView", v); this.blink(); },
+    setView(v) { this.view = v; this._persist("scopeView", v); this.blink(); this._sweep(); },
+    // Restart the CRT sweep animation (drop the class for a frame so CSS re-triggers it).
+    _sweep() {
+      this.sweep = false;
+      requestAnimationFrame(() => {
+        this.sweep = true;
+        clearTimeout(this._st);
+        this._st = setTimeout(() => (this.sweep = false), 550);
+      });
+    },
     selectObs(i) { this.obsIdx = i; this._persist("obsTelescope", this.curObs().telescope || ""); },
     // Style/Shape act on the modelled render. If the real photo is showing, the first click
     // simply brings the model back (no value change) so the knobs never feel "locked out";
