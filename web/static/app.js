@@ -62,8 +62,8 @@ document.addEventListener("alpine:init", () => {
     // Render fidelity: "classic" (physics-honest) or "stylised" (restyled for looks). Global, persisted.
     fidelity: localStorage.getItem("renderFidelity") || "classic",
     // Accent theme, persisted and applied site-wide via a data-attribute on <html>.
-    accent: localStorage.getItem("accent") || "blue",
-    // Retro accent palettes (id must match CSS [data-accent] + .acc-<id>).
+    accent: localStorage.getItem("accent") || "tron",
+    // Retro accent palettes (id must match CSS [data-accent] + .acc-<id>), hue-ordered.
     accents: [
       { id: "blue", name: "Cobalt" },
       { id: "electric", name: "Electric" },
@@ -72,10 +72,15 @@ document.addEventListener("alpine:init", () => {
       { id: "cyan", name: "Teletext" },
       { id: "seafoam", name: "Seafoam" },
       { id: "green", name: "Phosphor" },
+      { id: "lime", name: "Lime" },
       { id: "mustard", name: "Gold" },
       { id: "amber", name: "Amber" },
+      { id: "ember", name: "Ember" },
+      { id: "crimson", name: "Crimson" },
       { id: "pink", name: "Synthwave" },
+      { id: "magenta", name: "Magenta" },
       { id: "violet", name: "Vaporwave" },
+      { id: "mono", name: "Mono" },
     ],
     setAccent(a) {
       this.accent = a;
