@@ -1105,7 +1105,9 @@ button.badge:active, a.badge:active { box-shadow: none; }
 
 /* ---- Compare page ---- */
 .lede-link { color: var(--accent); white-space: nowrap; margin-left: 6px; }
-.compare { max-width: 920px; }
+/* Centre the whole compare page (header + content) rather than letting it hug the left. */
+.compare-page { max-width: 920px; margin: 0 auto; }
+.compare { max-width: none; }
 .cmp-search { background: var(--bg-3); border: 1px solid var(--line); color: var(--fg); font: inherit; font-size: 14px; padding: 10px 12px; box-shadow: 3px 3px 0 var(--line); width: 100%; }
 .cmp-search:focus { outline: none; border-color: var(--accent); box-shadow: 3px 3px 0 var(--accent); }
 .cmp-vs { font-family: var(--pixel); font-size: 10px; color: var(--fg-faint); flex: none; }
