@@ -95,17 +95,17 @@
         {%- if rec.host_star.spectral_type %} · {{ rec.host_star.spectral_type }}{% endif -%}
         {%- if rec.host_star.teff_k %} · {{ rec.host_star.teff_k|round|int }} K{% endif -%}
       </div>
-      <div style="margin-top:10px">{{ provenance_badge(rec) }}
-        <span class="badge">{{ rec.discovery.method }}</span></div>
       {# The description here tracks what the hero is showing: the modelled caption, or,
          when the Source knob is on Telescope, the real image's details + credit, in full.
          The slot reserves a stable height and fills the width so toggling the Source knob
          doesn't shove the header up and down. #}
       <div class="desc-slot{% if rec.real_observations %} has-obs{% endif %}">
-        {# Mobile-only expander (hidden on desktop, where the caption is always visible). #}
+        {# Mobile-only expander (hidden on desktop, where everything below is always visible). #}
         <button class="desc-toggle" @click="descOpen = !descOpen" :class="descOpen ? 'on' : ''"
-          :aria-expanded="descOpen">about this picture <span x-text="descOpen ? '▴' : '▾'"></span></button>
+          :aria-expanded="descOpen">what am I looking at <span x-text="descOpen ? '▴' : '▾'"></span></button>
         <div class="desc-body" :class="descOpen ? 'open' : ''">
+          <div class="title-badges">{{ provenance_badge(rec) }}
+            <span class="badge">{{ rec.discovery.method }}</span></div>
           <p class="viewnote" x-show="heroSource !== 'telescope'"
             x-text="view === 'full' ? fullCap : romanCap"></p>
           {% if rec.real_observations %}
