@@ -88,6 +88,30 @@ project as for an astronomy nerd**. This is a hard requirement, not a nicety. In
 - Keep the science honest: every palette page must state model assumptions
   (cloud state, metallicity, phase angle) — these are modelled, not photographed.
 
+## Working in parallel (multiple sessions)
+
+The owner sometimes runs **two Claude Code sessions on this repo at once**. Two sessions
+editing the same files in the same checkout, both pushing to `main`, causes surprise
+divergence and merge churn. To avoid it:
+
+- **One git worktree per session.** Each session works in its own directory + branch under
+  `.claude/worktrees/`, never the shared checkout. Create with the `EnterWorktree` tool (or
+  `git worktree add ../<dir> -b <branch>`). Merge to `main` deliberately, one session at a time.
+- **Split the work by area so merges stay conflict-free.** Almost all collisions have been two
+  sessions both editing `web/static/app.js`, `web/templates/gallery.html`, or
+  `web/static/style.css`. Keep the areas apart:
+  - **Data/science side** — `pipeline/`, `data/`, `web/build.py`, `web/svg.py`, `tests/`.
+  - **Web/UI side** — `web/templates/`, `web/static/`.
+  If a task truly needs both, say so and coordinate before touching the other side's files.
+- **Rebase before every push.** `git pull --rebase origin main` replays your commits on top of
+  the other session's — no merge commits, and divergence is caught early instead of at a
+  rejected push. Commit small and push often to shrink the collision window.
+- **Never force-push `main`** — the other session's work lives there. On a rejected push,
+  fetch + rebase + resolve; force only to overwrite your *own* just-pushed mistake.
+- `data/planets.json` is the committed source of truth (regenerate with
+  `pipeline build --bulk N`); `dist/` is gitignored and built at deploy. Regenerating data is a
+  "data side" change — don't do it from a UI-side session.
+
 ## Milestones
 
 1. **Validate the pipeline on one planet.** Script that generates a Jupiter-analog
