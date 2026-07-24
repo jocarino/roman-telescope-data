@@ -211,15 +211,20 @@
           <code x-text="view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}'"></code></div>
         <div class="ro-ch ch2"><span class="sw"></span>CH2 ROMAN <code>{{ rv.hex }}</code></div>
         <div class="ro-sep"></div>
-        <div class="ro-row"><span>&#916;E2000</span>
+        <div class="ro-row"><span>&#916;E2000
+          <span class="tip" x-data="{ t: false }" @click.outside="t = false">
+            <button class="info-btn xs" @click="t = !t" :class="t ? 'on' : ''"
+              aria-label="What does &#916;E2000 mean?">i</button>
+            <span class="tip-body" :class="t ? 'open' : ''">How different the full-spectrum and Roman colours look to
+              the eye: 0 = identical, above ~2 is a visible difference. Below
+              {{ iview.reconstruction.extrapolated_below_nm|round|int }}&nbsp;nm Roman is
+              blind, so the model holds the spectrum flat there.</span>
+          </span></span>
           <b>{{ '%.1f'|format(iview.reconstruction_error.delta_e2000) }}</b></div>
         <div class="ro-row"><span>Y BRIGHT</span>
           <b x-text="(view === 'full' ? fullLum : romanLum).toFixed(3)"></b></div>
         <div class="ro-row"><span>GAMUT</span>
           <b x-text="(view === 'full' ? fullOog : romanOog) ? 'OOG' : 'OK'"></b></div>
-        <div class="ro-sep"></div>
-        <div class="ro-note">&#916;E = perceptual distance (full vs Roman).
-          &lt;{{ iview.reconstruction.extrapolated_below_nm|round|int }} nm: Roman blind, flat-held.</div>
       </div>
       <div class="scope-rail">
         <div class="knob-tag"><span class="knob-tag-main">PLANET DISPLAY</span><span class="knob-tag-sub">the picture up top</span></div>
