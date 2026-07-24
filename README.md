@@ -49,10 +49,10 @@ When two or more Claude Code sessions each serve their own `dist/`, it's easy to
 which port is which worktree. `exohub` fixes that — stdlib-only, no deps:
 
 ```bash
-python tools/exohub.py serve --build   # serve THIS worktree on its stable port
-python tools/exohub.py dash            # live table: port -> worktree -> URL
-python tools/exohub.py ports           # the stable port each worktree gets
-python tools/exohub.py mprocs          # one labelled pane per worktree, in mprocs
+python3 tools/exohub.py serve --build   # serve THIS worktree on its stable port
+python3 tools/exohub.py dash            # live table: port -> worktree -> URL
+python3 tools/exohub.py ports           # the stable port each worktree gets
+python3 tools/exohub.py mprocs          # one labelled pane per worktree, in mprocs
 ```
 
 - **Stable ports.** `main` always gets `8799`; every other worktree hashes its branch name to a
