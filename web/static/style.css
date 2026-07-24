@@ -414,6 +414,73 @@ button.badge:active, a.badge:active { box-shadow: none; }
   text-transform: none; color: var(--fg-faint);
 }
 
+/* ---- "Seen in fiction" filter: the deliberate odd-one-out ----
+   A glitchy CRT toggle in its OWN cyan/magenta palette — not the site accent — so the fun,
+   non-scientific filter reads as different from the tidy science filters below it. Chromatic
+   aberration on hover; full RGB-split glitch + scanline sweep when engaged. Motion is dropped
+   for prefers-reduced-motion. */
+.fic-sec { padding: 8px 8px 10px; border-bottom: 1px solid var(--line); }
+.fic-toggle {
+  position: relative; display: flex; align-items: center; gap: 10px; width: 100%;
+  background: #08080f; border: 1px solid #2b2b3d; color: #cdd4e4; text-align: left;
+  padding: 9px 10px; cursor: pointer; overflow: hidden; border-radius: 0;
+  transition: border-color .12s, background .12s;
+}
+.fic-toggle:hover { border-color: #14e0e6; }
+.fic-glyph { font-size: 13px; color: #14e0e6; line-height: 1; flex: none; }
+.fic-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fic-txt {
+  position: relative; font-family: var(--pixel); font-size: 8px; letter-spacing: .12em;
+  text-transform: uppercase; color: inherit; -webkit-font-smoothing: none; font-smooth: never;
+}
+/* Two coloured ghosts of the label, stacked exactly over it: idle-invisible, split on hover,
+   torn apart while active. */
+.fic-txt::before, .fic-txt::after {
+  content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%;
+  opacity: 0; pointer-events: none; transition: opacity .12s, transform .12s;
+}
+.fic-txt::before { color: #ff2e97; }   /* magenta channel */
+.fic-txt::after  { color: #14e0e6; }   /* cyan channel */
+.fic-toggle:hover .fic-txt::before { opacity: .75; transform: translateX(-1.6px); }
+.fic-toggle:hover .fic-txt::after  { opacity: .75; transform: translateX(1.6px); }
+.fic-sub {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .04em; color: var(--fg-faint);
+  text-transform: none;
+}
+.fic-count {
+  margin-left: auto; flex: none; font-family: var(--mono); font-size: 9px;
+  color: #14e0e6; border: 1px solid #22384a; padding: 1px 5px; line-height: 1.5;
+}
+/* Engaged: magenta frame, live glitch. */
+.fic-toggle.on { border-color: #ff2e97; background: #120010; color: #fff; }
+.fic-toggle.on .fic-count { color: #ff2e97; border-color: #ff2e97; }
+.fic-toggle.on .fic-glyph { color: #ff2e97; animation: fic-flick .5s steps(2, jump-none) infinite; }
+.fic-toggle.on .fic-txt::before { opacity: .9; animation: fic-glitch-a .9s steps(2, end) infinite; }
+.fic-toggle.on .fic-txt::after  { opacity: .9; animation: fic-glitch-b 1.15s steps(2, end) infinite; }
+.fic-toggle.on::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen;
+  background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(180, 220, 255, .05) 2px 3px);
+  animation: fic-scan 2.6s linear infinite;
+}
+@keyframes fic-glitch-a {
+  0%   { clip-path: inset(0 0 82% 0); transform: translateX(-2px); }
+  50%  { clip-path: inset(38% 0 40% 0); transform: translateX(2px); }
+  100% { clip-path: inset(74% 0 4% 0); transform: translateX(-1px); }
+}
+@keyframes fic-glitch-b {
+  0%   { clip-path: inset(70% 0 10% 0); transform: translateX(2px); }
+  50%  { clip-path: inset(18% 0 55% 0); transform: translateX(-2px); }
+  100% { clip-path: inset(4% 0 80% 0); transform: translateX(1px); }
+}
+@keyframes fic-flick { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+@keyframes fic-scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+@media (prefers-reduced-motion: reduce) {
+  .fic-toggle.on .fic-glyph, .fic-toggle.on .fic-txt::before,
+  .fic-toggle.on .fic-txt::after, .fic-toggle.on::after { animation: none; }
+  .fic-toggle.on .fic-txt::before { transform: translateX(-1.6px); }
+  .fic-toggle.on .fic-txt::after  { transform: translateX(1.6px); }
+}
+
 /* ---- Sharpen the last rounded boxes on the planet page ---- */
 .assume, .banner, .palette { border-radius: 0; }
 .palette .stop code { border-radius: 0; font-family: var(--mono); font-size: 8px; }

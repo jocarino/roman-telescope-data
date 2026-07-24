@@ -88,7 +88,7 @@
     <div class="dropdown" x-data="{ open: false, shut: {} }" @keydown.escape="open=false"
       @click.outside="open=false">
       <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
-        :class="sort !== 'name' || prov !== 'all' || ptype !== 'all' || disc !== 'all' || distBand !== 'all' ? 'active' : ''"
+        :class="sort !== 'name' || prov !== 'all' || ptype !== 'all' || disc !== 'all' || distBand !== 'all' || fic ? 'active' : ''"
         aria-label="Filter, sort and display options" title="Filter, sort and display options">
         <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
           <path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" stroke-width="1.6"
@@ -96,6 +96,19 @@
         </svg>
       </button>
       <div class="dd-menu m-menu" x-show="open" x-cloak>
+        {# The odd one out: a glitchy CRT toggle in its own cyan/magenta palette (not the site
+           accent), flagged as the fun, non-scientific filter. Single switch, no collapse. #}
+        <div class="fic-sec">
+          <button type="button" class="fic-toggle" :class="fic ? 'on' : ''" @click="fic = !fic"
+            :aria-pressed="fic" title="Show only planets that appear in books, films or games">
+            <span class="fic-glyph" aria-hidden="true">◈</span>
+            <span class="fic-main">
+              <span class="fic-txt" data-text="SEEN IN FICTION">SEEN IN FICTION</span>
+              <span class="fic-sub">books · films · games</span>
+            </span>
+            <span class="fic-count" x-show="loaded" x-cloak x-text="ficCount()"></span>
+          </button>
+        </div>
         <button type="button" class="dd-head dd-sec" @click="shut.prov = !shut.prov"
           :aria-expanded="!shut.prov"><span>How real<span class="dd-sub">modelled vs measured colour</span></span>
           <span class="dd-chev" x-text="shut.prov ? '▸' : '▾'"></span></button>

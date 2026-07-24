@@ -91,9 +91,9 @@ def _planet_ctx(rec: PlanetRecord, fiction: dict[str, dict] | None = None) -> di
     }
 
 
-def _index_entry(rec: PlanetRecord) -> dict:
+def _index_entry(rec: PlanetRecord, fiction: dict[str, dict] | None = None) -> dict:
     view = rec.instrument_views[0]
-    return {
+    entry = {
         "id": rec.id,
         "name": rec.name,
         "host": rec.host_star.name,
@@ -123,6 +123,13 @@ def _index_entry(rec: PlanetRecord) -> dict:
         "sma": rec.params.semi_major_axis_au,
         "year": rec.discovery.year,
     }
+    # Fiction flag: the system name if this planet appears in the curated overlay, else absent
+    # (kept off the entry entirely so the 900+ non-fiction rows stay lean). Drives the gallery
+    # "seen in fiction" filter.
+    fic = (fiction or {}).get(rec.name)
+    if fic:
+        entry["fic"] = fic["system"]
+    return entry
 
 
 def _stats(records: list[PlanetRecord]) -> dict:
@@ -171,7 +178,7 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     # The gallery index is fetched at runtime (not inlined) so index.html stays tiny and the
     # grid scales to thousands of planets. Cache-busted by build_id.
     (out / f"planets.index.{build_id}.json").write_text(
-        json.dumps([_index_entry(r) for r in records], separators=(",", ":"))
+        json.dumps([_index_entry(r, fiction) for r in records], separators=(",", ":"))
     )
     gallery_html = env.get_template("gallery.html").render(
         stats=_stats(records),

@@ -19,6 +19,7 @@ document.addEventListener("alpine:init", () => {
     ptype: "all",
     disc: "all",
     distBand: "all",
+    fic: false,       // "seen in fiction" toggle: show only planets in the pop-culture overlay
     sort: "name",
     scrolled: false,  // page scrolled past the header: toolbar is stuck, TOP button shows
     // Labels for the custom (retro) dropdowns.
@@ -107,6 +108,7 @@ document.addEventListener("alpine:init", () => {
       if (near) this.nearId = near;
       const fam = params.get("family");
       if (fam && this.familyMeta[fam]) this.family = fam;
+      if (params.get("fiction") === "1") this.fic = true;
 
       try {
         const res = await fetch(this.indexUrl);
@@ -131,7 +133,7 @@ document.addEventListener("alpine:init", () => {
       window.addEventListener("resize", onScroll, { passive: true });
 
       // Any filter/sort change re-renders the grid from the top.
-      ["q", "prov", "ptype", "disc", "distBand", "family", "sort", "nearId"].forEach((k) =>
+      ["q", "prov", "ptype", "disc", "distBand", "family", "fic", "sort", "nearId"].forEach((k) =>
         this.$watch(k, () => this._rerender()));
 
       this._rerender();
@@ -274,6 +276,9 @@ document.addEventListener("alpine:init", () => {
       const b = this.distBands.find((x) => x[0] === this.distBand);
       return b ? b[1] : "Any distance";
     },
+    // How many planets carry a fiction reference (for the "seen in fiction" toggle's counter).
+    // Touch `loaded` so Alpine re-evaluates this once the (non-reactive) index has been fetched.
+    ficCount() { return this.loaded ? (window.PLANETS || []).reduce((n, p) => n + (p.fic ? 1 : 0), 0) : 0; },
     setFamily(f) { this.family = this.family === f ? null : f; },
     setSort(v) { this.sort = v; this.nearId = null; },  // an explicit sort cancels similar-colour
     clearNear() { this.nearId = null; },
@@ -312,6 +317,7 @@ document.addEventListener("alpine:init", () => {
         if (this.disc !== "all" && p.disc !== this.disc) return false;
         if (this.distBand !== "all" && this._distBandOf(p.dist_ly) !== this.distBand) return false;
         if (this.family && p.family !== this.family) return false;
+        if (this.fic && !p.fic) return false;
         if (this.q) {
           const s = (p.name + " " + p.host).toLowerCase();
           if (!s.includes(this.q.toLowerCase())) return false;
