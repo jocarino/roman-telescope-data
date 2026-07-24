@@ -797,9 +797,12 @@ document.addEventListener("alpine:init", () => {
 })();
 
 // Hover-to-spin on gallery cards (desktop with a real pointer only, avoids mobile churn
-// and keeps the site light: only the hovered planet animates).
+// and keeps the site light: only the hovered planet animates). The hovered planet also
+// runs the same full lunar cycle as the planet page — waning through dark, waxing back
+// from the left — picking up from the card's dealt phase. Un-hovering restores it.
 (function () {
   if (!window.matchMedia || !window.matchMedia("(hover: hover)").matches) return;
+  var PHASE_SPEED = 16;  // degrees per second, matching the planet page's cycle
   var hovered = null;
   function optsFor(cv) {
     var list = window.PLANETS || [];
@@ -813,6 +816,17 @@ document.addEventListener("alpine:init", () => {
       phase: window.PlanetRender.hashPhase(p.id),
     };
   }
+  // Per-hover animator: advances the phase through the full 0-360° cycle from `startRad`.
+  function phaseAnimator(startRad) {
+    var deg = (startRad * 180) / Math.PI, last = null;
+    return function (t) {
+      if (last == null) last = t;
+      deg += (PHASE_SPEED * Math.min(t - last, 100)) / 1000;
+      last = t;
+      if (deg >= 360) deg -= 360;
+      return { phase: (deg * Math.PI) / 180 };
+    };
+  }
   document.addEventListener("mouseover", function (e) {
     var card = e.target.closest && e.target.closest("a.card");
     if (card === hovered) return;
@@ -824,7 +838,7 @@ document.addEventListener("alpine:init", () => {
     if (card && window.PlanetRender) {
       var cv = card.querySelector(".card-planet");
       var o = cv && optsFor(cv);
-      if (o) window.PlanetRender.spin(cv, o);
+      if (o) window.PlanetRender.spin(cv, Object.assign({}, o, { frame: phaseAnimator(o.phase) }));
     }
   });
 })();
