@@ -608,11 +608,17 @@ document.addEventListener("alpine:init", () => {
       if (this.heroSource === "telescope") { this.heroSource = "model"; this._persist("heroSource", "model"); }
       this.renderAll();
     },
+    // The phase fan under the hero: this planet at 0-150° in 30° steps. 180° is excluded
+    // on purpose — a fully backlit planet is just a black disc.
+    fanIdxs() {
+      return [0, 3, 6, 9, 12, 15].filter((i) => i < this.phases.length);
+    },
+    setPhaseIdx(i) { this.phaseIdx = i; this.phaseChanged(); },
     // Retint a palette by the per-channel drift of the phase colour vs full phase, so the
     // render carries the modelled colour shift (subtle blueing/reddening) as it wanes.
-    _phaseTint(palette) {
-      const ph = this.phase();
-      if (!ph.d || !this.phases.length) return palette;
+    _phaseTint(palette, idx) {
+      const ph = this.phases[idx == null ? this.phaseIdx : idx];
+      if (!ph || !ph.d || !this.phases.length) return palette;
       const base = this.phases[0].h;
       const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
       const [br, bg, bb] = rgb(base), [pr, pg, pb] = rgb(ph.h);
@@ -665,6 +671,18 @@ document.addEventListener("alpine:init", () => {
       // Single hero planet, rotating; its style (sphere/pixel) is a scope knob.
       this.$refs.cHero.classList.toggle("pixel", this.heroStyle === "retro");
       PlanetRender.spin(this.$refs.cHero, { ...opts, style: this.heroStyle });
+      // The phase fan: static mini renders of the same planet at each fan phase.
+      this.$el.querySelectorAll("canvas[data-fan]").forEach((cv) => {
+        const i = +cv.dataset.fan;
+        const ph = this.phases[i];
+        if (!ph) return;
+        PlanetRender.render(cv, {
+          ...opts,
+          palette: this._phaseTint(this.view === "full" ? this.fullPalette : this.romanPalette, i),
+          phase: (ph.d * Math.PI) / 180,
+          style: this.heroStyle,
+        });
+      });
     },
   }));
 });

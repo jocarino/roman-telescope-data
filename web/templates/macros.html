@@ -88,6 +88,21 @@
       <canvas class="detail-hero" x-show="heroSource !== 'telescope'"
         :class="heroStyle === 'retro' ? 'pixel' : ''" x-ref="cHero"
         width="256" height="256" aria-label="{{ rec.name }} modelled render"></canvas>
+      {% if rec.phase_colours %}
+      {# The phase fan: this planet at 0-150°, each a mini render; click to set the phase.
+         180° is deliberately excluded — a fully backlit planet is just a black disc. #}
+      <div class="phase-fan" x-show="heroSource !== 'telescope'" role="group"
+        aria-label="The same planet at other orbital phases">
+        <template x-for="i in fanIdxs()" :key="'f' + i">
+          <button class="fan-cell" :class="phaseIdx === i ? 'on' : ''"
+            @click="setPhaseIdx(i)" :title="phases[i].d + '°'"
+            :aria-label="'Show at ' + phases[i].d + '° phase'">
+            <canvas width="48" height="48" :data-fan="i"
+              :class="heroStyle === 'retro' ? 'pixel' : ''"></canvas>
+          </button>
+        </template>
+      </div>
+      {% endif %}
       {% if rec.real_observations %}
       <figure class="hero-obs" x-show="heroSource === 'telescope'" x-cloak>
         <button class="obs-thumb" @click="obsZoom = true" title="Click to enlarge the real image"
@@ -334,8 +349,8 @@
             {% endif %}
           </div>
           {% if rec.phase_colours %}
-          {# Phase slider: drag the planet from fully lit (0°) to backlit (180°). Drives the
-             render's terminator, the phase colour chip and the brightness readout. #}
+          {# Phase slider: drag the planet from fully lit (0°) to a thin crescent (170°).
+             Drives the render's terminator and the phase fan under the hero. #}
           <div class="phase-row">
             <div class="phase-head">
               <span class="knob-name">Phase
@@ -346,11 +361,12 @@
               <span class="phase-val"><span x-text="phase().d + '°'"></span> ·
                 <span x-text="phaseName()"></span></span>
             </div>
-            <input type="range" class="phase-slider" min="0" :max="phases.length - 1" step="1"
+            {# max stops at 170°: a fully backlit (180°) planet is just a black disc. #}
+            <input type="range" class="phase-slider" min="0" :max="phases.length - 2" step="1"
               x-model.number="phaseIdx" @input="phaseChanged()"
               aria-label="Orbital phase: 0° fully lit to 180° backlit">
             <div class="phase-scale" aria-hidden="true">
-              <span>FULL</span><span>HALF</span><span>NEW</span>
+              <span>FULL</span><span>HALF</span><span>CRESCENT</span>
             </div>
           </div>
           {% endif %}

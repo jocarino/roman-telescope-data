@@ -1020,6 +1020,16 @@ button.badge:active, a.badge:active { box-shadow: none; }
   display: flex; justify-content: space-between;
   font-family: var(--mono); font-size: 8.5px; letter-spacing: .5px; color: var(--fg-faint);
 }
+/* Phase fan under the hero render: the same planet at 0-150°, click to set the phase. */
+.phase-fan { display: flex; gap: 3px; margin-top: 8px; }
+.fan-cell {
+  padding: 1px; border: 1px solid var(--line); background: var(--bg-3); cursor: pointer;
+  line-height: 0; border-radius: 0;
+}
+.fan-cell:hover { border-color: var(--accent); }
+.fan-cell.on { border-color: var(--accent); box-shadow: 2px 2px 0 var(--accent); }
+.fan-cell canvas { width: 20px; height: 20px; display: block; }
+.fan-cell canvas.pixel { image-rendering: pixelated; image-rendering: crisp-edges; }
 .knob {
   width: 44px; height: 44px; border-radius: 50%; position: relative; cursor: pointer;
   margin: 7px;  /* room for the tick ring */
