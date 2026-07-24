@@ -1,11 +1,12 @@
-"""Curated real telescope images for the directly-imaged planets.
+"""Curated real images for planets we have actually photographed.
 
 These are hand-maintained facts, not derivable from the Exoplanet Archive: which planets
-have an actual processed direct-imaging photograph, where it came from, and how it must be
-credited. Keyed by record id (see `pipeline.catalog._slug`). Only directly-imaged planets
-appear here: microlensing planets never yield an image, and RV/transit planets have none
-yet. The site's colour is always modelled; these are the genuine (always infrared, always
-false-coloured) dots of light a telescope actually received.
+have an actual processed photograph, where it came from, and how it must be credited.
+Keyed by record id (see `pipeline.catalog._slug`). Two kinds of planet qualify:
+directly-imaged exoplanets (infrared, false-coloured dots of light — the site's colour is
+still modelled), and the solar system anchors (real visible-light spacecraft photographs,
+the ground truth the measured-albedo swatch can be checked against). Microlensing planets
+never yield an image, and RV/transit planets have none yet.
 
 Each planet maps to a LIST of observations so a second instrument (e.g. Roman, post-launch)
 is APPENDED beside the first, never substituted, and the page then offers a per-telescope
@@ -110,6 +111,84 @@ OBSERVATIONS: dict[str, list[RealObservation]] = {
             source_url="https://subarutelescope.org/en/gallery/pressrelease/galactic/2025/06/18/3566.html",
             note="The planet is the white point at upper-right; the star sits behind the black "
             "central mask amid blue/orange speckle noise. Near-infrared, false-coloured.",
+        ),
+    ],
+    # ── Solar system anchors: real visible-light photographs, credit NASA (public domain).
+    # Unlike the exoplanet entries above these are TRUE-COLOUR photos — the one place the
+    # pipeline's swatch can be checked against what a camera actually saw.
+    "jupiter": [
+        RealObservation(
+            telescope="Cassini",
+            file="obs/jupiter.jpg",
+            instrument="Cassini / Imaging Science Subsystem",
+            band="visible light (true colour)",
+            year=2000,
+            credit="NASA/JPL/Space Science Institute",
+            license="Public domain (NASA)",
+            source_url="https://photojournal.jpl.nasa.gov/catalog/PIA04866",
+            note="A real visible-light photograph — the most detailed global colour portrait "
+            "of Jupiter ever made, from Cassini's December 2000 flyby. Compare it directly "
+            "with the measured-spectrum swatch.",
+        ),
+    ],
+    "saturn": [
+        RealObservation(
+            telescope="Cassini",
+            file="obs/saturn.jpg",
+            instrument="Cassini / Imaging Science Subsystem",
+            band="visible light (natural colour)",
+            year=2008,
+            credit="NASA/JPL/Space Science Institute",
+            license="Public domain (NASA)",
+            source_url="https://photojournal.jpl.nasa.gov/catalog/PIA11141",
+            note="A real visible-light photograph from Cassini in Saturn orbit (2008), "
+            "natural colour. The spectrum behind our swatch is of the globe alone, at zero "
+            "ring tilt — the rings in the photo are a bonus the disk-average never sees.",
+        ),
+    ],
+    "uranus": [
+        RealObservation(
+            telescope="Voyager 2",
+            file="obs/uranus.jpg",
+            instrument="Voyager 2 / Imaging Science Subsystem",
+            band="visible light (true colour)",
+            year=1986,
+            credit="NASA/JPL-Caltech",
+            license="Public domain (NASA)",
+            source_url="https://photojournal.jpl.nasa.gov/catalog/PIA18182",
+            note="A real visible-light photograph — humanity's only close-up of Uranus "
+            "(Voyager 2, January 1986). Its featureless pale cyan is genuinely what the "
+            "planet looks like.",
+        ),
+    ],
+    "neptune": [
+        RealObservation(
+            telescope="Voyager 2",
+            file="obs/neptune.jpg",
+            instrument="Voyager 2 / Imaging Science Subsystem",
+            band="visible light (contrast-enhanced colour)",
+            year=1989,
+            credit="NASA/JPL",
+            license="Public domain (NASA)",
+            source_url="https://photojournal.jpl.nasa.gov/catalog/PIA01492",
+            note="A real Voyager 2 photograph (August 1989) — but its famous deep blue was "
+            "contrast-enhanced in processing. Modern reanalysis shows Neptune's true colour "
+            "is the paler greenish-blue our measured spectrum reproduces.",
+        ),
+    ],
+    "earth": [
+        RealObservation(
+            telescope="Apollo 17",
+            file="obs/earth.jpg",
+            instrument="Hasselblad 70 mm camera, en route to the Moon",
+            band="visible light (true colour)",
+            year=1972,
+            credit="NASA / Apollo 17 crew",
+            license="Public domain (NASA)",
+            source_url="https://images.nasa.gov/details/as17-148-22727",
+            note="The Blue Marble — a real photograph taken by the Apollo 17 crew on "
+            "7 December 1972. The palest of pale blue dots, exactly the tint the measured "
+            "spectrum yields.",
         ),
     ],
 }

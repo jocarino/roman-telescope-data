@@ -156,6 +156,13 @@ Milestones 1–5 are DONE; the catalog is the full archive pull (5,759 planets l
    comparison (DONE — `sun_swap` data + the "Light source" knob on the planet page);
    post-launch, ingest real CGI photometry for the tech-demo targets (future — runbook:
    `docs/roman-measured-data.md`).
+7. **Solar system anchors.** (DONE) Jupiter, Saturn, Uranus, Neptune and Earth run through
+   the exact same pipeline from MEASURED albedo spectra (Karkoschka 1998 via PDS for the
+   giants; Payne et al. 2026 for Earth — see `data/measured_albedo/README.md`), with a real
+   NASA photograph beside each swatch (`provenance: "measured-albedo"`,
+   `pipeline/solar_system.py`). They are the site's calibration proof — the one place the
+   spectrum→colour conversion is checked against a photographed planet — and the visitor's
+   anchor for reading every exoplanet swatch.
 
 ## Gotchas
 

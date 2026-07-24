@@ -12,7 +12,8 @@
     'simulated-cgi': 'Roman: simulated',
     'measured-cgi': 'Roman: measured',
     'model-microlensing': 'Modelled',
-    'measured-hwo': 'HWO: measured'
+    'measured-hwo': 'HWO: measured',
+    'measured-albedo': 'Spectrum: measured'
   } -%}
   <span class="badge {{ rec.provenance }}">{{ labels.get(rec.provenance, rec.provenance) }}</span>
 {%- endmacro %}
@@ -70,7 +71,7 @@
     {%- endif %}
     radius: {{ rec.params.radius_r_earth if rec.params.radius_r_earth else 8 }},
     cloudState: '{{ rec.params.assumed_cloud_state }}',
-    fullCap: 'Modelled from the complete reflected-light spectrum (380–780 nm): a physics prediction, not a photograph.',
+    fullCap: '{% if rec.provenance == 'measured-albedo' %}Computed from the planet’s real, measured reflected-light spectrum (380–780 nm) — the same maths as every exoplanet on this site, run on real data.{% else %}Modelled from the complete reflected-light spectrum (380–780 nm): a physics prediction, not a photograph.{% endif %}',
     romanCap: '{% if iview.band_samples.source == 'measured' %}Measured: real Roman photometry in four bands{% if iview.band_samples.epoch %} ({{ iview.band_samples.epoch }}){% endif %}, reconstructed to a colour. Real data.{% else %}Simulated: the model at quadrature (half-lit — the only geometry a coronagraph can catch) pushed through the four Roman filters, i.e. what Roman would measure. Not real data yet.{% endif %}',
     phases: [{% if rec.phase_colours %}{% for c in rec.phase_colours.colours %}{d:{{ c.phase_deg }},h:'{{ c.hex }}',l:{{ '%.4f'|format(c.luminance_y) }}}{{ ',' if not loop.last }}{% endfor %}{% endif %}],
     phaseSource: '{{ rec.phase_colours.source if rec.phase_colours else '' }}',
@@ -464,7 +465,11 @@
     <div class="dossier-help" x-show="help" x-cloak>
       <div class="assume">
         <button class="info-x" @click="help = false" aria-label="Close">&times;</button>
-        {% if rec.provenance in ['simulated-cgi', 'measured-cgi'] %}
+        {% if rec.provenance == 'measured-albedo' %}
+        A solar system planet — one of the five anchors that let you check this whole site.
+        The spectrum behind this swatch is a <strong>real measurement</strong> of the actual
+        planet, not a model, and the page carries a real photograph to compare against.
+        {% elif rec.provenance in ['simulated-cgi', 'measured-cgi'] %}
         A Roman tech-demo target: the four-band view will be replaced by <strong>real measured
         data</strong> once Roman observes it, the only real colour this planet will ever have.
         {% elif not rec.is_light_isolable %}
@@ -479,8 +484,16 @@
         (derived from the star + orbit), or <span class="src src-assumed">assumed</span> (an
         archetype default because no data exists for this planet).
         <br><br>
-        {%- set engine = {'parametric': 'a parametric albedo model', 'cahoy': 'the Cahoy et al. 2010 grid', 'picaso': 'PICASO radiative transfer'} -%}
-        Spectrum engine: {{ engine.get(rec.params.spectrum_source, rec.params.spectrum_source) }}.
+        {%- set engine = {'parametric': 'a parametric albedo model', 'cahoy': 'the Cahoy et al. 2010 grid', 'picaso': 'PICASO radiative transfer', 'karkoschka1998': 'measured full-disk spectrophotometry (Karkoschka 1998, ESO)', 'payne2026': 'the measured solar-system reference spectrum (Payne et al. 2026)'} -%}
+        Spectrum source: {{ engine.get(rec.params.spectrum_source, rec.params.spectrum_source) }}.
+        {% if rec.provenance == 'measured-albedo' %}
+        Nothing about the atmosphere is assumed — the spectrum already contains the planet's
+        real clouds and chemistry. Phase angle:
+        {{ rec.params.assumed_phase_angle_deg|round(1) }}°, the geometry the spectrum was
+        measured at. Planet and orbit data:
+        <a href="https://nssdc.gsfc.nasa.gov/planetary/factsheet/" target="_blank" rel="noopener">NASA
+        planetary fact sheets</a>.
+        {% else %}
         Atmosphere is always <span class="src src-assumed">assumed</span> (we hold no per-planet
         cloud/metallicity data). Cloud state: {{ rec.params.assumed_cloud_state }};
         metallicity: {{ (rec.params.assumed_metallicity ~ '× solar') if rec.params.assumed_metallicity else 'n/a (rocky)' }};
@@ -488,6 +501,7 @@
         Planet and star data:
         <a href="https://exoplanetarchive.ipac.caltech.edu/" target="_blank" rel="noopener">NASA
         Exoplanet Archive</a>.
+        {% endif %}
       </div>
     </div>
 

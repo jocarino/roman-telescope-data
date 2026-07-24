@@ -719,6 +719,7 @@ button.badge:active, a.badge:active { box-shadow: none; }
 .badge.model { }
 .badge.simulated-cgi { border-color: #3a4d6b; color: #9fc0ef; }
 .badge.measured-cgi { border-color: #2f6b45; color: #86e0aa; background: #12241a; }
+.badge.measured-albedo { border-color: #2f6b45; color: #86e0aa; background: #12241a; }
 .badge.model-microlensing { border-color: #6b5330; color: #e6c07a; background: #241d12; }
 .badge.hex { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 
