@@ -17,9 +17,12 @@
     <a href="https://exoplanetarchive.ipac.caltech.edu/" target="_blank" rel="noopener">NASA
     Exoplanet Archive</a>.
   </p>
+  <p class="subhead lede">Modelling <strong>{{ n_modelled }}</strong> of the ~{{ known_total }}
+    known exoplanets — the nearest that pass our data-completeness gate.</p>
 </div>
 
-<div x-data="gallery()" @scroll.window.passive="scrolled = window.scrollY > 160">
+<div x-data="gallery({ indexUrl: '{{ index_url }}' })"
+  @scroll.window.passive="scrolled = window.scrollY > 160">
   <div class="controls" :class="scrolled ? 'stuck' : ''">
     {# The main filter: by the planet's colour family (computed in the pipeline). #}
     <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
@@ -157,7 +160,9 @@
       </div>
     </div>
     <div class="spacer"></div>
-    <span class="count"><span x-text="count()"></span> shown · long-press for a quick peek</span>
+    <span class="count" x-show="loaded" x-cloak><span x-text="count()"></span> shown ·
+      long-press for a quick peek</span>
+    <span class="count" x-show="!loaded">loading…</span>
     {# Similar-colour mode, entered from a planet page's "similar colours" link. #}
     <span class="near-pill" x-show="nearId" x-cloak>
       <span class="near-dot" :style="{ background: nearHex() }"></span>Nearest in colour to
@@ -166,21 +171,11 @@
     </span>
   </div>
 
-  <div class="grid" x-init="$nextTick(() => renderCards())">
-    {% for p in planets %}
-    <a class="card" href="/planet/{{ p.record.id }}.html"
-       data-peek="/fragments/peek/{{ p.record.id }}.html"
-       x-show="show('{{ p.record.id }}')" :style="{ order: order('{{ p.record.id }}') }">
-      <canvas class="card-planet" data-id="{{ p.record.id }}" width="256" height="256"
-        aria-label="{{ p.record.name }} render"></canvas>
-      <div class="card-name">{{ p.record.name }}</div>
-      <div class="card-meta">
-        {{ provenance_badge(p.record) }}
-        <span class="badge hex"><i class="chip" style="background: {{ p.record.true_colour.hex }}"></i>{{ p.record.true_colour.hex }}</span>
-      </div>
-    </a>
-    {% endfor %}
-  </div>
+  {# Cards are rendered incrementally in JS from a fetched index (scales to thousands): the grid
+     starts empty, the component fills it in batches as you scroll. #}
+  <div class="grid" x-ref="grid"></div>
+  <div class="grid-sentinel" x-ref="sentinel" aria-hidden="true"></div>
+  <p class="grid-empty" x-show="loaded && count() === 0" x-cloak>No planets match these filters.</p>
 
   <button class="to-top" x-show="scrolled" x-cloak
     @click="window.scrollTo({ top: 0, behavior: 'smooth' })"
@@ -190,6 +185,4 @@
 {# Hold-to-peek overlay: appears while a card is long-pressed, gone on release.
    pointer-events: none throughout, so the release still lands on the card underneath. #}
 <div class="peek" id="peek" aria-hidden="true"><div class="peek-box" id="peek-body"></div></div>
-
-<script>window.PLANETS = {{ index_json|safe }};</script>
 {% endblock %}
