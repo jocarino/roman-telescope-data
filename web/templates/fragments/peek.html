@@ -1,18 +1,44 @@
-{# Hold-to-peek card: just the planet's identity, honesty caption and the spectrum plot.
-   Deliberately much lighter than the planet page (which a normal tap navigates to). #}
+{# Hold-to-peek card: the planet's identity plus a compact "how this colour is made" flow —
+   the pipeline (starlight × reflectance → colour) shown with THIS planet's real values.
+   Deliberately lighter than the planet page, which a normal tap navigates to. #}
 {%- set rec = ctx.record -%}
+{%- set tc = rec.true_colour -%}
+{%- set star = rec.host_star -%}
 <div class="peek-head">
   {# Rendered client-side on show (same engine + style settings as the gallery cards). #}
   <canvas class="peek-planet" data-id="{{ rec.id }}" width="128" height="128"
     aria-label="{{ rec.name }} render"></canvas>
   <div>
     <div class="peek-name">{{ rec.name }}</div>
-    <div class="peek-host">{{ rec.host_star.name }}
-      {%- if rec.host_star.spectral_type %} · {{ rec.host_star.spectral_type }}{% endif -%}
-      {%- if rec.host_star.teff_k %} · {{ rec.host_star.teff_k|round|int }} K{% endif -%}
+    <div class="peek-host">{{ star.name }}
+      {%- if star.spectral_type %} · {{ star.spectral_type }}{% endif -%}
+      {%- if star.teff_k %} · {{ star.teff_k|round|int }} K{% endif -%}
     </div>
   </div>
 </div>
-<p class="peek-desc">Modelled from the complete reflected-light spectrum (380–780 nm):
-  a physics prediction, not a photograph.</p>
-<div class="peek-screen">{{ ctx.spectrum_svg_compact|safe }}</div>
+
+<div class="peek-flow">
+  <div class="peek-flow-cap">How this colour is made</div>
+
+  <div class="peek-step">
+    <span class="peek-step-lbl">Starlight</span>
+    <span class="peek-step-val">{% if star.spectral_type %}{{ star.spectral_type }} star{% else %}Host star{% endif %}
+      · {{ star.teff_k|round|int }} K — modelled as a blackbody</span>
+  </div>
+
+  <div class="peek-step">
+    <span class="peek-step-lbl">× Reflects</span>
+    <div class="peek-screen">{{ ctx.spectrum_svg_compact|safe }}</div>
+    <span class="peek-step-sub">geometric albedo across 380–780 nm</span>
+  </div>
+
+  <div class="peek-step">
+    <span class="peek-step-lbl">→ Colour</span>
+    <div class="peek-colour">
+      <span class="peek-swatch" style="background: {{ tc.hex }}"></span>
+      <code>{{ tc.hex }}</code>
+      <span class="peek-step-sub">brightness Y {{ '%.3f'|format(tc.luminance_y) }}{% if tc.out_of_gamut %} · outside sRGB{% endif %}</span>
+    </div>
+    <span class="peek-step-sub">via CIE 1931 colour matching</span>
+  </div>
+</div>
