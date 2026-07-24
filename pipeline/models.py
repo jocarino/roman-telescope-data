@@ -21,6 +21,11 @@ Provenance = Literal[
 ColourMethod = Literal["full-spectrum", "band-reconstruction"]
 Confidence = Literal["high", "medium", "low"]
 
+# Where a single modelling parameter's value came from. This is NOT a quality score — it just
+# states, honestly and per-field, whether we used a real measurement, derived the value from
+# other measurements, or fell back to an archetype assumption because no data exists.
+DataSource = Literal["measured", "computed", "assumed"]
+
 
 class SpectralCurve(BaseModel):
     grid: str  # GRID_ID
@@ -85,17 +90,37 @@ class HostStar(BaseModel):
     spectral_type: str | None = None
 
 
+class ParamSources(BaseModel):
+    """Per-parameter data origin, so the page can show exactly which numbers are real
+    measurements, which we computed from other measurements, and which are archetype
+    assumptions. Cloud state / metallicity / phase are always assumed (we hold no per-planet
+    atmosphere data); the rest are 'measured' when the Archive has them."""
+
+    equilibrium_temp_k: DataSource = "assumed"
+    radius_r_earth: DataSource = "assumed"
+    mass_m_earth: DataSource = "assumed"
+    semi_major_axis_au: DataSource = "assumed"
+    distance_pc: DataSource = "assumed"
+    star_teff_k: DataSource = "assumed"
+    metallicity: DataSource = "assumed"
+    cloud_state: DataSource = "assumed"
+    phase_angle_deg: DataSource = "assumed"
+
+
 class PlanetParams(BaseModel):
     equilibrium_temp_k: float | None = None
     radius_r_earth: float | None = None
     mass_m_earth: float | None = None
     semi_major_axis_au: float | None = None
+    distance_pc: float | None = None  # distance from Earth, parsecs
     # Model assumptions, surfaced for honesty ("modelled, not photographed").
     assumed_cloud_state: str
     assumed_metallicity: float
     assumed_phase_angle_deg: float
     # Which spectrum engine produced the albedo: "parametric" | "cahoy" | "picaso".
     spectrum_source: str = "parametric"
+    # Per-field data origin (measured / computed / assumed). Optional for back-compat.
+    sources: ParamSources | None = None
 
 
 class Discovery(BaseModel):

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 
-from pipeline.catalog import _display_name, _model_temperature
+from pipeline.catalog import _display_name, _model_temperature, completeness_gate
 from pipeline.fetch.archive import ArchiveRecord
 from pipeline.spectrum.parametric import model_for
 
@@ -85,3 +85,35 @@ def test_young_imaged_giant_reclassified_to_irradiation_temp():
     rec = _rec(pl_eqt=1200.0, st_teff=7400.0, st_rad=1.4, pl_orbsmax=68.0)
     mt = _model_temperature(rec, rec.equilibrium_temp_k())
     assert mt is not None and mt < 100, f"expected cold irradiation temp, got {mt}"
+
+
+def test_gate_passes_with_radius_and_temp():
+    ok, reason = completeness_gate(_rec(pl_rade=1.0, st_teff=5772.0, pl_eqt=300.0))
+    assert ok and reason is None
+
+
+def test_gate_passes_with_mass_only_and_temp():
+    # 51 Eri b shape: no radius, but a mass (giant) + real star + measured temp -> keep.
+    ok, _ = completeness_gate(_rec(pl_bmasse=3464.0, st_teff=7422.0, pl_eqt=807.0))
+    assert ok
+
+
+def test_gate_passes_with_computable_temp():
+    ok, _ = completeness_gate(_rec(pl_rade=2.0, st_teff=5772.0, st_rad=1.0, pl_orbsmax=1.0))
+    assert ok
+
+
+def test_gate_excludes_no_size():
+    ok, reason = completeness_gate(_rec(st_teff=5772.0, pl_eqt=300.0))
+    assert not ok and "size" in reason
+
+
+def test_gate_excludes_unknown_star():
+    # OGLE microlensing shape: has radius + temp, but the host star is uncharacterised.
+    ok, reason = completeness_gate(_rec(pl_rade=2.2, pl_eqt=50.0))
+    assert not ok and "host star" in reason
+
+
+def test_gate_excludes_no_temperature():
+    ok, reason = completeness_gate(_rec(pl_rade=1.0, st_teff=5772.0))  # nothing to compute from
+    assert not ok and "temperature" in reason

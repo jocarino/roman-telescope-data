@@ -11,6 +11,11 @@
   <span class="badge {{ rec.provenance }}">{{ labels.get(rec.provenance, rec.provenance) }}</span>
 {%- endmacro %}
 
+{# Per-value origin tag: measured (real Archive datum) / computed (derived) / assumed (archetype). #}
+{% macro src_tag(src) -%}
+  {%- if src %}<span class="src src-{{ src }}" title="{{ {'measured': 'Real measurement from the NASA Exoplanet Archive', 'computed': 'Derived from the star + orbit', 'assumed': 'Archetype assumption — no data for this planet'}[src] }}">{{ src }}</span>{% endif -%}
+{%- endmacro %}
+
 {% macro palette_strip(palette) -%}
   <span class="palette-strip">
     {%- for s in palette %}<span style="background: {{ s.hex }}"></span>{% endfor -%}
@@ -38,7 +43,6 @@
 {%- set rv = iview.colour -%}
 <div class="detail" :data-panel="panel" x-data="detail({
     fullHex: '{{ tc.hex }}', romanHex: '{{ rv.hex }}',
-    fullConf: '{{ tc.confidence }}', romanConf: '{{ rv.confidence }}',
     fullLum: {{ '%.3f'|format(tc.luminance_y) }}, romanLum: {{ '%.3f'|format(rv.luminance_y) }},
     fullOog: {{ 'true' if tc.out_of_gamut else 'false' }},
     romanOog: {{ 'true' if rv.out_of_gamut else 'false' }},
@@ -211,8 +215,6 @@
           <b>{{ '%.1f'|format(iview.reconstruction_error.delta_e2000) }}</b></div>
         <div class="ro-row"><span>Y BRIGHT</span>
           <b x-text="(view === 'full' ? fullLum : romanLum).toFixed(3)"></b></div>
-        <div class="ro-row"><span>CONF</span>
-          <b x-text="view === 'full' ? fullConf : romanConf"></b></div>
         <div class="ro-row"><span>GAMUT</span>
           <b x-text="(view === 'full' ? fullOog : romanOog) ? 'OOG' : 'OK'"></b></div>
         <div class="ro-sep"></div>
@@ -275,6 +277,8 @@
           title="Copy all five palette colours, comma-separated">COPY ALL</button>
         <button class="badge hex" @click="copyCssVars($event)">CSS VARS</button>
         <a class="badge hex" href="/palettes/{{ rec.id }}.ase" download>.ASE</a>
+        <a class="badge hex similar" href="/?near={{ rec.id }}"
+          title="Find planets closest in colour to this one">◎ SIMILAR COLOURS</a>
         <span class="copied" x-show="msg" x-text="msg" x-cloak></span>
       </div>
     </div>
@@ -302,9 +306,15 @@
         This planet's light has never been isolated by any telescope; both colours are modelled.
         {% endif %}
         <br><br>
+        Each planet value is tagged by origin: <span class="src src-measured">measured</span>
+        (a real datum from the NASA Exoplanet Archive), <span class="src src-computed">computed</span>
+        (derived from the star + orbit), or <span class="src src-assumed">assumed</span> (an
+        archetype default because no data exists for this planet).
+        <br><br>
         {%- set engine = {'parametric': 'a parametric albedo model', 'cahoy': 'the Cahoy et al. 2010 grid', 'picaso': 'PICASO radiative transfer'} -%}
         Spectrum engine: {{ engine.get(rec.params.spectrum_source, rec.params.spectrum_source) }}.
-        Model assumptions. Cloud state: {{ rec.params.assumed_cloud_state }};
+        Atmosphere is always <span class="src src-assumed">assumed</span> (we hold no per-planet
+        cloud/metallicity data). Cloud state: {{ rec.params.assumed_cloud_state }};
         metallicity: {{ rec.params.assumed_metallicity }}× solar;
         phase angle: {{ rec.params.assumed_phase_angle_deg|round|int }}°.
         Planet and star data:
@@ -320,17 +330,18 @@
         <table class="params">
           <tr><td>Base hex</td><td><code x-text="view === 'full' ? '{{ tc.hex }}' : '{{ rv.hex }}'"></code></td></tr>
           <tr><td>Reflected brightness (Y)</td><td x-text="(view === 'full' ? fullLum : romanLum).toFixed(3)"></td></tr>
-          <tr><td>Confidence</td><td x-text="view === 'full' ? fullConf : romanConf"></td></tr>
           <tr><td>Out of sRGB gamut</td><td x-text="(view === 'full' ? fullOog : romanOog) ? 'yes' : 'no'"></td></tr>
         </table>
       </div>
       <div class="dossier-stats">
         <div class="dossier-sub">Planet</div>
+        {%- set src = rec.params.sources -%}
         <table class="params">
-          <tr><td>Equilibrium temp</td><td>{{ (rec.params.equilibrium_temp_k|round|int ~ ' K') if rec.params.equilibrium_temp_k else 'n/a' }}</td></tr>
-          <tr><td>Radius</td><td>{{ (rec.params.radius_r_earth|round(2) ~ ' R⊕') if rec.params.radius_r_earth else 'n/a' }}</td></tr>
-          <tr><td>Mass</td><td>{{ (rec.params.mass_m_earth|round(1) ~ ' M⊕') if rec.params.mass_m_earth else 'n/a' }}</td></tr>
-          <tr><td>Semi-major axis</td><td>{{ (rec.params.semi_major_axis_au|round(3) ~ ' AU') if rec.params.semi_major_axis_au else 'n/a' }}</td></tr>
+          <tr><td>Equilibrium temp</td><td>{{ (rec.params.equilibrium_temp_k|round|int ~ ' K') if rec.params.equilibrium_temp_k else 'n/a' }}{% if src and rec.params.equilibrium_temp_k %} {{ src_tag(src.equilibrium_temp_k) }}{% endif %}</td></tr>
+          <tr><td>Radius</td><td>{{ (rec.params.radius_r_earth|round(2) ~ ' R⊕') if rec.params.radius_r_earth else 'n/a' }}{% if src and rec.params.radius_r_earth %} {{ src_tag(src.radius_r_earth) }}{% endif %}</td></tr>
+          <tr><td>Mass</td><td>{{ (rec.params.mass_m_earth|round(1) ~ ' M⊕') if rec.params.mass_m_earth else 'n/a' }}{% if src and rec.params.mass_m_earth %} {{ src_tag(src.mass_m_earth) }}{% endif %}</td></tr>
+          <tr><td>Semi-major axis</td><td>{{ (rec.params.semi_major_axis_au|round(3) ~ ' AU') if rec.params.semi_major_axis_au else 'n/a' }}{% if src and rec.params.semi_major_axis_au %} {{ src_tag(src.semi_major_axis_au) }}{% endif %}</td></tr>
+          <tr><td>Distance from Earth</td><td>{{ (rec.params.distance_pc|round(2) ~ ' pc') if rec.params.distance_pc else 'n/a' }}{% if src and rec.params.distance_pc %} {{ src_tag(src.distance_pc) }}{% endif %}</td></tr>
           <tr><td>Discovery</td><td>{{ rec.discovery.method }}{{ (' · ' ~ rec.discovery.year) if rec.discovery.year else '' }}</td></tr>
         </table>
       </div>

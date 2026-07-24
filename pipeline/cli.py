@@ -10,10 +10,10 @@ from __future__ import annotations
 import argparse
 from datetime import UTC, datetime
 
-from pipeline.catalog import catalog_planets
+from pipeline.catalog import catalog_bulk, catalog_planets
 from pipeline.config import INSTRUMENTS, ROMAN_CGI
 from pipeline.demo_planets import demo_planets
-from pipeline.emit.build import build_record
+from pipeline.emit.cache import cached_build_record
 from pipeline.emit.writer import write_planets
 from pipeline.system import attach_systems
 
@@ -27,14 +27,20 @@ def cmd_build(args: argparse.Namespace) -> None:
     instruments = [ROMAN_CGI] if args.targets_only is False else list(INSTRUMENTS.values())
     if args.source == "demo":
         inputs = demo_planets()
+    elif args.bulk is not None:
+        inputs = catalog_bulk(args.bulk, use_cache=not args.no_cache)
     else:
         inputs = catalog_planets(use_cache=not args.no_cache)
     if args.limit is not None:
         inputs = inputs[: args.limit]
 
     records = []
+    hits = 0
     for pin in inputs:
-        rec = build_record(pin, instruments, generated_at)
+        rec, was_hit = cached_build_record(
+            pin, instruments, generated_at, use_cache=not args.no_cache
+        )
+        hits += was_hit
         records.append(rec)
         tc = rec.true_colour
         roman = rec.instrument_views[0]
@@ -51,7 +57,8 @@ def cmd_build(args: argparse.Namespace) -> None:
     attach_systems(records)
 
     out = write_planets(records, generated_at)
-    print(f"\nWrote {len(records)} planet(s) -> {out}")
+    n = len(records)
+    print(f"\nWrote {n} planet(s) -> {out}  ({hits} from cache, {n - hits} rebuilt)")
 
 
 def main() -> None:
@@ -64,6 +71,13 @@ def main() -> None:
         choices=("catalog", "demo"),
         default="catalog",
         help="catalog = real Exoplanet Archive planets (default); demo = synthetic archetypes",
+    )
+    p_build.add_argument(
+        "--bulk",
+        type=int,
+        default=None,
+        metavar="N",
+        help="Scaled catalog: curated planets + nearest N well-characterised Archive planets",
     )
     p_build.add_argument("--limit", type=int, default=None, help="Only build the first N planets")
     p_build.add_argument("--no-cache", action="store_true", help="Bypass the TAP disk cache")

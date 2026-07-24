@@ -21,22 +21,23 @@
 
 <div x-data="gallery()" @scroll.window.passive="scrolled = window.scrollY > 160">
   <div class="controls" :class="scrolled ? 'stuck' : ''">
-    {# The main filter: by the planet's actual colour family. #}
+    {# The main filter: by the planet's colour family (computed in the pipeline). #}
     <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
       @click.outside="open=false">
       <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
-        :class="hue !== 'all' ? 'active' : ''" :title="hueLabels[hue]"
+        :class="family ? 'active' : ''" :title="family ? familyMeta[family].n : 'All colours'"
         aria-label="Filter by colour">
         <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
           <path d="M2 3.5H14L9.5 8.5V13L6.5 14.5V8.5L2 3.5Z" fill="currentColor"/>
         </svg>
       </button>
       <div class="dd-menu" x-show="open" x-cloak>
-        <div class="dd-head">Colour<span class="dd-sub">filter by palette family</span></div>
-        <template x-for="[val, label] in Object.entries(hueLabels)" :key="val">
-          <button :class="hue === val ? 'on' : ''" @click="hue = val; open = false">
-            <i class="hue-chip" :style="hueSwatch[val] ? 'background:' + hueSwatch[val] : ''"
-              :class="val === 'all' ? 'rainbow' : ''"></i><span x-text="label"></span>
+        <div class="dd-head">Colour<span class="dd-sub">filter by colour family</span></div>
+        <button :class="!family ? 'on' : ''" @click="family = null; open = false">
+          <i class="hue-chip rainbow"></i><span>All colours</span></button>
+        <template x-for="f in families()" :key="f.id">
+          <button :class="family === f.id ? 'on' : ''" @click="family = f.id; open = false">
+            <i class="hue-chip" :style="'background:' + f.colour"></i><span x-text="f.name"></span>
           </button>
         </template>
       </div>
@@ -54,7 +55,7 @@
       </button>
       <div class="dd-menu" x-show="open" x-cloak>
         <div class="dd-head">How real<span class="dd-sub">modelled vs measured colour</span></div>
-        <template x-for="[val, label] in Object.entries(provLabels)" :key="val">
+        <template x-for="[val, label] in provOptions()" :key="val">
           <button :class="prov === val ? 'on' : ''" @click="prov = val; open = false"
             x-text="label"></button>
         </template>
@@ -71,7 +72,7 @@
       </button>
       <div class="dd-menu" x-show="open" x-cloak>
         <template x-for="[val, label] in Object.entries(sortLabels)" :key="val">
-          <button :class="sort === val ? 'on' : ''" @click="sort = val; open = false"
+          <button :class="sort === val && !nearId ? 'on' : ''" @click="setSort(val); open = false"
             x-text="label"></button>
         </template>
       </div>
@@ -124,12 +125,12 @@
       </button>
       <div class="dd-menu m-menu" x-show="open" x-cloak>
         <div class="dd-head">How real<span class="dd-sub">modelled vs measured colour</span></div>
-        <template x-for="[val, label] in Object.entries(provLabels)" :key="'p' + val">
+        <template x-for="[val, label] in provOptions()" :key="'p' + val">
           <button :class="prov === val ? 'on' : ''" @click="prov = val" x-text="label"></button>
         </template>
         <div class="dd-head">Sort by</div>
         <template x-for="[val, label] in Object.entries(sortLabels)" :key="val">
-          <button :class="sort === val ? 'on' : ''" @click="sort = val"
+          <button :class="sort === val && !nearId ? 'on' : ''" @click="setSort(val)"
             x-text="label.replace('Sort: ', '')"></button>
         </template>
         <div class="dd-head">Planet render</div>
@@ -157,6 +158,12 @@
     </div>
     <div class="spacer"></div>
     <span class="count"><span x-text="count()"></span> shown · long-press for a quick peek</span>
+    {# Similar-colour mode, entered from a planet page's "similar colours" link. #}
+    <span class="near-pill" x-show="nearId" x-cloak>
+      <span class="near-dot" :style="{ background: nearHex() }"></span>Nearest in colour to
+      <b x-text="nearName()"></b>
+      <button class="near-x" @click="clearNear()" aria-label="Clear similar-colour sort">×</button>
+    </span>
   </div>
 
   <div class="grid" x-init="$nextTick(() => renderCards())">

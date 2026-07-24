@@ -12,9 +12,9 @@ from __future__ import annotations
 import re
 
 from pipeline.emit.build import PlanetInput
-from pipeline.fetch.archive import ArchiveRecord, fetch_by_names
+from pipeline.fetch.archive import ArchiveRecord, fetch_bulk, fetch_by_names
 from pipeline.illuminant.blackbody import BlackbodyStar
-from pipeline.models import Discovery, HostStar, PlanetParams
+from pipeline.models import Discovery, HostStar, ParamSources, PlanetParams
 from pipeline.spectrum.router import choose_model
 
 # Planets flagged as Roman-CGI-style reflected-light targets (RV giants at wide separation).
@@ -25,6 +25,7 @@ _METHOD_LABELS = {
     "rv": "Radial Velocity",
     "tran": "Transit",
     "micro": "Microlensing",
+    "ima": "Imaging",
     "imag": "Imaging",
     "ttv": "Transit Timing Variations",
     "ast": "Astrometry",
@@ -113,6 +114,26 @@ def _model_temperature(rec: ArchiveRecord, eq_temp: float | None) -> float | Non
     return eq_temp
 
 
+def completeness_gate(rec: ArchiveRecord) -> tuple[bool, str | None]:
+    """The minimum real data a planet needs before we will model a colour for it. Below this
+    there is nothing to anchor an archetype to and the result would be pure guesswork, so we
+    exclude it rather than invent it. Returns (ok, reason-if-excluded).
+
+    Requires a SIZE (radius, or a mass we can class by), a real HOST-STAR temperature (the
+    illuminant IS the colour, so a made-up star produces a made-up colour and there is no point
+    showing it), and a planet TEMPERATURE (measured, or computable from the star + orbit).
+    A missing radius on a known giant is still fine (the value is tagged 'assumed' and barely
+    affects reflected-light colour); a missing/unknowable illuminant is not."""
+    if rec.pl_rade is None and rec.pl_bmasse is None:
+        return False, "no size (neither radius nor mass)"
+    if rec.st_teff is None:
+        return False, "unknown host star (no stellar temperature; the illuminant is the colour)"
+    temp_computable = rec.st_rad is not None and rec.pl_orbsmax is not None
+    if rec.pl_eqt is None and not temp_computable:
+        return False, "no temperature and none computable from star + orbit"
+    return True, None
+
+
 def _to_input(rec: ArchiveRecord) -> PlanetInput:
     eq_temp = rec.equilibrium_temp_k()
     teff = rec.st_teff if rec.st_teff is not None else 5772.0
@@ -134,15 +155,34 @@ def _to_input(rec: ArchiveRecord) -> PlanetInput:
         teff_k=teff,
         spectral_type=rec.st_spectype,
     )
+    # Per-field origin: a real Archive measurement, a value we computed, or an archetype
+    # assumption. Cloud/metallicity/phase are always assumed (we hold no per-planet atmosphere
+    # data); eqt is measured if the Archive gives it, else computed from the star + orbit.
+    eq_source = (
+        "measured" if rec.pl_eqt is not None else ("computed" if eq_temp is not None else "assumed")
+    )
+    sources = ParamSources(
+        equilibrium_temp_k=eq_source,
+        radius_r_earth="measured" if rec.pl_rade is not None else "assumed",
+        mass_m_earth="measured" if rec.pl_bmasse is not None else "assumed",
+        semi_major_axis_au="measured" if rec.pl_orbsmax is not None else "assumed",
+        distance_pc="measured" if rec.sy_dist is not None else "assumed",
+        star_teff_k="measured" if rec.st_teff is not None else "assumed",
+        metallicity="assumed",
+        cloud_state="assumed",
+        phase_angle_deg="assumed",
+    )
     params = PlanetParams(
         equilibrium_temp_k=eq_temp,
         radius_r_earth=rec.pl_rade,
         mass_m_earth=rec.pl_bmasse,
         semi_major_axis_au=rec.pl_orbsmax,
+        distance_pc=rec.sy_dist,
         assumed_cloud_state=model.cloud_state,
         assumed_metallicity=model.metallicity,
         assumed_phase_angle_deg=model.phase_angle_deg,
         spectrum_source=model.source,
+        sources=sources,
     )
     discovery = Discovery(
         method=_method_label(rec.disc_method),
@@ -162,6 +202,47 @@ def _to_input(rec: ArchiveRecord) -> PlanetInput:
     )
 
 
+def _apply_gate(records: list[ArchiveRecord], *, verbose: bool = True) -> list[PlanetInput]:
+    """Run each fetched record through the completeness gate; keep passers, log exclusions."""
+    kept: list[PlanetInput] = []
+    excluded: list[tuple[str, str]] = []
+    for rec in records:
+        ok, reason = completeness_gate(rec)
+        if not ok:
+            excluded.append((rec.pl_name, reason or "incomplete"))
+            continue
+        kept.append(_to_input(rec))
+    if excluded and verbose:
+        print(f"Completeness gate: excluded {len(excluded)} of {len(records)} planet(s):")
+        # At scale the per-planet list is noise; summarise by reason, show a few examples.
+        by_reason: dict[str, list[str]] = {}
+        for name, reason in excluded:
+            by_reason.setdefault(reason, []).append(name)
+        for reason, names in sorted(by_reason.items(), key=lambda kv: -len(kv[1])):
+            sample = ", ".join(names[:4]) + (" …" if len(names) > 4 else "")
+            print(f"  - {len(names):>3}× {reason}  ({sample})")
+    return kept
+
+
 def catalog_planets(names: list[str] | None = None, *, use_cache: bool = True) -> list[PlanetInput]:
+    """The curated set (or an explicit name list), passed through the completeness gate."""
     records = fetch_by_names(names or CURATED_NAMES, use_cache=use_cache)
-    return [_to_input(rec) for rec in records]
+    return _apply_gate(records)
+
+
+def catalog_bulk(limit: int, *, use_cache: bool = True) -> list[PlanetInput]:
+    """A scaled catalog: the curated planets (always pinned) plus the nearest well-characterised
+    planets from the Archive, up to `limit` total, de-duplicated by planet id and gate-checked."""
+    curated = fetch_by_names(CURATED_NAMES, use_cache=use_cache)
+    bulk = fetch_bulk(limit, use_cache=use_cache)
+    seen: set[str] = set()
+    merged: list[ArchiveRecord] = []
+    for rec in [*curated, *bulk]:  # curated first so pinned planets always win a dedupe
+        key = rec.pl_name
+        if key in seen:
+            continue
+        seen.add(key)
+        merged.append(rec)
+    kept = _apply_gate(merged)
+    print(f"Scaled catalog: {len(kept)} planets kept (curated pinned + nearest {limit}).")
+    return kept

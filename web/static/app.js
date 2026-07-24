@@ -8,48 +8,28 @@ document.addEventListener("alpine:init", () => {
     q: "",
     prov: "all",
     sort: "name",
-    hue: "all",
     scrolled: false,  // page scrolled past the header: toolbar is stuck, TOP button shows
     // Labels for the custom (retro) dropdowns.
     provLabels: {
       all: "All", model: "Modelled", "simulated-cgi": "Roman: simulated",
       "measured-cgi": "Roman: measured", "model-microlensing": "Microlensing",
     },
-    // Filter-by-colour families, derived client-side from each planet's base hex.
-    hueLabels: {
-      all: "All colours", blue: "Blues", teal: "Teals & greens", gold: "Golds & browns",
-      cream: "Creams & whites", pink: "Pinks & violets", dark: "Near-black",
-    },
-    hueSwatch: {
-      all: "", blue: "#5b8fd6", teal: "#3fbfa0", gold: "#c9a35c",
-      cream: "#e8e2d4", pink: "#d06bb0", dark: "#171b22",
-    },
-    // Bucket a hex into one of the families above (HSL heuristics; display taxonomy only).
-    hueOf(hex) {
-      const r = parseInt(hex.slice(1, 3), 16) / 255;
-      const g = parseInt(hex.slice(3, 5), 16) / 255;
-      const b = parseInt(hex.slice(5, 7), 16) / 255;
-      const max = Math.max(r, g, b), min = Math.min(r, g, b);
-      const l = (max + min) / 2, d = max - min;
-      const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
-      let h = 0;
-      if (d > 0) {
-        if (max === r) h = ((g - b) / d + 6) % 6;
-        else if (max === g) h = (b - r) / d + 2;
-        else h = (r - g) / d + 4;
-        h *= 60;
-      }
-      if (l < 0.14) return "dark";
-      if (s < 0.15) return l > 0.4 ? "cream" : "dark";
-      if (h < 20 || h >= 270) return "pink";
-      if (h < 70) return "gold";
-      if (h < 190) return "teal";
-      return "blue";
-    },
     sortLabels: {
       name: "Sort: name", temp: "Sort: hottest", lum: "Sort: brightest",
-      de: "Sort: colour lost to Roman",
+      dist: "Sort: nearest Earth", de: "Sort: colour lost to Roman",
     },
+    // Colour exploration: a family-chip filter + a "similar to this planet" perceptual sort.
+    family: null,   // selected colour-family chip (e.g. "blue"), or null for all
+    nearId: null,   // "similar colour to this planet" reference id, or null
+    familyMeta: {
+      blue: { n: "Blue", c: "#4a7fd0" }, teal: { n: "Teal", c: "#2fb8b8" },
+      green: { n: "Green", c: "#4caf6a" }, gold: { n: "Gold", c: "#d9b44a" },
+      orange: { n: "Orange", c: "#e08a3c" }, red: { n: "Red", c: "#d0503c" },
+      pink: { n: "Pink", c: "#d06a9c" }, brown: { n: "Brown", c: "#8a6a4a" },
+      grey: { n: "Grey", c: "#9aa0ac" }, white: { n: "White", c: "#dfe3ea" },
+      dark: { n: "Dark", c: "#3a3f4a" },
+    },
+    familyOrder: ["blue", "teal", "green", "gold", "orange", "red", "pink", "brown", "grey", "white", "dark"],
     // Card render style: "smooth" (sphere) or "retro" (pixel). Persisted, default pixel.
     style: localStorage.getItem("planetStyle") || "retro",
     // Render fidelity: "classic" (physics-honest) or "stylised" (restyled for looks). Global, persisted.
@@ -84,6 +64,53 @@ document.addEventListener("alpine:init", () => {
     // Clicking either side of a two-state toggle flips it — including the already-active side.
     toggleStyle() { this.setStyle(this.style === "retro" ? "smooth" : "retro"); },
     toggleFidelity() { this.setFidelity(this.fidelity === "classic" ? "stylised" : "classic"); },
+    // Deep-link support: /?near=<id> (similar-colour sort) and /?family=<f> (colour filter).
+    init() {
+      const p = new URLSearchParams(location.search);
+      const near = p.get("near");
+      if (near) this.nearId = near;
+      const fam = p.get("family");
+      if (fam && this.familyMeta[fam]) this.family = fam;
+    },
+    // Colour families actually present in the data, in canonical order, with a swatch + label.
+    families() {
+      const present = new Set((window.PLANETS || []).map((x) => x.family));
+      return this.familyOrder.filter((f) => present.has(f))
+        .map((f) => ({ id: f, name: this.familyMeta[f].n, colour: this.familyMeta[f].c }));
+    },
+    // Provenance dropdown: "all" + only the provenances present (declutters at scale, where
+    // it's nearly all "Modelled" but the handful of Roman targets are still worth finding).
+    provOptions() {
+      const present = new Set((window.PLANETS || []).map((x) => x.prov));
+      return Object.entries(this.provLabels).filter(([v]) => v === "all" || present.has(v));
+    },
+    setFamily(f) { this.family = this.family === f ? null : f; },
+    setSort(v) { this.sort = v; this.nearId = null; },  // an explicit sort cancels similar-colour
+    clearNear() { this.nearId = null; },
+    nearName() {
+      const p = (window.PLANETS || []).find((x) => x.id === this.nearId);
+      return p ? p.name : "";
+    },
+    nearHex() {
+      const p = (window.PLANETS || []).find((x) => x.id === this.nearId);
+      return p ? p.hex : "#000";
+    },
+    // Perceptual colour distance (ΔE76 over CIE Lab), computed from the displayed hex so it
+    // matches exactly what the eye sees. Cheap enough to run over the whole set on each sort.
+    _lab(hex) {
+      const h = hex.replace("#", "");
+      const toLin = (c) => (c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+      const r = toLin(parseInt(h.slice(0, 2), 16) / 255);
+      const g = toLin(parseInt(h.slice(2, 4), 16) / 255);
+      const b = toLin(parseInt(h.slice(4, 6), 16) / 255);
+      let X = (r * 0.4124 + g * 0.3576 + b * 0.1805) / 0.95047;
+      const Y = r * 0.2126 + g * 0.7152 + b * 0.0722;
+      let Z = (r * 0.0193 + g * 0.1192 + b * 0.9505) / 1.08883;
+      const f = (t) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+      const fx = f(X), fy = f(Y), fz = f(Z);
+      return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
+    },
+    _de(a, b) { return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]); },
     renderCards() {
       if (!window.PlanetRender || !window.PLANETS) return;
       var byId = {};
@@ -102,21 +129,30 @@ document.addEventListener("alpine:init", () => {
     get view() {
       let items = (window.PLANETS || []).filter((p) => {
         if (this.prov !== "all" && p.prov !== this.prov) return false;
-        if (this.hue !== "all" && this.hueOf(p.hex) !== this.hue) return false;
+        if (this.family && p.family !== this.family) return false;
         if (this.q) {
           const s = (p.name + " " + p.host).toLowerCase();
           if (!s.includes(this.q.toLowerCase())) return false;
         }
         return true;
       });
-      const s = this.sort;
-      items.sort((a, b) => {
-        if (s === "name") return a.name.localeCompare(b.name);
-        if (s === "temp") return (b.temp || 0) - (a.temp || 0);
-        if (s === "lum") return (b.lum || 0) - (a.lum || 0);
-        if (s === "de") return (b.de || 0) - (a.de || 0);
-        return 0;
-      });
+      const ref = this.nearId && (window.PLANETS || []).find((x) => x.id === this.nearId);
+      if (ref) {
+        // Similar-colour sort: rank by perceptual distance to the reference planet's colour.
+        const rl = this._lab(ref.hex), dc = {};
+        const dist = (p) => (dc[p.id] ??= this._de(this._lab(p.hex), rl));
+        items.sort((a, b) => dist(a) - dist(b));
+      } else {
+        const s = this.sort;
+        items.sort((a, b) => {
+          if (s === "name") return a.name.localeCompare(b.name);
+          if (s === "temp") return (b.temp || 0) - (a.temp || 0);
+          if (s === "lum") return (b.lum || 0) - (a.lum || 0);
+          if (s === "dist") return (a.dist ?? Infinity) - (b.dist ?? Infinity); // nearest, unknowns last
+          if (s === "de") return (b.de || 0) - (a.de || 0);
+          return 0;
+        });
+      }
       const vis = new Set(items.map((p) => p.id));
       const ord = {};
       items.forEach((p, i) => (ord[p.id] = i));
@@ -274,7 +310,22 @@ document.addEventListener("alpine:init", () => {
     if (!p) return;
     p.then(function (html) {
       // Only if this press is still being held on the same card.
-      if (downCard === card) { body.innerHTML = html; peek.classList.add("on"); }
+      if (downCard !== card) return;
+      body.innerHTML = html;
+      // The planet itself, drawn with the same engine + settings as the gallery cards.
+      var cv = body.querySelector(".peek-planet");
+      var pl = cv && window.PlanetRender && (window.PLANETS || []).find(function (x) {
+        return x.id === cv.dataset.id;
+      });
+      if (pl) {
+        var style = localStorage.getItem("planetStyle") || "retro";
+        cv.classList.toggle("pixel", style === "retro");
+        window.PlanetRender.render(cv, {
+          palette: pl.palette, radius: pl.radius, cloudState: pl.cloud, lumY: pl.lum,
+          style: style, fidelity: localStorage.getItem("renderFidelity") || "classic",
+        });
+      }
+      peek.classList.add("on");
     });
   }
   function hidePeek() {

@@ -19,6 +19,8 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
+from pipeline.classify import planet_type
+from pipeline.colour.family import colour_family
 from pipeline.models import PlanetRecord, PlanetsFile
 from pipeline.palette.export import ase_bytes
 from web.svg import spectrum_svg
@@ -61,9 +63,15 @@ def _index_entry(rec: PlanetRecord) -> dict:
         "host": rec.host_star.name,
         "prov": rec.provenance,
         "temp": rec.params.equilibrium_temp_k,
+        "dist": rec.params.distance_pc,
         "lum": rec.true_colour.luminance_y,
         "de": view.reconstruction_error.delta_e2000 if view.reconstruction_error else 0.0,
         "hex": rec.true_colour.hex,
+        "family": colour_family(tuple(rec.true_colour.srgb)),
+        "ptype": planet_type(
+            rec.params.radius_r_earth, rec.params.mass_m_earth, rec.params.equilibrium_temp_k
+        ),
+        "disc": rec.discovery.method,
         # For the card planet renders:
         "palette": [s.hex for s in rec.true_colour.palette],
         "radius": rec.params.radius_r_earth,
