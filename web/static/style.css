@@ -244,7 +244,7 @@ a.badge:active, .drawer-close:active { transform: translateY(1px); }
 .acc.on { outline: 2px solid var(--fg); outline-offset: 1px; }
 
 /* ---- Colour bar: filter planets by colour family + "nearest in colour" pill ---- */
-.colour-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 18px; }
+.colour-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .colour-bar-lbl {
   font-family: var(--pixel); font-size: 9px; letter-spacing: .5px; text-transform: uppercase;
   color: var(--fg-dim); margin-right: 2px;
