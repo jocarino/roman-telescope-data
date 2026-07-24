@@ -113,7 +113,13 @@
             @click="ptypeF = val" x-text="label"></button>
         </template>
       </div>
-      <div class="cmp-picker-count"><span x-text="pickerResults().length"></span> planets</div>
+      <div class="cmp-phead">
+        <span class="cmp-phead-l">Planet <em x-text="'· ' + pickerResults().length"></em></span>
+        <span class="cmp-phead-r">
+          <span class="cmp-mi"><i class="mi-ic">✦</i>Star</span>
+          <span class="cmp-mi"><i class="mi-ic">⊕</i>Distance from Earth</span>
+        </span>
+      </div>
       <div class="cmp-picker-list">
         <template x-for="p in pickerResults()" :key="p.id">
           <button class="cmp-prow" @click="choose(p.id)"
