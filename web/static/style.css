@@ -446,6 +446,7 @@ body::after {
 /* Reserve a stable height so flipping the Source knob (short modelled caption <-> longer
    real-image credit) fills the width instead of shoving the header up and down. */
 .desc-slot.has-obs { min-height: 5.4em; }
+.title-badges { margin-top: 10px; }
 .detail-swatch { width: 200px; height: 200px; border-radius: var(--radius); border: 1px solid var(--line); flex: none; box-shadow: var(--shadow); }
 .detail-title h1 { margin: 0 0 4px; font-size: 28px; letter-spacing: -0.02em; }
 .detail-title .host { color: var(--fg-dim); }
