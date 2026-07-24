@@ -89,5 +89,12 @@ ROMAN_CGI = Instrument(
 
 INSTRUMENTS: dict[str, Instrument] = {ROMAN_CGI.id: ROMAN_CGI}
 
+# The phase angle at which the simulated Roman view is computed. A coronagraph can never
+# observe full phase (a fully-lit planet sits behind its star); CGI catches planets near
+# QUADRATURE, half-lit. Simulated band samples, the reconstructed Roman colour, and its
+# delta-E (against the full spectrum at the SAME phase, isolating what the filters lose)
+# all use this geometry, so post-launch measured photometry is compared like-for-like.
+CGI_OBSERVATION_PHASE_DEG = 90.0
+
 PIPELINE_VERSION = "0.1.0"
-SCHEMA_VERSION = 3  # v3: + `phase_colours` (0-180° phase-resolved); v2: + `sun_swap`
+SCHEMA_VERSION = 4  # v4: Roman view at quadrature + observed_phase_deg; v3: phase_colours; v2: sun_swap

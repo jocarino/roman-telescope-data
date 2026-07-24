@@ -47,3 +47,21 @@ def test_measured_file_flips_provenance(tmp_path, monkeypatch):
     # Downstream products still present and unchanged in shape.
     assert view.colour.hex.startswith("#")
     assert view.reconstruction_error is not None
+
+
+def test_simulated_view_is_at_quadrature():
+    """The simulated Roman view uses the quadrature geometry a coronagraph actually sees:
+    band values are dimmer than full phase, the record says so, and delta-E compares at
+    the same phase (so it stays small for a spectrally flat planet)."""
+    from pipeline.bands.integrate import simulate_band_samples
+    from pipeline.config import CGI_OBSERVATION_PHASE_DEG
+
+    pin = demo_planets()[0]
+    rec = build_record(pin, [ROMAN_CGI], "2026-07-24T00:00:00+00:00")
+    view = rec.instrument_views[0]
+    assert view.observed_phase_deg == CGI_OBSERVATION_PHASE_DEG
+
+    full = simulate_band_samples(pin.provider, pin.illuminant, ROMAN_CGI)
+    quad_values = [s.value for s in view.band_samples.samples]
+    full_values = [s.value for s in full.samples]
+    assert all(q < f for q, f in zip(quad_values, full_values, strict=True))

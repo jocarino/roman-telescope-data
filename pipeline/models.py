@@ -82,6 +82,9 @@ class InstrumentViewModel(BaseModel):
     reconstruction: ReconstructionModel
     colour: ColourResultModel
     reconstruction_error: ReconstructionError | None = None
+    # Phase angle the simulated view is computed at (quadrature for a coronagraph — it can
+    # never see full phase). None for measured data, whose phase is whatever Roman caught.
+    observed_phase_deg: float | None = None
 
 
 class PhaseColourModel(BaseModel):
