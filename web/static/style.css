@@ -1026,10 +1026,12 @@ button.badge:active, a.badge:active { box-shadow: none; }
   .desc-body:not(.open) { display: none; }
   .viewnote { margin-top: 8px; }
 
-  /* Scope header: the model line duplicates the page title, so drop it; let the rest wrap. */
-  .scope-top { flex-wrap: wrap; row-gap: 6px; padding: 10px 16px; }
+  /* Scope header: the model line duplicates the page title, so drop it; let the rest wrap.
+     Tighter gaps + button padding so VIEW + both buttons + ℹ fit one row on a 390px phone. */
+  .scope-top { flex-wrap: wrap; row-gap: 6px; padding: 10px 14px; gap: 10px; }
   .scope-model { display: none; }
-  .scope-view { flex-wrap: wrap; justify-content: flex-end; }
+  .scope-view { flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+  .led-btn { padding: 6px 8px; font-size: 11px; }
 
   /* Stacked instrument: screen first (compact face, legible labels), knobs under it,
      then the F1–F3 keys paging measure / palette / planet data. display:contents lets the
