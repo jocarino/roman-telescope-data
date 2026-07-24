@@ -49,8 +49,13 @@ def choose_model(
     teff_k: float,
 ) -> ChosenModel:
     # The parametric model is always computed: it supplies the cloud-state / metallicity /
-    # phase metadata AND is the final fallback provider.
-    base = model_for(equilibrium_temp_k=equilibrium_temp_k, radius_r_earth=radius_r_earth)
+    # phase metadata AND is the final fallback provider. Mass feeds gravity + the
+    # mass–metallicity relation, so its albedo varies continuously planet to planet.
+    base = model_for(
+        equilibrium_temp_k=equilibrium_temp_k,
+        radius_r_earth=radius_r_earth,
+        mass_m_earth=mass_m_earth,
+    )
 
     temp = equilibrium_temp_k if equilibrium_temp_k is not None else 300.0
     radius = radius_r_earth if radius_r_earth is not None else 8.0

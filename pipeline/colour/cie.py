@@ -19,11 +19,43 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import numpy as np
-from colour import MSDS_CMFS, SpectralDistribution, XYZ_to_sRGB, sd_to_XYZ
+from colour import MSDS_CMFS, SpectralDistribution, XYZ_to_sRGB, cctf_encoding, sd_to_XYZ
 
 from pipeline.config import BASE_SWATCH_LUMINANCE_Y, GRID_ID, GRID_NM
 
 _CMFS = MSDS_CMFS["CIE 1931 2 Degree Standard Observer"]
+
+
+def _gamut_map(xyz: np.ndarray) -> tuple[tuple[int, int, int], str, bool]:
+    """XYZ (at the display luminance) -> gamma-encoded sRGB (0-255), hex, out_of_gamut flag.
+
+    Out-of-gamut colours are handled in two steps that keep distinct colours distinct (naive
+    per-channel clipping distorts hue and slams many colours onto the same boundary value —
+    why 97% of hot Jupiters collapsed to one clamped blue):
+
+    1. If the *chromaticity* is outside the sRGB gamut (a linear channel < 0), desaturate
+       toward neutral at this luminance just enough to reach the gamut hull (rare edge colours).
+    2. If it is merely too bright (a channel > 1), scale luminance down to fit. This preserves
+       both hue AND chroma, so two saturated blues of slightly different depth stay two
+       different swatches — a deep-blue hot Jupiter renders as a darker, still-vivid blue
+       rather than being clamped. Brightness is reported separately as `luminance_y` anyway."""
+    lin = np.asarray(XYZ_to_sRGB(xyz, apply_cctf_encoding=False))  # linear sRGB; may exit [0,1]
+    oog = bool(np.any(lin < -1e-6) or np.any(lin > 1.0 + 1e-6))
+    if lin.min() < 0.0:  # chromaticity outside gamut: desaturate to the hull at this luminance
+        y = float(np.clip(xyz[1], 0.0, 1.0))
+        grey = np.full(3, y)
+        d = lin - grey
+        s = 1.0
+        for c in range(3):
+            if d[c] < -1e-12:
+                s = min(s, (0.0 - grey[c]) / d[c])
+        lin = grey + max(0.0, min(1.0, s)) * d
+    m = float(lin.max())
+    if m > 1.0:  # too bright for the gamut: darken to fit, keeping hue + chroma (distinctness)
+        lin = lin / m
+    rgb = np.asarray(cctf_encoding(np.clip(lin, 0.0, 1.0), function="sRGB"))
+    srgb_255 = tuple(int(round(c * 255)) for c in np.clip(rgb, 0.0, 1.0))
+    return srgb_255, "#{:02x}{:02x}{:02x}".format(*srgb_255), oog  # type: ignore[arg-type]
 
 
 @dataclass(frozen=True)
@@ -90,12 +122,8 @@ def reflected_flux_to_colour(
     else:
         xyz_norm = np.zeros(3)
 
-    # XYZ -> gamma-encoded sRGB (D65). Out-of-gamut shows up as channels outside [0,1].
-    rgb = np.asarray(XYZ_to_sRGB(xyz_norm))
-    out_of_gamut = bool(np.any(rgb < -1e-6) or np.any(rgb > 1.0 + 1e-6))
-    rgb_clamped = np.clip(rgb, 0.0, 1.0)
-    srgb_255 = tuple(int(round(c * 255)) for c in rgb_clamped)
-    hex_code = "#{:02x}{:02x}{:02x}".format(*srgb_255)
+    # XYZ -> gamma-encoded sRGB (D65), gamut-mapped by chroma reduction (hue/lightness kept).
+    srgb_255, hex_code, out_of_gamut = _gamut_map(xyz_norm)
 
     if illuminant_flux is not None:
         lum_y = reflectance_luminance(flux, illuminant_flux)
