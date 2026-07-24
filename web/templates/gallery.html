@@ -9,6 +9,7 @@
         aria-label="How these colours are made" title="How these colours are made">i</button></span>
   </div>
   <p class="subhead" x-show="intro" x-cloak>
+    <button class="info-x" @click="intro = false" aria-label="Close">&times;</button>
     Each planet's colour is computed from its reflected-light spectrum (albedo model × host-star
     spectrum) via CIE 1931 colour matching. Every planet is shown two ways: the full modelled
     spectrum, and what the Roman Coronagraph would recover from just four bands. <strong>Both are
@@ -16,6 +17,8 @@
     four-band view will one day be replaced by real measured data. Planet and star data:
     <a href="https://exoplanetarchive.ipac.caltech.edu/" target="_blank" rel="noopener">NASA
     Exoplanet Archive</a>.
+    <strong>Want the whole journey from starlight to hex code?</strong>
+    <a href="/how.html">How we get the colours →</a>
   </p>
   <p class="subhead lede">Modelling <strong>{{ n_modelled }}</strong> of the ~{{ known_total }}
     known exoplanets — the nearest that pass our data-completeness gate.</p>
