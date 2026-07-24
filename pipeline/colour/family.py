@@ -8,7 +8,7 @@ from __future__ import annotations
 
 # Canonical chip order; only families that have members are shown.
 FAMILY_ORDER = [
-    "blue", "periwinkle", "teal", "green", "gold", "orange", "red", "pink", "violet",
+    "teal", "azure", "blue", "periwinkle", "green", "gold", "orange", "red", "pink", "violet",
     "brown", "grey", "white", "dark",
 ]
 
@@ -55,10 +55,16 @@ def colour_family(rgb: tuple[int, int, int]) -> str:
     if h < 200:
         return "teal"
     if h < 255:
-        # The blue range is the biggest by far, and splits into two visually distinct groups:
-        # pale blue-lavender (the Rayleigh-scattering cool giants / sub-Neptunes) reads as
-        # "periwinkle", while the deeper, more saturated cobalt/azure stays "blue".
-        return "periwinkle" if lightness > 0.70 else "blue"
+        # The blue range holds ~40% of all planets (reflected-light worlds are mostly blue), so
+        # it earns three chips that are genuinely distinct to the eye:
+        #   - pale + washed-out -> "periwinkle" (the Rayleigh-scattering cool giants). Needs BOTH
+        #     pale AND low-saturation; lightness alone mislabels hot Jupiters, which normalise to
+        #     a similar display lightness but stay fully saturated.
+        #   - cyan-leaning vivid blue -> "azure" (the bulk: sodium-blue hot Jupiters, bright)
+        #   - deeper cobalt/indigo    -> "blue"
+        if lightness > 0.72 and s < 0.55:
+            return "periwinkle"
+        return "azure" if h < 208 else "blue"
     if h < 300:
         return "violet"
     return "pink"
