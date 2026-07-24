@@ -8,28 +8,37 @@
 </div>
 
 <div class="compare" x-data="compare({ indexUrl: '{{ index_url }}' })" x-cloak>
-  {# Two searchable pickers (native datalist autocomplete over all planet names). #}
-  <div class="cmp-pickers">
-    <label class="cmp-pick">
-      <span class="cmp-pick-lbl">Planet A</span>
-      <input class="cmp-search" list="cmp-names" x-model="aInput"
-        @change="pick('a', aInput)" placeholder="Search a planet…" aria-label="First planet">
-    </label>
+  {# Two slots. Each shows the current selection right away; click to open the browser. #}
+  <div class="cmp-slots">
+    <button class="cmp-slot" @click="openPicker('a')" :class="a() ? 'filled' : ''">
+      <template x-if="a()">
+        <span class="cmp-slot-in">
+          <span class="cmp-slot-sw" :style="{ background: a().hex }"></span>
+          <span class="cmp-slot-txt"><b x-text="a().name"></b><i x-text="a().host"></i></span>
+          <span class="cmp-slot-act">change</span>
+        </span>
+      </template>
+      <template x-if="!a()"><span class="cmp-slot-empty">＋ Choose planet A</span></template>
+    </button>
     <span class="cmp-vs">vs</span>
-    <label class="cmp-pick">
-      <span class="cmp-pick-lbl">Planet B</span>
-      <input class="cmp-search" list="cmp-names" x-model="bInput"
-        @change="pick('b', bInput)" placeholder="Search a planet…" aria-label="Second planet">
-    </label>
+    <button class="cmp-slot" @click="openPicker('b')" :class="b() ? 'filled' : ''">
+      <template x-if="b()">
+        <span class="cmp-slot-in">
+          <span class="cmp-slot-sw" :style="{ background: b().hex }"></span>
+          <span class="cmp-slot-txt"><b x-text="b().name"></b><i x-text="b().host"></i></span>
+          <span class="cmp-slot-act">change</span>
+        </span>
+      </template>
+      <template x-if="!b()"><span class="cmp-slot-empty">＋ Choose planet B</span></template>
+    </button>
     <button class="cmp-swap" @click="swap()" x-show="a() && b()" title="Swap sides"
       aria-label="Swap the two planets">⇄</button>
   </div>
-  <datalist id="cmp-names">
-    <template x-for="n in names" :key="n"><option :value="n"></option></template>
-  </datalist>
 
   <p class="cmp-empty" x-show="loaded && !(a() && b())" x-cloak>
-    Pick two planets above to compare their colours and the data behind them.</p>
+    <span x-show="a() || b()">Pick the other planet to see them side by side.</span>
+    <span x-show="!(a() || b())">Choose two planets above to compare their colours and the data behind them.</span>
+  </p>
 
   {# Two swatches + palettes. #}
   <div class="cmp-heads" x-show="a() && b()" x-cloak>
@@ -74,6 +83,49 @@
         </template>
       </div>
     </template>
+  </div>
+
+  {# ── Planet browser: search + colour/type filters + a filterable list to pick from ── #}
+  <div class="cmp-picker" x-show="pickerOpen" x-cloak x-transition.opacity
+    @keydown.escape.window="closePicker()">
+    <div class="cmp-picker-backdrop" @click="closePicker()"></div>
+    <div class="cmp-picker-box">
+      <div class="cmp-picker-head">
+        <span>Choose planet <b x-text="(pickerSlot || '').toUpperCase()"></b></span>
+        <button class="cmp-picker-x" @click="closePicker()" aria-label="Close">×</button>
+      </div>
+      <input class="cmp-search" x-ref="pickerSearch" x-model="pq"
+        placeholder="Search planet or star…" aria-label="Search planets">
+      <div class="cmp-picker-filters">
+        <span class="cmp-fil-lbl">Colour</span>
+        <button class="hue-cell rainbow" :class="!pfam ? 'on' : ''" @click="pfam = null"
+          title="All colours"></button>
+        <template x-for="f in pickerFamilies()" :key="f.id">
+          <button class="hue-cell" :class="pfam === f.id ? 'on' : ''"
+            :style="'background:' + f.colour" @click="pfam = pfam === f.id ? null : f.id"
+            :title="f.name"></button>
+        </template>
+      </div>
+      <div class="cmp-picker-filters">
+        <span class="cmp-fil-lbl">Type</span>
+        <template x-for="[val, label] in pickerTypes()" :key="val">
+          <button class="cmp-tchip" :class="ptypeF === val ? 'on' : ''"
+            @click="ptypeF = val" x-text="label"></button>
+        </template>
+      </div>
+      <div class="cmp-picker-count"><span x-text="pickerResults().length"></span> planets</div>
+      <div class="cmp-picker-list">
+        <template x-for="p in pickerResults()" :key="p.id">
+          <button class="cmp-prow" @click="choose(p.id)"
+            :class="(pickerSlot === 'a' ? aId : bId) === p.id ? 'on' : ''">
+            <span class="cmp-prow-sw" :style="{ background: p.hex }"></span>
+            <span class="cmp-prow-name" x-text="p.name"></span>
+            <span class="cmp-prow-meta"><span x-text="p.host"></span> ·
+              <span x-text="fmtLy(p)"></span></span>
+          </button>
+        </template>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

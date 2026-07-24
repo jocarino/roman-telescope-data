@@ -963,15 +963,61 @@ button.badge:active, a.badge:active { box-shadow: none; }
 /* ---- Compare page ---- */
 .lede-link { color: var(--accent); white-space: nowrap; margin-left: 6px; }
 .compare { max-width: 920px; }
-.cmp-pickers { display: flex; align-items: flex-end; gap: 12px; margin: 8px 0 26px; flex-wrap: wrap; }
-.cmp-pick { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 190px; }
-.cmp-pick-lbl { font-family: var(--pixel); font-size: 9px; letter-spacing: .5px; color: var(--fg-dim); text-transform: uppercase; }
-.cmp-search { background: var(--bg-3); border: 1px solid var(--line); color: var(--fg); font: inherit; font-size: 14px; padding: 10px 12px; box-shadow: 3px 3px 0 var(--line); }
+.cmp-search { background: var(--bg-3); border: 1px solid var(--line); color: var(--fg); font: inherit; font-size: 14px; padding: 10px 12px; box-shadow: 3px 3px 0 var(--line); width: 100%; }
 .cmp-search:focus { outline: none; border-color: var(--accent); box-shadow: 3px 3px 0 var(--accent); }
-.cmp-vs { font-family: var(--pixel); font-size: 10px; color: var(--fg-faint); padding-bottom: 12px; }
+.cmp-vs { font-family: var(--pixel); font-size: 10px; color: var(--fg-faint); flex: none; }
 .cmp-swap { width: 42px; height: 42px; flex: none; border: 1px solid var(--line); background: var(--bg-3); color: var(--accent); font-size: 18px; cursor: pointer; box-shadow: 3px 3px 0 var(--line); }
 .cmp-swap:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--line); }
-.cmp-empty { color: var(--fg-faint); text-align: center; padding: 44px 0; }
+.cmp-empty { color: var(--fg-faint); text-align: center; padding: 44px 0; line-height: 1.6; }
+
+/* Slots: each shows the current selection and opens the planet browser on click. */
+.cmp-slots { display: flex; align-items: stretch; gap: 12px; margin: 8px 0 24px; flex-wrap: wrap; }
+.cmp-slot {
+  flex: 1; min-width: 200px; text-align: left; cursor: pointer; padding: 12px 14px;
+  border: 1px solid var(--line); background: var(--bg-3); color: var(--fg-dim);
+  box-shadow: 3px 3px 0 var(--line); font: inherit; min-height: 58px;
+}
+.cmp-slot:hover { border-color: var(--accent); }
+.cmp-slot:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--line); }
+.cmp-slot-empty { font-family: var(--pixel); font-size: 11px; letter-spacing: .3px; color: var(--fg-dim); }
+.cmp-slot-in { display: flex; align-items: center; gap: 11px; }
+.cmp-slot-sw { width: 34px; height: 34px; flex: none; border: 1px solid #000; }
+.cmp-slot-txt { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
+.cmp-slot-txt b { color: var(--fg); font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmp-slot-txt i { color: var(--fg-faint); font-size: 11px; font-style: normal; }
+.cmp-slot-act { font-family: var(--pixel); font-size: 7px; letter-spacing: .3px; text-transform: uppercase; color: var(--accent); flex: none; }
+
+/* The browser pop-over: search + colour/type filters + a scrollable planet list. */
+.cmp-picker { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.cmp-picker-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, .72); }
+.cmp-picker-box {
+  position: relative; width: 100%; max-width: 520px; max-height: 82vh; display: flex;
+  flex-direction: column; background: var(--bg-2); border: 1px solid var(--accent);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, .5); padding: 16px;
+}
+.cmp-picker-head { display: flex; justify-content: space-between; align-items: center; font-family: var(--pixel); font-size: 12px; margin-bottom: 12px; }
+.cmp-picker-head b { color: var(--accent); }
+.cmp-picker-x { border: 0; background: none; color: var(--fg-dim); font-size: 22px; line-height: 1; cursor: pointer; }
+.cmp-picker-x:hover { color: var(--fg); }
+.cmp-picker-filters { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.cmp-fil-lbl { font-family: var(--pixel); font-size: 8px; letter-spacing: .4px; text-transform: uppercase; color: var(--fg-faint); margin-right: 4px; }
+.cmp-tchip {
+  padding: 4px 8px; border: 1px solid var(--line); background: var(--bg-3); color: var(--fg-dim);
+  font-size: 11px; cursor: pointer;
+}
+.cmp-tchip.on { border-color: var(--accent); color: var(--fg); }
+.cmp-picker-count { font-family: var(--pixel); font-size: 8px; color: var(--fg-faint); margin: 12px 0 6px; }
+.cmp-picker-list { overflow-y: auto; border-top: 1px solid var(--line); }
+.cmp-prow {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; cursor: pointer;
+  padding: 8px 6px; border: 0; border-bottom: 1px dashed var(--line); background: none; color: var(--fg);
+  font: inherit;
+}
+.cmp-prow:hover { background: var(--bg-3); }
+.cmp-prow.on { background: var(--bg-3); box-shadow: inset 3px 0 0 var(--accent); }
+.cmp-prow-sw { width: 20px; height: 20px; flex: none; border: 1px solid #000; }
+.cmp-prow-name { font-size: 13px; flex: none; }
+.cmp-prow-meta { font-size: 11px; color: var(--fg-faint); margin-left: auto; white-space: nowrap; }
 .cmp-heads { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 22px; }
 .cmp-col { text-align: center; }
 .cmp-planet { width: 150px; height: 150px; image-rendering: pixelated; image-rendering: crisp-edges; background: transparent; }
