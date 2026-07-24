@@ -13,7 +13,7 @@ from colour import XYZ_to_Lab, delta_E
 from pipeline.bands.integrate import BandSampleSet, simulate_band_samples
 from pipeline.bands.reconstruct import reconstruct_curve
 from pipeline.colour.cie import ColourResult, reflected_flux_to_colour
-from pipeline.config import GRID_ID, GRID_NM, Instrument
+from pipeline.config import CGI_OBSERVATION_PHASE_DEG, GRID_ID, GRID_NM, Instrument
 from pipeline.fetch.targets import load_measured_samples
 from pipeline.illuminant.base import Illuminant
 from pipeline.illuminant.blackbody import SUN
@@ -148,16 +148,26 @@ def build_record(
         )
     phase_colours = PhaseSetModel(source=phased.source, colours=phase_stops)
 
+    # Instrument views are simulated at QUADRATURE (half-lit) — the geometry a coronagraph
+    # actually observes; a fully-lit planet sits behind its star. The delta-E compares the
+    # band-reconstructed colour against the full spectrum at the SAME phase, so it isolates
+    # what the filter set loses rather than mixing in the phase difference.
+    quad_deg = CGI_OBSERVATION_PHASE_DEG
+    quad_provider = phased.at(quad_deg)
+    quad_colour = reflected_flux_to_colour(
+        phased(GRID_NM, quad_deg) * star, method="full-spectrum", illuminant_flux=star,
+        confidence="high",
+    )
     views: list[InstrumentViewModel] = []
     for inst in instruments:
-        band_set = obtain_band_samples(pin.id, pin.provider, pin.illuminant, inst)
+        band_set = obtain_band_samples(pin.id, quad_provider, pin.illuminant, inst)
         recon = reconstruct_curve(band_set)
         roman_flux = recon.values * star
         roman_colour = reflected_flux_to_colour(
             roman_flux, method="band-reconstruction", illuminant_flux=star, confidence="low"
         )
         roman_palette = derive_palette(roman_colour)
-        de = _delta_e2000(true_colour, roman_colour)
+        de = _delta_e2000(quad_colour, roman_colour)
         views.append(
             InstrumentViewModel(
                 instrument_id=inst.id,
@@ -185,9 +195,10 @@ def build_record(
                 colour=_colour_to_model(roman_colour, roman_palette),
                 reconstruction_error=ReconstructionError(
                     delta_e2000=de,
-                    note="Perceptual distance from the full-spectrum true colour; how much "
-                    "colour identity survives this instrument's filters.",
+                    note="Perceptual distance from the full spectrum at the same (quadrature) "
+                    "phase; how much colour identity survives this instrument's filters.",
                 ),
+                observed_phase_deg=quad_deg if band_set.source == "simulated" else None,
             )
         )
 

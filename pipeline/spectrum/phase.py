@@ -52,6 +52,19 @@ class PhasedAlbedo:
             except ProviderUnavailable:
                 pass  # grid not installed: fall through to lambert-grey
 
+    def at(self, phase_deg: float) -> SpectrumProvider:
+        """A SpectrumProvider view of this planet frozen at one phase angle — lets the
+        band integrator (or anything provider-shaped) consume a phased spectrum."""
+
+        class _AtPhase:
+            def __init__(inner, parent: PhasedAlbedo, deg: float):
+                inner._parent, inner._deg = parent, deg
+
+            def geometric_albedo(inner, wavelengths_nm: np.ndarray) -> np.ndarray:
+                return inner._parent(wavelengths_nm, inner._deg)
+
+        return _AtPhase(self, phase_deg)
+
     def __call__(self, wavelengths_nm: np.ndarray, phase_deg: float) -> np.ndarray:
         wl = np.asarray(wavelengths_nm, dtype=float)
         if self.source == "cahoy-grid":
