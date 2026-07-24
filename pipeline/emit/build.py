@@ -26,6 +26,8 @@ from pipeline.models import (
     IlluminantSwapModel,
     InstrumentViewModel,
     PaletteStopModel,
+    PhaseColourModel,
+    PhaseSetModel,
     PlanetParams,
     PlanetRecord,
     ReconstructionError,
@@ -36,6 +38,7 @@ from pipeline.models import (
 from pipeline.observations import observations_for
 from pipeline.palette.derive import derive_palette
 from pipeline.spectrum.base import SpectrumProvider
+from pipeline.spectrum.phase import PHASE_ANGLES_DEG, PhasedAlbedo
 
 
 @dataclass(frozen=True)
@@ -124,6 +127,27 @@ def build_record(
         delta_e2000_vs_true=_delta_e2000(true_colour, sun_colour),
     )
 
+    # Phase-resolved colours (the phase slider): A(λ, α) under the planet's own star,
+    # 0-180° in 10° steps. hex = colour identity at that phase; luminance_y = true
+    # relative brightness including the phase dimming (0° ≈ base, 180° → 0).
+    phased = PhasedAlbedo(
+        pin.provider,
+        semi_major_axis_au=pin.params.semi_major_axis_au,
+        metallicity=pin.params.assumed_metallicity,
+    )
+    phase_stops = []
+    for deg in PHASE_ANGLES_DEG:
+        p_flux = phased(GRID_NM, float(deg)) * star
+        p_colour = reflected_flux_to_colour(
+            p_flux, method="full-spectrum", illuminant_flux=star, confidence="high"
+        )
+        phase_stops.append(
+            PhaseColourModel(
+                phase_deg=deg, hex=p_colour.hex, luminance_y=round(p_colour.luminance_y, 5)
+            )
+        )
+    phase_colours = PhaseSetModel(source=phased.source, colours=phase_stops)
+
     views: list[InstrumentViewModel] = []
     for inst in instruments:
         band_set = obtain_band_samples(pin.id, pin.provider, pin.illuminant, inst)
@@ -180,6 +204,7 @@ def build_record(
         spectrum=SpectralCurve(grid=GRID_ID, values=[float(a) for a in albedo]),
         true_colour=_colour_to_model(true_colour, true_palette),
         sun_swap=sun_swap,
+        phase_colours=phase_colours,
         instrument_views=views,
         real_observations=observations_for(pin.id),
         meta=RecordMeta(
