@@ -2,9 +2,18 @@
 
 document.addEventListener("alpine:init", () => {
 
-  // Gallery: search / filter / sort over the inlined index (window.PLANETS).
-  // Cards are server-rendered; this toggles their visibility and CSS `order`.
-  Alpine.data("gallery", () => ({
+  // Gallery: search / filter / sort over a fetched index (window.PLANETS). Cards are rendered
+  // incrementally in JS and their planet is drawn only when scrolled into view, so the grid
+  // scales to thousands of planets without a heavy server-rendered DOM or an inlined index.
+  Alpine.data("gallery", (cfg) => ({
+    indexUrl: (cfg && cfg.indexUrl) || null,
+    loaded: false,
+    _results: null,       // cached ordered+filtered array for the current render pass
+    _shown: 0,            // how many cards appended to the grid so far
+    _batch: 60,           // cards appended per scroll step
+    _map: null,           // id -> planet lookup
+    _raf: 0,              // pending rAF handle for the throttled draw pass
+    _loadIO: null,        // appends the next batch as the sentinel nears the viewport
     q: "",
     prov: "all",
     sort: "name",
@@ -58,45 +67,172 @@ document.addEventListener("alpine:init", () => {
     setStyle(s) {
       this.style = s;
       try { localStorage.setItem("planetStyle", s); } catch (e) { /* ignore */ }
-      this.renderCards();
+      this._redrawAll();
     },
     setFidelity(f) {
       this.fidelity = f;
       try { localStorage.setItem("renderFidelity", f); } catch (e) { /* ignore */ }
-      this.renderCards();
+      this._redrawAll();
     },
     // Clicking either side of a two-state toggle flips it — including the already-active side.
     toggleStyle() { this.setStyle(this.style === "retro" ? "smooth" : "retro"); },
     toggleFidelity() { this.setFidelity(this.fidelity === "classic" ? "stylised" : "classic"); },
-    // Deep-link support: /?near=<id> (similar-colour sort) and /?family=<f> (colour filter).
-    init() {
-      const p = new URLSearchParams(location.search);
-      const near = p.get("near");
+    // Fetch the index, wire up lazy rendering, and honour /?near= and /?family= deep links.
+    async init() {
+      const params = new URLSearchParams(location.search);
+      const near = params.get("near");
       if (near) this.nearId = near;
-      const fam = p.get("family");
+      const fam = params.get("family");
       if (fam && this.familyMeta[fam]) this.family = fam;
+
+      try {
+        const res = await fetch(this.indexUrl);
+        window.PLANETS = await res.json();
+      } catch (e) { window.PLANETS = []; }
+      this._map = {};
+      window.PLANETS.forEach((p) => (this._map[p.id] = p));
+      this.loaded = true;
+
+      // Append the next batch as the sentinel nears the viewport (infinite scroll).
+      this._loadIO = new IntersectionObserver((entries) => {
+        if (entries.some((e) => e.isIntersecting)) this._fill();
+      }, { rootMargin: "800px" });
+      this._loadIO.observe(this.$refs.sentinel);
+
+      // Draw each planet lazily: a rAF-throttled pass draws in-viewport, not-yet-drawn cards.
+      const onScroll = () => {
+        if (this._raf) return;
+        this._raf = requestAnimationFrame(() => { this._raf = 0; this._drawVisible(); });
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll, { passive: true });
+
+      // Any filter/sort change re-renders the grid from the top.
+      ["q", "prov", "family", "sort", "nearId"].forEach((k) =>
+        this.$watch(k, () => this._rerender()));
+
+      this._rerender();
+    },
+    // --- Incremental grid rendering ---------------------------------------------------------
+    _rerender() {
+      if (!this.loaded) return;
+      window.scrollTo(0, 0);  // results changed: show them from the top, not mid-scroll
+      this._results = this.results();
+      this.$refs.grid.replaceChildren();
+      this._shown = 0;
+      this._fill();
+    },
+    // Append batches until the sentinel is pushed out of the pre-load zone (or results run out).
+    _fill() {
+      if (!this.loaded || !this._results) return;
+      if (this._shown >= this._results.length) return;
+      this._appendBatch();
+      requestAnimationFrame(() => {
+        if (this._shown >= this._results.length) return;
+        const r = this.$refs.sentinel.getBoundingClientRect();
+        if (r.top < window.innerHeight + 800) this._fill();
+      });
+    },
+    _appendBatch() {
+      if (!this.loaded || !this._results) return;
+      const next = this._results.slice(this._shown, this._shown + this._batch);
+      if (!next.length) return;
+      const frag = document.createDocumentFragment();
+      next.forEach((p) => frag.appendChild(this._makeCard(p)));
+      this.$refs.grid.appendChild(frag);
+      this._shown += next.length;
+      this._drawVisible();
+    },
+    // Draw any appended card whose planet isn't drawn yet and is within ~a screen of the viewport.
+    _drawVisible() {
+      if (!window.PlanetRender || !this.$refs.grid) return;
+      const pad = window.innerHeight;
+      this.$refs.grid.querySelectorAll(".card-planet:not([data-drawn])").forEach((cv) => {
+        const r = cv.getBoundingClientRect();
+        if (r.bottom > -pad && r.top < window.innerHeight + pad) {
+          this._drawCanvas(cv);
+          cv.dataset.drawn = "1";
+        }
+      });
+    },
+    _makeCard(p) {
+      const a = document.createElement("a");
+      a.className = "card";
+      a.href = "/planet/" + p.id + ".html";
+      a.setAttribute("data-peek", "/fragments/peek/" + p.id + ".html");
+      const cv = document.createElement("canvas");
+      cv.className = "card-planet" + (this.style === "retro" ? " pixel" : "");
+      cv.width = 256; cv.height = 256; cv.dataset.id = p.id;
+      cv.setAttribute("aria-label", p.name + " render");
+      a.appendChild(cv);
+      const name = document.createElement("div");
+      name.className = "card-name"; name.textContent = p.name;
+      a.appendChild(name);
+      const meta = document.createElement("div");
+      meta.className = "card-meta";
+      const badge = document.createElement("span");
+      badge.className = "badge " + p.prov;
+      badge.textContent = this._provBadge(p.prov);
+      meta.appendChild(badge);
+      const hex = document.createElement("span");
+      hex.className = "badge hex";
+      const chip = document.createElement("i");
+      chip.className = "chip"; chip.style.background = p.hex;
+      hex.appendChild(chip);
+      hex.appendChild(document.createTextNode(p.hex));
+      meta.appendChild(hex);
+      a.appendChild(meta);
+      return a;
+    },
+    _provBadge(prov) {
+      const m = {
+        model: "Modelled", "model-microlensing": "Modelled",
+        "simulated-cgi": "Roman: simulated", "measured-cgi": "Roman: measured",
+        "measured-hwo": "HWO: measured",
+      };
+      return m[prov] || prov;
+    },
+    _drawCanvas(cv) {
+      const p = this._map[cv.dataset.id];
+      if (!p || !window.PlanetRender) return;
+      cv.classList.toggle("pixel", this.style === "retro");
+      window.PlanetRender.render(cv, {
+        palette: p.palette, radius: p.radius, cloudState: p.cloud, lumY: p.lum,
+        style: this.style, fidelity: this.fidelity,
+      });
+    },
+    _redrawAll() {
+      if (!this.$refs.grid) return;
+      // Style/fidelity changed: invalidate every card, redraw the visible ones now, rest on scroll.
+      this.$refs.grid.querySelectorAll(".card-planet").forEach((cv) => cv.removeAttribute("data-drawn"));
+      this._drawVisible();
     },
     // Colour families actually present in the data, in canonical order, with a swatch + label.
+    // (The `this.loaded` read makes these reactive to the async fetch populating window.PLANETS.)
     families() {
-      const present = new Set((window.PLANETS || []).map((x) => x.family));
+      if (!this.loaded) return [];
+      const present = new Set(window.PLANETS.map((x) => x.family));
       return this.familyOrder.filter((f) => present.has(f))
         .map((f) => ({ id: f, name: this.familyMeta[f].n, colour: this.familyMeta[f].c }));
     },
     // Provenance dropdown: "all" + only the provenances present (declutters at scale, where
     // it's nearly all "Modelled" but the handful of Roman targets are still worth finding).
     provOptions() {
-      const present = new Set((window.PLANETS || []).map((x) => x.prov));
+      if (!this.loaded) return [["all", this.provLabels.all]];
+      const present = new Set(window.PLANETS.map((x) => x.prov));
       return Object.entries(this.provLabels).filter(([v]) => v === "all" || present.has(v));
     },
     setFamily(f) { this.family = this.family === f ? null : f; },
     setSort(v) { this.sort = v; this.nearId = null; },  // an explicit sort cancels similar-colour
     clearNear() { this.nearId = null; },
     nearName() {
-      const p = (window.PLANETS || []).find((x) => x.id === this.nearId);
+      if (!this.loaded) return "";
+      const p = window.PLANETS.find((x) => x.id === this.nearId);
       return p ? p.name : "";
     },
     nearHex() {
-      const p = (window.PLANETS || []).find((x) => x.id === this.nearId);
+      if (!this.loaded) return "#000";
+      const p = window.PLANETS.find((x) => x.id === this.nearId);
       return p ? p.hex : "#000";
     },
     // Perceptual colour distance (ΔE76 over CIE Lab), computed from the displayed hex so it
@@ -115,23 +251,10 @@ document.addEventListener("alpine:init", () => {
       return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
     },
     _de(a, b) { return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]); },
-    renderCards() {
-      if (!window.PlanetRender || !window.PLANETS) return;
-      var byId = {};
-      window.PLANETS.forEach((p) => (byId[p.id] = p));
-      var style = this.style, fidelity = this.fidelity;
-      document.querySelectorAll(".card-planet").forEach((cv) => {
-        var p = byId[cv.dataset.id];
-        if (!p) return;
-        cv.classList.toggle("pixel", style === "retro");
-        window.PlanetRender.render(cv, {
-          palette: p.palette, radius: p.radius, cloudState: p.cloud, lumY: p.lum,
-          style: style, fidelity: fidelity,
-        });
-      });
-    },
-    get view() {
-      let items = (window.PLANETS || []).filter((p) => {
+    // The filtered + sorted planet list for the current controls (an ordered array).
+    results() {
+      const all = window.PLANETS || [];
+      let items = all.filter((p) => {
         if (this.prov !== "all" && p.prov !== this.prov) return false;
         if (this.family && p.family !== this.family) return false;
         if (this.q) {
@@ -140,7 +263,7 @@ document.addEventListener("alpine:init", () => {
         }
         return true;
       });
-      const ref = this.nearId && (window.PLANETS || []).find((x) => x.id === this.nearId);
+      const ref = this.nearId && all.find((x) => x.id === this.nearId);
       if (ref) {
         // Similar-colour sort: rank by perceptual distance to the reference planet's colour.
         const rl = this._lab(ref.hex), dc = {};
@@ -157,20 +280,10 @@ document.addEventListener("alpine:init", () => {
           return 0;
         });
       }
-      const vis = new Set(items.map((p) => p.id));
-      const ord = {};
-      items.forEach((p, i) => (ord[p.id] = i));
-      return { vis, ord, count: items.length };
-    },
-    show(id) {
-      return this.view.vis.has(id);
-    },
-    order(id) {
-      const o = this.view.ord[id];
-      return o === undefined ? 999 : o;
+      return items;
     },
     count() {
-      return this.view.count;
+      return (this._results || []).length;
     },
   }));
 
