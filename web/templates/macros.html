@@ -453,5 +453,37 @@
     </div>
 
   </div>
+
+  {# ── Seen in fiction: pop-culture appearances of this REAL system in books/films/games.
+     Only renders when the curated overlay (data/fiction-references.json) has a match. Honest
+     by design: the star/planet is real, the stories are invented — said plainly, not implied. #}
+  {% if ctx.fiction %}
+  {%- set media = {'book': '📖 book', 'film': '🎬 film', 'tv': '📺 TV', 'game': '🎮 game'} -%}
+  <div class="panel fiction">
+    <div class="fiction-head">
+      <h3>Seen in fiction</h3>
+      <span class="fiction-tag">POP CULTURE</span>
+    </div>
+    <p class="fiction-intro"><strong>{{ ctx.fiction.system }}</strong> is a real star system —
+      but it also turns up in stories. These are named books, films and games set here. The
+      worlds and plots are invented; only the star is real, and none of these are where the
+      colour above comes from.</p>
+    <ul class="fiction-list">
+      {% for r in ctx.fiction.references %}
+      <li class="fiction-item">
+        <span class="fiction-medium">{{ media.get(r.medium, '◈ ' ~ r.medium) }}</span>
+        <span class="fiction-body">
+          <span class="fiction-work">{{ r.work }}</span>
+          <span class="fiction-cred">
+            {%- if r.creator %}{{ r.creator }}{% endif -%}
+            {%- if r.year %} · {{ r.year }}{% endif -%}
+          </span>
+          {% if r.note %}<span class="fiction-note">{{ r.note }}</span>{% endif %}
+        </span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
 </div>
 {%- endmacro %}

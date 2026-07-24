@@ -29,6 +29,33 @@ _HERE = Path(__file__).parent
 _TEMPLATES = _HERE / "templates"
 _STATIC = _HERE / "static"
 _DEFAULT_JSON = Path("data/planets.json")
+# Curated "seen in fiction" overlay: real systems that appear in named books/films/games.
+# Hand-maintained, kept OUT of planets.json, joined here by planet name. Optional — a missing
+# file just means no fiction sections render.
+_FICTION_JSON = Path("data/fiction-references.json")
+
+
+def _load_fiction(path: Path = _FICTION_JSON) -> dict[str, dict]:
+    """Map archive planet name -> {system, recognizability, references} for planets that appear
+    in fiction. Only the confirmed `systems` block is used (star-only cameos have no planet to
+    join to). `unverified` references are dropped so the public page stays honest; a system left
+    with no references is omitted entirely."""
+    if not path.exists():
+        return {}
+    doc = json.loads(path.read_text())
+    lookup: dict[str, dict] = {}
+    for sysrec in doc.get("systems", []):
+        refs = [r for r in sysrec.get("references", []) if r.get("confidence") != "unverified"]
+        if not refs:
+            continue
+        entry = {
+            "system": sysrec["system"],
+            "recognizability": sysrec.get("recognizability"),
+            "references": refs,
+        }
+        for pl in sysrec.get("planets", []):
+            lookup[pl["archive_name"]] = entry
+    return lookup
 
 
 def _env() -> Environment:
@@ -48,7 +75,7 @@ KNOWN_TOTAL_APPROX = 6300
 _LY_PER_PC = 3.26156
 
 
-def _planet_ctx(rec: PlanetRecord) -> dict:
+def _planet_ctx(rec: PlanetRecord, fiction: dict[str, dict] | None = None) -> dict:
     view = rec.instrument_views[0]
     args = dict(
         true_albedo=rec.spectrum.values,
@@ -60,6 +87,7 @@ def _planet_ctx(rec: PlanetRecord) -> dict:
         "record": rec,
         "spectrum_svg": spectrum_svg(**args),
         "spectrum_svg_compact": spectrum_svg(**args, compact=True),
+        "fiction": (fiction or {}).get(rec.name),
     }
 
 
@@ -124,7 +152,8 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     (out / "fragments" / "peek").mkdir(parents=True)
     (out / "palettes").mkdir(parents=True)
 
-    contexts = [_planet_ctx(r) for r in records]
+    fiction = _load_fiction()
+    contexts = [_planet_ctx(r, fiction) for r in records]
     # Cache-bust static assets on every build so browsers never serve a stale JS/CSS.
     build_id = str(int(time.time()))
 

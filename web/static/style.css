@@ -865,6 +865,40 @@ button.badge:active, a.badge:active { box-shadow: none; }
   font-family: var(--mono); font-size: 10px; letter-spacing: .05em; text-transform: uppercase;
   color: var(--fg-dim); margin-bottom: 6px;
 }
+/* Seen-in-fiction panel: pop-culture appearances of a real system. Accent-keyed left rule so it
+   reads as a distinct "aside" from the science panels, but same retro chrome (mono labels, square
+   edges, hard offset shadow on rows). */
+.panel.fiction { border-left: 4px solid var(--accent); }
+.fiction-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.fiction-tag {
+  font-family: var(--pixel); font-size: 7px; letter-spacing: .3px; text-transform: uppercase;
+  color: var(--accent); border: 1px solid var(--accent); padding: 2px 5px; white-space: nowrap;
+}
+.fiction-intro {
+  margin: 8px 0 14px; font-size: 12.5px; line-height: 1.6; color: var(--fg-dim); max-width: 62ch;
+}
+.fiction-intro strong { color: var(--fg); }
+.fiction-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.fiction-item {
+  display: grid; grid-template-columns: 76px 1fr; gap: 12px; align-items: start;
+  background: var(--bg-3); border: 1px solid var(--line); box-shadow: 3px 3px 0 var(--line);
+  padding: 10px 12px;
+}
+.fiction-medium {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .3px; text-transform: uppercase;
+  color: var(--accent); padding-top: 2px;
+}
+.fiction-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fiction-work { font-size: 13.5px; color: var(--fg); font-weight: 600; }
+.fiction-cred {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .2px; color: var(--fg-faint);
+}
+.fiction-note { font-size: 12.5px; line-height: 1.55; color: var(--fg-dim); margin-top: 3px; }
+@media (max-width: 560px) {
+  .fiction-item { grid-template-columns: 1fr; gap: 4px; }
+  .fiction-medium { padding-top: 0; }
+}
+
 /* Per-value origin tags: measured / computed / assumed. Same colour language as provenance. */
 .src {
   font-family: var(--pixel); font-size: 7px; letter-spacing: .3px; text-transform: uppercase;
