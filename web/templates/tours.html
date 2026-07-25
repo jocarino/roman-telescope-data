@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% from "macros.html" import back_link %}
+{% block title %}Guided tours · Exoplanet Palette{% endblock %}
+{% block content %}
+<div class="tours-index" x-data="{ intro: false }">
+  <div class="site-head">
+    {{ back_link() }}
+    <h1>Guided tours</h1>
+    <span class="tagline">short walks through the catalogue — no astronomy needed
+      <button class="info-btn sm" @click="intro = !intro" :class="intro ? 'on' : ''"
+        aria-label="What is a guided tour?" title="What is a guided tour?">i</button></span>
+  </div>
+  <div class="subhead intro-box" x-show="intro" x-cloak>
+    <button class="info-x" @click="intro = false" aria-label="Close">&times;</button>
+    <div class="intro-row">
+      <span class="intro-lbl">The idea</span>
+      <p>{{ n_planets }} planets is a lot to face from a standing start. A tour is a handful of
+        them in a deliberate order, one screen at a time, each with a plain-English reason for
+        being there. Ten minutes, no background required.</p>
+    </div>
+    <div class="intro-row">
+      <span class="intro-lbl">How they're picked</span>
+      <p>Most tours are re-derived from the data on every build — "the darkest worlds" really is
+        the current bottom of the catalogue, not a list someone froze last year. Each tour says
+        on its own page exactly how its planets were chosen.</p>
+    </div>
+    <div class="intro-row">
+      <span class="intro-lbl">Honesty</span>
+      <p><strong>Every colour is computed from physics, not photographed</strong> — except the
+        five solar-system worlds on the first tour, whose spectra were really measured.</p>
+    </div>
+  </div>
+  <p class="subhead lede">{{ tours|length }} tours · pick one and walk it.
+    <a class="lede-link" href="/">◧ Browse all {{ n_planets }} planets →</a></p>
+
+  <div class="tour-cards">
+    {% for tour in tours %}
+    <a class="tour-card panel" href="/tours/{{ tour.id }}">
+      <span class="tc-band" aria-hidden="true">
+        {% for hex in tour.swatches %}<i style="background: {{ hex }}"></i>{% endfor %}
+      </span>
+      <span class="tc-body">
+        <span class="tc-title">{{ tour.title }}</span>
+        <span class="tc-kicker">{{ tour.kicker }}</span>
+        <span class="tc-foot">
+          <span class="tc-count">{{ tour.stops|length }} STOPS</span>
+          <span class="tc-names">{{ tour.stops[:3]|map(attribute='planet.name')|join(' · ') }}…</span>
+          <span class="tc-go">START ▶</span>
+        </span>
+      </span>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+  /* Page-scoped (kept out of style.css so parallel sessions don't collide there). */
+  .tours-index { max-width: 1040px; margin: 0 auto; }
+  .tour-cards { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tour-card {
+    display: block; padding: 0; overflow: hidden; color: var(--fg);
+    border: 1px solid var(--line); background: var(--bg-3); box-shadow: 4px 4px 0 var(--line);
+    transition: border-color .14s, box-shadow .14s, transform .14s;
+  }
+  .tour-card:hover {
+    text-decoration: none; border-color: var(--accent); box-shadow: 4px 4px 0 var(--accent);
+  }
+  .tour-card:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--accent); }
+  /* The tour's own planets ARE its cover art: one stripe per stop, in stop order. */
+  .tc-band { display: flex; height: 46px; }
+  .tc-band i { flex: 1; display: block; }
+  .tc-body { display: block; padding: 12px 14px 13px; }
+  .tc-title { display: block; font-size: 15px; font-weight: 650; letter-spacing: -.01em; }
+  .tc-kicker { display: block; margin-top: 3px; font-size: 12.5px; color: var(--fg-dim); }
+  .tc-foot {
+    display: flex; align-items: center; gap: 10px; margin-top: 11px; flex-wrap: wrap;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .5px;
+  }
+  .tc-count {
+    border: 1px solid var(--line); padding: 3px 7px; color: var(--fg-dim);
+    box-shadow: 2px 2px 0 var(--line);
+  }
+  .tc-names {
+    color: var(--fg-faint); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; text-transform: none; letter-spacing: 0;
+  }
+  .tc-go { color: var(--accent); }
+  @media (max-width: 760px) {
+    .tour-cards { grid-template-columns: 1fr; }
+    .tc-names { display: none; }
+  }
+</style>
+{% endblock %}

@@ -623,6 +623,29 @@
 
   </div>
 
+  {# ── On a guided tour: this planet is a stop on one of the curated walks. A way back out of
+     a single planet page into a story that gives it context. Renders for the ~50 planets that
+     are on a tour; invisible for everyone else. #}
+  {% if ctx.tours %}
+  <div class="panel tourlink">
+    <span class="tourlink-lbl">ON A GUIDED TOUR</span>
+    <span class="tourlink-body">This planet is a stop on
+      {% for t in ctx.tours %}<a href="/tours/{{ t.id }}">{{ t.title }}</a>{% if not loop.last %},
+      {% endif %}{% endfor %} — a short, plain-English walk through the catalogue.</span>
+  </div>
+  <style>
+    .panel.tourlink {
+      display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-top: 16px;
+      padding: 11px 14px; border-left: 4px solid var(--accent);
+    }
+    .tourlink-lbl {
+      font-family: var(--mono); font-size: 9.5px; letter-spacing: .7px; color: var(--fg-faint);
+      white-space: nowrap;
+    }
+    .tourlink-body { font-size: 13px; color: var(--fg-dim); flex: 1; min-width: 200px; }
+  </style>
+  {% endif %}
+
   {# ── Seen in fiction: pop-culture appearances of this REAL system in books/films/games.
      Only renders when the curated overlay (data/fiction-references.json) has a match. Honest
      by design: the star/planet is real, the stories are invented — said plainly, not implied. #}

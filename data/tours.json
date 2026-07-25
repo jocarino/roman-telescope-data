@@ -1,0 +1,98 @@
+{
+  "_readme": "Guided tours: the curated editorial layer. Hand-written copy ONLY — never generated, and deliberately kept out of planets.json. Each tour is a short walk through a handful of planets for someone who has never heard of an exoplanet. Two kinds: a `select` rule (the planet list is re-derived from the current planets.json on every build by pipeline/tours.py, so a claim like 'the ten darkest worlds' stays true after a data re-release) or an explicit `stops` list (membership is a genuine editorial choice, e.g. the five solar-system anchors). Per-stop captions for rule tours are generated from the record; `notes` can attach a hand-written line to a named planet if it happens to be picked. `basis` is shown on the page — it must say honestly how the list was chosen. `draft: true` hides a tour without deleting it.",
+  "schema_version": 1,
+  "tours": [
+    {
+      "id": "start-here",
+      "title": "Start here: five worlds we can check",
+      "kicker": "the only colours on this site that can be held up against a photograph",
+      "intro": "Every exoplanet colour here is a prediction. These five are not. Their reflected-light spectra were actually measured — four of them by pointing telescopes at our own solar system, Earth's from orbit looking down. Run through exactly the same maths as every exoplanet on this site, they come out the colours we already know they are. That agreement is the reason to take the rest seriously.",
+      "basis": "Hand-picked: every planet in the catalogue whose spectrum is a real measurement rather than a model, in order outward from the Sun.",
+      "honesty": "These five are measured spectra. Every other tour is modelled — physics-derived predictions, not photographs.",
+      "stops": [
+        {
+          "id": "earth",
+          "metric": "measured",
+          "caption": "Home, seen the way this site sees every other planet: as a single average colour. Ocean, cloud and land blur together into one pale blue-white — the 'pale blue dot', arrived at by maths rather than sentiment.",
+          "note": "If the pipeline got Earth wrong, nothing else here would be worth reading."
+        },
+        {
+          "id": "jupiter",
+          "metric": "measured",
+          "caption": "Ammonia clouds over a deep hydrogen atmosphere, reflecting broadly across the visible with a warm tilt: the cream-tan every telescope photograph shows.",
+          "note": "The reference planet for the whole gas-giant family — most modelled giants here are, in effect, Jupiter moved to a different star."
+        },
+        {
+          "id": "saturn",
+          "metric": "measured",
+          "caption": "The same chemistry as Jupiter under a deeper haze layer, which drains the blue and leaves a warmer butterscotch.",
+          "note": "Rings excluded — this is the colour of the globe alone."
+        },
+        {
+          "id": "uranus",
+          "metric": "measured",
+          "caption": "Cold enough for methane to dominate. Methane absorbs red light, so what returns is the blue-green left behind — the ice-giant signature that makes distant exoplanets identifiable by colour alone.",
+          "note": "The pale, washed-out end of methane blue: the haze above the methane mutes it."
+        },
+        {
+          "id": "neptune",
+          "metric": "measured",
+          "caption": "Neptune's version of the same trick, with less haze in the way, so the methane blue comes through deeper and more saturated than Uranus's.",
+          "note": "Two worlds, near-identical chemistry, visibly different colours — a useful reminder of how little it takes to shift a planet's hue."
+        }
+      ]
+    },
+    {
+      "id": "strangest-colours",
+      "title": "The ten strangest colours",
+      "kicker": "the worlds furthest from the catalogue's average",
+      "intro": "Most modelled planets cluster around a pale, cool blue-grey. These ten are the outliers — the colours least like everything else in the catalogue, and each one strange for its own physical reason: a sun so red it stains the whole planet amber, air so hot the clouds have boiled away, methane swallowing the red end of the spectrum. Each stop is also visibly different from the others, so this is ten kinds of strange rather than one strangeness ten times.",
+      "basis": "Picked automatically from the current data: the planets whose modelled colour sits furthest (in perceptual ΔE) from the catalogue's median colour, skipping any that would look like a stop already on the list, one per star system.",
+      "honesty": "Modelled colours, not photographs. Some sit outside the range a screen can display; where that happens the swatch is the closest colour your screen can show and the planet page flags it as out of gamut.",
+      "select": { "rule": "colour-outliers", "limit": 10, "min_separation_de": 9.0 }
+    },
+    {
+      "id": "darkest-worlds",
+      "title": "The darkest worlds",
+      "kicker": "planets that send almost nothing back",
+      "intro": "Earth returns about a third of the light that falls on it; fresh snow returns most of it. These worlds return a twentieth. They are giant planets orbiting so close to their stars that clouds cannot form — with nothing to scatter light back, they are among the least reflective objects known, darker than charcoal.",
+      "basis": "Picked automatically from the current data: the lowest reflected brightness (CIE luminance Y) in the catalogue, one per star system.",
+      "honesty": "Every swatch on this site is brightened to a standard display brightness so the hue is visible at all — so these do not look as dark as they are. The percentage on each stop is what actually comes back.",
+      "select": { "rule": "dimmest", "limit": 10 }
+    },
+    {
+      "id": "two-ways-to-be-blue",
+      "title": "Two ways to be blue",
+      "kicker": "the same colour, from opposite physics",
+      "intro": "Blue is the commonest colour in this catalogue, and it arrives by two completely unrelated routes. Cold giants are blue because methane in their frigid air absorbs red light and leaves the rest. Ultra-hot Jupiters are blue because they have no clouds at all: bare, scorching hydrogen scatters blue light back at you, the same physics that makes Earth's sky blue, while sodium vapour eats the yellow. This walk alternates between the two — a freezer, then a furnace, all the way down.",
+      "basis": "Picked automatically from the current data: the bluest cold, methane-cloud worlds interleaved with the bluest ultra-hot, cloud-free ones, one per star system.",
+      "select": { "rule": "blue-two-ways", "limit": 8 }
+    },
+    {
+      "id": "planets-of-dead-stars",
+      "title": "Planets of dead stars",
+      "kicker": "worlds that outlived their sun",
+      "intro": "When a star like the Sun runs out of fuel it swells, sheds its outer layers and collapses into a white dwarf: an Earth-sized cinder, no fuel left, glowing for billions of years on stored heat alone. Anything that survives the swelling is left circling a corpse. This catalogue contains two such planets, and both were found by watching what little light the dead star still gives off.",
+      "basis": "Picked automatically from the current data: every planet whose host is a white dwarf, hottest cinder first.",
+      "epilogue": "Only two, and that is the honest number rather than a shortage of curation. Hotter stellar remnants are excluded from this catalogue on purpose — their light is mostly ultraviolet, where a reflected visible colour would mean nothing. And the pulsar planets, the first exoplanets ever discovered back in 1992, cannot appear at all: a pulsar is a neutron star, and there is no ordinary starlight there to reflect.",
+      "select": { "rule": "remnant-hosts", "limit": 6 }
+    },
+    {
+      "id": "roman-blind-spots",
+      "title": "Where Roman loses the colour",
+      "kicker": "the worlds the four-band view gets furthest wrong",
+      "intro": "The Roman Space Telescope's coronagraph will not see a planet's whole spectrum. It sees visible light through four narrow filters, and a colour has to be rebuilt from those four samples. Usually that lands close. On these worlds it does not: the reconstruction misses the features that carried the colour and comes back a different colour entirely — deep blue planets returning as salmon pink. Each stop shows both, side by side.",
+      "basis": "Picked automatically from the current data: the largest perceptual gap (ΔE2000) between the full-spectrum colour and the four-band reconstruction, one per star system.",
+      "honesty": "Both colours are modelled. The four-band view is what Roman's filters would recover from this modelled spectrum — no real Roman measurements exist yet.",
+      "select": { "rule": "roman-gap", "limit": 10 }
+    },
+    {
+      "id": "nearest-neighbours",
+      "title": "The nearest worlds",
+      "kicker": "closest first, starting next door",
+      "intro": "Distance is the one exoplanet number that needs no explanation. This walk starts at the closest planet to Earth outside the solar system and works outward, a few light-years at a time. Every star here is a naked-eye or small-telescope object — you can point at where these planets are tonight, and each planet page will show you where in the sky to look.",
+      "basis": "Picked automatically from the current data: sorted by distance from Earth, closest first, one per star system. The solar system's own planets are excluded — they are on the 'Start here' tour.",
+      "select": { "rule": "nearest", "limit": 10 }
+    }
+  ]
+}
