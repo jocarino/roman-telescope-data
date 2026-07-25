@@ -50,12 +50,13 @@
    Alpine holds the full-spectrum <-> Roman view; both colours/palettes are precomputed.
    NB: neither view is "true colour"; both are MODELLED. They differ by spectral coverage
    (full model spectrum vs Roman's four bands); provenance (modelled/measured) is separate. #}
-{% macro detail_body(ctx) -%}
+{% macro detail_body(ctx, index_url=None) -%}
 {%- set rec = ctx.record -%}
 {%- set tc = rec.true_colour -%}
 {%- set iview = rec.instrument_views[0] -%}
 {%- set rv = iview.colour -%}
 <div class="detail" :data-panel="panel" x-data="detail({
+    {%- if index_url %}indexUrl: '{{ index_url }}',{% endif %}
     fullHex: '{{ tc.hex }}', romanHex: '{{ rv.hex }}',
     fullLum: {{ '%.3f'|format(tc.luminance_y) }}, romanLum: {{ '%.3f'|format(rv.luminance_y) }},
     fullOog: {{ 'true' if tc.out_of_gamut else 'false' }},
@@ -92,6 +93,9 @@
 
   <div class="detail-head" x-effect="view; fidelity; heroStyle; illum; $nextTick(() => renderAll())">
     {{ back_link() }}
+    {# Keep rolling planet-to-planet without going back to the gallery. #}
+    <button type="button" class="back rand" @click="randomGo()" aria-label="Random planet"
+      title="Random planet · press R">⤳<span class="back-txt"> RANDOM</span></button>
     <div class="hero-stack">
       <canvas class="detail-hero" x-show="heroSource !== 'telescope'"
         :class="heroStyle === 'retro' ? 'pixel' : ''" x-ref="cHero"

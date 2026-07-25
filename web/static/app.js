@@ -1,5 +1,30 @@
 // Alpine components + the gallery hold-to-peek. No build step; plain ES.
 
+// Random-planet jump, shared by the gallery button, the detail-page button and the R key.
+// `pool` is the list to roll over (e.g. the gallery's filtered results); falls back to the
+// full index. Never lands on the planet already on screen (unless it's the only one).
+const ExoRandom = {
+  go(pool) {
+    let list = (pool && pool.length ? pool : window.PLANETS) || [];
+    if (!list.length) return;
+    const m = location.pathname.match(/^\/planet\/([^/]+?)(?:\.html)?$/);
+    const cur = m ? decodeURIComponent(m[1]) : null;
+    if (cur && list.length > 1) list = list.filter((p) => p.id !== cur);
+    const p = list[Math.floor(Math.random() * list.length)];
+    location.href = "/planet/" + p.id;
+  },
+};
+
+// Keyboard shortcut: R rolls a random planet on pages that registered a handler
+// (gallery + planet detail). Ignored while typing in a field.
+document.addEventListener("keydown", (e) => {
+  if ((e.key !== "r" && e.key !== "R") || e.metaKey || e.ctrlKey || e.altKey) return;
+  const el = document.activeElement;
+  if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" ||
+    el.isContentEditable)) return;
+  if (typeof window.__randomGo === "function") window.__randomGo();
+});
+
 document.addEventListener("alpine:init", () => {
 
   // Gallery: search / filter / sort over a fetched index (window.PLANETS). Cards are rendered
@@ -137,7 +162,15 @@ document.addEventListener("alpine:init", () => {
       ["q", "prov", "ptype", "disc", "distBand", "family", "fic", "sort", "nearId"].forEach((k) =>
         this.$watch(k, () => this._rerender()));
 
+      window.__randomGo = () => this.randomGo();  // wire the R shortcut to this gallery
+
       this._rerender();
+    },
+    // Jump to a random planet — within the current filters (far more delightful than fully
+    // random), falling back to the whole catalog when the filter matches nothing.
+    randomGo() {
+      if (!this.loaded) return;
+      ExoRandom.go(this._results && this._results.length ? this._results : window.PLANETS);
     },
     // --- Incremental grid rendering ---------------------------------------------------------
     _rerender() {
@@ -516,6 +549,7 @@ document.addEventListener("alpine:init", () => {
   // both are modelled. `init` carries the precomputed colours/palettes.
   Alpine.data("detail", (init) => ({
     view: "full",
+    indexUrl: null,   // planet index URL for the RANDOM roll (injected by the page template)
     // Render fidelity: "classic" (physics-honest) or "stylised" (restyled for looks). Global, persisted.
     fidelity: localStorage.getItem("renderFidelity") || "classic",
     heroStyle: "retro",   // hero render: "retro" (pixel) or "smooth" (sphere)
@@ -571,7 +605,20 @@ document.addEventListener("alpine:init", () => {
       const fromPlanet = document.referrer.includes("/planet/");
       this.heroSource =
         src === "telescope" && fromPlanet && this.obs.length ? "telescope" : "model";
+      window.__randomGo = () => this.randomGo();  // wire the R shortcut to this page
       this._phaseLoop();  // start the wax/wane phase cycle (on by default)
+    },
+    // Jump to a random planet. The detail page doesn't carry the index, so fetch it lazily
+    // on the first roll (cached in window.PLANETS for every roll after).
+    async randomGo() {
+      if (!window.PLANETS || !window.PLANETS.length) {
+        if (!this.indexUrl) return;
+        try {
+          const res = await fetch(this.indexUrl);
+          window.PLANETS = await res.json();
+        } catch (e) { return; }
+      }
+      ExoRandom.go(window.PLANETS);
     },
     _persist(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } },
     blink() {
