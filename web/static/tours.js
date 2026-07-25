@@ -1,13 +1,16 @@
 // Guided tour "story mode": the stops are all in the DOM, one is visible at a time. Alpine
-// holds the index; this file also draws the active stop's planet (the shared WebGL renderer,
-// same as the gallery cards) and wires arrow keys, swipes and #stop-N deep links.
-// Page-scoped — only tour pages load it.
+// holds the index; this file also draws the active stop's planet — running the same wax/wane
+// phase cycle as the planet page's hero, not a bare rotation — and wires arrow keys, swipes
+// and #stop-N deep links. Page-scoped: only tour pages load it.
 
 document.addEventListener("alpine:init", () => {
   Alpine.data("tour", (cfg) => ({
     n: (cfg && cfg.n) || 1,
     i: 0,
-    intro: false,
+    // The intro box opens by default so anyone arriving cold gets the point of the tour — but
+    // not on a phone, where three paragraphs would push the first planet off the screen
+    // entirely. There the ℹ (in the accent colour, right beside the kicker) opens it.
+    intro: !(window.matchMedia && window.matchMedia("(max-width: 760px)").matches),
 
     init() {
       // Deep link: /tours/darkest-worlds#stop-4 opens on that stop (shareable mid-tour).
@@ -24,9 +27,9 @@ document.addEventListener("alpine:init", () => {
     go(k) {
       const next = Math.min(Math.max(k, 0), this.n - 1);
       if (next === this.i) return;
+      // Deliberately no scrolling: stops are the same shape, so staying put keeps whatever
+      // you were reading — caption, facts, palette — under your eyes as the planet changes.
       this.i = next;
-      // A stop is a screenful: land at the top of it rather than mid-panel.
-      window.scrollTo({ top: 0, behavior: "smooth" });
     },
     next() { this.go(this.i + 1); },
     prev() { this.go(this.i - 1); },
@@ -46,19 +49,22 @@ document.addEventListener("alpine:init", () => {
       this.$nextTick(() => window.TourStops && window.TourStops.draw(this.i));
     },
 
-    // Sideways swipe steps the tour on touch devices; vertical drags stay scrolls.
+    // Sideways swipe steps the tour on touch devices. Touch events rather than pointer
+    // events: a vertical scroll fires pointercancel and the pointerup never arrives, so a
+    // pointer-based swipe silently stops working the moment the page can scroll.
     _swipe() {
       let x0 = null, y0 = null;
       const el = this.$el;
-      el.addEventListener("pointerdown", (e) => {
-        if (e.pointerType === "mouse") return;
-        x0 = e.clientX; y0 = e.clientY;
+      el.addEventListener("touchstart", (e) => {
+        if (e.touches.length !== 1) { x0 = null; return; }
+        x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
       }, { passive: true });
-      el.addEventListener("pointerup", (e) => {
-        if (x0 === null) return;
-        const dx = e.clientX - x0, dy = e.clientY - y0;
+      el.addEventListener("touchend", (e) => {
+        if (x0 === null || !e.changedTouches.length) return;
+        const dx = e.changedTouches[0].clientX - x0;
+        const dy = e.changedTouches[0].clientY - y0;
         x0 = null;
-        if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.6) {
+        if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.2) {
           if (dx < 0) this.next(); else this.prev();
         }
       }, { passive: true });
@@ -67,10 +73,16 @@ document.addEventListener("alpine:init", () => {
 });
 
 // ── Planet renders ──────────────────────────────────────────────────────────
-// Each stop's canvas carries its own palette/radius/cloud/brightness, so drawing needs no
-// index fetch. Drawn on first view and cached; hovering spins the sphere, as in the gallery.
+// Each stop's canvas carries its own palette, attributes and phase-resolved colours, so
+// drawing needs no index fetch. The active stop runs the phase cycle from the planet page:
+// the terminator sweeps a full lunar cycle and the palette is retinted by the modelled
+// colour at each phase, so you see the planet lit, half-lit and backlit — not a spinning ball.
 (function () {
   "use strict";
+
+  var PHASE_SPEED = 16;   // degrees per second, matching the planet page's hero
+  var START_DEG = 20;     // the page's default phase: enough terminator to read as 3D
+  var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function optsFor(cv) {
     var pal = (cv.dataset.palette || "").split(",").filter(Boolean);
@@ -82,45 +94,87 @@ document.addEventListener("alpine:init", () => {
       lumY: parseFloat(cv.dataset.lum) || 0,
       style: localStorage.getItem("planetStyle") || "retro",
       fidelity: localStorage.getItem("renderFidelity") || "classic",
-      phase: window.PlanetRender ? window.PlanetRender.hashPhase(cv.dataset.pid || "") : 0,
     };
+  }
+
+  function phasesOf(cv) {
+    try { return JSON.parse(cv.dataset.phases || "[]"); } catch (e) { return []; }
+  }
+
+  function rgb(hex) { return [1, 3, 5].map(function (i) { return parseInt(hex.slice(i, i + 2), 16); }); }
+
+  // Retint a palette by the per-channel drift of the phase colour against full phase, so the
+  // render carries the modelled colour shift as the planet wanes. (Same maths as app.js.)
+  function tint(palette, phases, idx) {
+    var ph = phases[idx];
+    if (!ph || !ph.d || !phases.length) return palette;
+    var base = rgb(phases[0].h), cur = rgb(ph.h);
+    var ratio = cur.map(function (v, i) { return v / (base[i] || 1); });
+    return palette.map(function (hex) {
+      return "#" + rgb(hex).map(function (v, i) {
+        var c = Math.max(0, Math.min(255, Math.round(v * ratio[i])));
+        return c.toString(16).padStart(2, "0");
+      }).join("");
+    });
+  }
+
+  function phaseName(d) {
+    if (d < 5) return "FULLY LIT";
+    if (d < 90) return "GIBBOUS";
+    if (d < 95) return "HALF LIT";
+    if (d < 175) return "CRESCENT";
+    return "BACKLIT";
+  }
+
+  function readout(cv, deg) {
+    var el = cv.parentNode && cv.parentNode.querySelector(".ts-phase b");
+    if (!el) return;
+    var eff = deg <= 180 ? deg : 360 - deg;
+    var txt = Math.round(eff) + "° · " + phaseName(eff);
+    if (el.textContent !== txt) el.textContent = txt;
   }
 
   function draw(index) {
+    if (!window.PlanetRender) return;
     var sections = document.querySelectorAll(".tour-stop");
+    for (var k = 0; k < sections.length; k++) {
+      var c = sections[k].querySelector(".ts-planet");
+      if (c && k !== index) window.PlanetRender.stop(c);
+    }
     var cv = sections[index] && sections[index].querySelector(".ts-planet");
-    if (!cv || !window.PlanetRender || cv.dataset.drawn === "1") return;
+    if (!cv) return;
     var o = optsFor(cv);
     if (!o) return;
-    window.PlanetRender.render(cv, o);
-    cv.dataset.drawn = "1";
-  }
+    var phases = phasesOf(cv);
 
-  var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var hoverable = window.matchMedia && window.matchMedia("(hover: hover)").matches;
+    if (reduced || phases.length < 2) {
+      // No cycle: hold the default phase, still lit like the planet page rather than flat.
+      var idx0 = Math.round(START_DEG / 10);
+      window.PlanetRender.render(cv, Object.assign({}, o, {
+        phase: (START_DEG * Math.PI) / 180,
+        palette: tint(o.palette, phases, idx0),
+      }));
+      readout(cv, START_DEG);
+      return;
+    }
 
-  function spinner(start) {
-    var t0 = null;
-    return function (t) {
-      if (t0 === null) t0 = t;
-      return start + ((t - t0) / 1000) * 0.45;  // ~14 s per turn: a drift, not a spin
-    };
-  }
-
-  if (hoverable && !reduced) {
-    document.addEventListener("mouseover", function (e) {
-      var cv = e.target.closest && e.target.closest(".ts-planet");
-      if (!cv || !window.PlanetRender) return;
-      var o = optsFor(cv);
-      if (o) window.PlanetRender.spin(cv, Object.assign({}, o, { frame: spinner(o.phase) }));
-    });
-    document.addEventListener("mouseout", function (e) {
-      var cv = e.target.closest && e.target.closest(".ts-planet");
-      if (!cv || !window.PlanetRender) return;
-      window.PlanetRender.stop(cv);
-      var o = optsFor(cv);
-      if (o) window.PlanetRender.render(cv, o);
-    });
+    var anim = { deg: START_DEG, last: null };
+    window.PlanetRender.spin(cv, Object.assign({}, o, {
+      frame: function (t) {
+        if (anim.last === null) anim.last = t;
+        anim.deg += PHASE_SPEED * (Math.min(t - anim.last, 100) / 1000);
+        anim.last = t;
+        if (anim.deg >= 360) anim.deg -= 360;
+        var eff = anim.deg <= 180 ? anim.deg : 360 - anim.deg;
+        var idx = Math.max(0, Math.min(phases.length - 1, Math.round(eff / 10)));
+        readout(cv, anim.deg);
+        // Per-frame overrides MUST be an object — spin() merges it over the base options.
+        return {
+          phase: (anim.deg * Math.PI) / 180,
+          palette: tint(o.palette, phases, idx),
+        };
+      },
+    }));
   }
 
   window.TourStops = { draw: draw };
