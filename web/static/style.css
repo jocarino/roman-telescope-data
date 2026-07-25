@@ -992,6 +992,52 @@ button.back.rand { cursor: pointer; }
   .fiction-medium { padding-top: 0; }
 }
 
+/* ---- Host star — "the lamp": the star's own colour + the star+planet duotone pair.
+   Same retro chrome as the other panels: square swatches, hard offset shadows, mono
+   labels, pixel tag in the accent. The inline .lamp-dot also marks the host line in the
+   page header and the peek card's Starlight step. ---- */
+.lamp-dot {
+  display: inline-block; width: 10px; height: 10px; border: 1px solid #000;
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, .5); vertical-align: -1px; margin-right: 6px;
+}
+.lamp-tag {
+  font-family: var(--pixel); font-size: 7px; letter-spacing: .3px; text-transform: uppercase;
+  color: var(--accent); border: 1px solid var(--accent); padding: 2px 5px; white-space: nowrap;
+  margin-left: 8px; vertical-align: 2px;
+}
+.lamp-grid {
+  display: grid; grid-template-columns: minmax(220px, 1fr) minmax(220px, 1.2fr);
+  gap: 20px 28px; margin-top: 14px; align-items: start;
+}
+@media (max-width: 720px) { .lamp-grid { grid-template-columns: 1fr; } }
+.lamp-row { display: flex; align-items: center; gap: 14px; }
+.lamp-swatch {
+  width: 64px; height: 64px; flex: none; border: 1px solid var(--line);
+  box-shadow: 3px 3px 0 var(--line);
+}
+.lamp-id { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.lamp-name {
+  font-family: var(--mono); font-size: 12px; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--fg);
+}
+.lamp-hex {
+  font-family: var(--mono); font-size: 11px; cursor: pointer; width: max-content;
+  background: var(--bg-3); border: 1px solid var(--line); padding: 2px 6px; color: var(--fg);
+}
+.lamp-hex:hover { border-color: var(--accent); color: var(--accent); }
+.lamp-cap {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--fg-faint);
+}
+.duo-col { display: flex; flex-direction: column; gap: 8px; }
+.duo-lbl {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--fg-dim);
+}
+.duo { box-shadow: 3px 3px 0 var(--line); }
+.duo .stop { height: 44px; }
+.duo-btns { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
 /* Per-value origin tags: measured / computed / assumed. Same colour language as provenance. */
 .src {
   font-family: var(--pixel); font-size: 7px; letter-spacing: .3px; text-transform: uppercase;

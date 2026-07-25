@@ -573,6 +573,9 @@ document.addEventListener("alpine:init", () => {
     _anim: null,          // { deg, dir, last } — continuous animation state
     _PHASE_SPEED: 16,     // degrees per second (~10.6 s per sweep)
     obsZoom: false,       // real-image lightbox open?
+    // Host star ("the lamp") swatch — injected by init; sunLampHex is the Sun's own colour,
+    // for the lamp panel to follow the Light-source knob.
+    starHex: null, starLabel: "", sunLampHex: null,
     msg: "",
     help: false,       // dossier "how to read this" expandable (ℹ button)
     info: null,        // which scope explainer is open: 'view' | 'style' | 'source' | null
@@ -673,6 +676,17 @@ document.addEventListener("alpine:init", () => {
     curHex() { return this.view === "roman" ? this.romanHex : (this.sunlit() ? this.sunHex : this.fullHex); },
     curLum() { return this.view === "roman" ? this.romanLum : (this.sunlit() ? this.sunLum : this.fullLum); },
     curOog() { return this.view === "roman" ? this.romanOog : (this.sunlit() ? this.sunOog : this.fullOog); },
+    // --- Host star ("the lamp") panel ---------------------------------------------------
+    // The lamp swatch follows the Light-source knob: the planet's own star, or the Sun when
+    // the Sun-lit variant is on screen. The duotone planet ink stays pegged to the
+    // full-spectrum colour (the Roman channel has no lamp of its own to show).
+    lampHex() { return this.sunlit() ? this.sunLampHex : this.starHex; },
+    lampLabel() { return this.sunlit() ? "The Sun · G2 V · 5772 K" : this.starLabel; },
+    duoBase() { return this.sunlit() ? this.sunHex : this.fullHex; },
+    copyDuo() {
+      navigator.clipboard?.writeText(this.lampHex() + ", " + this.duoBase());
+      this.flash("copied lamp + planet");
+    },
     // What the palette-out / dossier headers call the current output.
     viewName() {
       if (this.view === "roman") return "Roman 4-band";
