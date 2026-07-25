@@ -44,6 +44,7 @@ document.addEventListener("alpine:init", () => {
     ptype: "all",
     disc: "all",
     distBand: "all",
+    hz: "all",        // habitable-zone lens: see hzLabels
     fic: false,       // "seen in fiction" toggle: show only planets in the pop-culture overlay
     sort: "name",
     scrolled: false,  // page scrolled past the header: toolbar is stuck, TOP button shows
@@ -58,6 +59,18 @@ document.addEventListener("alpine:init", () => {
       neptune: "Neptune-like", "gas-giant": "Gas giant", "hot-jupiter": "Hot Jupiter",
       unknown: "Unknown",
     },
+    // Habitable-zone lens. "water" is the headline case — the orbit is in the zone AND the
+    // planet is small enough to have a surface. The others split the rest honestly rather
+    // than hiding it: a giant at the right distance is a real, different answer.
+    hzLabels: {
+      all: "All planets",
+      water: "Could hold liquid water",
+      zone: "Right distance, no surface",
+      "too-hot": "Too close to its star",
+      "too-cold": "Too far from its star",
+      unknown: "Not computable",
+    },
+    hzOrder: ["water", "zone", "too-hot", "too-cold", "unknown"],
     // Distance bands (light-years). id -> [label, maxExclusive in ly]; last band catches the rest.
     distBands: [
       ["all", "Any distance", Infinity],
@@ -135,6 +148,8 @@ document.addEventListener("alpine:init", () => {
       const fam = params.get("family");
       if (fam && this.familyMeta[fam]) this.family = fam;
       if (params.get("fiction") === "1") this.fic = true;
+      const hz = params.get("hz");
+      if (hz && this.hzLabels[hz]) this.hz = hz;
 
       try {
         const res = await fetch(this.indexUrl);
@@ -159,7 +174,7 @@ document.addEventListener("alpine:init", () => {
       window.addEventListener("resize", onScroll, { passive: true });
 
       // Any filter/sort change re-renders the grid from the top.
-      ["q", "prov", "ptype", "disc", "distBand", "family", "fic", "sort", "nearId"].forEach((k) =>
+      ["q", "prov", "ptype", "disc", "distBand", "hz", "family", "fic", "sort", "nearId"].forEach((k) =>
         this.$watch(k, () => this._rerender()));
 
       window.__randomGo = () => this.randomGo();  // wire the R shortcut to this gallery
@@ -240,6 +255,16 @@ document.addEventListener("alpine:init", () => {
       hex.appendChild(chip);
       hex.appendChild(document.createTextNode(p.hex));
       meta.appendChild(hex);
+      // Only the strongest case earns a card badge: right distance AND a plausible surface.
+      // Everything weaker is left to the planet page, where the caveats travel with it.
+      if (this._hzOf(p) === "water") {
+        const w = document.createElement("span");
+        w.className = "badge water";
+        w.title = "Orbits in its star's habitable zone and may have a solid surface — "
+          + "a candidate for liquid water, not a detection of it";
+        w.textContent = "◉ Liquid water?";
+        meta.appendChild(w);
+      }
       a.appendChild(meta);
       return a;
     },
@@ -294,6 +319,24 @@ document.addEventListener("alpine:init", () => {
       const order = ["rocky", "super-earth", "neptune", "gas-giant", "hot-jupiter", "unknown"];
       return [["all", this.typeLabels.all], ...order.filter((t) => present.has(t))
         .map((t) => [t, this.typeLabels[t]])];
+    },
+    // Which habitable-zone bucket a planet falls in. "water" needs both halves of the claim:
+    // the right amount of starlight AND a plausible surface to keep an ocean on.
+    _hzOf(p) {
+      const inZone = p.hz === "conservative" || p.hz === "optimistic";
+      if (inZone) return (p.srf === "rocky" || p.srf === "uncertain") ? "water" : "zone";
+      return p.hz || "unknown";
+    },
+    // Habitable-zone dropdown: "all" plus every bucket present, each with its count.
+    hzOptions() {
+      if (!this.loaded) return [["all", this.hzLabels.all]];
+      const counts = {};
+      window.PLANETS.forEach((p) => {
+        const b = this._hzOf(p);
+        counts[b] = (counts[b] || 0) + 1;
+      });
+      return [["all", this.hzLabels.all], ...this.hzOrder.filter((b) => counts[b])
+        .map((b) => [b, this.hzLabels[b] + " · " + counts[b].toLocaleString()])];
     },
     // Discovery-method dropdown: "all" + only the methods present, most-common first.
     discOptions() {
@@ -356,6 +399,7 @@ document.addEventListener("alpine:init", () => {
         if (this.ptype !== "all" && p.ptype !== this.ptype) return false;
         if (this.disc !== "all" && p.disc !== this.disc) return false;
         if (this.distBand !== "all" && this._distBandOf(p.dist_ly) !== this.distBand) return false;
+        if (this.hz !== "all" && this._hzOf(p) !== this.hz) return false;
         if (this.family && p.family !== this.family) return false;
         if (this.fic && !p.fic) return false;
         if (this.q) {
