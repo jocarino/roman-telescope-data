@@ -24,7 +24,9 @@ from pipeline.spectrum.measured import karkoschka1998, payne2026_earth
 
 _AU_TO_PC = 1.0 / 206264.806
 
-_SUN = HostStar(name="Sun", teff_k=SUN.teff_k, spectral_type="G2 V")
+_SUN = HostStar(
+    name="Sun", teff_k=SUN.teff_k, spectral_type="G2 V", radius_r_sun=1.0, luminosity_lsun=1.0
+)
 
 # Every number below is measured, and the "assumed" atmosphere fields are the real observed
 # atmosphere — record them as such so the page's origin chips say the honest thing.
@@ -47,6 +49,7 @@ def _params(
     radius_r_earth: float,
     mass_m_earth: float,
     sma_au: float,
+    eccentricity: float,
     metallicity: float | None,
     phase_deg: float,
     spectrum_source: str,
@@ -56,6 +59,7 @@ def _params(
         radius_r_earth=radius_r_earth,
         mass_m_earth=mass_m_earth,
         semi_major_axis_au=sma_au,
+        eccentricity=eccentricity,
         # Mean distance from Earth ~ the planet's own orbital radius (0 for Earth itself).
         distance_pc=sma_au * _AU_TO_PC if sma_au != 1.0 else 0.0,
         assumed_cloud_state="as observed",
@@ -87,8 +91,14 @@ def solar_system_planets() -> list[PlanetInput]:
             "Earth",
             _spec(payne2026_earth),
             _params(
-                eq_temp_k=255.0, radius_r_earth=1.0, mass_m_earth=1.0, sma_au=1.0,
-                metallicity=None, phase_deg=0.0, spectrum_source="payne2026",
+                eq_temp_k=255.0,
+                radius_r_earth=1.0,
+                mass_m_earth=1.0,
+                sma_au=1.0,
+                eccentricity=0.0167,
+                metallicity=None,
+                phase_deg=0.0,
+                spectrum_source="payne2026",
             ),
             Discovery(method="Home planet", year=None, facility=None),
         ),
@@ -97,8 +107,14 @@ def solar_system_planets() -> list[PlanetInput]:
             "Jupiter",
             _spec(karkoschka1998, "jupiter"),
             _params(
-                eq_temp_k=110.0, radius_r_earth=11.209, mass_m_earth=317.83, sma_au=5.204,
-                metallicity=3.0, phase_deg=6.8, spectrum_source="karkoschka1998",
+                eq_temp_k=110.0,
+                radius_r_earth=11.209,
+                mass_m_earth=317.83,
+                sma_au=5.204,
+                eccentricity=0.0489,
+                metallicity=3.0,
+                phase_deg=6.8,
+                spectrum_source="karkoschka1998",
             ),
             Discovery(method="Known since antiquity", year=None, facility=None),
         ),
@@ -107,8 +123,14 @@ def solar_system_planets() -> list[PlanetInput]:
             "Saturn",
             _spec(karkoschka1998, "saturn"),
             _params(
-                eq_temp_k=81.0, radius_r_earth=9.449, mass_m_earth=95.16, sma_au=9.573,
-                metallicity=10.0, phase_deg=5.7, spectrum_source="karkoschka1998",
+                eq_temp_k=81.0,
+                radius_r_earth=9.449,
+                mass_m_earth=95.16,
+                sma_au=9.573,
+                eccentricity=0.0565,
+                metallicity=10.0,
+                phase_deg=5.7,
+                spectrum_source="karkoschka1998",
             ),
             Discovery(method="Known since antiquity", year=None, facility=None),
         ),
@@ -117,8 +139,14 @@ def solar_system_planets() -> list[PlanetInput]:
             "Uranus",
             _spec(karkoschka1998, "uranus"),
             _params(
-                eq_temp_k=58.0, radius_r_earth=4.007, mass_m_earth=14.54, sma_au=19.165,
-                metallicity=30.0, phase_deg=0.0, spectrum_source="karkoschka1998",
+                eq_temp_k=58.0,
+                radius_r_earth=4.007,
+                mass_m_earth=14.54,
+                sma_au=19.165,
+                eccentricity=0.0457,
+                metallicity=30.0,
+                phase_deg=0.0,
+                spectrum_source="karkoschka1998",
             ),
             Discovery(method="Telescope", year=1781, facility="W. Herschel"),
         ),
@@ -127,8 +155,14 @@ def solar_system_planets() -> list[PlanetInput]:
             "Neptune",
             _spec(karkoschka1998, "neptune"),
             _params(
-                eq_temp_k=47.0, radius_r_earth=3.883, mass_m_earth=17.15, sma_au=30.178,
-                metallicity=30.0, phase_deg=0.0, spectrum_source="karkoschka1998",
+                eq_temp_k=47.0,
+                radius_r_earth=3.883,
+                mass_m_earth=17.15,
+                sma_au=30.178,
+                eccentricity=0.0113,
+                metallicity=30.0,
+                phase_deg=0.0,
+                spectrum_source="karkoschka1998",
             ),
             Discovery(method="Telescope", year=1846, facility="Berlin Observatory"),
         ),

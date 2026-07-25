@@ -124,6 +124,13 @@ should — enforced by `tests/test_sanity_gate.py`:
   band samples with zero downstream change; the planet's provenance flips
   `simulated`→`measured` automatically. Empty until Roman reports; the full ingestion
   procedure is `docs/roman-measured-data.md`.
+- **The habitable-zone lens** (`pipeline/habitable.py`, rendered by `web/hz.py`): every
+  planet is placed against its star's liquid-water zone using the Kopparapu et al. 2014
+  climate limits, from the host star's Teff + radius and the orbital distance alone — no
+  atmosphere is assumed, and none has been measured. Emitted as `habitability` on each
+  record (zone, surface class, insolation, zone edges in AU, and the caveats that must be
+  shown with any verdict). Drives the gallery's "Liquid water" filter (deep-linkable as
+  `/?hz=water`), the card badge, and the orbit diagram on each planet page.
 - **`web/`** — Jinja2 static-site generator + htmx + Alpine.js, a pure static consumer of
   `planets.json` (no colour maths client-side). Renders a gallery, per-planet detail pages,
   and htmx drawer fragments into `dist/`.
