@@ -727,6 +727,8 @@ button.badge:active, a.badge:active { box-shadow: none; }
 }
 .back:hover { color: var(--fg); border-color: var(--accent); }
 .back:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--line); }
+/* The detail page's RANDOM roll: a <button> wearing the .back chrome, sat beside it. */
+button.back.rand { cursor: pointer; }
 /* Inside a title row (.site-head / .detail-head) the back button sits to the LEFT of the
    page title, vertically centred on it, instead of stacked above. On wide screens it hangs
    in the left GUTTER — outside the content band — so the title stays flush with the content
@@ -741,6 +743,8 @@ button.badge:active, a.badge:active { box-shadow: none; }
   .site-head .back { top: 50%; transform: translateY(-50%); }
   .site-head .back:active { transform: translateY(-50%) translate(1px, 1px); }
   .detail-head .back { top: 6px; margin-top: 0; }
+  /* Both back-row controls hang in the gutter: BACK on top, RANDOM stacked just below. */
+  .detail-head .back.rand { top: 44px; }
 }
 /* Phones: the back control collapses to just the arrow. */
 @media (max-width: 560px) {
