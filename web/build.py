@@ -112,6 +112,17 @@ def _tour_stop_ctx(stop: TourStop) -> dict:
         "roman_de": (
             f"{view.reconstruction_error.delta_e2000:.0f}" if view.reconstruction_error else ""
         ),
+        # Phase-resolved colours, so a tour stop can run the same wax/wane cycle as the planet
+        # page's hero (empty for records from a pre-phase data release: the render then just
+        # sits at its default phase).
+        "phases": (
+            [
+                {"d": c.phase_deg, "h": c.hex, "l": round(c.luminance_y, 4)}
+                for c in rec.phase_colours.colours
+            ]
+            if rec.phase_colours
+            else []
+        ),
         "metric": stop.metric,
         "caption": stop.caption,
         "note": stop.note,

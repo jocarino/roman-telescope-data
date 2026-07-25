@@ -12,12 +12,15 @@
       <button class="info-btn sm" @click="intro = !intro" :class="intro ? 'on' : ''"
         aria-label="About this tour" title="About this tour">i</button></span>
   </div>
-  {# The intro is the hook for someone arriving cold on a shared link, so it is visible by
-     default; the ℹ holds the two things only some readers want (how the list was picked, and
-     the modelled-not-photographed caveat). #}
-  <p class="tour-intro">{{ tour.intro }}</p>
+  {# Everything about the tour lives in one accent box, in the site's labelled-row style. It
+     starts OPEN (the intro is the hook for anyone arriving cold on a shared link); the ℹ
+     collapses it once read. #}
   <div class="subhead intro-box" x-show="intro" x-cloak>
     <button class="info-x" @click="intro = false" aria-label="Close">&times;</button>
+    <div class="intro-row">
+      <span class="intro-lbl">This tour</span>
+      <p>{{ tour.intro }}</p>
+    </div>
     <div class="intro-row">
       <span class="intro-lbl">How picked</span>
       <p>{{ tour.basis }}</p>
@@ -45,9 +48,9 @@
     </span>
     <span class="tr-keys">
       <button class="tour-key" @click="prev()" :disabled="i === 0"
-        aria-label="Previous stop">◀ <span>PREVIOUS</span></button>
+        aria-label="Previous stop"><span class="tk-gl">◀◀</span><span>PREV</span></button>
       <button class="tour-key" @click="next()" :disabled="i === {{ last }}"
-        aria-label="Next stop"><span>NEXT</span> ▶</button>
+        aria-label="Next stop"><span>NEXT</span><span class="tk-gl">▶▶</span></button>
     </span>
   </div>
   <p class="tour-hint">Arrow keys ← → step through the tour; on a phone, swipe sideways.</p>
@@ -60,7 +63,9 @@
         <canvas class="ts-planet" width="360" height="360" aria-label="Modelled render of
           {{ s.name }} in its computed colours" data-palette="{{ s.palette|join(',') }}"
           data-radius="{{ s.radius }}" data-cloud="{{ s.cloud }}" data-lum="{{ s.lum }}"
-          data-pid="{{ s.id }}"></canvas>
+          data-pid="{{ s.id }}" data-phases="{{ s.phases|tojson|forceescape }}"></canvas>
+        {# Same readout as the planet page's phase knob: what fraction of the disc is lit. #}
+        <p class="ts-phase" aria-live="off">PHASE <b>—</b></p>
         {# The site's own palette block, so the hex chips stay readable on dark stops and
            click-to-copy behaves the same here as on a planet page. #}
         <div class="ts-palette">{{ palette_full(s.rec.true_colour.palette) }}</div>
@@ -139,30 +144,31 @@
   .tr-tick:hover { opacity: .85; }
   .tr-tick.on { opacity: 1; border-color: var(--accent); box-shadow: 0 0 8px var(--accent); }
   .tr-keys { display: flex; gap: 8px; }
-  /* Keycap: lit from above, extruded, travels on press — the scope's F-key recipe. */
+  /* Transport keys in the site's own button language: square, stamped, hard offset shadow,
+     mono uppercase label, accent on hover, and a real press travel. Double-triangle glyphs
+     read as tape-deck transport rather than generic web arrows. */
   .tour-key {
-    display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
-    padding: 8px 14px 9px; border-radius: 5px; border: 1px solid #05070b;
-    border-top-color: #39414f;
-    background: linear-gradient(180deg, #2a3140 0%, #1c212c 45%, #141821 100%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), inset 0 -2px 3px rgba(0, 0, 0, .45),
-      0 3px 0 #05070b, 0 5px 7px rgba(0, 0, 0, .55);
-    color: var(--fg); font-family: var(--mono); font-size: 11px; letter-spacing: .6px;
+    display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+    padding: 9px 14px; border-radius: 0; border: 1px solid var(--line);
+    background: var(--bg-3); box-shadow: 3px 3px 0 var(--line);
+    color: var(--fg); font-family: var(--mono); font-size: 11px; letter-spacing: .8px;
     text-transform: uppercase;
   }
-  .tour-key:hover { color: var(--accent); text-decoration: none; }
-  .tour-key:active:not(:disabled) {
-    transform: translateY(3px);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 2px 4px rgba(0, 0, 0, .5),
-      0 1px 0 #05070b;
+  .tour-key:hover:not(:disabled) {
+    color: var(--accent); border-color: var(--accent); box-shadow: 3px 3px 0 var(--accent);
+    text-decoration: none;
   }
+  .tour-key:active:not(:disabled) {
+    transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--accent);
+  }
+  .tour-key .tk-gl { font-size: 9px; letter-spacing: -1px; color: var(--fg-faint); }
+  .tour-key:hover:not(:disabled) .tk-gl { color: var(--accent); }
   .tour-key:disabled { opacity: .35; cursor: default; }
   .tour-key.wide { justify-content: center; }
   .tour-hint {
     margin: 8px 0 16px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .4px;
     color: var(--fg-faint);
   }
-  .tour-intro { margin: 12px 0 18px; font-size: 14px; line-height: 1.65; max-width: 74ch; }
 
   .tour-stop { padding: 18px; }
   .ts-grid { display: grid; grid-template-columns: 360px 1fr; gap: 22px; align-items: start; }
@@ -170,7 +176,12 @@
     width: 100%; height: auto; display: block; image-rendering: pixelated;
     image-rendering: crisp-edges;
   }
-  .ts-palette { margin-top: 10px; }
+  .ts-phase {
+    margin: 8px 0 0; font-family: var(--mono); font-size: 10px; letter-spacing: .7px;
+    color: var(--fg-faint); text-transform: uppercase;
+  }
+  .ts-phase b { color: var(--accent); font-weight: 400; }
+  .ts-palette { margin-top: 8px; }
   .ts-palette .palette .stop { height: 48px; }
   .ts-palette-hint {
     margin: 6px 0 0; font-family: var(--mono); font-size: 10px; letter-spacing: .4px;
