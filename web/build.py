@@ -6,6 +6,10 @@ pages, and htmx detail fragments into an output directory, then copy static asse
 Pure static consumer — no colour maths here; both colours and palettes are precomputed in
 planets.json. A regenerated planets.json (e.g. after real measured data lands) just changes
 what renders; no template edits.
+
+One derived exception: the host-star "lamp" swatch (pipeline.colour.star) is computed at
+build time because it is a pure function of the star's Teff, which every record already
+carries — deriving it here means the feature needs no data re-release.
 """
 
 from __future__ import annotations
@@ -21,6 +25,8 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from pipeline.classify import planet_type
 from pipeline.colour.family import colour_family
+from pipeline.colour.star import star_swatch
+from pipeline.illuminant.blackbody import SUN
 from pipeline.models import PlanetRecord, PlanetsFile
 from pipeline.palette.export import ase_bytes
 from pipeline.sky import format_dec, format_ra
@@ -91,6 +97,11 @@ def _planet_ctx(
     # Two scope faces: wide for desktop, near-square for phones (CSS picks one).
     return {
         "record": rec,
+        # The lamp: the host star's own blackbody colour (and the Sun's, for the sun-swap
+        # knob to switch the lamp display to). Derived from Teff at build time — see module
+        # docstring.
+        "star": star_swatch(rec.host_star.teff_k),
+        "sun_lamp": star_swatch(SUN.teff_k),
         "spectrum_svg": spectrum_svg(**args),
         "spectrum_svg_compact": spectrum_svg(**args, compact=True),
         "fiction": (fiction or {}).get(rec.name),
@@ -176,7 +187,8 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     # Cache-bust static assets on every build so browsers never serve a stale JS/CSS.
     build_id = str(int(time.time()))
 
-    # Emit one .ase per planet (true-colour + Roman-view stops, named).
+    # Emit one .ase per planet (true-colour + Roman-view stops, named), plus the star+planet
+    # duotone pair: the host star's own colour ("lamp") and the planet base, as two inks.
     for rec in records:
         entries: list[tuple[str, str]] = [
             (f"{rec.name} true {s.role}", s.hex) for s in rec.true_colour.palette
@@ -184,6 +196,11 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
         entries += [
             (f"{rec.name} roman {s.role}", s.hex)
             for s in rec.instrument_views[0].colour.palette
+        ]
+        lamp_hex = star_swatch(rec.host_star.teff_k).hex
+        entries += [
+            (f"{rec.name} duotone lamp ({rec.host_star.name})", lamp_hex),
+            (f"{rec.name} duotone planet", rec.true_colour.hex),
         ]
         (out / "palettes" / f"{rec.id}.ase").write_bytes(ase_bytes(entries))
 

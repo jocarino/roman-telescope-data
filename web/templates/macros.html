@@ -55,6 +55,11 @@
 {%- set tc = rec.true_colour -%}
 {%- set iview = rec.instrument_views[0] -%}
 {%- set rv = iview.colour -%}
+{%- set star_label -%}
+{{- rec.host_star.name -}}
+{%- if rec.host_star.spectral_type %} · {{ rec.host_star.spectral_type }}{% endif -%}
+{%- if rec.host_star.teff_k %} · {{ rec.host_star.teff_k|round|int }} K{% endif -%}
+{%- endset -%}
 <div class="detail" :data-panel="panel" x-data="detail({
     {%- if index_url %}indexUrl: '{{ index_url }}',{% endif %}
     fullHex: '{{ tc.hex }}', romanHex: '{{ rv.hex }}',
@@ -70,6 +75,9 @@
     sunDe: {{ '%.1f'|format(ss.delta_e2000_vs_true) }},
     sunPalette: [{% for s in ss.colour.palette %}'{{ s.hex }}'{{ ',' if not loop.last }}{% endfor %}],
     {%- endif %}
+    starHex: '{{ ctx.star.hex }}',
+    starLabel: {{ star_label|trim|tojson|forceescape }},
+    sunLampHex: '{{ ctx.sun_lamp.hex }}',
     radius: {{ rec.params.radius_r_earth if rec.params.radius_r_earth else 8 }},
     cloudState: '{{ rec.params.assumed_cloud_state }}',
     fullCap: '{% if rec.provenance == 'measured-albedo' %}Computed from the planet’s real, measured reflected-light spectrum (380–780 nm) — the same maths as every exoplanet on this site, run on real data.{% else %}Modelled from the complete reflected-light spectrum (380–780 nm): a physics prediction, not a photograph.{% endif %}',
@@ -121,7 +129,8 @@
     </div>
     <div class="detail-title">
       <h1>{{ rec.name }}</h1>
-      <div class="host">{{ rec.host_star.name }}
+      <div class="host"><span class="lamp-dot" style="background: {{ ctx.star.hex }}"
+          title="{{ rec.host_star.name }}'s own colour — the lamp lighting this planet (details below)"></span>{{ rec.host_star.name }}
         {%- if rec.host_star.spectral_type %} · {{ rec.host_star.spectral_type }}{% endif -%}
         {%- if rec.host_star.teff_k %} · {{ rec.host_star.teff_k|round|int }} K{% endif -%}
       </div>
@@ -454,6 +463,69 @@
         <a class="badge hex similar" href="/compare?a={{ rec.id }}"
           title="Compare this planet with another">⇄ COMPARE</a>
         <span class="copied" x-show="msg" x-text="msg" x-cloak></span>
+      </div>
+    </div>
+  </div>
+
+  {# ── Host star — the lamp: the star's own colour beside its planet, plus the star+planet
+     duotone pair for designers. A planet emits no visible light of its own, so every swatch
+     above is this star's light, reflected; this panel shows the lamp itself. The swatch
+     follows the Light-source knob (its own star ⇄ the Sun) where that knob exists. ── #}
+  <div class="panel lamp" x-data="{ lh: false }">
+    <div class="dossier-head">
+      <h3>Host star <span class="lamp-tag">THE LAMP</span></h3>
+      <button class="info-btn" @click="lh = !lh" :class="lh ? 'on' : ''" :aria-expanded="lh"
+        title="Why show the star's colour?" aria-label="Why show the star's colour?">i</button>
+    </div>
+    <div class="dossier-help" x-show="lh" x-cloak>
+      <div class="assume">
+        <button class="info-x" @click="lh = false" aria-label="Close">&times;</button>
+        A planet makes no visible light of its own — every colour on this page is starlight,
+        reflected. This swatch is the lamp itself: {{ rec.host_star.name }}'s own colour,
+        modelled as a {{ rec.host_star.teff_k|round|int }}&nbsp;K blackbody (cool stars glow
+        orange-red, Sun-like stars warm white, hot stars blue-white), shown at the same
+        display brightness as the planet swatches. Modelled, not photographed.
+        {% if rec.sun_swap %}
+        <br><br>
+        When the <strong>Light source</strong> knob above is set to the Sun, this panel
+        follows: the lamp becomes the Sun, and the duotone pairs it with the planet's
+        Sun-lit colour.
+        {% endif %}
+        <br><br>
+        <strong>Duotone</strong> is the designer take-away: star + planet as a two-ink
+        pair — the lamp, and what the planet makes of its light.
+      </div>
+    </div>
+    <div class="lamp-grid">
+      <div class="lamp-row">
+        <span class="lamp-swatch" :style="{ background: lampHex() }"
+          style="background: {{ ctx.star.hex }}"></span>
+        <div class="lamp-id">
+          <span class="lamp-name" x-text="lampLabel()">{{ star_label|trim }}</span>
+          <code class="lamp-hex" @click="copy(lampHex())" title="Copy the star's hex"
+            x-text="lampHex()">{{ ctx.star.hex }}</code>
+          <span class="lamp-cap">the light this planet reflects</span>
+        </div>
+      </div>
+      <div class="duo-col">
+        <span class="duo-lbl">DUOTONE ▸ star + planet <span
+          x-show="sunlit()" x-cloak>· Sun-lit</span></span>
+        <div class="palette duo">
+          <div class="stop" :style="{ background: lampHex() }"
+            style="background: {{ ctx.star.hex }}">
+            <code @click="copy(lampHex())" x-text="lampHex()">{{ ctx.star.hex }}</code>
+          </div>
+          <div class="stop" :style="{ background: duoBase() }" style="background: {{ tc.hex }}">
+            <code @click="copy(duoBase())" x-text="duoBase()">{{ tc.hex }}</code>
+          </div>
+        </div>
+        <div class="duo-btns">
+          <button class="badge hex" @click="copyDuo()"
+            title="Copy both colours, comma-separated">COPY PAIR</button>
+          <a class="badge hex" href="/palettes/{{ rec.id }}.ase"
+            title="The .ASE download includes the duotone pair" download>.ASE</a>
+          <span class="copied" x-show="msg" x-text="msg" x-cloak></span>
+        </div>
       </div>
     </div>
   </div>

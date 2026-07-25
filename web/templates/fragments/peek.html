@@ -22,7 +22,9 @@
 
   <div class="peek-step">
     <span class="peek-step-lbl">Starlight</span>
-    <span class="peek-step-val">{% if star.spectral_type %}{{ star.spectral_type }} star{% else %}Host star{% endif %}
+    <span class="peek-step-val"><span class="lamp-dot"
+        style="background: {{ ctx.star.hex }}"
+        title="{{ star.name }}'s own colour — the lamp"></span>{% if star.spectral_type %}{{ star.spectral_type }} star{% else %}Host star{% endif %}
       · {{ star.teff_k|round|int }} K — modelled as a blackbody</span>
   </div>
 
