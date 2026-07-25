@@ -655,6 +655,83 @@
   </div>
   {% endif %}
 
+  {# ── Habitable zone: where this orbit falls against the star's liquid-water zone. Computed
+     from the host star's temperature and radius plus the orbital distance alone (Kopparapu
+     et al. 2014 climate limits) — it says nothing about an atmosphere, and no atmosphere has
+     been measured for any of these planets. The caveats are therefore part of the claim, not
+     decoration: they render immediately under the verdict, never behind a disclosure. #}
+  {% if rec.habitability and ctx.hz_svg %}
+  {%- set hab = rec.habitability -%}
+  <div class="panel hzpanel" x-data="{ sh: false }">
+    <div class="dossier-head">
+      <h3>Could it hold liquid water?</h3>
+      <button class="info-btn" @click="sh = !sh" :class="sh ? 'on' : ''" :aria-expanded="sh"
+        title="How the habitable zone is worked out"
+        aria-label="How the habitable zone is worked out">i</button>
+    </div>
+    <div class="dossier-help" x-show="sh" x-cloak>
+      <div class="assume">
+        <button class="info-x" @click="sh = false" aria-label="Close">&times;</button>
+        The <strong>habitable zone</strong> is the ring around a star where a planet gets
+        about the right amount of starlight for liquid water to survive on its surface —
+        too close and an ocean boils away, too far and it freezes. Its edges come from
+        climate models (Kopparapu et al. 2014) and depend only on the star's temperature
+        and brightness, so we can work them out for every star in this catalog.
+        <br><br>
+        The <strong>solid band</strong> is the conservative zone that those models support
+        directly. The <strong>faint band</strong> around it is the optimistic zone, stretched
+        out to where Venus and Mars appear to have held surface water early in their history.
+        <br><br>
+        This is <strong>geography, not biology</strong>. It places the orbit; it cannot tell
+        you whether the planet has an atmosphere, an ocean, or anything living in it.
+      </div>
+    </div>
+
+    {% if hab.zone in ('conservative', 'optimistic') and hab.surface in ('rocky', 'uncertain') %}
+    <p class="hz-verdict yes"><span class="hz-flag">◉ RIGHT DISTANCE FOR LIQUID WATER</span> —
+      {{ rec.name }} orbits
+      {{ 'well inside' if hab.zone == 'conservative' else 'at the optimistic edge of' }}
+      its star's habitable zone, and it is small enough that it may have a solid surface for
+      water to sit on. That makes it a candidate, not a discovery.</p>
+    {% elif hab.zone in ('conservative', 'optimistic') %}
+    <p class="hz-verdict part"><span class="hz-flag">◍ RIGHT DISTANCE — NO SURFACE</span> —
+      the orbit falls
+      {{ 'inside' if hab.zone == 'conservative' else 'at the optimistic edge of' }}
+      the habitable zone, but this planet is
+      {{ 'far too large to be a ball of rock' if hab.surface == 'enveloped'
+         else 'of unmeasured size' }}. Starlight alone does not make an ocean.</p>
+    {% elif hab.zone == 'too-hot' %}
+    <p class="hz-verdict no"><span class="hz-flag">△ TOO CLOSE</span> — at
+      {{ ctx.hz_insol }}× the starlight Earth receives, any surface water here would have
+      boiled off long ago. The habitable zone lies further out, past
+      {{ hab.optimistic_inner_au|round(3) }} AU.</p>
+    {% elif hab.zone == 'too-cold' %}
+    <p class="hz-verdict no"><span class="hz-flag">▽ TOO FAR</span> — this orbit receives
+      {{ ctx.hz_insol }}× the starlight Earth does, far too little to keep water liquid at the
+      surface. The habitable zone lies further in, inside
+      {{ hab.optimistic_outer_au|round(2) }} AU.</p>
+    {% endif %}
+
+    <div class="hz-wide">{{ ctx.hz_svg|safe }}</div>
+    <div class="hz-compact">{{ ctx.hz_svg_compact|safe }}</div>
+
+    <div class="sky-facts">
+      <span>Starlight received{{ jinfo("How much stellar energy reaches the planet, with Earth = 1. It follows from the star's brightness and the orbit's size. Venus gets 1.9x, Mars 0.43x.") }}
+        <b>{{ ctx.hz_insol }}× Earth's</b></span>
+      <span>This star's zone <b>{{ hab.inner_au|round(3) }} – {{ hab.outer_au|round(2) }} AU</b></span>
+      <span>This orbit <b>{{ rec.params.semi_major_axis_au|round(3) }} AU</b></span>
+    </div>
+
+    {% if hab.caveats %}
+    <ul class="hz-caveats">
+      {% for c in hab.caveats %}
+      <li>{{ c }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+  {% endif %}
+
   {# ── Where in the sky: the "go outside and look at it" chart. The crosshair is this
      planet's host star at its real J2000 position; every faint dot is another host star
      from this catalog. Only renders when the data release carries sky positions. #}

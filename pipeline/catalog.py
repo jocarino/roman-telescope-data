@@ -13,6 +13,7 @@ import re
 
 from pipeline.emit.build import PlanetInput
 from pipeline.fetch.archive import ArchiveRecord, fetch_bulk, fetch_by_names
+from pipeline.habitable import luminosity_lsun
 from pipeline.illuminant.blackbody import BlackbodyStar
 from pipeline.models import Discovery, HostStar, ParamSources, PlanetParams
 from pipeline.sky import build_sky
@@ -173,6 +174,8 @@ def _to_input(rec: ArchiveRecord) -> PlanetInput:
         name=_display_name(rec.hostname or rec.pl_name),
         teff_k=teff,
         spectral_type=rec.st_spectype,
+        radius_r_sun=rec.st_rad,
+        luminosity_lsun=luminosity_lsun(teff, rec.st_rad),
     )
     # Per-field origin: a real Archive measurement, a value we computed, or an archetype
     # assumption. Cloud/metallicity/phase are always assumed (we hold no per-planet atmosphere
@@ -196,6 +199,7 @@ def _to_input(rec: ArchiveRecord) -> PlanetInput:
         radius_r_earth=rec.pl_rade,
         mass_m_earth=rec.pl_bmasse,
         semi_major_axis_au=rec.pl_orbsmax,
+        eccentricity=rec.pl_orbeccen,
         distance_pc=rec.sy_dist,
         assumed_cloud_state=model.cloud_state,
         assumed_metallicity=model.metallicity,

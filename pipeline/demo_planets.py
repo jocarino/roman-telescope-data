@@ -14,7 +14,13 @@ from pipeline.spectrum.synthetic import (
     METHANE_NEPTUNE,
 )
 
-_SUN_STAR = HostStar(name="Sun (analog)", teff_k=5772.0, spectral_type="G2V")
+_SUN_STAR = HostStar(
+    name="Sun (analog)",
+    teff_k=5772.0,
+    spectral_type="G2V",
+    radius_r_sun=1.0,
+    luminosity_lsun=1.0,
+)
 
 
 def demo_planets() -> list[PlanetInput]:
