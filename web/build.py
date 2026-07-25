@@ -36,6 +36,7 @@ from pipeline.models import PaletteStopModel, PlanetRecord, PlanetsFile
 from pipeline.palette.derive import derive_palette_from_hex
 from pipeline.palette.export import ase_bytes
 from pipeline.sky import format_dec, format_ra
+from web.hz import hz_strip_svg
 from web.sky import sky_chart_svg
 from web.svg import spectrum_svg
 
@@ -89,6 +90,21 @@ KNOWN_TOTAL_APPROX = 6300
 _LY_PER_PC = 3.26156
 
 
+def _fmt_insolation(s: float | None) -> str | None:
+    """Starlight received, Earth = 1. Spans 0.001x to 7,000x, so pick precision by magnitude."""
+    if s is None:
+        return None
+    if s >= 100:
+        return f"{s:,.0f}"
+    if s >= 10:
+        return f"{s:.1f}"
+    if s >= 1:
+        return f"{s:.2f}"
+    if s >= 0.01:
+        return f"{s:.3f}".rstrip("0")
+    return f"{s:.4f}".rstrip("0")
+
+
 def _planet_ctx(
     rec: PlanetRecord,
     fiction: dict[str, dict] | None = None,
@@ -118,6 +134,12 @@ def _planet_ctx(
         ),
         "sky_ra": format_ra(rec.sky.ra_deg) if rec.sky else None,
         "sky_dec": format_dec(rec.sky.dec_deg) if rec.sky else None,
+        # None (no panel) when the star or orbit is too sparsely measured to place a zone.
+        "hz_svg": hz_strip_svg(rec),
+        "hz_svg_compact": hz_strip_svg(rec, compact=True),
+        "hz_insol": _fmt_insolation(
+            rec.habitability.insolation_earth if rec.habitability else None
+        ),
     }
 
 
@@ -138,6 +160,10 @@ def _index_entry(rec: PlanetRecord, fiction: dict[str, dict] | None = None) -> d
             rec.params.radius_r_earth, rec.params.mass_m_earth, rec.params.equilibrium_temp_k
         ),
         "disc": rec.discovery.method,
+        # Habitable-zone lens: the zone the orbit falls in, and whether the planet is small
+        # enough to have a surface. The gallery derives "could hold liquid water" from both.
+        "hz": rec.habitability.zone if rec.habitability else "unknown",
+        "srf": rec.habitability.surface if rec.habitability else "unknown",
         # For the card planet renders:
         "palette": [s.hex for s in rec.true_colour.palette],
         "radius": rec.params.radius_r_earth,

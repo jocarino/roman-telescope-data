@@ -102,7 +102,7 @@
     <div class="dropdown" x-data="{ open: false, shut: {} }" @keydown.escape="open=false"
       @click.outside="open=false">
       <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
-        :class="sort !== 'name' || prov !== 'all' || ptype !== 'all' || disc !== 'all' || distBand !== 'all' || fic ? 'active' : ''"
+        :class="sort !== 'name' || prov !== 'all' || ptype !== 'all' || disc !== 'all' || distBand !== 'all' || hz !== 'all' || fic ? 'active' : ''"
         aria-label="Filter, sort and display options" title="Filter, sort and display options">
         <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
           <path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" stroke-width="1.6"
@@ -137,6 +137,20 @@
         <div class="dd-sec-body" x-show="!shut.ptype">
           <template x-for="[val, label] in typeOptions()" :key="'t' + val">
             <button :class="ptype === val ? 'on' : ''" @click="ptype = val" x-text="label"></button>
+          </template>
+        </div>
+        {# The habitable-zone lens. "Liquid water" is the question every visitor arrives with,
+           so it sits high in the menu — but the label says "could", the options name the
+           failure cases plainly, and the ℹ spells out that this is orbital distance only. #}
+        <button type="button" class="dd-head dd-sec" @click="shut.hz = !shut.hz"
+          :aria-expanded="!shut.hz"><span>Liquid water<span class="dd-sub">by habitable zone</span></span>
+          <span class="dd-chev" x-text="shut.hz ? '▸' : '▾'"></span></button>
+        <div class="dd-sec-body" x-show="!shut.hz">
+          <div class="dd-note">Whether the orbit gets about as much starlight as Earth does —
+            and whether the planet is small enough to have a surface. It says nothing about
+            an atmosphere, which nobody has measured for these planets.</div>
+          <template x-for="[val, label] in hzOptions()" :key="'h' + val">
+            <button :class="hz === val ? 'on' : ''" @click="hz = val" x-text="label"></button>
           </template>
         </div>
         <button type="button" class="dd-head dd-sec" @click="shut.dist = !shut.dist"

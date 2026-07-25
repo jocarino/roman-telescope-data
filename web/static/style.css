@@ -1514,3 +1514,71 @@ button.back.rand { cursor: pointer; }
   .sky-wide { display: none; }
   .sky-compact { display: block; }
 }
+
+/* ── Habitable-zone panel ─────────────────────────────────────────────────────
+   The orbit-vs-liquid-water-zone strip and its verdict. Same visual grammar as the
+   sky chart: open markers (never filled dots — this is a diagram, not a photograph),
+   mono ticks, accent reserved for the thing the panel is actually about. */
+.hzpanel .hzstrip { display: block; width: 100%; height: auto; }
+.hzstrip .hz-band { fill: var(--accent); }
+.hzstrip .hz-band.opt { opacity: .12; }
+.hzstrip .hz-band.cons { opacity: .28; }
+.hzstrip .hz-axis { stroke: rgba(160, 185, 215, .38); stroke-width: 1; }
+.hzstrip .hz-tick { stroke: rgba(160, 185, 215, .38); stroke-width: 1; }
+.hzstrip .tick { fill: var(--fg-faint); font-size: 10px; font-family: var(--mono); }
+.hzstrip .hz-edge {
+  fill: var(--fg-dim); font-size: 10px; font-family: var(--mono); letter-spacing: .02em;
+}
+.hzstrip .hz-star { stroke: var(--fg-dim); stroke-width: 1.5; }
+.hzstrip .hz-orbit { stroke: var(--fg); stroke-width: 1; opacity: .45; }
+.hzstrip .hz-mark { fill: none; stroke: var(--fg); stroke-width: 1.5; }
+.hzstrip .hz-label {
+  fill: var(--fg); font-size: 11px; font-weight: 600;
+  font-family: var(--mono); letter-spacing: .04em;
+}
+/* In-zone planets get the accent on the marker itself: the one element that answers the
+   panel's question at a glance. */
+.hz-verdict.yes ~ .hz-wide .hz-mark, .hz-verdict.yes ~ .hz-compact .hz-mark,
+.hz-verdict.yes ~ .hz-wide .hz-label, .hz-verdict.yes ~ .hz-compact .hz-label {
+  stroke: var(--accent); fill: none;
+}
+.hz-verdict.yes ~ .hz-wide .hz-label, .hz-verdict.yes ~ .hz-compact .hz-label {
+  fill: var(--accent); stroke: none;
+}
+.hz-compact { display: none; }
+.hz-verdict {
+  margin: 0 0 10px; font-size: 12.5px; line-height: 1.55; color: var(--fg-dim);
+}
+.hz-verdict .hz-flag {
+  color: var(--accent); font-weight: 700; letter-spacing: .06em;
+  font-family: var(--mono); font-size: 11.5px;
+}
+.hz-verdict.yes { color: var(--fg); }
+.hz-verdict.no .hz-flag, .hz-verdict.part .hz-flag { color: var(--fg-dim); }
+.hz-caveats {
+  margin: 10px 0 0; padding: 8px 0 0; list-style: none;
+  border-top: 1px solid var(--line);
+}
+.hz-caveats li {
+  position: relative; padding-left: 14px; margin-bottom: 5px;
+  font-size: 11.5px; line-height: 1.5; color: var(--fg-faint);
+}
+.hz-caveats li::before {
+  content: "—"; position: absolute; left: 0; color: var(--fg-faint);
+}
+.hz-caveats li:last-child { margin-bottom: 0; }
+@media (max-width: 760px) {
+  .hz-wide { display: none; }
+  .hz-compact { display: block; }
+}
+
+/* Habitable-zone card badge + the menu section's plain-English note. The badge uses the
+   accent (it is the one card badge that answers a question rather than labelling provenance);
+   the trailing "?" is deliberate — it is a candidate, never a detection. */
+.badge.water {
+  border-color: var(--accent); color: var(--accent); background: rgba(35, 196, 232, .07);
+}
+.dd-note {
+  padding: 6px 12px 8px; font-size: 11px; line-height: 1.5; color: var(--fg-faint);
+  border-bottom: 1px solid var(--line);
+}

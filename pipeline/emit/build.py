@@ -15,6 +15,7 @@ from pipeline.bands.reconstruct import reconstruct_curve
 from pipeline.colour.cie import ColourResult, reflected_flux_to_colour
 from pipeline.config import CGI_OBSERVATION_PHASE_DEG, GRID_ID, GRID_NM, Instrument
 from pipeline.fetch.targets import load_measured_samples
+from pipeline.habitable import assess as assess_habitability
 from pipeline.illuminant.base import Illuminant
 from pipeline.illuminant.blackbody import SUN
 from pipeline.models import (
@@ -22,6 +23,7 @@ from pipeline.models import (
     BandSampleSetModel,
     ColourResultModel,
     Discovery,
+    Habitability,
     HostStar,
     IlluminantSwapModel,
     InstrumentViewModel,
@@ -210,6 +212,30 @@ def build_record(
 
     provenance = _determine_provenance(pin, views)
 
+    # Habitable-zone lens. Independent of the colour pipeline — it reads only the measured
+    # star and orbit, so it stays correct regardless of which spectrum engine ran above.
+    hab = assess_habitability(
+        teff_k=pin.host_star.teff_k,
+        star_radius_r_sun=pin.host_star.radius_r_sun,
+        semi_major_axis_au=pin.params.semi_major_axis_au,
+        radius_r_earth=pin.params.radius_r_earth,
+        mass_m_earth=pin.params.mass_m_earth,
+        eccentricity=pin.params.eccentricity,
+        axis_source=pin.params.sources.semi_major_axis_au if pin.params.sources else None,
+    )
+    habitability = Habitability(
+        zone=hab.zone,  # type: ignore[arg-type]
+        surface=hab.surface,  # type: ignore[arg-type]
+        insolation_earth=hab.insolation_earth,
+        inner_au=hab.inner_au,
+        outer_au=hab.outer_au,
+        optimistic_inner_au=hab.optimistic_inner_au,
+        optimistic_outer_au=hab.optimistic_outer_au,
+        extrapolated=hab.extrapolated,
+        is_candidate=hab.is_candidate,
+        caveats=hab.caveats,
+    )
+
     return PlanetRecord(
         id=pin.id,
         name=pin.name,
@@ -225,6 +251,7 @@ def build_record(
         instrument_views=views,
         real_observations=observations_for(pin.id),
         sky=pin.sky,
+        habitability=habitability,
         meta=RecordMeta(
             generated_at=generated_at,
             pipeline_version=PIPELINE_VERSION,

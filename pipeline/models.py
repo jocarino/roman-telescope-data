@@ -30,6 +30,12 @@ Confidence = Literal["high", "medium", "low"]
 # other measurements, or fell back to an archetype assumption because no data exists.
 DataSource = Literal["measured", "computed", "assumed"]
 
+# Habitable-zone classification (pipeline.habitable). "conservative" and "optimistic" are the
+# two standard zone widths in the literature, not a confidence rating.
+HabitableZoneClass = Literal["conservative", "optimistic", "too-hot", "too-cold", "unknown"]
+# Whether there is a solid surface for an ocean to sit on, from the planet's size alone.
+SurfaceClass = Literal["rocky", "uncertain", "enveloped", "unknown"]
+
 
 class SpectralCurve(BaseModel):
     grid: str  # GRID_ID
@@ -127,6 +133,11 @@ class HostStar(BaseModel):
     name: str
     teff_k: float
     spectral_type: str | None = None
+    # Stellar radius (solar radii) and the luminosity derived from it via Stefan-Boltzmann.
+    # Luminosity is what sets the habitable zone; both are optional because the Archive does
+    # not have a radius for every host. Absent in pre-v5 releases.
+    radius_r_sun: float | None = None
+    luminosity_lsun: float | None = None
 
 
 class SkyPosition(BaseModel):
@@ -165,6 +176,7 @@ class PlanetParams(BaseModel):
     radius_r_earth: float | None = None
     mass_m_earth: float | None = None
     semi_major_axis_au: float | None = None
+    eccentricity: float | None = None  # orbital eccentricity; 0 = circular
     distance_pc: float | None = None  # distance from Earth, parsecs
     # Model assumptions, surfaced for honesty ("modelled, not photographed").
     assumed_cloud_state: str
@@ -221,6 +233,29 @@ class PlanetSystem(BaseModel):
     siblings: list[SystemSibling] = Field(default_factory=list)
 
 
+class Habitability(BaseModel):
+    """Where the orbit sits relative to the star's liquid-water zone (pipeline.habitable).
+
+    Orbital geography, not a habitability claim: it follows from the host star's temperature
+    and radius and the planet's orbital distance, and says nothing about an atmosphere — none
+    has been measured for any of these planets. `caveats` carries the plain-English limits of
+    this particular verdict and the UI must show them wherever the badge appears.
+    """
+
+    zone: HabitableZoneClass
+    surface: SurfaceClass
+    insolation_earth: float | None = None  # starlight received, Earth = 1
+    inner_au: float | None = None  # conservative inner edge (runaway greenhouse)
+    outer_au: float | None = None  # conservative outer edge (maximum greenhouse)
+    optimistic_inner_au: float | None = None  # recent Venus
+    optimistic_outer_au: float | None = None  # early Mars
+    # True when the host is outside the 2,600-7,200 K range the climate models cover.
+    extrapolated: bool = False
+    # The badge case: in the zone AND plausibly has a surface for an ocean to sit on.
+    is_candidate: bool = False
+    caveats: list[str] = Field(default_factory=list)
+
+
 class RecordMeta(BaseModel):
     generated_at: str
     pipeline_version: str
@@ -249,6 +284,8 @@ class PlanetRecord(BaseModel):
     system: PlanetSystem | None = None
     # Optional for back-compat: data releases generated before the sky chart lack it.
     sky: SkyPosition | None = None
+    # Habitable-zone lens. Optional for back-compat with pre-v5 releases.
+    habitability: Habitability | None = None
     meta: RecordMeta
 
 
