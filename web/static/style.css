@@ -557,6 +557,12 @@ button.badge:active, a.badge:active { box-shadow: none; }
 .scope-info strong { color: var(--fg); }
 .scope-info p { margin: 0 0 8px; }
 .scope-info p:last-child { margin-bottom: 0; }
+/* Footer link in every scope explainer: the door to the full four-step story. */
+.scope-info-more {
+  display: inline-block; margin-top: 8px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .4px; text-transform: uppercase;
+}
+.scope-info-more:hover { color: var(--fg); }
 .scope-main { display: grid; grid-template-columns: 1fr 254px; min-height: 340px; }
 /* The CRT: inset in the chassis with a visible bezel gap, gently curved corners, phosphor
    tinted toward the accent, scanlines + vignette + glare on the glass. */
