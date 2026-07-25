@@ -36,6 +36,8 @@ from pipeline.models import PaletteStopModel, PlanetRecord, PlanetsFile
 from pipeline.palette.derive import derive_palette_from_hex
 from pipeline.palette.export import ase_bytes
 from pipeline.sky import format_dec, format_ra
+from pipeline.tours import Tour, TourStop
+from pipeline.tours import resolve as resolve_tours
 from web.hz import hz_strip_svg
 from web.sky import sky_chart_svg
 from web.svg import spectrum_svg
@@ -71,6 +73,69 @@ def _load_fiction(path: Path = _FICTION_JSON) -> dict[str, dict]:
         for pl in sysrec.get("planets", []):
             lookup[pl["archive_name"]] = entry
     return lookup
+
+
+def _tour_stop_ctx(stop: TourStop) -> dict:
+    """Everything one tour stop needs, formatted here rather than in the template: the numbers
+    a newcomer can read, plus the raw values the planet renderer wants."""
+    rec = stop.planet
+    view = rec.instrument_views[0]
+    p = rec.params
+    ly = round(p.distance_pc * _LY_PER_PC, 1) if p.distance_pc else None
+    return {
+        "rec": rec,
+        "id": rec.id,
+        "name": rec.name,
+        "host": rec.host_star.name,
+        "star": " · ".join(
+            x
+            for x in (
+                f"{round(rec.host_star.teff_k):,} K" if rec.host_star.teff_k else None,
+                rec.host_star.spectral_type,
+            )
+            if x
+        ),
+        "hex": rec.true_colour.hex,
+        "palette": [s.hex for s in rec.true_colour.palette],
+        "radius": p.radius_r_earth or "",
+        "cloud": p.assumed_cloud_state,
+        "lum": f"{rec.true_colour.luminance_y:.4f}",
+        "temp": f"{round(p.equilibrium_temp_k):,} K" if p.equilibrium_temp_k else "unknown",
+        "size": f"{p.radius_r_earth:.1f} × Earth's radius" if p.radius_r_earth else "unknown",
+        # Solar-system anchors sit a few ten-thousandths of a parsec away; "0.0 ly" would be
+        # both wrong-looking and beside the point for them.
+        "dist": (
+            f"{ly:,.1f} light-years" if ly and ly >= 0.1 else "in our own solar system"
+        ),
+        "reflect": f"{rec.true_colour.luminance_y * 100:.1f} % of the light that reaches it",
+        "roman_hex": view.colour.hex,
+        "roman_de": (
+            f"{view.reconstruction_error.delta_e2000:.0f}" if view.reconstruction_error else ""
+        ),
+        "metric": stop.metric,
+        "caption": stop.caption,
+        "note": stop.note,
+        "caveat": stop.caveat,
+    }
+
+
+def _tour_pages(env: Environment, tours: list[Tour], out: Path, build_id: str, n: int) -> None:
+    """One index page plus one page per tour, under /tours/. Written as tours/index.html so the
+    clean-URL rule (`try_files $uri $uri.html $uri/index.html`) serves /tours and /tours/<id>."""
+    (out / "tours").mkdir(parents=True, exist_ok=True)
+    (out / "tours" / "index.html").write_text(
+        env.get_template("tours.html").render(tours=tours, n_planets=n, build_id=build_id)
+    )
+    tpl = env.get_template("tour.html")
+    for tour in tours:
+        (out / "tours" / f"{tour.id}.html").write_text(
+            tpl.render(
+                tour=tour,
+                stops=[_tour_stop_ctx(s) for s in tour.stops],
+                n_planets=n,
+                build_id=build_id,
+            )
+        )
 
 
 def _env() -> Environment:
@@ -109,6 +174,7 @@ def _planet_ctx(
     rec: PlanetRecord,
     fiction: dict[str, dict] | None = None,
     sky_points: list[tuple[float, float]] | None = None,
+    tour_membership: dict[str, list[dict]] | None = None,
 ) -> dict:
     view = rec.instrument_views[0]
     args = dict(
@@ -127,6 +193,9 @@ def _planet_ctx(
         "spectrum_svg": spectrum_svg(**args),
         "spectrum_svg_compact": spectrum_svg(**args, compact=True),
         "fiction": (fiction or {}).get(rec.name),
+        # Guided tours this planet is a stop on, so a planet page can point back at the walk
+        # it belongs to (empty for the great majority of planets).
+        "tours": (tour_membership or {}).get(rec.id, []),
         # None (no chart) for records without a sky position, e.g. pre-sky data releases.
         "sky_svg": sky_chart_svg(rec.sky, sky_points or []) if rec.sky else None,
         "sky_svg_compact": (
@@ -280,6 +349,15 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
             index_url=f"/planets.index.{build_id}.json", build_id=build_id
         )
     )
+    # Guided tours: curated walks, resolved against THIS catalog (see pipeline/tours.py).
+    tours = resolve_tours(records)
+    _tour_pages(env, tours, out, build_id, len(records))
+    tour_membership: dict[str, list[dict]] = {}
+    for tour in tours:
+        for stop in tour.stops:
+            tour_membership.setdefault(stop.planet.id, []).append(
+                {"id": tour.id, "title": tour.title}
+            )
 
     page_tpl = env.get_template("planet.html")
     frag_tpl = env.get_template("fragments/planet_detail.html")
@@ -290,7 +368,7 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     # materialising all of them first is ~1 GB of strings at 6k planets — enough to push a
     # small VPS into swap during deploy. Peak memory is now one context, not N.
     for rec in records:
-        ctx = _planet_ctx(rec, fiction, sky_points)
+        ctx = _planet_ctx(rec, fiction, sky_points, tour_membership)
         pid = rec.id
         (out / "planet" / f"{pid}.html").write_text(page_tpl.render(ctx=ctx, build_id=build_id))
         (out / "fragments" / "planet" / f"{pid}.html").write_text(frag_tpl.render(ctx=ctx))

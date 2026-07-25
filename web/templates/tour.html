@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+{% from "macros.html" import provenance_badge, jinfo, palette_full %}
+{% block title %}{{ tour.title }} · Guided tour · Exoplanet Palette{% endblock %}
+{% block content %}
+{%- set last = stops|length - 1 %}
+<div class="tour-page" x-data="tour({ n: {{ stops|length }} })"
+  @keydown.window.arrow-right="next()" @keydown.window.arrow-left="prev()">
+  <div class="site-head">
+    <a class="back" href="/tours" aria-label="Back to all tours">←<span class="back-txt"> ALL TOURS</span></a>
+    <h1>{{ tour.title }}</h1>
+    <span class="tagline">{{ tour.kicker }}
+      <button class="info-btn sm" @click="intro = !intro" :class="intro ? 'on' : ''"
+        aria-label="About this tour" title="About this tour">i</button></span>
+  </div>
+  {# The intro is the hook for someone arriving cold on a shared link, so it is visible by
+     default; the ℹ holds the two things only some readers want (how the list was picked, and
+     the modelled-not-photographed caveat). #}
+  <p class="tour-intro">{{ tour.intro }}</p>
+  <div class="subhead intro-box" x-show="intro" x-cloak>
+    <button class="info-x" @click="intro = false" aria-label="Close">&times;</button>
+    <div class="intro-row">
+      <span class="intro-lbl">How picked</span>
+      <p>{{ tour.basis }}</p>
+    </div>
+    {% if tour.honesty %}
+    <div class="intro-row">
+      <span class="intro-lbl">Honesty</span>
+      <p>{{ tour.honesty }}</p>
+    </div>
+    {% endif %}
+  </div>
+
+  {# ── The transport: which stop you are on, every stop as a colour tick, and the two keys.
+     Labels stay literal ("PREVIOUS" / "NEXT"): the instrument styling is a costume. #}
+  <div class="tour-rail">
+    <span class="tr-count">STOP <b x-text="pad(i + 1)"></b> <span class="tr-of">of</span>
+      {{ stops|length }}</span>
+    <span class="tr-ticks" role="group" aria-label="Jump to a stop">
+      {% for s in stops %}
+      <button class="tr-tick" :class="i === {{ loop.index0 }} ? 'on' : ''"
+        @click="go({{ loop.index0 }})" style="background: {{ s.hex }}"
+        title="{{ loop.index }}. {{ s.name }}"
+        aria-label="Stop {{ loop.index }}: {{ s.name }}"></button>
+      {% endfor %}
+    </span>
+    <span class="tr-keys">
+      <button class="tour-key" @click="prev()" :disabled="i === 0"
+        aria-label="Previous stop">◀ <span>PREVIOUS</span></button>
+      <button class="tour-key" @click="next()" :disabled="i === {{ last }}"
+        aria-label="Next stop"><span>NEXT</span> ▶</button>
+    </span>
+  </div>
+  <p class="tour-hint">Arrow keys ← → step through the tour; on a phone, swipe sideways.</p>
+
+  {% for s in stops %}
+  <section class="panel tour-stop" x-show="i === {{ loop.index0 }}"
+    {% if not loop.first %}style="display: none"{% endif %}>
+    <div class="ts-grid">
+      <div class="ts-visual">
+        <canvas class="ts-planet" width="360" height="360" aria-label="Modelled render of
+          {{ s.name }} in its computed colours" data-palette="{{ s.palette|join(',') }}"
+          data-radius="{{ s.radius }}" data-cloud="{{ s.cloud }}" data-lum="{{ s.lum }}"
+          data-pid="{{ s.id }}"></canvas>
+        {# The site's own palette block, so the hex chips stay readable on dark stops and
+           click-to-copy behaves the same here as on a planet page. #}
+        <div class="ts-palette">{{ palette_full(s.rec.true_colour.palette) }}</div>
+        <p class="ts-palette-hint">Click a hex to copy it<span x-show="msg" x-cloak
+          class="ts-flash" x-text="msg"></span></p>
+      </div>
+      <div class="ts-info">
+        <div class="ts-head">
+          <span class="ts-metric">{{ s.metric }}</span>
+          <h2 class="ts-name">{{ s.name }}</h2>
+          <span class="ts-host">{{ s.host }}{% if s.star %} · {{ s.star }}{% endif %}</span>
+          <span class="ts-badges">{{ provenance_badge(s.rec) }}</span>
+        </div>
+        <p class="ts-caption">{{ s.caption }}</p>
+        {% if s.note %}
+        <p class="ts-note"><span class="ts-note-lbl">EDITOR'S NOTE</span>{{ s.note }}</p>
+        {% endif %}
+        {% if s.caveat %}
+        <p class="ts-caveat"><span class="ts-caveat-lbl">⚠ ABOUT THIS SWATCH</span>{{ s.caveat }}</p>
+        {% endif %}
+        <dl class="ts-facts">
+          <div><dt>Temperature</dt><dd>{{ s.temp }}</dd></div>
+          <div><dt>Size</dt><dd>{{ s.size }}</dd></div>
+          <div><dt>Distance</dt><dd>{{ s.dist }}</dd></div>
+          <div><dt>Reflects{{ jinfo('The share of its star&#39;s light this planet sends back (CIE luminance Y). Earth reflects about 30%. Every swatch on this site is brightened to a standard display brightness, so a dark planet still shows its hue — this number is what actually comes back.') }}</dt>
+            <dd>{{ s.reflect }}</dd></div>
+          <div><dt>As Roman would see it{{ jinfo('The Roman Space Telescope&#39;s coronagraph samples visible light in four narrow bands. This is the colour rebuilt from those four samples alone, and how far it lands from the full-spectrum colour in perceptual units (ΔE): under ~2 is invisible to the eye, ~10 reads as a different shade, 20+ as a different colour.') }}</dt>
+            <dd><span class="ts-chip" style="background: {{ s.roman_hex }}"></span>{{ s.roman_hex }}
+              {% if s.roman_de %}<span class="ts-de">ΔE {{ s.roman_de }}</span>{% endif %}</dd></div>
+          <div><dt>Model assumes</dt><dd>{{ s.cloud }}</dd></div>
+        </dl>
+        <a class="ts-open" href="/planet/{{ s.id }}">Open the full planet page →</a>
+      </div>
+    </div>
+  </section>
+  {% endfor %}
+
+  {# Shown alongside the final stop: the pay-off, the honest note about how the list was built,
+     and somewhere to go next. #}
+  <section class="panel tour-end" x-show="i === {{ last }}" style="display: none">
+    <h3>End of the tour</h3>
+    {% if tour.epilogue %}<p class="te-epilogue">{{ tour.epilogue }}</p>{% endif %}
+    <p class="te-basis"><span class="te-lbl">HOW THESE {{ stops|length }} WERE PICKED</span>
+      {{ tour.basis }}</p>
+    <div class="te-links">
+      <button class="tour-key wide" @click="go(0)">◀ START AGAIN</button>
+      <a class="tour-key wide" href="/tours">ALL TOURS</a>
+      <a class="tour-key wide" href="/">BROWSE ALL {{ n_planets }} PLANETS</a>
+    </div>
+  </section>
+</div>
+
+<style>
+  /* Page-scoped styles (kept out of style.css so parallel sessions don't collide there).
+     Same primitives as the rest of the app: square corners, hard offset shadows, mono labels,
+     accent for the active state. The two transport keys are physical-looking keycaps, like the
+     scope's function keys. */
+  .tour-page { max-width: 1040px; margin: 0 auto; }
+
+  .tour-rail {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    border: 1px solid var(--line); background: var(--bg-3); padding: 9px 12px;
+    box-shadow: 4px 4px 0 var(--line);
+  }
+  .tr-count {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .6px; color: var(--fg-dim);
+    white-space: nowrap;
+  }
+  .tr-count b { color: var(--accent); font-size: 14px; }
+  .tr-of { text-transform: lowercase; }
+  .tr-ticks { display: flex; gap: 4px; flex: 1; min-width: 120px; }
+  .tr-tick {
+    flex: 1; height: 22px; min-width: 10px; padding: 0; cursor: pointer;
+    border: 1px solid var(--line); outline: 1px solid #05070b; opacity: .5;
+  }
+  .tr-tick:hover { opacity: .85; }
+  .tr-tick.on { opacity: 1; border-color: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .tr-keys { display: flex; gap: 8px; }
+  /* Keycap: lit from above, extruded, travels on press — the scope's F-key recipe. */
+  .tour-key {
+    display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+    padding: 8px 14px 9px; border-radius: 5px; border: 1px solid #05070b;
+    border-top-color: #39414f;
+    background: linear-gradient(180deg, #2a3140 0%, #1c212c 45%, #141821 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), inset 0 -2px 3px rgba(0, 0, 0, .45),
+      0 3px 0 #05070b, 0 5px 7px rgba(0, 0, 0, .55);
+    color: var(--fg); font-family: var(--mono); font-size: 11px; letter-spacing: .6px;
+    text-transform: uppercase;
+  }
+  .tour-key:hover { color: var(--accent); text-decoration: none; }
+  .tour-key:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 2px 4px rgba(0, 0, 0, .5),
+      0 1px 0 #05070b;
+  }
+  .tour-key:disabled { opacity: .35; cursor: default; }
+  .tour-key.wide { justify-content: center; }
+  .tour-hint {
+    margin: 8px 0 16px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .4px;
+    color: var(--fg-faint);
+  }
+  .tour-intro { margin: 12px 0 18px; font-size: 14px; line-height: 1.65; max-width: 74ch; }
+
+  .tour-stop { padding: 18px; }
+  .ts-grid { display: grid; grid-template-columns: 360px 1fr; gap: 22px; align-items: start; }
+  .ts-planet {
+    width: 100%; height: auto; display: block; image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+  .ts-palette { margin-top: 10px; }
+  .ts-palette .palette .stop { height: 48px; }
+  .ts-palette-hint {
+    margin: 6px 0 0; font-family: var(--mono); font-size: 10px; letter-spacing: .4px;
+    color: var(--fg-faint); display: flex; gap: 8px;
+  }
+  .ts-flash { color: var(--accent); }
+
+  .ts-head { display: flex; flex-direction: column; gap: 3px; }
+  .ts-metric {
+    align-self: flex-start; font-family: var(--mono); font-size: 10.5px; letter-spacing: .6px;
+    text-transform: uppercase; color: #05121f; background: var(--accent); padding: 3px 8px;
+    box-shadow: 2px 2px 0 var(--line);
+  }
+  .ts-name {
+    font-family: var(--pixel); -webkit-font-smoothing: none; font-smooth: never;
+    font-size: 17px; line-height: 1.35; margin: 8px 0 0; letter-spacing: .5px;
+  }
+  .ts-host { font-family: var(--mono); font-size: 11.5px; color: var(--fg-dim); }
+  .ts-badges { margin-top: 6px; }
+  .ts-caption { font-size: 14px; line-height: 1.6; margin: 14px 0 0; }
+  .ts-note, .ts-caveat {
+    margin: 12px 0 0; padding: 9px 12px; font-size: 12.5px; line-height: 1.55;
+    color: var(--fg-dim); background: var(--bg-3); border: 1px solid var(--line);
+    border-left-width: 4px;
+  }
+  .ts-note { border-left-color: var(--accent); }
+  .ts-caveat { border-left-color: #b08a3a; }
+  .ts-note-lbl, .ts-caveat-lbl {
+    display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .7px;
+    color: var(--fg-faint); margin-bottom: 4px;
+  }
+  .ts-facts { margin: 16px 0 0; display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  .ts-facts > div {
+    display: grid; grid-template-columns: 190px 1fr; gap: 10px; background: var(--bg-3);
+    padding: 7px 10px;
+  }
+  .ts-facts dt {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .5px; text-transform: uppercase;
+    color: var(--fg-dim);
+  }
+  .ts-facts dd { margin: 0; font-size: 12.5px; display: flex; align-items: center; gap: 7px; }
+  .ts-chip {
+    display: inline-block; width: 13px; height: 13px; border: 1px solid rgba(255, 255, 255, .3);
+  }
+  .ts-de { font-family: var(--mono); font-size: 10.5px; color: var(--fg-faint); }
+  .ts-open {
+    display: inline-block; margin-top: 16px; font-family: var(--mono); font-size: 11.5px;
+    letter-spacing: .4px;
+  }
+
+  .tour-end { margin-top: 16px; padding: 18px; }
+  .tour-end h3 { margin: 0 0 8px; font-size: 12px; letter-spacing: .06em; }
+  .te-epilogue { margin: 0 0 12px; font-size: 13.5px; line-height: 1.6; }
+  .te-basis {
+    margin: 0 0 16px; font-size: 12.5px; line-height: 1.55; color: var(--fg-dim);
+    border-left: 4px solid var(--line); padding-left: 12px;
+  }
+  .te-lbl {
+    display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .7px;
+    color: var(--fg-faint); margin-bottom: 3px;
+  }
+  .te-links { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  @media (max-width: 820px) {
+    .ts-grid { grid-template-columns: 1fr; gap: 16px; }
+    .ts-visual { max-width: 320px; margin: 0 auto; }
+    .ts-facts > div { grid-template-columns: 1fr; gap: 2px; }
+    .tour-rail { gap: 9px 10px; }
+    /* The two keys drop to their own full-width row rather than being squeezed to arrows:
+       a thumb-sized target each, and the words PREVIOUS / NEXT stay readable. */
+    .tr-keys { flex-basis: 100%; }
+    .tour-key { flex: 1; justify-content: center; }
+    .tr-ticks { min-width: 90px; }
+  }
+</style>
+<script src="/static/tours.js?v={{ build_id }}"></script>
+{% endblock %}
