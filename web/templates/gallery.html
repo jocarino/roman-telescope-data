@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros.html" import provenance_badge, palette_strip %}
+{% from "macros.html" import provenance_badge, palette_strip, dice_icon %}
 {% block content %}
 <div x-data="{ intro: false }">
   <div class="site-head">
@@ -86,15 +86,7 @@
        CURRENT filters when any are active, so "random blue gas giant" just works. #}
     <button type="button" class="dd-btn dd-icon" @click="randomGo()"
       aria-label="Random planet" title="Random planet (from current filters) · press R">
-      <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-        <rect x="2.3" y="2.3" width="11.4" height="11.4" fill="none" stroke="currentColor"
-          stroke-width="1.6"/>
-        <circle cx="5.5" cy="5.5" r="1.1" fill="currentColor"/>
-        <circle cx="10.5" cy="5.5" r="1.1" fill="currentColor"/>
-        <circle cx="8" cy="8" r="1.1" fill="currentColor"/>
-        <circle cx="5.5" cy="10.5" r="1.1" fill="currentColor"/>
-        <circle cx="10.5" cy="10.5" r="1.1" fill="currentColor"/>
-      </svg>
+      {{ dice_icon() }}
     </button>
     {# The hamburger (all viewports): everything except the colour filter + search lives here.
        Each section collapses (expanded by default) so the menu isn't one long scroll; `shut`
