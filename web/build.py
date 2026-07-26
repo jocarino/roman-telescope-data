@@ -50,6 +50,29 @@ _DEFAULT_JSON = Path("data/planets.json")
 # Hand-maintained, kept OUT of planets.json, joined here by planet name. Optional — a missing
 # file just means no fiction sections render.
 _FICTION_JSON = Path("data/fiction-references.json")
+# Every jargon term on the site, defined once. Feeds both the /glossary page and the
+# site-wide hover tooltips (templates mark a term with the g() macro; the short definition
+# is shipped as one cached JS file rather than inlined into 900+ pages).
+_GLOSSARY_JSON = Path("data/glossary.json")
+
+
+def _load_glossary(path: Path = _GLOSSARY_JSON) -> dict:
+    """The glossary document: {"categories": [...], "terms": [...]}. Missing file = no
+    glossary page and inert (unstyled-but-readable) jargon markup, never a broken build."""
+    if not path.exists():
+        return {"categories": [], "terms": []}
+    doc = json.loads(path.read_text())
+    return {
+        "categories": doc.get("categories", []),
+        "terms": [t for t in doc.get("terms", []) if t.get("id") and t.get("term")],
+    }
+
+
+def _glossary_runtime_js(terms: list[dict]) -> str:
+    """The hover-tooltip payload: id -> {t: term, s: short}. Only what a tooltip needs — the
+    long definitions stay on the glossary page, so this stays a few KB for every page."""
+    lookup = {t["id"]: {"t": t["term"], "s": t["short"]} for t in terms}
+    return "window.GLOSSARY=" + json.dumps(lookup, separators=(",", ":")) + ";\n"
 
 
 def _load_fiction(path: Path = _FICTION_JSON) -> dict[str, dict]:
@@ -315,8 +338,12 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     (out / "palettes").mkdir(parents=True)
 
     fiction = _load_fiction()
+    glossary = _load_glossary()
     # Cache-bust static assets on every build so browsers never serve a stale JS/CSS.
     build_id = str(int(time.time()))
+
+    # Jargon definitions for the hover tooltips, one cached file for the whole site.
+    (out / f"glossary.terms.{build_id}.js").write_text(_glossary_runtime_js(glossary["terms"]))
 
     # Emit one .ase per planet (true-colour + Roman-view stops, named), plus the star+planet
     # duotone pair: the host star's own colour ("lamp") and the planet base, as two inks.
@@ -352,6 +379,13 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     (out / "compare.html").write_text(
         env.get_template("compare.html").render(
             index_url=f"/planets.index.{build_id}.json", build_id=build_id
+        )
+    )
+    # Glossary: every jargon term on the site, in plain English. Deliberately unlinked from
+    # the nav — it is reachable at /glossary, and by hovering any marked term anywhere.
+    (out / "glossary.html").write_text(
+        env.get_template("glossary.html").render(
+            categories=glossary["categories"], terms=glossary["terms"], build_id=build_id
         )
     )
     # Colour census: the whole catalog as one dataset (same fetched index).

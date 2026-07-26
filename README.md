@@ -52,6 +52,24 @@ fiction" overlay, and clean extensionless URLs. No backend, no build toolchain b
 `web.build` streams one planet at a time, so rendering all 5,759 pages takes ~7 s locally
 (`dist/` ≈ 477 MB; the runtime gallery index ≈ 2.5 MB).
 
+### Jargon and the glossary
+
+Every technical word on the site is defined once, in `data/glossary.json`, and used in two
+places from that one source:
+
+- **In place.** Templates wrap a term in the `g()` macro (`web/templates/macros.html`):
+  `{{ g('albedo-spectrum', 'albedo spectrum') }}`. It renders a subtle pixel-dotted underline
+  plus a small accent pixel, and `web/static/glossary.js` shows the plain-English definition on
+  hover, tap or keyboard focus. Events are delegated, so terms inside htmx fragments work too.
+  Use `g()` for **terms**; keep the `[i]` info buttons for **controls** (knobs, view switches).
+- **All together.** `/glossary` lists every term grouped by topic, searchable and deep-linkable
+  (`/glossary#quadrature`). It is deliberately **not linked from the nav** — you reach it by URL,
+  or by hovering a marked term.
+
+`tests/test_glossary.py` fails if a template marks a term the glossary doesn't define, so the
+two can't drift. Only the short tooltip text ships to every page (`glossary.terms.<build>.js`,
+~14 KB); the long entries live on the glossary page.
+
 ### Previewing several worktrees at once (`tools/exohub.py`)
 
 When two or more Claude Code sessions each serve their own `dist/`, it's easy to lose track of

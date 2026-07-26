@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros.html" import back_link %}
+{% from "macros.html" import back_link, g %}
 {% block title %}Colour census · Exoplanet Palette{% endblock %}
 {% block content %}
 <div class="census-page" x-data="{ intro: false, iScatter: false, iRoman: false }">
@@ -44,12 +44,14 @@
       <button class="info-btn xs" @click="iScatter = !iScatter" :class="iScatter ? 'on' : ''"
         aria-label="How to read this chart">i</button></h3>
     <div class="census-info" x-show="iScatter" x-cloak>
-      <p>Each dot is a planet, drawn in its own modelled colour: left–right is how hot it is,
-        up–down is how much of its star's light it reflects. The clusters are chemistry, not
-        chance — cold gas giants keep their methane and reflect blue-green; temperate worlds
-        wear bright water clouds; the hottest Jupiters are cloud-free and dark, tinted deep
-        blue by light scattering off bare gas; orange dots are worlds around small red stars,
-        tinted by their star's own light.</p>
+      <p>Each dot is a planet, drawn in its own {{ g('modelled') }} colour: left–right is how
+        hot it is ({{ g('equilibrium-temperature', 'equilibrium temperature') }}), up–down is
+        how much of its star's light it reflects ({{ g('geometric-albedo', 'geometric albedo') }}).
+        The clusters are chemistry, not chance — cold {{ g('gas-giant', 'gas giants') }} keep
+        their {{ g('methane-absorption', 'methane') }} and reflect blue-green; temperate worlds
+        wear bright water clouds; the hottest {{ g('hot-jupiter', 'Jupiters') }} are cloud-free
+        and dark, tinted deep blue by {{ g('rayleigh-scattering', 'light scattering off bare gas') }};
+        orange dots are worlds around small red stars, tinted by their star's own light.</p>
     </div>
     <p class="census-sub">Every planet by temperature and reflectivity, coloured as itself.
       Hover to identify; click to visit.</p>
@@ -65,9 +67,11 @@
       <button class="info-btn xs" @click="iRoman = !iRoman" :class="iRoman ? 'on' : ''"
         aria-label="What is delta-E?">i</button></h3>
     <div class="census-info" x-show="iRoman" x-cloak>
-      <p>The Roman Space Telescope's coronagraph sees visible light in only four bands, so it
-        recovers an approximation of each planet's colour. ΔE ("delta-E") measures how far that
-        approximation lands from the full-spectrum colour, in units of human perception: below
+      <p>The {{ g('roman-space-telescope', 'Roman Space Telescope') }}'s {{ g('coronagraph') }}
+        sees visible light in only four {{ g('bandpass', 'bands') }}, so it recovers an
+        approximation of each planet's colour. {{ g('delta-e2000', 'ΔE') }} ("delta-E") measures
+        how far that approximation lands from the full-spectrum colour, in units of human
+        perception: below
         ~2 the eye can't tell the difference, around 10 it reads as a clearly different shade,
         beyond 20 it's a different colour altogether.</p>
     </div>

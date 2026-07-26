@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros.html" import provenance_badge, palette_strip, dice_icon %}
+{% from "macros.html" import provenance_badge, palette_strip, dice_icon, g %}
 {% block content %}
 <div x-data="{ intro: false }">
   <div class="site-head">
@@ -12,18 +12,29 @@
     <button class="info-x" @click="intro = false" aria-label="Close">&times;</button>
     <div class="intro-row">
       <span class="intro-lbl">The colour</span>
-      <p>Computed from each planet's reflected-light spectrum (albedo model × host-star spectrum)
-        via CIE 1931 colour matching — no photographs involved.</p>
+      <p>Computed from each planet's reflected-light spectrum
+        ({{ g('albedo-spectrum', 'albedo model') }} × {{ g('host-star', 'host-star') }} spectrum)
+        via {{ g('cie-1931', 'CIE 1931 colour matching') }} — no photographs involved.</p>
     </div>
     <div class="intro-row">
       <span class="intro-lbl">Two views</span>
-      <p>Every planet is shown both ways: the full modelled spectrum, and what the Roman
-        Coronagraph would recover from just four bands. For Roman's ~dozen tech-demo targets,
-        the four-band view will one day be replaced by real measured data.</p>
+      <p>Every planet is shown both ways: the {{ g('full-spectrum-view', 'full modelled spectrum') }},
+        and what the {{ g('coronagraph', 'Roman Coronagraph') }} would recover from just
+        {{ g('roman-4-band', 'four bands') }}. For Roman's ~dozen
+        {{ g('tech-demo-target', 'tech-demo targets') }}, the four-band view will one day be
+        replaced by real measured data.</p>
     </div>
     <div class="intro-row">
       <span class="intro-lbl">Honesty</span>
-      <p><strong>Both are modelled predictions, not photographs.</strong></p>
+      <p><strong>Both are {{ g('modelled') }} predictions, not photographs.</strong></p>
+    </div>
+    <div class="intro-row">
+      {# The jargon mark, introduced where a newcomer first meets it. Live example, so the
+         thing being described is the thing on screen. #}
+      <span class="intro-lbl">Jargon</span>
+      <p>Words like {{ g('geometric-albedo', 'geometric albedo') }} carry a dotted underline and
+        a small pixel: hover or tap any of them, anywhere on the site, for a plain-English
+        definition.</p>
     </div>
     <div class="intro-foot">
       <span>Planet &amp; star data: <a href="https://exoplanetarchive.ipac.caltech.edu/"

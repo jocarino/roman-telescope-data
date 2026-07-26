@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+{% from "macros.html" import back_link, g %}
+{% block title %}Glossary · Exoplanet Palette{% endblock %}
+{% block content %}
+{# Every jargon term on the site, in plain English. Content comes from data/glossary.json —
+   the same file that feeds the hover tooltips — so a definition is written once and can never
+   drift between the tooltip and this page.
+
+   Reachable at /glossary only: deliberately not in the nav, per the site owner. The way you
+   find it in normal use is by hovering a marked term. #}
+<div class="gl-page">
+  <div class="site-head">
+    {{ back_link() }}
+    <h1>Glossary</h1>
+    <span class="tagline">every bit of jargon on this site, in plain English</span>
+  </div>
+
+  <div class="subhead intro-box gl-intro">
+    <div class="intro-row">
+      <span class="intro-lbl">The mark</span>
+      <p>Anywhere on this site, a word that looks like {{ g('albedo-spectrum', 'this') }} — a
+        dotted underline and a small pixel — has a definition attached. Hover it, tap it, or
+        tab to it and press&nbsp;Enter. Everything marked that way is listed below.</p>
+    </div>
+    <div class="intro-row">
+      <span class="intro-lbl">Who it's for</span>
+      <p>Nothing here assumes you have read an astronomy book. Where a term has a precise
+        technical meaning, the precise version is in the longer paragraph, not hidden.</p>
+    </div>
+    <div class="intro-foot">
+      <span><b id="gl-count">{{ terms|length }}</b> terms · {{ categories|length }} groups</span>
+      <a class="intro-link" href="/how">How we get the colours →</a>
+    </div>
+  </div>
+
+  <div class="gl-controls">
+    <label class="search gl-search">
+      <svg class="search-mag" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+        <circle cx="7" cy="7" r="4.3" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <input type="search" id="gl-q" placeholder="Search a term or a definition…"
+        aria-label="Search the glossary" autocomplete="off">
+    </label>
+    <div class="gl-cats" role="group" aria-label="Jump to a group">
+      <button type="button" class="gl-cat on" data-cat="">All</button>
+      {% for c in categories %}
+      <button type="button" class="gl-cat" data-cat="{{ c.id }}"
+        title="{{ c.name }}">{{ c.short if c.short else c.name }}</button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <p class="gl-none" id="gl-none" hidden>No term matches that. Try a plainer word — the
+    definitions are searched too.</p>
+
+  {% for c in categories %}
+  {%- set entries = terms | selectattr('category', 'equalto', c.id) | list -%}
+  {% if entries %}
+  <section class="panel gl-sec" data-sec="{{ c.id }}" id="group-{{ c.id }}">
+    <div class="gl-sec-head">
+      <h3>{{ c.name }}</h3>
+      <span class="gl-sec-n">{{ entries|length }}</span>
+    </div>
+    {% if c.blurb %}<p class="gl-sec-blurb">{{ c.blurb }}</p>{% endif %}
+    <dl class="gl-list">
+      {% for t in entries %}
+      <div class="gl-entry" id="{{ t.id }}" data-cat="{{ c.id }}"
+        data-k="{{ (t.term ~ ' ' ~ (t.aliases|join(' ') if t.aliases else '') ~ ' ' ~ t.short ~ ' ' ~ t.long)|lower }}">
+        <dt class="gl-term">
+          <a class="gl-anchor" href="#{{ t.id }}" aria-label="Link to {{ t.term }}">#</a>
+          {{ t.term }}
+          {% if t.aliases %}<span class="gl-alias">also: {{ t.aliases|join(' · ') }}</span>{% endif %}
+        </dt>
+        <dd class="gl-def">
+          <p class="gl-short">{{ t.short }}</p>
+          <p class="gl-long">{{ t.long }}</p>
+          {% if t.seeAlso %}
+          <p class="gl-see"><span class="gl-see-lbl">see also</span>
+            {% for s in t.seeAlso %}{% set st = terms|selectattr('id', 'equalto', s)|first %}
+            {% if st %}<a href="#{{ st.id }}">{{ st.term }}</a>{% endif %}
+            {%- endfor %}
+          </p>
+          {% endif %}
+        </dd>
+      </div>
+      {% endfor %}
+    </dl>
+  </section>
+  {% endif %}
+  {% endfor %}
+
+  <p class="subhead gl-foot">Missing a word? Every term here is defined once, in
+    <code>data/glossary.json</code>, and the same text is what you see when you hover it
+    anywhere on the site.</p>
+  {{ back_link() }}
+</div>
+
+<style>
+  /* Page-scoped styles (kept out of style.css to avoid cross-session merge churn). The shared
+     .gloss mark and its popover DO live in style.css — they appear on every page. */
+  .gl-page { max-width: 900px; margin: 0 auto; }
+  .gl-intro { display: block; }
+  /* Sticky, so the filters stay reachable however far down the list you are. Solid black
+     (not a fade): the chips can wrap to two rows, and a gradient let text show through. */
+  .gl-controls {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 18px 0 6px;
+    position: sticky; top: 0; z-index: 30; padding: 10px 0;
+    background: #000; border-bottom: 1px solid var(--line);
+  }
+  /* The search field is always open here (unlike the gallery's magnifier, which collapses to
+     an icon), so it also needs its placeholder back — the gallery hides it while collapsed. */
+  .gl-search { flex: 1 1 240px; max-width: 380px; }
+  .gl-search input { width: 100%; cursor: text; }
+  .gl-search input::placeholder { color: var(--fg-faint); }
+  .gl-cats { display: flex; flex-wrap: wrap; gap: 6px; }
+  .gl-cat {
+    border: 1px solid var(--line); background: var(--bg-3); color: var(--fg-dim);
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: .5px; text-transform: uppercase;
+    padding: 6px 9px; cursor: pointer; box-shadow: 2px 2px 0 var(--line);
+  }
+  .gl-cat:hover { color: var(--fg); border-color: var(--accent); }
+  .gl-cat.on {
+    background: var(--accent); color: #05121f; border-color: var(--accent); box-shadow: none;
+    transform: translate(1px, 1px);
+  }
+  .gl-sec { margin-top: 18px; padding: 16px 18px 6px; }
+  .gl-sec-head { display: flex; align-items: baseline; gap: 8px; }
+  .gl-sec-head h3 { margin: 0; }
+  .gl-sec-n {
+    font-family: var(--mono); font-size: 10px; color: var(--fg-faint);
+    border: 1px solid var(--line); padding: 1px 5px;
+  }
+  .gl-sec-blurb { margin: 6px 0 0; font-size: 12.5px; color: var(--fg-dim); max-width: 78ch; }
+  .gl-list { margin: 0; }
+  .gl-entry { position: relative; border-top: 1px solid var(--line); padding: 14px 0 12px; }
+  .gl-entry:first-child { border-top: 0; padding-top: 10px; }
+  /* Deep-link flash: the accent bar marks which entry the URL hash pointed at. */
+  .gl-entry:target { border-left: 4px solid var(--accent); padding-left: 12px; margin-left: -16px; }
+  .gl-term {
+    font-family: var(--pixel); -webkit-font-smoothing: none; font-smooth: never;
+    font-size: 12px; letter-spacing: .5px; color: var(--fg); line-height: 1.6;
+  }
+  /* Deep-link handle in the left gutter, so revealing it never shifts the term itself. */
+  .gl-anchor {
+    position: absolute; left: -14px; top: 15px;
+    color: var(--fg-faint); font-family: var(--mono); font-size: 11px;
+    opacity: 0; transition: opacity .1s;
+  }
+  .gl-entry:hover .gl-anchor, .gl-anchor:focus-visible { opacity: 1; }
+  .gl-alias {
+    display: inline-block; margin-left: 8px; font-family: var(--mono); font-size: 9.5px;
+    letter-spacing: .3px; color: var(--fg-faint); text-transform: none;
+  }
+  .gl-def { margin: 0; }
+  .gl-short { margin: 7px 0 0; font-size: 13.5px; line-height: 1.6; color: var(--fg); max-width: 78ch; }
+  .gl-long { margin: 7px 0 0; font-size: 12.5px; line-height: 1.7; color: var(--fg-dim); max-width: 78ch; }
+  .gl-see { margin: 8px 0 0; font-size: 11.5px; }
+  .gl-see-lbl {
+    font-family: var(--mono); font-size: 9px; letter-spacing: .6px; text-transform: uppercase;
+    color: var(--fg-faint); margin-right: 6px;
+  }
+  .gl-see a { margin-right: 10px; }
+  .gl-none { margin: 24px 0; color: var(--fg-dim); font-size: 13px; }
+  .gl-foot { margin-top: 22px; }
+  .gl-foot code { font-family: var(--mono); font-size: 11.5px; color: var(--fg); }
+  @media (max-width: 640px) {
+    .gl-controls { position: static; }
+    .gl-search { max-width: none; }
+    .gl-anchor { display: none; }  /* no gutter to hang it in */
+  }
+</style>
+<script>
+// Filtering: plain DOM, no framework. Entries are server-rendered, so the page is complete
+// (and searchable by the browser's own find) before this runs.
+(function () {
+  var q = document.getElementById("gl-q");
+  var none = document.getElementById("gl-none");
+  var count = document.getElementById("gl-count");
+  var entries = [].slice.call(document.querySelectorAll(".gl-entry"));
+  var secs = [].slice.call(document.querySelectorAll(".gl-sec"));
+  var cats = [].slice.call(document.querySelectorAll(".gl-cat"));
+  var cat = "";
+
+  function apply() {
+    var needle = (q.value || "").trim().toLowerCase();
+    var shown = 0;
+    entries.forEach(function (el) {
+      var hit = (!cat || el.dataset.cat === cat) &&
+        (!needle || el.dataset.k.indexOf(needle) !== -1);
+      el.hidden = !hit;
+      if (hit) shown++;
+    });
+    // A group with nothing left in it hides its heading too, rather than sitting empty.
+    secs.forEach(function (s) {
+      s.hidden = !s.querySelector(".gl-entry:not([hidden])");
+    });
+    none.hidden = shown > 0;
+    count.textContent = shown;
+  }
+
+  q.addEventListener("input", apply);
+  cats.forEach(function (b) {
+    b.addEventListener("click", function () {
+      cat = b.dataset.cat;
+      cats.forEach(function (o) { o.classList.toggle("on", o === b); });
+      apply();
+      // Jumping to a group from the top should show it, not leave you mid-page.
+      if (cat) window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+
+  // A hash link (from a "see also", or from another page) must survive an active filter.
+  function revealHash() {
+    var id = location.hash.slice(1);
+    if (!id) return;
+    var el = document.getElementById(id);
+    if (!el || !el.classList.contains("gl-entry")) return;
+    if (el.hidden || (el.closest(".gl-sec") || {}).hidden) {
+      q.value = ""; cat = "";
+      cats.forEach(function (o) { o.classList.toggle("on", !o.dataset.cat); });
+      apply();
+      el.scrollIntoView({ block: "center" });
+    }
+  }
+  window.addEventListener("hashchange", revealHash);
+  revealHash();
+})();
+</script>
+{% endblock %}
