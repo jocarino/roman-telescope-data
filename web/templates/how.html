@@ -199,7 +199,10 @@
       on a narrow wavelength window.</p>
     {{ maths_open() }}
       <p>Ramp stops: the base colour converted to a lightness-controlled space, its lightness
-        replaced by five fixed targets (two shades, base, two tints), hue and chroma held.
+        replaced by five evenly spaced targets from 0.18 to 0.88, hue and chroma held. The ramp
+        deliberately carries the planet's hue rather than its exact colour — every base swatch is
+        pinned to one display luminance, so a stop sitting at the planet's own lightness would
+        crowd the tints. The exact computed colour is the swatch and hex above.
         Spectral accents: restrict F(λ) to a window [λ₁,&nbsp;λ₂] (e.g. around a CH₄ band
         edge), re-run the CIE conversion on that slice alone, and keep the resulting colour,
         labelled with its source wavelength. Palettes export as hex, CSS variables or an

@@ -7,9 +7,14 @@ Pure static consumer — no colour maths here; both colours and palettes are pre
 planets.json. A regenerated planets.json (e.g. after real measured data lands) just changes
 what renders; no template edits.
 
-One derived exception: the host-star "lamp" swatch (pipeline.colour.star) is computed at
-build time because it is a pure function of the star's Teff, which every record already
-carries — deriving it here means the feature needs no data re-release.
+Two derived exceptions, both pure functions of values every record already carries, so both
+ship on the next deploy with no data re-release:
+
+- the host-star "lamp" swatch (pipeline.colour.star), from the star's Teff;
+- the 5-stop palette ramp (pipeline.palette.derive), from the colour's own base hex. Ramps
+  in already-released planets.json files are non-monotonic (see derive.py), so they are
+  re-derived here rather than trusted. Base colours are never recomputed — the physics is
+  read from planets.json exactly as written.
 """
 
 from __future__ import annotations
@@ -27,7 +32,8 @@ from pipeline.classify import planet_type
 from pipeline.colour.family import colour_family
 from pipeline.colour.star import star_swatch
 from pipeline.illuminant.blackbody import SUN
-from pipeline.models import PlanetRecord, PlanetsFile
+from pipeline.models import PaletteStopModel, PlanetRecord, PlanetsFile
+from pipeline.palette.derive import derive_palette_from_hex
 from pipeline.palette.export import ase_bytes
 from pipeline.sky import format_dec, format_ra
 from web.sky import sky_chart_svg
@@ -171,9 +177,28 @@ def _stats(records: list[PlanetRecord]) -> dict:
     }
 
 
+def _rederive_palettes(records: list[PlanetRecord]) -> None:
+    """Rebuild every ramp from its stored base hex, in place.
+
+    Palettes are a pure function of the base colour, so a ramp fix does not need a spectrum
+    re-run or a data re-release -- it lands on the next deploy. Data written before the ramp
+    was fixed carries a non-monotonic ramp (the old middle stop kept the base's own lightness
+    and overshot the tints); this re-derives it. Colours themselves are untouched: the physics
+    stays exactly as `planets.json` recorded it.
+    """
+    for rec in records:
+        for colour in (rec.true_colour, *(v.colour for v in rec.instrument_views)):
+            ramp = derive_palette_from_hex(colour.hex)
+            accents = [s for s in colour.palette if s.role == "accent"]
+            colour.palette = [
+                PaletteStopModel(hex=s.hex, role=s.role, source_nm=s.source_nm) for s in ramp
+            ] + accents
+
+
 def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     doc = PlanetsFile.model_validate_json(planets_json.read_text())
     records = doc.planets
+    _rederive_palettes(records)
     env = _env()
 
     if out.exists():
@@ -194,8 +219,7 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
             (f"{rec.name} true {s.role}", s.hex) for s in rec.true_colour.palette
         ]
         entries += [
-            (f"{rec.name} roman {s.role}", s.hex)
-            for s in rec.instrument_views[0].colour.palette
+            (f"{rec.name} roman {s.role}", s.hex) for s in rec.instrument_views[0].colour.palette
         ]
         lamp_hex = star_swatch(rec.host_star.teff_k).hex
         entries += [
