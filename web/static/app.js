@@ -256,7 +256,7 @@ document.addEventListener("alpine:init", () => {
       if (!p || !window.PlanetRender) return;
       cv.classList.toggle("pixel", this.style === "retro");
       window.PlanetRender.render(cv, {
-        palette: p.palette, radius: p.radius, cloudState: p.cloud, lumY: p.lum,
+        palette: p.palette, baseHex: p.hex, radius: p.radius, cloudState: p.cloud, lumY: p.lum,
         style: this.style, fidelity: this.fidelity,
         phase: window.PlanetRender.hashPhase(p.id),
       });
@@ -748,6 +748,7 @@ document.addEventListener("alpine:init", () => {
       return {
         phase: (a.deg * Math.PI) / 180,
         palette: this._phaseTint(this.curPalette(), idx),
+        baseHex: this._phaseTint([this.curHex()], idx)[0],
       };
     },
     // Retint a palette by the per-channel drift of the phase colour vs full phase, so the
@@ -800,6 +801,8 @@ document.addEventListener("alpine:init", () => {
       if (!window.PlanetRender || !this.$refs.cHero) return;
       const opts = {
         palette: this._phaseTint(this.curPalette()),
+        // Retinted the same way as the palette, so haze/blueness tracks the phase colour.
+        baseHex: this._phaseTint([this.curHex()])[0],
         radius: this.radius,
         cloudState: this.cloudState,
         lumY: this.curLum(),
