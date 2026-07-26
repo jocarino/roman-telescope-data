@@ -170,7 +170,12 @@
     var bandContrast = cls === "rocky" ? 0.25 : (cloudFree ? 0.25 : 0.8);
     var lum = opts.lumY == null ? 0.5 : opts.lumY;
     var brightness = 0.72 + Math.min(lum, 1) * 0.55;   // dark planets stay darker
-    var base = hexToRgb(opts.palette[2] || opts.palette[0]);
+    // The planet's OWN computed colour, not a ramp stop. This used to read palette[2], which
+    // held the true colour back when the middle stop kept the base's lightness; the ramp is now
+    // an evenly spaced design object whose middle stop is ~0.53 light, and reading it here made
+    // every planet render darker and hazier (blueness below is an absolute channel gap, so the
+    // same hue at lower lightness scores as far bluer). palette[2] stays as the fallback.
+    var base = hexToRgb(opts.baseHex || opts.palette[2] || opts.palette[0]);
     var haze = Math.max(0, base[2] - Math.max(base[0], base[1])) * 2.2; // blueness -> haze
     return { bandFreq: bandFreq, bandContrast: bandContrast, brightness: brightness, haze: Math.min(haze, 1) };
   }
