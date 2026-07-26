@@ -733,8 +733,11 @@ button.badge:active, a.badge:active { box-shadow: none; }
 }
 .back:hover { color: var(--fg); border-color: var(--accent); }
 .back:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--line); }
-/* The detail page's RANDOM roll: a <button> wearing the .back chrome, sat beside it. */
-button.back.rand { cursor: pointer; }
+/* The detail page's RANDOM roll: a <button> wearing the .back chrome, sat beside it. It
+   carries the same dice as the gallery's roll button, so the action is recognisable even
+   when the label is hidden. */
+button.back.rand { cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.back .dice { width: 11px; height: 11px; flex: none; }
 /* Inside a title row (.site-head / .detail-head) the back button sits to the LEFT of the
    page title, vertically centred on it, instead of stacked above. On wide screens it hangs
    in the left GUTTER — outside the content band — so the title stays flush with the content
@@ -752,10 +755,18 @@ button.back.rand { cursor: pointer; }
   /* Both back-row controls hang in the gutter: BACK on top, RANDOM stacked just below. */
   .detail-head .back.rand { top: 44px; }
 }
-/* Phones: the back control collapses to just the arrow. */
+/* Phones: the back control collapses to just the arrow, and RANDOM to just the dice. With
+   no labels to read, the pair works as a top bar — BACK anchored left, the dice roll on the
+   far right — so the two icons never read as one ambiguous cluster. That needs the row to
+   itself: push the hero onto the next line. */
 @media (max-width: 560px) {
   .back .back-txt { display: none; }
-  .back { padding: 7px 11px; font-size: 11px; }
+  /* Icon-only, so both glyphs get a bit bigger — the dice pips are unreadable much below
+     14px — and a fixed line-height keeps the arrow and the dice the same box height. */
+  .back { padding: 7px 11px; font-size: 13px; line-height: 14px; }
+  .back .dice { width: 14px; height: 14px; }
+  .detail-head .back.rand { margin-left: auto; }
+  .detail-head .hero-stack { flex-basis: 100%; }
 }
 .detail-head { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; margin: 12px 0 22px; }
 .detail-title { flex: 1 1 340px; min-width: 280px; }

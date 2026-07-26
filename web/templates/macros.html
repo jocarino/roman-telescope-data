@@ -6,6 +6,20 @@
   <a class="back" href="/" aria-label="Back to all planets">←<span class="back-txt"> ALL PLANETS</span></a>
 {%- endmacro %}
 
+{# The dice: the one icon for "roll a random planet", shared by the gallery toolbar and the
+   detail page's RANDOM control so both read as the same action. #}
+{% macro dice_icon(cls='ic') -%}
+<svg class="{{ cls }}" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+  <rect x="2.3" y="2.3" width="11.4" height="11.4" fill="none" stroke="currentColor"
+    stroke-width="1.6"/>
+  <circle cx="5.5" cy="5.5" r="1.1" fill="currentColor"/>
+  <circle cx="10.5" cy="5.5" r="1.1" fill="currentColor"/>
+  <circle cx="8" cy="8" r="1.1" fill="currentColor"/>
+  <circle cx="5.5" cy="10.5" r="1.1" fill="currentColor"/>
+  <circle cx="10.5" cy="10.5" r="1.1" fill="currentColor"/>
+</svg>
+{%- endmacro %}
+
 {% macro provenance_badge(rec) -%}
   {%- set labels = {
     'model': 'Modelled',
@@ -103,7 +117,7 @@
     {{ back_link() }}
     {# Keep rolling planet-to-planet without going back to the gallery. #}
     <button type="button" class="back rand" @click="randomGo()" aria-label="Random planet"
-      title="Random planet · press R">⤳<span class="back-txt"> RANDOM</span></button>
+      title="Random planet · press R">{{ dice_icon('dice') }}<span class="back-txt"> RANDOM</span></button>
     <div class="hero-stack">
       <canvas class="detail-hero" x-show="heroSource !== 'telescope'"
         :class="heroStyle === 'retro' ? 'pixel' : ''" x-ref="cHero"
