@@ -83,6 +83,13 @@ project as for an astronomy nerd**. This is a hard requirement, not a nicety. In
   otherwise. Don't bury the explanation; don't clutter simple controls with it either.
 - **Honest wording.** Prefer "Modelled" over "Model"; never imply a colour is photographed when
   it is computed. Honesty about what is model vs measurement is the whole point of the project.
+- **Jargon is marked, never assumed.** Every technical word is defined once in
+  `data/glossary.json` and marked in templates with the `g()` macro
+  (`{{ g('quadrature') }}`) — a subtle pixel-dotted underline that reveals a plain-English
+  definition on hover/tap/focus, plus the full list at `/glossary` (URL-only, not in the nav).
+  Rule of thumb: `g()` for **terms**, the `[i]` info button for **controls**. When you add copy
+  with a new technical word, add the glossary entry in the same change —
+  `tests/test_glossary.py` fails if a template marks a term that isn't defined.
 
 ## Conventions
 

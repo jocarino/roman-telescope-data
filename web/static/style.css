@@ -962,6 +962,59 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 }
 .tip:hover .tip-body, .tip-body.open { display: block; }
 
+/* ---- Jargon: any term that has a glossary entry ----------------------------------------
+   The site-wide "you can learn this word" mark. Subtle at rest — a 2px-on/2px-off pixel rule
+   under the word, plus one 3px accent pixel riding high like a footnote marker — and
+   unmistakable on hover, when the rule goes solid and a hard-edged accent block lights up
+   behind the text. It is a <button>, so keyboard and screen-reader users get the same
+   definition; it renders inline and adds no height, so marking a term can never reflow a
+   page. Definitions come from data/glossary.json via the g() macro; the popover itself is
+   built once by glossary.js. */
+.gloss {
+  display: inline; margin: 0; padding: 0 0 2px; border: 0; border-radius: 0;
+  font: inherit; letter-spacing: inherit; text-transform: inherit; text-align: inherit;
+  color: inherit; cursor: help; -webkit-appearance: none; appearance: none;
+  background-color: transparent;
+  background-image: linear-gradient(90deg,
+    color-mix(in srgb, var(--accent) 58%, transparent) 0 2px, transparent 2px 4px);
+  background-repeat: repeat-x;
+  background-size: 4px 2px;
+  background-position: 0 100%;
+}
+/* The pixel: one accent square, opacity-stepped rather than resized so nothing shifts. */
+.gloss::after {
+  content: ""; display: inline-block; width: 3px; height: 3px; margin-left: 3px;
+  vertical-align: .5em; background: var(--accent); opacity: .55;
+}
+.gloss:hover, .gloss:focus-visible, .gloss.on {
+  outline: 0; color: var(--fg);
+  background-color: color-mix(in srgb, var(--accent) 18%, transparent);
+  background-image: linear-gradient(90deg, var(--accent) 0 100%);
+}
+.gloss:hover::after, .gloss:focus-visible::after, .gloss.on::after { opacity: 1; }
+/* Keyboard focus still needs a visible ring where the accent block alone could be missed. */
+.gloss:focus-visible { box-shadow: 0 0 0 1px var(--accent); }
+
+/* The shared popover, created once by glossary.js and moved to whichever term is active.
+   Fixed-position, so panels with clipped corners or overflow never cut it off. */
+.gloss-pop {
+  position: fixed; top: 0; left: 0; z-index: 90; display: none;
+  width: min(288px, calc(100vw - 20px));
+  background: #000; border: 1px solid var(--accent); box-shadow: 4px 4px 0 rgba(0, 0, 0, .75);
+  font-family: var(--mono); font-size: 11.5px; line-height: 1.55; letter-spacing: 0;
+  text-align: left; text-transform: none; color: var(--fg-dim);
+}
+.gloss-pop.open { display: block; }
+.gloss-pop-term {
+  display: block; padding: 6px 10px 5px; border-bottom: 1px solid var(--line);
+  font-family: var(--pixel); -webkit-font-smoothing: none; font-smooth: never;
+  font-size: 9.5px; letter-spacing: .6px; color: var(--accent);
+}
+.gloss-pop-def { display: block; padding: 8px 10px 9px; }
+@media (prefers-reduced-motion: no-preference) {
+  .gloss { transition: background-color 90ms steps(2, end); }
+}
+
 /* Close × in the top-right corner of every ℹ reveal (tooltips + accent callout boxes). */
 .info-x {
   position: absolute; top: 5px; right: 5px; z-index: 1; background: none; border: 0;
@@ -1216,10 +1269,9 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 }
 .how-chain-hex { color: var(--accent); border-color: var(--accent); }
 .how-chain-op { color: var(--fg-faint); }
-/* No notched corners here: the panel clip-path would clip tooltips that float past the
-   panel edge. Tooltips also hang rightward so they open over the text column. */
+/* No notched corners here: the panel clip-path would clip anything floating past the panel
+   edge. (Jargon definitions use the fixed-position .gloss-pop, which is immune either way.) */
 .how-step { padding: 20px 22px 18px; margin-bottom: 22px; clip-path: none; }
-.how .tip-body { right: auto; left: -10px; }
 .how-num {
   display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .8px;
   color: var(--accent); margin-bottom: 6px;
@@ -1230,8 +1282,6 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 }
 .how-body { margin: 0; font-size: 13.5px; line-height: 1.7; color: var(--fg-dim); max-width: 84ch; }
 .how-body strong, .math-body strong { color: var(--fg); }
-.jarg { color: var(--fg); }
-.jarg .tip { margin-left: 3px; }
 
 /* Diagrams: little screens in the scope's visual language (dark face, mono labels,
    CH1-yellow / CH2-cyan curves where two spectra are compared). */

@@ -1,0 +1,630 @@
+{
+  "_comment": "Single source of truth for every jargon term on the site. `short` is the hover tooltip (keep it one or two plain sentences, no jargon inside a jargon definition); `long` is the /glossary page entry. Templates reference entries by id via the g() macro in macros.html; tests/test_glossary.py fails the build if a template names an id that isn't here.",
+  "categories": [
+    { "id": "colour", "short": "Colour", "name": "Colour science", "blurb": "How a spectrum becomes a hex code, and what the readouts on each planet page mean." },
+    { "id": "light", "short": "Light", "name": "Light and spectra", "blurb": "What we model: the light a star sends out and the fraction a planet sends back." },
+    { "id": "planets", "short": "Planets", "name": "Planets and orbits", "blurb": "The planet numbers behind every swatch, and the words for the kinds of worlds." },
+    { "id": "sky", "short": "Sky", "name": "The sky and how we find planets", "blurb": "Where these worlds are, and the four ways humanity has spotted them." },
+    { "id": "roman", "short": "Roman", "name": "Roman and telescopes", "blurb": "The instrument this project is built around, and how it will actually see colour." },
+    { "id": "site", "short": "Site words", "name": "How this site labels things", "blurb": "Our own vocabulary: the honesty tags, the knobs, and the designer output." }
+  ],
+  "terms": [
+    {
+      "id": "albedo-spectrum",
+      "term": "Albedo spectrum",
+      "category": "light",
+      "short": "The fraction of starlight a planet reflects at each wavelength: 0 absorbs everything, 1 reflects everything. Its shape across the rainbow is what gives a planet its colour.",
+      "long": "A planet makes no visible light of its own, so its colour is written entirely in what it reflects. The albedo spectrum, written A(λ), is that reflectivity measured wavelength by wavelength across the visible range — 380 to 780 nanometres. A planet that reflects blue strongly and red weakly looks blue-green; one that reflects everything looks white; one that absorbs nearly everything looks almost black. Everything on this site starts from this curve.",
+      "seeAlso": ["geometric-albedo", "rayleigh-scattering", "methane-absorption", "nanometre"]
+    },
+    {
+      "id": "geometric-albedo",
+      "term": "Geometric albedo",
+      "category": "light",
+      "short": "How bright a planet looks when fully lit, compared with a perfectly white flat disc of the same size. 1 is a perfect mirror-white; Earth is about 0.3.",
+      "long": "The specific flavour of reflectivity used throughout this project. It compares the planet, seen fully lit face-on, against an idealised perfectly reflecting flat disc of the same size. Jupiter sits near 0.5, Earth near 0.3, a cloud-free hot Jupiter can be below 0.05 — darker than charcoal. Measured at every wavelength in turn, it becomes the albedo spectrum.",
+      "seeAlso": ["albedo-spectrum", "luminance"]
+    },
+    {
+      "id": "rayleigh-scattering",
+      "term": "Rayleigh scattering",
+      "category": "light",
+      "short": "Light bouncing off individual gas molecules. Blue scatters about ten times more strongly than red — the same physics that makes Earth's sky blue.",
+      "long": "When light meets molecules far smaller than its own wavelength, it scatters, and the effect is dramatically stronger at the blue end of the spectrum. It is why Earth's sky is blue and its sunsets red. On a planet with a clear atmosphere and no clouds to hide it, Rayleigh scattering is what bounces blue light back to space, which is why several cloud-free giants come out a deep cobalt blue.",
+      "seeAlso": ["albedo-spectrum", "cloud-deck", "hot-jupiter"]
+    },
+    {
+      "id": "methane-absorption",
+      "term": "Methane absorption",
+      "category": "light",
+      "short": "Methane gas swallows red light in distinct bands, so an atmosphere rich in it reflects mostly blue and green. This is why Neptune is blue.",
+      "long": "Methane (CH₄) absorbs strongly in several narrow bands in the red and near-infrared, near 619, 727 and 790 nanometres. An atmosphere carrying a lot of it therefore returns the blue and green part of the starlight while eating the red, which is exactly why Uranus and Neptune are the colours they are — and why cold gas giants across the catalog cluster in the blue-green part of the colour census.",
+      "seeAlso": ["albedo-spectrum", "neptune-like"]
+    },
+    {
+      "id": "cloud-deck",
+      "term": "Cloud deck",
+      "category": "light",
+      "short": "A continuous layer of cloud high in an atmosphere. Thick cloud reflects all wavelengths roughly equally, which brightens a planet and washes its colour toward cream-white.",
+      "long": "Clouds are the single biggest lever on a planet's colour. A thick, high deck reflects most of the light that reaches it, and reflects all colours about equally, so it both brightens a planet and drains the colour out of it toward white or cream. Strip the clouds away and the gas beneath does the colouring instead: methane bands, sodium absorption, or plain molecular scattering. Because nobody has measured the clouds of these planets, this site assumes a cloud state from each planet's temperature and says so on every page.",
+      "seeAlso": ["assumed", "rayleigh-scattering", "methane-absorption"]
+    },
+    {
+      "id": "metallicity",
+      "term": "Metallicity",
+      "category": "light",
+      "short": "How much of an atmosphere is made of things heavier than hydrogen and helium, quoted as a multiple of the Sun's mix — e.g. '10× solar'.",
+      "long": "Astronomers call every element heavier than helium a 'metal', which includes carbon, oxygen and, importantly here, the carbon in methane. A higher metallicity means more of the absorbing molecules that sculpt an albedo spectrum, so it shifts a planet's colour. Small planets generally carry higher metallicity atmospheres than large ones. This site has no per-planet measurement of it and so assumes a value, stated on every planet page.",
+      "seeAlso": ["assumed", "methane-absorption", "cahoy-grid"]
+    },
+    {
+      "id": "blackbody",
+      "term": "Blackbody",
+      "category": "light",
+      "short": "The smooth glow of anything hot; its colour depends only on temperature. Cool stars (~3,000 K) glow orange-red, the Sun (~5,800 K) yellow-white, hot stars blue-white.",
+      "long": "An idealised object that absorbs all light falling on it and re-radiates it purely according to its temperature, following Planck's law. Real stars are close enough to this that a blackbody at the star's measured temperature is an excellent stand-in for its spectrum when all you want is a perceived colour. That is exactly how this site models every host star — a deliberate simplification, upgradeable to detailed model atmospheres later without touching any other step.",
+      "aliases": ["Planck's law"],
+      "seeAlso": ["effective-temperature", "host-star", "kelvin"]
+    },
+    {
+      "id": "kelvin",
+      "term": "Kelvin (K)",
+      "category": "light",
+      "short": "The temperature scale science uses, starting at absolute zero. 0 K is −273 °C; room temperature is about 293 K; the Sun's surface is 5,772 K.",
+      "long": "Kelvin has the same size of degree as Celsius but starts at absolute zero, the point where thermal motion stops. It is the natural scale for radiation physics because a blackbody's colour and brightness depend directly on its absolute temperature. Every temperature on this site — stellar surfaces, planet equilibrium temperatures — is in kelvin.",
+      "seeAlso": ["blackbody", "effective-temperature", "equilibrium-temperature"]
+    },
+    {
+      "id": "effective-temperature",
+      "term": "Effective temperature (T_eff)",
+      "category": "light",
+      "short": "A star's surface temperature in kelvin — the single number that sets what colour its light is. The Sun's is 5,772 K.",
+      "long": "The temperature of the blackbody that would radiate the same total energy as the star. It is the one stellar number this site's colour maths truly needs: it fixes the shape of the star's spectrum, and therefore the tint of the light every planet in the system has to work with. It comes measured from the NASA Exoplanet Archive.",
+      "aliases": ["Teff"],
+      "seeAlso": ["blackbody", "spectral-type", "host-star", "kelvin"]
+    },
+    {
+      "id": "spectral-type",
+      "term": "Spectral type",
+      "category": "light",
+      "short": "The one-letter class of a star, ordered hottest to coolest: O, B, A, F, G, K, M. The Sun is a G star; small red dwarfs are M stars.",
+      "long": "A century-old classification by the absorption lines in a star's light, which in practice orders stars by temperature: O and B are hot and blue-white, G is Sun-like yellow-white, K is orange, M is a cool red dwarf. The number after the letter is a finer subdivision (the Sun is G2). Because temperature sets colour, a planet's spectral type tells you a lot about the tint of the light it reflects.",
+      "seeAlso": ["effective-temperature", "host-star", "blackbody"]
+    },
+    {
+      "id": "radiative-transfer",
+      "term": "Radiative transfer",
+      "category": "light",
+      "short": "Simulating how light is absorbed and scattered as it travels through an atmosphere, layer by layer, molecule by molecule.",
+      "long": "The full physics of light moving through a gas: at every depth, some light is absorbed by molecules, some scattered in a new direction, some passed through. Solving it properly for a modelled atmosphere is expensive but gives the most faithful albedo spectrum. NASA's PICASO does this, and is one of the three spectrum engines this site can call on.",
+      "seeAlso": ["picaso", "albedo-spectrum"]
+    },
+    {
+      "id": "nanometre",
+      "term": "Nanometre (nm)",
+      "category": "light",
+      "short": "A billionth of a metre — the unit of wavelength for light. Human vision runs from about 380 nm (violet) to 780 nm (deep red).",
+      "long": "Wavelength is what your eye reads as colour, and for visible light the convenient unit is the nanometre. Violet sits near 400 nm, green near 550, red near 700; below 380 is ultraviolet and above 780 is infrared, both invisible. Every spectrum on this site is computed over 380–780 nm in 5 nm steps: 81 numbers per planet.",
+      "seeAlso": ["albedo-spectrum", "infrared", "bandpass"]
+    },
+    {
+      "id": "infrared",
+      "term": "Infrared",
+      "category": "light",
+      "short": "Light with wavelengths longer than the eye can see, beyond deep red. Most real exoplanet observations are infrared, which is why they cannot give a visible colour.",
+      "long": "Infrared begins just past 780 nanometres and runs far longer. It carries most of the heat a planet emits, so it is where telescopes like JWST do their exoplanet chemistry — but it is invisible to human eyes, and an infrared spectrum on its own can never be turned into a colour you could see. That gap is the reason this site models visible reflected light rather than reusing published transit spectra, and why real telescope images of planets are shown false-coloured.",
+      "seeAlso": ["false-colour", "nanometre", "roman-space-telescope"]
+    },
+    {
+      "id": "photometry",
+      "term": "Photometry",
+      "category": "light",
+      "short": "Measuring how much light arrives in a given filter — a brightness number rather than a full spectrum.",
+      "long": "Where spectroscopy spreads light out into its wavelengths, photometry just totals how much gets through a filter. Roman's coronagraph will do photometry in four visible bands, giving four numbers per planet instead of a curve. Reconstructing a colour from four numbers, and asking how much of the true colour survives that, is this project's signature question.",
+      "seeAlso": ["bandpass", "roman-4-band", "spectroscopy"]
+    },
+    {
+      "id": "spectroscopy",
+      "term": "Spectroscopy",
+      "category": "light",
+      "short": "Splitting light into its wavelengths to see the whole spectrum, rather than measuring one total brightness.",
+      "long": "A spectrograph spreads incoming light out like a prism and records how much arrives at each wavelength, which reveals the fingerprints of individual molecules. Two of Roman's four coronagraph bands, at 660 and 730 nanometres, feed a slit spectrograph at low resolution; the other two do plain photometry.",
+      "seeAlso": ["photometry", "bandpass", "albedo-spectrum"]
+    },
+    {
+      "id": "picaso",
+      "term": "PICASO",
+      "category": "light",
+      "short": "NASA's open-source radiative-transfer code for planetary atmospheres. One of the three engines this site can use to generate an albedo spectrum.",
+      "long": "PICASO (Planetary Intensity Code for Atmospheric Scattering Observations) simulates light travelling through a modelled atmosphere and returns the reflected spectrum. It is the most physically detailed of the three spectrum engines here and is used for selected well-characterised targets; most planets in the catalog use a faster parametric archetype model instead. Every planet page names the engine that produced its spectrum.",
+      "seeAlso": ["radiative-transfer", "cahoy-grid", "albedo-spectrum"]
+    },
+    {
+      "id": "cahoy-grid",
+      "term": "Cahoy grid",
+      "category": "light",
+      "short": "A published set of precomputed albedo spectra for Jupiter- and Neptune-class planets (Cahoy et al. 2010) — the reference models the Roman community works from.",
+      "long": "Cahoy, Marley and Fortney published a grid of modelled reflected-light spectra covering a range of star-planet distances, atmospheric metallicities and cloud states. Because the grid is a standard reference for Roman coronagraph planning, this site uses it both as a spectrum source and as a sanity check on its own models. It is also the source of how a planet's colour changes with phase.",
+      "seeAlso": ["picaso", "metallicity", "phase-angle"]
+    },
+    {
+      "id": "cie-1931",
+      "term": "CIE 1931 colour matching functions",
+      "category": "colour",
+      "short": "Three curves, measured from human observers in 1931, describing how strongly each wavelength stimulates the eye's three cone types. Still the international standard for turning a spectrum into a colour.",
+      "long": "In the late 1920s, observers were asked to match pure single-wavelength lights by mixing three primaries; the averaged results became three curves named x̄, ȳ and z̄. Weighting any spectrum by each curve and summing collapses thousands of numbers into just three — which is exactly what an eye does with its three cone types. It is the same machinery used to design camera sensors and displays, here pointed at a planet.",
+      "aliases": ["CIE 1931 2° observer"],
+      "seeAlso": ["tristimulus-xyz", "srgb", "luminance"]
+    },
+    {
+      "id": "tristimulus-xyz",
+      "term": "Tristimulus XYZ",
+      "category": "colour",
+      "short": "Three numbers that can encode any colour the eye can see — the bridge between physics (spectra) and screens (RGB).",
+      "long": "X, Y and Z are what you get when a spectrum is weighted by the three CIE colour matching functions and summed. They are device-independent: they describe the colour a human would perceive, with no assumption about screens or inks. Y on its own is the luminance, the perceived brightness. Every colour on this site passes through XYZ on its way from a spectrum to a hex code.",
+      "seeAlso": ["cie-1931", "srgb", "luminance"]
+    },
+    {
+      "id": "srgb",
+      "term": "sRGB",
+      "category": "colour",
+      "short": "The standard colour space of screens and the web; hex codes like #91d3ff live here. It cannot show every colour an eye can see.",
+      "long": "A colour space is a defined set of primaries and a white point that pins down what a given set of numbers actually looks like. sRGB is the one browsers, phones and most monitors assume, built on a D65 (daylight) white point. Converting XYZ into it is a fixed 3×3 matrix followed by a gamma encode. Its range is narrower than human vision, so some real colours simply cannot be displayed — see gamut.",
+      "seeAlso": ["gamut", "tristimulus-xyz", "gamma-encoding", "white-point"]
+    },
+    {
+      "id": "white-point",
+      "term": "White point (D65)",
+      "category": "colour",
+      "short": "The colour a colour space calls 'white'. sRGB uses D65, a standard daylight white around 6,500 K.",
+      "long": "Colour only means anything relative to a reference white — the same paper looks white under a lamp and under the sky, because your eye adapts. Colour spaces fix this by declaring one. sRGB's is D65, an average daylight around 6,500 kelvin. It matters here because it decides how a planet lit by a cool red star reads on screen: warm, but relative to daylight rather than relative to that star.",
+      "seeAlso": ["srgb", "light-source-knob", "blackbody"]
+    },
+    {
+      "id": "gamma-encoding",
+      "term": "Gamma encoding",
+      "category": "colour",
+      "short": "The non-linear curve applied to colour numbers before they are stored, matching how human vision is far more sensitive in the dark than in the light.",
+      "long": "Doubling the physical light does not look twice as bright to a person. Image formats therefore store a curved version of the brightness so that the available numbers are spread evenly across perceived steps rather than physical ones. Skipping this step is the classic way to make everything come out too dark; it is the final operation between the linear physics and the hex code shown on every planet page.",
+      "seeAlso": ["srgb", "luminance"]
+    },
+    {
+      "id": "luminance",
+      "term": "Luminance (Y)",
+      "category": "colour",
+      "short": "The perceived brightness of a colour — the Y of XYZ. 0 is pitch black, 1 is a perfect white reflector. Most planets are dim, so swatches are shown brightened.",
+      "long": "Luminance is how bright a colour looks to a human, weighted the way the eye weights wavelengths (very sensitive to green, much less to blue). Rendered at their true luminance, nearly every planet here would be a near-black square, so each swatch shows the planet's colour identity at a fixed display brightness and reports the real value separately as the Y BRIGHT readout. The colour is honest; the brightness is deliberately, and visibly, turned up.",
+      "aliases": ["Y BRIGHT", "reflected brightness"],
+      "seeAlso": ["tristimulus-xyz", "geometric-albedo", "gamma-encoding"]
+    },
+    {
+      "id": "gamut",
+      "term": "Gamut (and OOG)",
+      "category": "colour",
+      "short": "The range of colours a screen can actually show. OOG means out of gamut: the modelled colour is more saturated than sRGB can display, so it is pulled to the nearest colour that fits.",
+      "long": "Human vision covers more colours than any display can reproduce. When the physics returns a colour outside the sRGB gamut, this site desaturates it just enough to reach the edge of the displayable range, holding its hue and lightness, and then flags it — that is the GAMUT · OOG readout on a planet page. The flag is there so a clamped colour is never mistaken for the raw model output.",
+      "aliases": ["OOG", "out of gamut"],
+      "seeAlso": ["srgb", "tristimulus-xyz"]
+    },
+    {
+      "id": "delta-e2000",
+      "term": "ΔE2000",
+      "category": "colour",
+      "short": "The standard measure of how different two colours look to a human: 0 identical, about 2 just noticeable, 10 or more clearly a different colour.",
+      "long": "Simple arithmetic on RGB values does not match perception — a small numeric change can be invisible in one part of colour space and glaring in another. ΔE2000 (CIEDE2000) is the current international formula for perceptual colour difference. This site uses it for the headline question: how far does the colour Roman would reconstruct from four bands land from the full-spectrum colour? Below about 2 the eye cannot tell; past 10 it is a visibly different shade. It also measures the shift when a planet is re-lit by the Sun.",
+      "aliases": ["ΔE", "delta-E"],
+      "seeAlso": ["roman-4-band", "light-source-knob", "gamut"]
+    },
+    {
+      "id": "colour-family",
+      "term": "Colour family",
+      "category": "site",
+      "short": "The named colour bucket each planet falls into — teal, azure, blue, gold, dark and so on. It is computed from the modelled colour, and drives the gallery's colour filter.",
+      "long": "Fourteen buckets covering the space of colours this catalog actually produces, assigned by converting each planet's modelled colour into a perceptual space and taking its hue and lightness. Nothing about it is hand-curated. It exists so you can ask the gallery for every green world, or every dark one, in a single click.",
+      "seeAlso": ["delta-e2000", "modelled"]
+    },
+    {
+      "id": "palette-ramp",
+      "term": "Palette ramp",
+      "category": "site",
+      "short": "The five-stop strip under every planet: its colour stepped through two shades, the colour itself, and two tints — a usable designer palette.",
+      "long": "One colour is rarely enough to design with, so each planet's base colour is converted into a lightness-controlled space and re-issued at five fixed lightness targets, holding hue and chroma. The result reads as one family: two darker shades, the planet's own colour, two lighter tints. Copy them as hex, as CSS variables, or download them as an .ase swatch file.",
+      "seeAlso": ["ase-file", "spectral-accent", "duotone"]
+    },
+    {
+      "id": "spectral-accent",
+      "term": "Spectral accent",
+      "category": "site",
+      "short": "An extra palette colour taken from a narrow slice of the planet's own spectrum — for example just the light at the edge of a methane band.",
+      "long": "Accents here are not invented for looks. The colour conversion is re-run on a restricted window of wavelengths, so the resulting colour is genuinely the colour of one specific feature in that planet's spectrum, labelled with the wavelengths it came from. It is a way of pulling a second, physically real colour out of a single world.",
+      "seeAlso": ["palette-ramp", "methane-absorption", "cie-1931"]
+    },
+    {
+      "id": "duotone",
+      "term": "Duotone",
+      "category": "site",
+      "short": "The two-ink pair on every planet page: the host star's own colour, and the planet's — the lamp and what the planet makes of its light.",
+      "long": "Borrowed from print, where a duotone is an image printed with two inks. Here it is the designer take-away of the whole physical story: one swatch for the star doing the lighting, one for the planet doing the reflecting. It ships in the .ase download alongside the five-stop ramp.",
+      "seeAlso": ["the-lamp", "palette-ramp", "ase-file"]
+    },
+    {
+      "id": "ase-file",
+      "term": ".ase file",
+      "category": "site",
+      "short": "Adobe Swatch Exchange — a small palette file that design tools (Photoshop, Illustrator, Figma via import) can load as named swatches.",
+      "long": "Every planet page offers its palette as an .ase download, carrying the full-spectrum ramp, the Roman-view ramp and the star-plus-planet duotone, each swatch named after the planet and its role. It is the fastest route from a physics prediction to something you can actually paint with.",
+      "seeAlso": ["palette-ramp", "duotone"]
+    },
+    {
+      "id": "exoplanet",
+      "term": "Exoplanet",
+      "category": "planets",
+      "short": "A planet orbiting a star other than the Sun. About 6,300 are confirmed; this site models the subset with enough data to compute a colour.",
+      "long": "The first confirmed planets around other stars arrived in the 1990s; the count is now in the thousands and rising. Almost none have ever been seen directly — most are known only from the wobble or the dimming they cause in their star's light. That is precisely why colour has to be modelled rather than photographed.",
+      "seeAlso": ["transit", "radial-velocity", "nasa-exoplanet-archive"]
+    },
+    {
+      "id": "host-star",
+      "term": "Host star",
+      "category": "planets",
+      "short": "The star a planet orbits — and the only source of the light the planet reflects. Its temperature tints every colour on the planet's page.",
+      "long": "Since a planet emits no visible light of its own, its colour is the product of two things: what it reflects, and what it is given to reflect. A cool red dwarf hands its planets warm, red-heavy light; a hot star hands them blue-white. Part of every colour on this site therefore belongs to the star rather than the planet, which is exactly what the Light source knob is there to expose.",
+      "seeAlso": ["the-lamp", "effective-temperature", "spectral-type", "light-source-knob"]
+    },
+    {
+      "id": "equilibrium-temperature",
+      "term": "Equilibrium temperature",
+      "category": "planets",
+      "short": "The temperature a planet settles at from the starlight it absorbs, assuming no greenhouse warming. It sets the likely atmosphere and cloud state — a key input to the colour.",
+      "long": "Balance the energy a planet receives from its star against the heat it radiates away, and you get its equilibrium temperature. It ignores greenhouse warming and internal heat, so a real surface can be much hotter — Earth's equilibrium temperature is about 255 K, some 33 degrees below its actual average. It matters here because it decides what can condense into clouds and what stays as gas, and therefore what the planet looks like.",
+      "seeAlso": ["cloud-deck", "semi-major-axis", "kelvin", "computed"]
+    },
+    {
+      "id": "semi-major-axis",
+      "term": "Semi-major axis",
+      "category": "planets",
+      "short": "The size of an orbit — a planet's average distance from its star. It sets how much starlight the planet gets, and so its temperature.",
+      "long": "Orbits are ellipses, and the semi-major axis is half the longest diameter — the standard way to state an orbit's size. Quoted in astronomical units, where 1 AU is the Earth-Sun distance. Halve it and the starlight arriving roughly quadruples, so this single number drives the temperature, the cloud state and ultimately the colour.",
+      "seeAlso": ["astronomical-unit", "equilibrium-temperature"]
+    },
+    {
+      "id": "astronomical-unit",
+      "term": "Astronomical unit (AU)",
+      "category": "planets",
+      "short": "The Earth-Sun distance, about 150 million kilometres. Orbit sizes are quoted in it: Jupiter is 5.2 AU from the Sun.",
+      "long": "The natural yardstick for measuring inside a planetary system. Mercury sits at 0.39 AU, Earth at 1, Neptune at 30. Many exoplanets in this catalog orbit far closer to their stars than Mercury does to the Sun — under 0.05 AU is common, which is why so many of them are scorching.",
+      "aliases": ["AU"],
+      "seeAlso": ["semi-major-axis", "hot-jupiter", "light-year"]
+    },
+    {
+      "id": "earth-radius",
+      "term": "Earth radius (R⊕)",
+      "category": "planets",
+      "short": "The unit planet sizes are quoted in. 1 R⊕ is Earth-sized; about 11 R⊕ is Jupiter-sized.",
+      "long": "Comparing exoplanets to Earth rather than to kilometres keeps the numbers meaningful. Below about 1.6 R⊕ planets are usually rocky; between roughly 2 and 4 they are Neptune-like with thick atmospheres; above about 6 they are gas giants. Size also feeds the render on each page, which is drawn to the planet's real relative scale.",
+      "aliases": ["R⊕"],
+      "seeAlso": ["earth-mass", "rocky-planet", "gas-giant"]
+    },
+    {
+      "id": "earth-mass",
+      "term": "Earth mass (M⊕)",
+      "category": "planets",
+      "short": "The unit planet masses are quoted in. 1 M⊕ is Earth; about 318 M⊕ is Jupiter.",
+      "long": "Mass and radius together tell you what a planet is made of: a world of 5 Earth masses packed into 1.5 Earth radii must be rock and iron, while the same mass spread over 4 radii has to be mostly gas. Mass usually comes from the radial-velocity method, radius from transits — which is why the best-understood planets are the ones caught by both.",
+      "aliases": ["M⊕"],
+      "seeAlso": ["earth-radius", "radial-velocity", "transit"]
+    },
+    {
+      "id": "light-year",
+      "term": "Light-year",
+      "category": "planets",
+      "short": "The distance light travels in a year, about 9.5 trillion kilometres. Distances to these systems are given in light-years.",
+      "long": "A unit of distance, not of time. The nearest star system is 4.2 light-years away; the planets in this catalog run from a few light-years to several thousand. It doubles as a reminder that you are seeing old light: a planet 300 light-years away is shown as its star was 300 years ago.",
+      "aliases": ["ly"],
+      "seeAlso": ["astronomical-unit", "kepler-field"]
+    },
+    {
+      "id": "phase-angle",
+      "term": "Phase angle",
+      "category": "planets",
+      "short": "How much of a planet's lit side faces us, exactly like Moon phases. 0° is fully lit, 90° half lit, 180° backlit and dark.",
+      "long": "The angle between the star and the observer as seen from the planet. It changes both how bright a planet is and, less obviously, what colour it is: at high phase angles light skims through more atmosphere on its way out, which shifts the spectrum. A coronagraph can never catch 0°, because a fully lit planet sits directly behind its star from our point of view.",
+      "seeAlso": ["quadrature", "terminator", "cahoy-grid"]
+    },
+    {
+      "id": "quadrature",
+      "term": "Quadrature",
+      "category": "planets",
+      "short": "The half-lit geometry, at a phase angle of 90° — the position where a planet is furthest from its star on the sky, and the only geometry a coronagraph can realistically catch.",
+      "long": "At quadrature the planet appears at its greatest separation from the star, which is what a coronagraph needs: the planet has to be far enough out to fall outside the blocked-out glare. It is also half lit, so you lose brightness in exchange for being able to see it at all. Every Roman four-band view on this site is computed at quadrature for exactly that reason.",
+      "seeAlso": ["phase-angle", "coronagraph", "roman-4-band"]
+    },
+    {
+      "id": "terminator",
+      "term": "Terminator",
+      "category": "planets",
+      "short": "The line dividing a planet's lit day side from its dark night side — the curved edge you see on a crescent Moon.",
+      "long": "Nothing to do with the film. As the phase slider on a planet page moves, the terminator sweeps across the rendered globe, turning a fully lit disc into a crescent. On real planets it is the most interesting place to be: the strip of permanent sunrise where an atmosphere's temperature contrast is sharpest.",
+      "seeAlso": ["phase-angle", "quadrature"]
+    },
+    {
+      "id": "hot-jupiter",
+      "term": "Hot Jupiter",
+      "category": "planets",
+      "short": "A gas giant orbiting extremely close to its star, often in days. Blistering, frequently cloud-free — and so among the darkest worlds in the catalog.",
+      "long": "The first exoplanets found around Sun-like stars, and still the easiest to detect. Orbiting closer than Mercury, they run at 1,000 K and above, too hot for the reflective clouds that brighten cooler giants. What is left is bare, absorbing gas with sodium eating the yellow, giving geometric albedos below 0.1 — genuinely darker than fresh asphalt. Where molecular scattering does survive, the result is a deep cobalt blue, as measured for HD 189733 b.",
+      "seeAlso": ["gas-giant", "rayleigh-scattering", "geometric-albedo"]
+    },
+    {
+      "id": "gas-giant",
+      "term": "Gas giant",
+      "category": "planets",
+      "short": "A large planet made mostly of hydrogen and helium, with no solid surface — Jupiter and Saturn are the local examples.",
+      "long": "Above roughly six Earth radii, a planet's mass is dominated by a deep hydrogen-helium envelope over a small core, and there is no surface to stand on. What you see is the top of the cloud deck. Colour depends almost entirely on what condenses at that level: ammonia gives Jupiter's creams, methane at colder temperatures gives blue-green.",
+      "seeAlso": ["hot-jupiter", "neptune-like", "cloud-deck", "earth-radius"]
+    },
+    {
+      "id": "neptune-like",
+      "term": "Neptune-like",
+      "category": "planets",
+      "short": "A mid-sized planet, roughly 2 to 6 Earth radii, with a thick methane-rich atmosphere over an icy interior — usually blue-green.",
+      "long": "The most common kind of planet found so far, despite having no analogue between Earth and Uranus in our own system. Their atmospheres carry enough methane to absorb red light strongly, which is why they cluster in the blue-green part of the colour census. Colder ones can also form bright cloud decks that wash them paler.",
+      "seeAlso": ["methane-absorption", "gas-giant", "super-earth"]
+    },
+    {
+      "id": "super-earth",
+      "term": "Super-Earth",
+      "category": "planets",
+      "short": "A planet bigger than Earth but smaller than Neptune, roughly 1.5 to 2 Earth radii. It may be rock or it may hold a thick atmosphere; often we cannot tell.",
+      "long": "A size class, not a promise of habitability. Somewhere in this range planets stop being rocky worlds with thin atmospheres and start being small gas-rich ones, and exactly where the switch happens is a live research question. Because their atmospheres are so poorly constrained, their modelled colours here lean heavily on assumed archetypes, which every page states.",
+      "seeAlso": ["rocky-planet", "neptune-like", "assumed"]
+    },
+    {
+      "id": "rocky-planet",
+      "term": "Rocky planet",
+      "category": "planets",
+      "short": "A small, dense, solid-surfaced world like Earth, Venus or Mars — usually under about 1.6 Earth radii.",
+      "long": "Rocky planets have thin atmospheres or none, so their colour is largely the colour of the ground and whatever haze sits above it. That makes them the hardest class to model honestly: surface composition is unknown for every exoplanet in this catalog, so their swatches rest on archetype assumptions rather than measured chemistry. The solar-system anchors on this site are the exception, computed from real measured spectra.",
+      "seeAlso": ["super-earth", "assumed", "measured-spectrum"]
+    },
+    {
+      "id": "radial-velocity",
+      "term": "Radial velocity",
+      "category": "sky",
+      "short": "Finding a planet by the tiny wobble its gravity puts on its star, seen as a rhythmic shift in the star's light. It gives the planet's mass.",
+      "long": "A planet and its star both orbit their shared centre of mass, so the star traces a small circle and its light is alternately blue- and red-shifted. Measuring that shift — down to metres per second — reveals the planet's orbital period and a minimum mass. It was how the first planet around a Sun-like star was found in 1995, and it remains the main source of mass measurements.",
+      "aliases": ["Doppler wobble"],
+      "seeAlso": ["transit", "earth-mass", "exoplanet"]
+    },
+    {
+      "id": "transit",
+      "term": "Transit",
+      "category": "sky",
+      "short": "Finding a planet by the dip in brightness as it crosses in front of its star. It gives the planet's size.",
+      "long": "If an orbit happens to be edge-on to us, the planet passes across the face of its star once per orbit and blocks a fraction of a percent of the light. The depth of the dip gives the planet's radius directly. It is by far the most productive detection method — Kepler alone found thousands this way — but it needs a lucky alignment, and it only produces infrared chemistry, never a visible colour.",
+      "seeAlso": ["earth-radius", "kepler-field", "infrared", "radial-velocity"]
+    },
+    {
+      "id": "transit-timing-variations",
+      "term": "Transit timing variations",
+      "category": "sky",
+      "short": "Finding a planet by the way its gravity makes another, already-known transiting planet arrive early or late.",
+      "long": "In a system with more than one planet, the planets tug on each other, so a transit that should arrive like clockwork drifts by seconds or minutes. Modelling that drift reveals an unseen sibling — and, unusually, gives its mass without ever seeing it directly. It is how several planets in tightly packed systems were found.",
+      "aliases": ["TTV"],
+      "seeAlso": ["transit", "earth-mass"]
+    },
+    {
+      "id": "direct-imaging",
+      "term": "Direct imaging",
+      "category": "sky",
+      "short": "Actually photographing a planet as a separate point of light beside its star. Only a handful of young, giant, far-out planets have ever been caught this way.",
+      "long": "The hardest method and the most literal: block the star's light and look for the faint dot next to it. It works today only for planets that are large, still glowing with the heat of their formation, and far from their stars. The images are infrared and false-coloured — a real dot of received light, not a picture of a surface. Roman's coronagraph exists to push this technique down to older, cooler, reflected-light planets.",
+      "seeAlso": ["coronagraph", "false-colour", "infrared", "roman-space-telescope"]
+    },
+    {
+      "id": "microlensing",
+      "term": "Microlensing",
+      "category": "sky",
+      "short": "Finding a planet by the way its gravity briefly magnifies a background star. The alignment never repeats — no light from the planet is ever received.",
+      "long": "When one star passes exactly in front of another, its gravity bends and focuses the background star's light, and a planet around the foreground star adds a short extra spike to that brightening. It is uniquely good at finding planets far from their stars, and uniquely final: the alignment happens once and never again. No telescope will ever isolate light from these worlds, so this site marks their swatches model-only, forever.",
+      "seeAlso": ["modelled", "exoplanet"]
+    },
+    {
+      "id": "right-ascension",
+      "term": "Right ascension (RA)",
+      "category": "sky",
+      "short": "The sky's version of longitude, measured in hours from 0 to 24. On a star chart it runs right to left.",
+      "long": "Together with declination it pins any point on the sky. It is measured in hours, minutes and seconds rather than degrees, because the sky turns through 24 hours of RA in one day. On the sky chart on each planet page, RA is the horizontal axis, running right to left as it does on a chart held up overhead.",
+      "aliases": ["RA"],
+      "seeAlso": ["declination", "celestial-equator", "constellation"]
+    },
+    {
+      "id": "declination",
+      "term": "Declination (Dec)",
+      "category": "sky",
+      "short": "The sky's version of latitude, in degrees. Positive is the northern sky, negative the southern, 0° is the celestial equator.",
+      "long": "Declination tells you how far north or south of the celestial equator an object lies, from +90° at the north celestial pole to −90° at the south. Practically, it tells you whether you can see something at all from where you are: an object at −60° never rises for most of Europe or North America.",
+      "aliases": ["Dec"],
+      "seeAlso": ["right-ascension", "celestial-equator"]
+    },
+    {
+      "id": "celestial-equator",
+      "term": "Celestial equator and poles",
+      "category": "sky",
+      "short": "Earth's equator and poles projected onto the sky. The poles are the two points the sky appears to rotate around.",
+      "long": "Extend Earth's equator outward and it traces a great circle across the sky at declination 0°; extend its axis and it hits the celestial poles, near Polaris in the north. On the flat sky chart used here, the equator is the brighter mid-line and each pole is a single point smeared across the entire top or bottom edge — the same distortion any flat map of a sphere suffers.",
+      "seeAlso": ["declination", "right-ascension"]
+    },
+    {
+      "id": "apparent-magnitude",
+      "term": "Apparent magnitude",
+      "category": "sky",
+      "short": "Astronomers' brightness scale, where smaller is brighter. Sirius is −1.5; the faintest star visible to the naked eye under a dark sky is about 6.5.",
+      "long": "Inherited from ancient Greek star catalogues, which ranked stars from first magnitude (brightest) to sixth (faintest), and kept because it is logarithmic in a way that matches the eye. Each step of 1 is about 2.5× in brightness, and the scale runs negative for the brightest objects. 'V' magnitude means the brightness measured through a standard visual green-yellow filter. Every sky panel on this site uses it to tell you whether you could find the host star yourself.",
+      "aliases": ["V magnitude"],
+      "seeAlso": ["constellation", "host-star"]
+    },
+    {
+      "id": "constellation",
+      "term": "Constellation",
+      "category": "sky",
+      "short": "One of 88 official regions the sky is divided into. Saying a star is 'in Cygnus' means it falls inside that patch, not that it belongs to the pattern.",
+      "long": "The ancient figures are just the brightest stars in each area; since 1930 the constellations have been formal boundaries covering the whole sky with no gaps. Every star has exactly one. It is the most human-scale coordinate there is — the answer to 'which way do I look?'",
+      "seeAlso": ["right-ascension", "declination", "apparent-magnitude"]
+    },
+    {
+      "id": "kepler-field",
+      "term": "Kepler field",
+      "category": "sky",
+      "short": "The single small patch of sky, near 19h and +45°, that NASA's Kepler telescope stared at for four years — which is why so many known planets cluster there.",
+      "long": "Kepler pointed at one region between Cygnus and Lyra and monitored about 150,000 stars continuously, looking for transit dips. The result is the dense white patch on this site's sky charts. It is a good reminder that the map shows where humanity has looked, not where planets actually are: the sky is not really lumpy with planets, our attention was.",
+      "seeAlso": ["transit", "right-ascension", "exoplanet"]
+    },
+    {
+      "id": "nasa-exoplanet-archive",
+      "term": "NASA Exoplanet Archive",
+      "category": "sky",
+      "short": "The public catalogue of every confirmed exoplanet and its measured parameters. Every planet and star number on this site comes from it.",
+      "long": "Run by Caltech for NASA, it collects the published measurements for each confirmed planet — radius, mass, orbit, host star temperature, distance — and marks a preferred value per planet. This site queries it, caches the response, and tags each value it uses as measured, computed or assumed so you can always tell which numbers are real observations.",
+      "seeAlso": ["measured", "computed", "assumed", "exoplanet"]
+    },
+    {
+      "id": "roman-space-telescope",
+      "term": "Nancy Grace Roman Space Telescope",
+      "category": "roman",
+      "short": "NASA's next large space observatory. Its coronagraph will be the first instrument to measure visible reflected light from mature planets around other stars.",
+      "long": "Roman carries a wide-field infrared camera and, as a technology demonstration, a coronagraph designed to suppress a star's glare by a factor of a hundred million. That is what makes it the first instrument capable of catching visible light reflected from an older, cooler planet — the actual light this entire site models. When it does, a handful of these swatches stop being predictions and become measurements.",
+      "aliases": ["Roman"],
+      "seeAlso": ["coronagraph", "bandpass", "tech-demo-target", "roman-4-band"]
+    },
+    {
+      "id": "coronagraph",
+      "term": "Coronagraph",
+      "category": "roman",
+      "short": "An instrument that blocks a star's light so something far fainter beside it can be seen. A planet is billions of times dimmer than its star.",
+      "long": "Originally built to study the Sun's corona by manufacturing an eclipse, the same idea scaled up is the only practical way to photograph a planet in reflected light. Roman's version uses masks and deformable mirrors to cancel starlight actively. The catch is geometric: the planet must be far enough from the star on the sky to fall outside the blocked region, which is why every Roman view here is computed at quadrature rather than fully lit.",
+      "seeAlso": ["quadrature", "direct-imaging", "roman-space-telescope"]
+    },
+    {
+      "id": "bandpass",
+      "term": "Bandpass",
+      "category": "roman",
+      "short": "A filter that lets through only the wavelengths inside its window and blocks the rest. Roman's coronagraph carries four, centred at 575, 660, 730 and 835 nm.",
+      "long": "Rather than recording a full spectrum, a filter returns one number: how much light got through its window. Roman's four sit at 575 nm (10% wide), 660 and 730 nm (6% each, feeding the spectrograph) and 835 nm (15%). This site models each as a simple top-hat window. Note where they are: all of them sit from orange to near-infrared, so below 575 nm Roman receives nothing at all.",
+      "aliases": ["band", "filter"],
+      "seeAlso": ["roman-4-band", "photometry", "nanometre", "top-hat-filter"]
+    },
+    {
+      "id": "top-hat-filter",
+      "term": "Top-hat filter",
+      "category": "roman",
+      "short": "A simplified filter model: perfectly transparent inside its wavelength window, perfectly opaque outside — a flat-topped rectangle.",
+      "long": "Real filters have sloped edges and imperfect transmission. Modelling them as clean rectangles is a deliberate first-pass simplification here, accurate enough for the question being asked (how much colour survives four bands) and easy to replace later with the measured throughput curves the Roman team publishes.",
+      "seeAlso": ["bandpass", "roman-4-band"]
+    },
+    {
+      "id": "roman-4-band",
+      "term": "Roman 4-band view",
+      "category": "roman",
+      "short": "The same planet as Roman's coronagraph would see it: half-lit, and sampled through only four filters instead of the whole spectrum.",
+      "long": "This site's signature comparison. The modelled spectrum is integrated through each of Roman's four bandpasses, giving four numbers; those are interpolated back across the visible range and pushed through the same colour conversion as the full spectrum. Below 575 nm, where Roman is blind, the reconstruction holds the spectrum flat rather than inventing data — which is why blue planets lose the most. The ΔE2000 readout is exactly how much colour identity was lost.",
+      "seeAlso": ["full-spectrum-view", "bandpass", "delta-e2000", "quadrature"]
+    },
+    {
+      "id": "full-spectrum-view",
+      "term": "Full spectrum view",
+      "category": "roman",
+      "short": "The colour computed from the complete modelled 380–780 nm spectrum — everything the physics predicts, before any instrument gets in the way.",
+      "long": "The reference against which the Roman view is judged. It is still a model, not a photograph: what it means is 'the colour this planet would have if you could see all of its reflected light at once, from the ideal viewpoint'. Flipping between it and the Roman view on any planet page shows the price of a real instrument's limits.",
+      "seeAlso": ["roman-4-band", "modelled", "albedo-spectrum"]
+    },
+    {
+      "id": "tech-demo-target",
+      "term": "Tech-demo target",
+      "category": "roman",
+      "short": "One of the roughly dozen planets Roman's coronagraph is expected to observe during its technology demonstration — the ones whose colours may become real measurements.",
+      "long": "The Roman coronagraph flies as a demonstration instrument rather than a full survey, with a shortlist of nearby, well-separated giant planets it can realistically detect. For those planets this site shows a simulated four-band view today, clearly labelled; once Roman observes them, the simulation is replaced by real photometry. Those will be the only real, measured colours any exoplanet on this site ever has.",
+      "seeAlso": ["roman-space-telescope", "photometry", "measured", "simulated"]
+    },
+    {
+      "id": "false-colour",
+      "term": "False colour",
+      "category": "roman",
+      "short": "Colours assigned to an image to make invisible light visible — an infrared image shown in orange, for instance. Not the colour a human eye would see.",
+      "long": "Almost every direct image of an exoplanet is infrared, and infrared has no colour to a human. To publish it, astronomers map brightness onto a visible colour scale. That is an entirely legitimate and standard practice, but it is not photography of a colour, and this site keeps the two rigorously apart: telescope images are shown with their instrument and band named, while every swatch is separately labelled as modelled.",
+      "seeAlso": ["infrared", "direct-imaging", "modelled"]
+    },
+    {
+      "id": "modelled",
+      "term": "Modelled",
+      "category": "site",
+      "short": "Computed from physics, not photographed. Almost every colour on this site is a prediction of what a planet would look like, not a measurement of what it does look like.",
+      "long": "The most important word here. Given a planet's temperature, size and assumed atmosphere, physics predicts what fraction of light it reflects at each wavelength; combine that with its star and the standard model of human vision and out comes a colour. That chain is honest and reproducible, but it starts from assumptions no telescope has yet checked. Wherever this site says modelled, it means: this is a prediction, and it is stated as one.",
+      "seeAlso": ["measured", "assumed", "false-colour", "full-spectrum-view"]
+    },
+    {
+      "id": "measured",
+      "term": "Measured",
+      "category": "site",
+      "short": "A real observed value, not derived or assumed. On a planet page, values tagged 'measured' come straight from the NASA Exoplanet Archive.",
+      "long": "One of three origin tags on every planet value. A measured number is one somebody actually observed and published — a transit depth giving a radius, a Doppler wobble giving a mass. The tag exists so that a page full of numbers never blurs the line between what is known and what has been filled in.",
+      "seeAlso": ["computed", "assumed", "nasa-exoplanet-archive", "measured-spectrum"]
+    },
+    {
+      "id": "computed",
+      "term": "Computed",
+      "category": "site",
+      "short": "Derived from other measured values rather than observed directly — for example an equilibrium temperature worked out from the star and the orbit.",
+      "long": "The middle origin tag. When the Archive has no published value for a field but the inputs it depends on are measured, this site derives it and says so. That is honest arithmetic rather than a guess, but it inherits every uncertainty in its inputs, so it is kept visibly distinct from a direct measurement.",
+      "seeAlso": ["measured", "assumed", "equilibrium-temperature"]
+    },
+    {
+      "id": "assumed",
+      "term": "Assumed",
+      "category": "site",
+      "short": "A stand-in value from an archetype, used because no data exists for this planet. Cloud state and metallicity are always assumed.",
+      "long": "The weakest of the three origin tags, and the one that carries the most weight for colour. Nobody has measured the clouds or the atmospheric composition of any planet in this catalog, so this site places each planet on a blend of archetypes — cloudy Jupiter, methane Neptune, rocky world, hot Jupiter — from its temperature and size. That assumption is stated on every planet page, because it is the main thing standing between a swatch and reality.",
+      "seeAlso": ["cloud-deck", "metallicity", "modelled", "measured"]
+    },
+    {
+      "id": "simulated",
+      "term": "Simulated",
+      "category": "site",
+      "short": "A modelled prediction of what a specific instrument would measure — the model pushed through Roman's filters, rather than data Roman has taken.",
+      "long": "Used on this site for the Roman four-band view of tech-demo targets before Roman has flown. It is one step more specific than 'modelled': it answers not just 'what colour is this planet' but 'what would this instrument report'. When real observations arrive, the label on those pages changes from simulated to measured, and the numbers change with it.",
+      "seeAlso": ["modelled", "measured", "tech-demo-target", "roman-4-band"]
+    },
+    {
+      "id": "measured-spectrum",
+      "term": "Measured spectrum",
+      "category": "site",
+      "short": "A swatch computed from a real, measured reflected-light spectrum rather than a model. On this site, only the solar-system planets have one.",
+      "long": "Five solar-system worlds are included as anchors, and their colours come from real full-disk spectrophotometry of the actual planets — the same colour maths as every exoplanet here, run on real data, with a real photograph alongside for comparison. They exist so you can check the whole pipeline against something you already know the colour of. If Jupiter comes out cream and Neptune comes out blue, the machinery works.",
+      "seeAlso": ["measured", "modelled", "geometric-albedo"]
+    },
+    {
+      "id": "the-lamp",
+      "term": "The lamp",
+      "category": "site",
+      "short": "This site's name for the host star's own colour swatch — the light being reflected, shown next to what the planet makes of it.",
+      "long": "Since a planet is only ever a mirror, showing its colour without showing the light source tells half the story. The lamp panel on each planet page is the star's own colour, modelled as a blackbody at its measured temperature and displayed at the same brightness convention as the planet swatches, so the two can be compared honestly.",
+      "seeAlso": ["host-star", "duotone", "blackbody", "light-source-knob"]
+    },
+    {
+      "id": "light-source-knob",
+      "term": "Light source (knob)",
+      "category": "site",
+      "short": "The control that re-lights a planet with our Sun instead of its own star, showing how much of its colour belongs to the planet and how much to the star.",
+      "long": "Same planet, same atmosphere, different lamp. Because a planet's colour is its reflectivity multiplied by the light falling on it, part of every colour here belongs to the host star. Switching the lamp to the Sun and reading the resulting ΔE tells you which: a shift near zero means the colour is genuinely the planet's, while a large shift means you were mostly looking at a red dwarf's tint.",
+      "seeAlso": ["host-star", "delta-e2000", "the-lamp", "white-point"]
+    },
+    {
+      "id": "render-style",
+      "term": "Classic vs stylised (render)",
+      "category": "site",
+      "short": "Classic draws the planet in the colour and brightness the physics gives it. Stylised restyles that same colour into bands and turbulence for looks — prettier, not more accurate.",
+      "long": "The picture at the top of a planet page is an illustration either way; neither is a photograph. Classic keeps it honest and plain: the derived colour on a smooth globe, with any banding purely schematic. Stylised takes the identical colour and adds warm/cool banding and turbulence because it looks better on a grid. The palette below is byte-for-byte identical in both modes — only the picture changes.",
+      "seeAlso": ["modelled", "colour-family"]
+    }
+  ]
+}

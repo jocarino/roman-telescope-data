@@ -37,6 +37,17 @@
   {%- if src %}<span class="src src-{{ src }}" title="{{ {'measured': 'Real measurement from the NASA Exoplanet Archive', 'computed': 'Derived from the star + orbit', 'assumed': 'Archetype assumption — no data for this planet'}[src] }}">{{ src }}</span>{% endif -%}
 {%- endmacro %}
 
+{# Jargon mark. Wraps a term that has an entry in data/glossary.json: the pixel-dotted rule
+   and accent pixel say "hover me", and glossary.js reveals the plain-English definition on
+   hover, tap or keyboard focus. The full list of terms lives at /glossary.
+
+   Use it for TERMS (words a newcomer wouldn't know). Use jinfo()/info-btn for CONTROLS and
+   panels, where the thing needing explanation is a knob, not a word. `id` must exist in the
+   glossary — tests/test_glossary.py fails if a template names one that doesn't. #}
+{% macro g(id, text=None) -%}
+<button type="button" class="gloss" data-term="{{ id }}" aria-expanded="false">{{ text if text else id }}</button>
+{%- endmacro %}
+
 {# A small terminal [i] beside a label that reveals a plain-English tooltip (hover or tap). #}
 {% macro jinfo(expl) -%}
 <span class="tip" x-data="{ t: false }" @click.outside="t = false"><button class="info-btn xs"
@@ -108,7 +119,7 @@
 
   {% if not rec.is_light_isolable %}
   <div class="banner">
-    ⚠︎ Discovered by microlensing: no light from this planet is ever isolable by any
+    ⚠︎ Discovered by {{ g('microlensing') }}: no light from this planet is ever isolable by any
     telescope. Both swatches are <strong>model-only</strong>, shown for interest, never observed.
   </div>
   {% endif %}
@@ -229,9 +240,11 @@
       <template x-if="info === 'view'"><div>
         <p><strong>Full spectrum</strong>: the colour computed from the complete 380–780&nbsp;nm
           reflected-light model.</p>
-        <p><strong>Roman 4-band</strong>: the same planet as the Roman Space Telescope's
-          Coronagraph would see it — half-lit (quadrature, the only geometry a coronagraph
-          can catch; fully lit would hide behind the star) and through just four filters.</p>
+        <p><strong>Roman 4-band</strong>: the same planet as the
+          {{ g('roman-space-telescope', 'Roman Space Telescope') }}'s
+          {{ g('coronagraph', 'Coronagraph') }} would see it — half-lit
+          ({{ g('quadrature') }}, the only geometry a coronagraph can catch; fully lit would
+          hide behind the star) and through just four {{ g('bandpass', 'filters') }}.</p>
         <p>Both are <strong>modelled, not photographs</strong>; flipping between them shows how
           much of a planet's colour survives Roman's coarse filter set.</p>
       </div></template>
@@ -247,8 +260,8 @@
           smooth globe in its derived colour. Not a photograph.</p>
         <p><strong>Telescope</strong>: the <em>actual</em> processed image astronomers took of
           this planet: a faint point of light beside its (blocked-out) star. It is almost
-          always infrared and false-coloured; the real dot humanity has received, not a
-          picture of the surface.</p>
+          always {{ g('infrared') }} and {{ g('false-colour', 'false-coloured') }}; the real
+          dot humanity has received, not a picture of the surface.</p>
         <p>Only a handful of planets have ever been photographed directly; that is why this
           knob appears on some pages and not others. When more than one telescope has imaged
           the same planet (e.g. JWST and, later, Roman), a small tab picks between them.</p>
@@ -259,11 +272,11 @@
           planet's colour is its reflectivity times the light falling on it, so part of every
           colour here belongs to the star, not the planet.</p>
         <p><strong>Its own star</strong>: lit by {{ rec.host_star.name }}
-          ({{ rec.host_star.teff_k|round|int }}&nbsp;K, modelled as a blackbody).
+          ({{ rec.host_star.teff_k|round|int }}&nbsp;K, modelled as a {{ g('blackbody') }}).
           <strong>The Sun</strong>: the identical planet re-lit by our Sun (5772&nbsp;K) —
           around the Sun this world would come out
           <span class="illum-swatch" style="background: {{ rec.sun_swap.colour.hex }}"></span><code>{{ rec.sun_swap.colour.hex }}</code>.</p>
-        <p>The shift is <strong>&#916;E {{ '%.1f'|format(rec.sun_swap.delta_e2000_vs_true) }}</strong>
+        <p>The shift is <strong>{{ g('delta-e2000', 'ΔE') }} {{ '%.1f'|format(rec.sun_swap.delta_e2000_vs_true) }}</strong>
           (0 = identical, above ~2 is visible to the eye).
           {% if rec.sun_swap.delta_e2000_vs_true < 2 %}
           Barely any change: this colour belongs to the <strong>planet itself</strong>, and its
@@ -288,10 +301,12 @@
           behind its star.</p>
         {% if rec.phase_colours.source == 'cahoy-grid' %}
         <p>This planet's phase colours come from <strong>phase-resolved model spectra</strong>
-          (Cahoy et al. 2010) — both the dimming and the colour shift are modelled.</p>
+          ({{ g('cahoy-grid', 'Cahoy et al. 2010') }}) — both the dimming and the colour shift
+          are modelled.</p>
         {% elif rec.phase_colours.source == 'cahoy-ratio' %}
         <p>How this colour bends with phase is <strong>borrowed from the closest reference
-          model</strong> (Cahoy et al. 2010); the planet keeps its own full-phase colour.</p>
+          model</strong> ({{ g('cahoy-grid', 'Cahoy et al. 2010') }}); the planet keeps its own
+          full-phase colour.</p>
         {% else %}
         <p>No phase-resolved model exists for this world, so we <strong>only dim it</strong>
           with phase and hold the colour constant — the simplest honest assumption.</p>
@@ -327,39 +342,17 @@
       <aside class="scope-rail">
         <section class="rail-mod rail-measure">
           <h4 class="rail-lbl">Measure</h4>
+          {# The three readouts are all jargon: each label is a glossary term, so the
+             explanation is one hover away and identical to the same word elsewhere. #}
           <div class="ro-row meas-row">
-            <span>&#916;E2000
-              <span class="tip" x-data="{ t: false }" @click.outside="t = false">
-                <button class="info-btn xs" @click="t = !t" :class="t ? 'on' : ''"
-                  aria-label="What does &#916;E2000 mean?">i</button>
-                <span class="tip-body" :class="t ? 'open' : ''">
-                  How different the full-spectrum and Roman colours look to
-                  the eye: 0 = identical, above ~2 is a visible difference. Below
-                  {{ iview.reconstruction.extrapolated_below_nm|round|int }}&nbsp;nm Roman is
-                  blind, so the model holds the spectrum flat there.</span>
-              </span></span>
+            <span>{{ g('delta-e2000', 'ΔE2000') }}</span>
             <b>{{ '%.1f'|format(iview.reconstruction_error.delta_e2000) }}</b>
           </div>
-          <span class="meas-sub">colour lost to Roman's 4 bands</span>
-          <div class="ro-row"><span>Y BRIGHT
-            <span class="tip" x-data="{ t: false }" @click.outside="t = false">
-              <button class="info-btn xs" @click="t = !t" :class="t ? 'on' : ''"
-                aria-label="What does Y BRIGHT mean?">i</button>
-              <span class="tip-body" :class="t ? 'open' : ''">
-                How much light the planet's colour reflects overall (CIE luminance Y):
-                0 = pitch black, 1 = a perfect white reflector. Most planets are dim, so the
-                swatches are brightened for display.</span>
-            </span></span>
+          <span class="meas-sub">colour lost to Roman's 4 bands ·
+            blind below {{ iview.reconstruction.extrapolated_below_nm|round|int }} nm</span>
+          <div class="ro-row"><span>{{ g('luminance', 'Y BRIGHT') }}</span>
             <b x-text="curLum().toFixed(3)"></b></div>
-          <div class="ro-row"><span>GAMUT
-            <span class="tip" x-data="{ t: false }" @click.outside="t = false">
-              <button class="info-btn xs" @click="t = !t" :class="t ? 'on' : ''"
-                aria-label="What does GAMUT mean?">i</button>
-              <span class="tip-body" :class="t ? 'open' : ''">
-                Whether this colour fits in sRGB, the range screens can show. OOG = out of
-                gamut: the modelled colour is more saturated than a screen can display, so it
-                is clamped to the closest displayable colour.</span>
-            </span></span>
+          <div class="ro-row"><span>{{ g('gamut', 'GAMUT') }}</span>
             <b><i class="gled" :class="curOog() ? 'bad' : ''"></i><span
               x-text="curOog() ? 'OOG' : 'OK'"></span></b></div>
         </section>
@@ -487,7 +480,7 @@
      follows the Light-source knob (its own star ⇄ the Sun) where that knob exists. ── #}
   <div class="panel lamp" x-data="{ lh: false }">
     <div class="dossier-head">
-      <h3>Host star <span class="lamp-tag">THE LAMP</span></h3>
+      <h3>{{ g('host-star', 'Host star') }} <span class="lamp-tag">{{ g('the-lamp', 'THE LAMP') }}</span></h3>
       <button class="info-btn" @click="lh = !lh" :class="lh ? 'on' : ''" :aria-expanded="lh"
         title="Why show the star's colour?" aria-label="Why show the star's colour?">i</button>
     </div>
@@ -496,7 +489,7 @@
         <button class="info-x" @click="lh = false" aria-label="Close">&times;</button>
         A planet makes no visible light of its own — every colour on this page is starlight,
         reflected. This swatch is the lamp itself: {{ rec.host_star.name }}'s own colour,
-        modelled as a {{ rec.host_star.teff_k|round|int }}&nbsp;K blackbody (cool stars glow
+        modelled as a {{ rec.host_star.teff_k|round|int }}&nbsp;K {{ g('blackbody') }} (cool stars glow
         orange-red, Sun-like stars warm white, hot stars blue-white), shown at the same
         display brightness as the planet swatches. Modelled, not photographed.
         {% if rec.sun_swap %}
@@ -506,7 +499,7 @@
         Sun-lit colour.
         {% endif %}
         <br><br>
-        <strong>Duotone</strong> is the designer take-away: star + planet as a two-ink
+        <strong>{{ g('duotone', 'Duotone') }}</strong> is the designer take-away: star + planet as a two-ink
         pair — the lamp, and what the planet makes of its light.
       </div>
     </div>
@@ -562,8 +555,9 @@
         The spectrum behind this swatch is a <strong>real measurement</strong> of the actual
         planet, not a model, and the page carries a real photograph to compare against.
         {% elif rec.provenance in ['simulated-cgi', 'measured-cgi'] %}
-        A Roman tech-demo target: the four-band view will be replaced by <strong>real measured
-        data</strong> once Roman observes it, the only real colour this planet will ever have.
+        A Roman {{ g('tech-demo-target', 'tech-demo target') }}: the four-band view will be
+        replaced by <strong>real measured data</strong> once Roman observes it, the only real
+        colour this planet will ever have.
         {% elif not rec.is_light_isolable %}
         No telescope can ever isolate this planet's light, so both colours are
         <strong>model-only, forever</strong>.
@@ -577,19 +571,20 @@
         archetype default because no data exists for this planet).
         <br><br>
         {%- set engine = {'parametric': 'a parametric albedo model', 'cahoy': 'the Cahoy et al. 2010 grid', 'picaso': 'PICASO radiative transfer', 'karkoschka1998': 'measured full-disk spectrophotometry (Karkoschka 1998, ESO)', 'payne2026': 'the measured solar-system reference spectrum (Payne et al. 2026)'} -%}
-        Spectrum source: {{ engine.get(rec.params.spectrum_source, rec.params.spectrum_source) }}.
+        {%- set engine_terms = {'cahoy': 'cahoy-grid', 'picaso': 'picaso', 'karkoschka1998': 'measured-spectrum', 'payne2026': 'measured-spectrum'} -%}
+        Spectrum source: {% if engine_terms.get(rec.params.spectrum_source) %}{{ g(engine_terms[rec.params.spectrum_source], engine.get(rec.params.spectrum_source, rec.params.spectrum_source)) }}{% else %}{{ engine.get(rec.params.spectrum_source, rec.params.spectrum_source) }}{% endif %}.
         {% if rec.provenance == 'measured-albedo' %}
         Nothing about the atmosphere is assumed — the spectrum already contains the planet's
-        real clouds and chemistry. Phase angle:
+        real clouds and chemistry. {{ g('phase-angle', 'Phase angle') }}:
         {{ rec.params.assumed_phase_angle_deg|round(1) }}°, the geometry the spectrum was
         measured at. Planet and orbit data:
         <a href="https://nssdc.gsfc.nasa.gov/planetary/factsheet/" target="_blank" rel="noopener">NASA
         planetary fact sheets</a>.
         {% else %}
         Atmosphere is always <span class="src src-assumed">assumed</span> (we hold no per-planet
-        cloud/metallicity data). Cloud state: {{ rec.params.assumed_cloud_state }};
-        metallicity: {{ (rec.params.assumed_metallicity ~ '× solar') if rec.params.assumed_metallicity else 'n/a (rocky)' }};
-        phase angle: {{ rec.params.assumed_phase_angle_deg|round|int }}°.
+        cloud/metallicity data). {{ g('cloud-deck', 'Cloud state') }}: {{ rec.params.assumed_cloud_state }};
+        {{ g('metallicity') }}: {{ (rec.params.assumed_metallicity ~ '× solar') if rec.params.assumed_metallicity else 'n/a (rocky)' }};
+        {{ g('phase-angle', 'phase angle') }}: {{ rec.params.assumed_phase_angle_deg|round|int }}°.
         Planet and star data:
         <a href="https://exoplanetarchive.ipac.caltech.edu/" target="_blank" rel="noopener">NASA
         Exoplanet Archive</a>.
@@ -603,20 +598,21 @@
           x-text="view === 'roman' ? 'Roman four-band' : (sunlit() ? 'full-spectrum model, lit by the Sun' : 'full-spectrum model')"></span></div>
         <table class="params">
           <tr><td>Base hex</td><td><code x-text="curHex()">{{ tc.hex }}</code></td></tr>
-          <tr><td>Reflected brightness (Y){{ jinfo('How much light the colour reflects overall (CIE luminance): 0 = pitch black, 1 = a perfect white reflector. Most planets are dim, so the swatches are shown brightened.') }}</td><td x-text="curLum().toFixed(3)"></td></tr>
-          <tr><td>Out of sRGB gamut{{ jinfo('Whether the modelled colour is more saturated than a screen can show. If so, it is clamped to the nearest colour the display can reproduce.') }}</td><td x-text="curOog() ? 'yes' : 'no'"></td></tr>
+          <tr><td>{{ g('luminance', 'Reflected brightness (Y)') }}</td><td x-text="curLum().toFixed(3)"></td></tr>
+          <tr><td>Out of {{ g('gamut', 'sRGB gamut') }}</td><td x-text="curOog() ? 'yes' : 'no'"></td></tr>
         </table>
       </div>
       <div class="dossier-stats">
         <div class="dossier-sub">Planet</div>
         {%- set src = rec.params.sources -%}
         <table class="params">
-          <tr><td>Equilibrium temp{{ jinfo('The temperature the planet settles at from the starlight it absorbs, assuming no greenhouse warming. It sets the likely atmosphere and cloud state — a key input to the colour.') }}</td><td>{{ (rec.params.equilibrium_temp_k|round|int ~ ' K') if rec.params.equilibrium_temp_k else 'n/a' }}{% if src and rec.params.equilibrium_temp_k %} {{ src_tag(src.equilibrium_temp_k) }}{% endif %}</td></tr>
-          <tr><td>Radius{{ jinfo('Measured in Earth radii (R⊕): 1 = Earth-sized, ~11 ≈ Jupiter.') }}</td><td>{{ (rec.params.radius_r_earth|round(2) ~ ' R⊕') if rec.params.radius_r_earth else 'n/a' }}{% if src and rec.params.radius_r_earth %} {{ src_tag(src.radius_r_earth) }}{% endif %}</td></tr>
-          <tr><td>Mass{{ jinfo('Measured in Earth masses (M⊕): 1 = Earth, ~318 ≈ Jupiter.') }}</td><td>{{ (rec.params.mass_m_earth|round(1) ~ ' M⊕') if rec.params.mass_m_earth else 'n/a' }}{% if src and rec.params.mass_m_earth %} {{ src_tag(src.mass_m_earth) }}{% endif %}</td></tr>
-          <tr><td>Semi-major axis{{ jinfo('The size of the orbit — the planet’s average distance from its star. 1 AU = the Earth–Sun distance (~150 million km). It sets how much starlight the planet gets, and so its temperature.') }}</td><td>{{ (rec.params.semi_major_axis_au|round(3) ~ ' AU') if rec.params.semi_major_axis_au else 'n/a' }}{% if src and rec.params.semi_major_axis_au %} {{ src_tag(src.semi_major_axis_au) }}{% endif %}</td></tr>
-          <tr><td>Distance from Earth{{ jinfo('How far the whole system is from us, in light-years — the distance light travels in one year (~9.5 trillion km).') }}</td><td>{{ ((rec.params.distance_pc * 3.26156)|round(1) ~ ' ly') if rec.params.distance_pc else 'n/a' }}{% if src and rec.params.distance_pc %} {{ src_tag(src.distance_pc) }}{% endif %}</td></tr>
-          <tr><td>Discovery{{ jinfo('How the planet was first detected: radial velocity (the star’s wobble), transit (a dip in its light), direct imaging (an actual picture), or microlensing (its gravity briefly magnifying a background star).') }}</td><td>{{ rec.discovery.method }}{{ (' · ' ~ rec.discovery.year) if rec.discovery.year else '' }}</td></tr>
+          <tr><td>{{ g('equilibrium-temperature', 'Equilibrium temp') }}</td><td>{{ (rec.params.equilibrium_temp_k|round|int ~ ' K') if rec.params.equilibrium_temp_k else 'n/a' }}{% if src and rec.params.equilibrium_temp_k %} {{ src_tag(src.equilibrium_temp_k) }}{% endif %}</td></tr>
+          <tr><td>Radius</td><td>{{ (rec.params.radius_r_earth|round(2) ~ ' ') if rec.params.radius_r_earth else 'n/a' }}{% if rec.params.radius_r_earth %}{{ g('earth-radius', 'R⊕') }}{% endif %}{% if src and rec.params.radius_r_earth %} {{ src_tag(src.radius_r_earth) }}{% endif %}</td></tr>
+          <tr><td>Mass</td><td>{{ (rec.params.mass_m_earth|round(1) ~ ' ') if rec.params.mass_m_earth else 'n/a' }}{% if rec.params.mass_m_earth %}{{ g('earth-mass', 'M⊕') }}{% endif %}{% if src and rec.params.mass_m_earth %} {{ src_tag(src.mass_m_earth) }}{% endif %}</td></tr>
+          <tr><td>{{ g('semi-major-axis', 'Semi-major axis') }}</td><td>{{ (rec.params.semi_major_axis_au|round(3) ~ ' ') if rec.params.semi_major_axis_au else 'n/a' }}{% if rec.params.semi_major_axis_au %}{{ g('astronomical-unit', 'AU') }}{% endif %}{% if src and rec.params.semi_major_axis_au %} {{ src_tag(src.semi_major_axis_au) }}{% endif %}</td></tr>
+          <tr><td>Distance from Earth</td><td>{{ ((rec.params.distance_pc * 3.26156)|round(1) ~ ' ') if rec.params.distance_pc else 'n/a' }}{% if rec.params.distance_pc %}{{ g('light-year', 'ly') }}{% endif %}{% if src and rec.params.distance_pc %} {{ src_tag(src.distance_pc) }}{% endif %}</td></tr>
+          {%- set disc_terms = {'Radial Velocity': 'radial-velocity', 'Transit': 'transit', 'Imaging': 'direct-imaging', 'Microlensing': 'microlensing', 'Transit Timing Variations': 'transit-timing-variations'} -%}
+          <tr><td>Discovery</td><td>{% if disc_terms.get(rec.discovery.method) %}{{ g(disc_terms[rec.discovery.method], rec.discovery.method) }}{% else %}{{ rec.discovery.method }}{% endif %}{{ (' · ' ~ rec.discovery.year) if rec.discovery.year else '' }}</td></tr>
         </table>
       </div>
     </div>
@@ -714,9 +710,10 @@
     <div class="sky-wide">{{ ctx.sky_svg|safe }}</div>
     <div class="sky-compact">{{ ctx.sky_svg_compact|safe }}</div>
     <div class="sky-facts">
-      <span>Constellation <b>{{ sky.constellation }}</b></span>
-      <span>RA <b>{{ ctx.sky_ra }}</b> · Dec <b>{{ ctx.sky_dec }}</b></span>
-      <span>Star brightness{{ jinfo("Apparent V magnitude — astronomers' brightness scale, where SMALLER is brighter: Sirius, the brightest star, is −1.5; the naked-eye limit under a dark sky is about 6.5.") }}
+      <span>{{ g('constellation', 'Constellation') }} <b>{{ sky.constellation }}</b></span>
+      <span>{{ g('right-ascension', 'RA') }} <b>{{ ctx.sky_ra }}</b> ·
+        {{ g('declination', 'Dec') }} <b>{{ ctx.sky_dec }}</b></span>
+      <span>{{ g('apparent-magnitude', 'Star brightness') }}
         <b>{{ ('V ' ~ sky.v_mag|round(1)) if sky.v_mag is not none else 'unmeasured' }}</b></span>
     </div>
     {% if sky.naked_eye %}

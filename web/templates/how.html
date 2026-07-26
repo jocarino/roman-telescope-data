@@ -1,15 +1,9 @@
 {% extends "base.html" %}
-{% from "macros.html" import back_link %}
+{% from "macros.html" import back_link, g %}
 {% block title %}How we get the colours · Exoplanet Palette{% endblock %}
 {% block content %}
-
-{# Jargon term + a small [i] that reveals a plain-English tooltip (hover or tap). #}
-{% macro jarg(term, expl) -%}
-<span class="jarg">{{ term }}<span class="tip" x-data="{ t: false }" @click.outside="t = false"><button
-  class="info-btn xs" @click="t = !t" :class="t ? 'on' : ''"
-  aria-label="What does {{ term }} mean?">i</button><span class="tip-body"
-  :class="t ? 'open' : ''">{{ expl }}</span></span></span>
-{%- endmacro %}
+{# Jargon on this page is marked with g() — the site-wide hover mark, defined once in
+   data/glossary.json and listed in full at /glossary. #}
 
 {# Collapsible deep-dive: the actual calculations behind a step. #}
 {% macro maths_open() -%}
@@ -44,16 +38,14 @@
     <h3>Model the light the planet reflects</h3>
     <p class="how-body">A planet has no light of its own — its colour is written in what it
       <strong>reflects</strong>. From the planet's temperature, size and likely cloud state we
-      model its {{ jarg('albedo spectrum',
-        'The fraction of starlight a planet reflects at each wavelength: 0 = absorbs everything,
-        1 = reflects everything. Its shape across the rainbow is what gives a planet its colour.')
-      }} — reflectivity at every visible wavelength, 380 to 780&nbsp;nm. Chemistry sculpts its
-      shape: methane eats red light (Neptune-likes turn blue-green),
-      {{ jarg('Rayleigh scattering',
-        'Light bouncing off individual molecules. Blue light scatters about ten times more
-        strongly than red — the same physics that makes Earth\'s sky blue.') }} brightens the
-      blue end, thick cloud decks reflect everything and push the whole planet toward
-      cream-white, and cloud-free hot Jupiters absorb almost everything and stay near-black.</p>
+      model its {{ g('albedo-spectrum', 'albedo spectrum') }} — reflectivity at every visible
+      wavelength, 380 to 780&nbsp;{{ g('nanometre', 'nm') }}. Chemistry sculpts its shape:
+      {{ g('methane-absorption', 'methane') }} eats red light
+      ({{ g('neptune-like', 'Neptune-likes') }} turn blue-green),
+      {{ g('rayleigh-scattering', 'Rayleigh scattering') }} brightens the
+      blue end, thick {{ g('cloud-deck', 'cloud decks') }} reflect everything and push the whole
+      planet toward cream-white, and cloud-free {{ g('hot-jupiter', 'hot Jupiters') }} absorb
+      almost everything and stay near-black.</p>
     <svg class="dg" viewBox="0 0 560 190" role="img"
       aria-label="An albedo spectrum: high in the blue, with methane absorption dips in the red">
       <defs>
@@ -87,13 +79,13 @@
           a Rayleigh component ∝ λ<sup>−4</sup>, Gaussian methane absorption bands
           (centred near 619, 727 and 790&nbsp;nm), a flat cloud-deck term, and alkali-metal
           (Na&nbsp;589&nbsp;nm) darkening for the hottest giants.</li>
-        <li><strong>Cahoy et al. 2010 grids</strong>: precomputed Jupiter/Neptune-class albedo
-          spectra at varying star–planet distances, metallicities and cloud states — the
-          reference set used by the Roman Coronagraph community.</li>
-        <li><strong>PICASO</strong>: NASA's open-source
-          {{ jarg('radiative transfer', 'Simulating how light is absorbed and scattered as it
-            travels through an atmosphere, layer by layer, molecule by molecule.') }} code,
-          run for selected well-characterised targets.</li>
+        <li><strong>{{ g('cahoy-grid', 'Cahoy et al. 2010 grids') }}</strong>: precomputed
+          Jupiter/Neptune-class albedo spectra at varying star–planet distances,
+          {{ g('metallicity', 'metallicities') }} and cloud states — the reference set used by
+          the Roman Coronagraph community.</li>
+        <li><strong>{{ g('picaso', 'PICASO') }}</strong>: NASA's open-source
+          {{ g('radiative-transfer', 'radiative transfer') }} code, run for selected
+          well-characterised targets.</li>
       </ul>
       <p>Every page's data card states which engine produced its spectrum, and tags each input
         as <em>measured</em>, <em>computed</em> or <em>assumed</em>.</p>
@@ -107,9 +99,8 @@
     <p class="how-body">A mirror is only as colourful as what it reflects. The same planet looks
       different under a cool red dwarf than under a Sun-like star, so we multiply the albedo
       spectrum by the host star's own spectrum — modelled as a
-      {{ jarg('blackbody', 'The smooth glow of anything hot: its spectrum depends only on
-        temperature. Cool stars (~3000 K) glow orange-red; the Sun (~5800 K) yellow-white;
-        hot stars blue-white.') }} at the star's measured temperature. The product is the
+      {{ g('blackbody') }} at the star's measured
+      {{ g('effective-temperature', 'temperature') }}. The product is the
       reflected light that would actually leave the planet and reach an observer.</p>
     <svg class="dg" viewBox="0 0 560 150" role="img"
       aria-label="Albedo spectrum times star spectrum equals reflected light">
@@ -126,8 +117,10 @@
       <text x="420" y="124">F(λ) reflected light</text>
     </svg>
     {{ maths_open() }}
-      <p>The star's spectrum is Planck's law at its effective temperature
-        <code>T<sub>eff</sub></code> (from the NASA Exoplanet Archive):</p>
+      <p>The star's spectrum is Planck's law at its
+        {{ g('effective-temperature', 'effective temperature') }}
+        <code>T<sub>eff</sub></code> (from the
+        {{ g('nasa-exoplanet-archive', 'NASA Exoplanet Archive') }}):</p>
       <span class="formula">B<sub>λ</sub>(T) = (2hc² / λ⁵) · 1 / (e<sup>hc/λk<sub>B</sub>T</sup> − 1)</span>
       <span class="formula">F(λ) = A(λ) · B<sub>λ</sub>(T<sub>eff</sub>)</span>
       <p>A blackbody is a deliberate v1 simplification: real stellar spectra carry absorption
@@ -142,14 +135,10 @@
     <h3>Convert it the way your eye would</h3>
     <p class="how-body">A spectrum is thousands of numbers; an eye reduces them to one colour.
       We run the reflected light through the
-      {{ jarg('CIE 1931 colour matching functions', 'Three curves, measured from human
-        observers in 1931, describing how strongly each wavelength stimulates the eye\'s three
-        cone types. Still the international standard for turning a spectrum into a colour.') }}
+      {{ g('cie-1931', 'CIE 1931 colour matching functions') }}
       — the standard model of human colour vision — which collapses the whole spectrum into
-      three numbers ({{ jarg('tristimulus XYZ', 'Three numbers that can encode any colour the
-        eye can see — the bridge between physics (spectra) and screens (RGB).') }}), and from
-      there to an {{ jarg('sRGB', 'The standard colour space of screens and the web; hex codes
-        like #91d3ff live here. It cannot show every colour an eye can see.') }} hex code.
+      three numbers ({{ g('tristimulus-xyz', 'tristimulus XYZ') }}), and from
+      there to an {{ g('srgb', 'sRGB') }} hex code.
       This is the exact machinery used to design camera sensors and displays — pointed at a
       planet.</p>
     <svg class="dg" viewBox="0 0 560 190" role="img"
@@ -170,17 +159,18 @@
       <p>Each tristimulus value is the spectrum weighted by one matching function and summed
         (the CIE 1931 2° observer):</p>
       <span class="formula">X = ∫ F(λ) x̄(λ) dλ &nbsp;&nbsp; Y = ∫ F(λ) ȳ(λ) dλ &nbsp;&nbsp; Z = ∫ F(λ) z̄(λ) dλ</span>
-      <p>Then XYZ → linear sRGB via the standard 3×3 matrix (D65 white), followed by the sRGB
-        gamma encode. Two honesty conventions on top:</p>
+      <p>Then XYZ → linear sRGB via the standard 3×3 matrix
+        ({{ g('white-point', 'D65 white') }}), followed by the sRGB
+        {{ g('gamma-encoding', 'gamma encode') }}. Two honesty conventions on top:</p>
       <ul>
         <li><strong>Brightness.</strong> Planets are dim — rendered at true
-          {{ jarg('luminance', 'The perceived brightness of a colour (the Y of XYZ):
-            0 = black, 1 = a perfect white reflector.') }} nearly every swatch would be
+          {{ g('luminance') }} nearly every swatch would be
           near-black. So a swatch shows the planet's <em>colour identity</em> at a fixed
           display luminance (Y&nbsp;=&nbsp;0.60), and the true reflected brightness is
           reported separately — the <code>Y&nbsp;BRIGHT</code> readout on every planet page.</li>
-        <li><strong>Gamut.</strong> Some modelled colours are more saturated than a screen can
-          show. If the colour falls outside sRGB we desaturate it just enough to reach the
+        <li><strong>{{ g('gamut', 'Gamut') }}.</strong> Some modelled colours are more
+          saturated than a screen can show. If the colour falls outside sRGB we desaturate it
+          just enough to reach the
           edge of the displayable range (keeping hue and lightness), and flag it —
           the <code>GAMUT&nbsp;·&nbsp;OOG</code> readout.</li>
       </ul>
@@ -193,7 +183,8 @@
     <span class="how-num">STEP 4</span>
     <h3>Grow a palette from the base colour</h3>
     <p class="how-body">One colour becomes a designer palette: the base hue stepped through a
-      five-stop lightness ramp, plus accent colours computed from <strong>slices of the actual
+      five-stop {{ g('palette-ramp', 'lightness ramp') }}, plus
+      {{ g('spectral-accent', 'accent colours') }} computed from <strong>slices of the actual
       spectrum</strong> — for example, the colour of just the light at the edge of a methane
       absorption band. The accents aren't decorative inventions; they are step&nbsp;3 re-run
       on a narrow wavelength window.</p>
@@ -214,16 +205,15 @@
   <section class="panel how-step">
     <span class="how-num">STEP 5 · THE ROMAN VIEW</span>
     <h3>What survives four filters?</h3>
-    <p class="how-body">NASA's Roman Space Telescope will be the first to measure reflected
-      <em>visible</em> light from planets like these — but its coronagraph sees through just
-      <strong>four</strong> {{ jarg('bandpasses', 'A filter that lets through only the
-        wavelengths inside its window and blocks the rest. Roman\'s coronagraph carries four,
-        centred at 575, 660, 730 and 835 nm.') }}, all in the orange-to-infrared half of the
-      spectrum. Every planet page shows the same colour twice: the full-spectrum prediction,
-      and the colour rebuilt from only what Roman's four filters would catch. The gap between
-      them — the {{ jarg('ΔE2000', 'The standard measure of how different two colours look to
-        a human: 0 = identical, ~2 = just noticeable, 10+ = clearly different colours.') }}
-      readout — is how much of the planet's colour identity Roman's filter set preserves.</p>
+    <p class="how-body">NASA's {{ g('roman-space-telescope', 'Roman Space Telescope') }} will be
+      the first to measure reflected <em>visible</em> light from planets like these — but its
+      {{ g('coronagraph') }} sees through just
+      <strong>four</strong> {{ g('bandpass', 'bandpasses') }}, all in the
+      orange-to-{{ g('infrared') }} half of the spectrum. Every planet page shows the same
+      colour twice: the {{ g('full-spectrum-view', 'full-spectrum') }} prediction, and the
+      colour rebuilt from only what {{ g('roman-4-band', "Roman's four filters") }} would
+      catch. The gap between them — the {{ g('delta-e2000', 'ΔE2000') }} readout — is how much
+      of the planet's colour identity Roman's filter set preserves.</p>
     <svg class="dg" viewBox="0 0 560 170" role="img"
       aria-label="Roman's four bandpasses cover 575 to 835 nm; below 575 nm it is blind">
       <defs>
@@ -244,7 +234,8 @@
       <text x="44" y="156">380</text>
     </svg>
     {{ maths_open() }}
-      <p>Each band is modelled as a top-hat filter; the measurement it would take is the
+      <p>Each band is modelled as a {{ g('top-hat-filter', 'top-hat filter') }}; the
+        measurement it would take is the
         star-weighted mean albedo inside the band:</p>
       <span class="formula">value<sub>band</sub> = ∫<sub>band</sub> A(λ)·S(λ) dλ / ∫<sub>band</sub> S(λ) dλ</span>
       <p>Bands: 575&nbsp;nm (10% width), 660 and 730&nbsp;nm (6%, the spectroscopy channels),
@@ -253,7 +244,8 @@
         information</strong> — precisely the blue-violet region where many of these planets
         live — so the reconstruction holds the spectrum flat there rather than inventing data.
         That honesty is why blue planets lose the most colour in the Roman view. For Roman's
-        ~dozen tech-demo targets, real measured photometry will one day replace the simulated
+        ~dozen {{ g('tech-demo-target', 'tech-demo targets') }}, real measured
+        {{ g('photometry') }} will one day replace the simulated
         band values — the only real colours any of these planets will ever have.</p>
     {{ maths_close() }}
   </section>
@@ -261,7 +253,8 @@
   <p class="subhead">Planet and star parameters come from the
     <a href="https://exoplanetarchive.ipac.caltech.edu/" target="_blank" rel="noopener">NASA
     Exoplanet Archive</a>. Every page states its model assumptions — cloud state, metallicity,
-    spectrum engine — and tags each value as measured, computed or assumed.
+    spectrum engine — and tags each value as {{ g('measured') }}, {{ g('computed') }} or
+    {{ g('assumed') }}.
     <strong>Modelled, not photographed</strong> — that's the whole point.</p>
 
   {{ back_link() }}
