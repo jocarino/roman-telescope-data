@@ -787,7 +787,9 @@ document.addEventListener("alpine:init", () => {
     },
     copyCssVars() {
       const pal = this.curPalette();
-      const roles = ["shade-2", "shade-1", "base", "tint-1", "tint-2"];
+      // Must match _RAMP_ROLES in pipeline/palette/derive.py. No stop is called "base": the
+      // ramp carries the planet's hue, not its exact colour, which is the swatch/hex above.
+      const roles = ["shade-2", "shade-1", "mid", "tint-1", "tint-2"];
       const lines = pal.map((h, i) => `  --planet-${roles[i] || i}: ${h};`);
       const css = ":root {\n" + lines.join("\n") + "\n}";
       navigator.clipboard?.writeText(css);
