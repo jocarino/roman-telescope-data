@@ -138,6 +138,11 @@
           class="dd-sub">two spectra and palettes, side by side</span></span></a>
         <a href="/census"><i class="nav-gl" aria-hidden="true">◧</i><span>Colour census<span
           class="dd-sub">what colour the catalogue is, overall</span></span></a>
+        {# The sky map. Its own page calls itself "Your sky tonight", so this says the same
+           thing rather than inventing a second name for it. Extensionless like its
+           neighbours: nginx resolves /sky via `try_files $uri $uri.html`. #}
+        <a href="/sky"><i class="nav-gl" aria-hidden="true">✦</i><span>Your sky tonight<span
+          class="dd-sub">every host star above your horizon right now</span></span></a>
       </div>
     </div>
     {# The hamburger (all viewports): everything except the colour filter + search lives here.
