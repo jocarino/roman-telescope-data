@@ -48,6 +48,10 @@
     <a class="lede-link" href="/census">◧ Colour census →</a></p>
 </div>
 
+{# The head of the default view, inlined so the first cards paint immediately; the gallery
+   component fetches the full index in the background and swaps it in (see app.js init). #}
+<script>window.PLANETS_BOOT = {{ boot_planets | tojson }};</script>
+
 <div x-data="gallery({ indexUrl: '{{ index_url }}' })"
   @scroll.window.passive="scrolled = window.scrollY > 160">
   <div class="controls" :class="scrolled ? 'stuck' : ''">
