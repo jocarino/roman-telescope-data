@@ -76,15 +76,33 @@ def _y(g: _Geom, val: float, vmax: float) -> float:
 
 
 def _stepped(g: _Geom, values: np.ndarray, vmax: float) -> str:
-    """Step-chart points (horizontal then vertical) for a blocky, pixel-art line."""
+    """Step-chart points (horizontal then vertical) for a blocky, pixel-art line.
+
+    Points are simplified after rounding to the precision they are emitted at, so the drawn
+    shape is bit-for-bit the one the unsimplified list would have produced. Two things go:
+    exact repeats (a step whose value didn't change lands on the point already there), and the
+    interior points of a horizontal run, which a polyline draws straight through anyway. x is
+    strictly increasing, so a run of equal y always advances and can never double back — the
+    collapse is safe. The Roman trace is a four-band reconstruction and therefore piecewise
+    constant, which is where most of this comes from.
+    """
     xs = [_x(g, nm) for nm in GRID_NM]
     ys = [_y(g, v, vmax) for v in values]
-    pts = []
+    raw: list[tuple[str, str]] = []
     for i in range(len(xs)):
-        pts.append(f"{xs[i]:.1f},{ys[i]:.1f}")
+        raw.append((f"{xs[i]:.1f}", f"{ys[i]:.1f}"))
         if i + 1 < len(xs):
-            pts.append(f"{xs[i + 1]:.1f},{ys[i]:.1f}")
-    return " ".join(pts)
+            raw.append((f"{xs[i + 1]:.1f}", f"{ys[i]:.1f}"))
+
+    pts: list[tuple[str, str]] = []
+    for p in raw:
+        if pts and pts[-1] == p:
+            continue
+        if len(pts) >= 2 and pts[-2][1] == pts[-1][1] == p[1]:
+            pts[-1] = p  # interior point of a horizontal run: slide the endpoint along
+            continue
+        pts.append(p)
+    return " ".join(f"{x},{y}" for x, y in pts)
 
 
 def _render(

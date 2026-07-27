@@ -1,10 +1,12 @@
+/* WOFF2 only, and no .ttf fallback on purpose: it is a quarter of the size, and every browser
+   that can run this site (IntersectionObserver, Alpine 3) has supported it for years. */
 @font-face {
   font-family: "Silkscreen"; font-style: normal; font-weight: 400;
-  src: url("/static/fonts/Silkscreen-Regular.ttf") format("truetype"); font-display: swap;
+  src: url("/static/fonts/Silkscreen-Regular.woff2") format("woff2"); font-display: swap;
 }
 @font-face {
   font-family: "Silkscreen"; font-style: normal; font-weight: 700;
-  src: url("/static/fonts/Silkscreen-Bold.ttf") format("truetype"); font-display: swap;
+  src: url("/static/fonts/Silkscreen-Bold.woff2") format("woff2"); font-display: swap;
 }
 
 :root {
