@@ -213,7 +213,8 @@
       </div>
       {% if rec.system and rec.system.siblings %}
       <nav class="system-strip" aria-label="Other planets in this star system">
-        <span class="system-lbl">SAME SYSTEM · {{ rec.host_star.name }}</span>
+        {# The host name is in the title block two lines up, so phones drop this half. #}
+        <span class="system-lbl">SAME SYSTEM<span class="system-host"> · {{ rec.host_star.name }}</span></span>
         <span class="system-links">
           {% for sib in rec.system.siblings %}
           <a class="system-planet" href="/planet/{{ sib.id }}"

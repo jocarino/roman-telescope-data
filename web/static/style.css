@@ -183,6 +183,9 @@ a:hover { text-decoration: underline; }
 .system-lbl {
   font-family: var(--mono); font-size: 10.5px; letter-spacing: .5px; color: var(--fg-dim);
   text-transform: uppercase;
+  /* Never let the label wrap to a second line when the row is squeezed — it is the shortest
+     thing here, so the chips beside it are what should give way. */
+  flex: none; white-space: nowrap;
 }
 .system-links { display: flex; flex-wrap: wrap; gap: 8px; }
 .system-planet {
@@ -1489,6 +1492,40 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
   .dossier-grid { grid-template-columns: 1fr; }
   .dossier-grid .dossier-stats:first-child { display: none; }
   .dossier-head h3 span { display: none; }
+}
+
+/* Phones only: two header rows that each cost a full line for very little. Kept out of the
+   760px block above because between 561 and 760 there is room to spare — nothing needs to go.
+
+   1. The scope header wrapped to two rows (brand above, VIEW switch below) at 80px tall. It
+      fits one 51px row once the "VIEW" word goes: the two buttons say "Full spectrum" and
+      "Roman 4-band" in plain words and the ℹ sits right beside them, so the label was only
+      naming what the controls already say. Below ~385px it still wraps as before — a clean
+      fallback rather than a squeeze that breaks the labels.
+   2. "Same system" spent up to 142px (TRAPPIST-1's six siblings wrapped over four rows) on
+      what is a side-note. Now one 28px row that scrolls sideways if the siblings overrun,
+      with the right edge fading to show there is more. The label drops the host name, which
+      the title block already states two lines above. */
+@media (max-width: 560px) {
+  .scope-top { gap: 8px; }
+  .scope-brand { font-size: 10px; letter-spacing: .5px; }
+  .scope-view-lbl { display: none; }
+  .scope-view { gap: 6px; }
+  .led-btn { padding: 6px 7px; font-size: 10.5px; gap: 5px; }
+
+  .system-strip { margin-top: 10px; gap: 8px; flex-wrap: nowrap; }
+  .system-host { display: none; }
+  .system-links {
+    flex-wrap: nowrap; overflow-x: auto; min-width: 0; scrollbar-width: none;
+    /* Self-hiding cue: with few siblings the chips stop short of the fade, so nothing dims. */
+    mask-image: linear-gradient(90deg, #000 calc(100% - 20px), transparent);
+  }
+  .system-links::-webkit-scrollbar { display: none; }
+  .system-planet {
+    padding: 4px 8px; font-size: 11.5px; gap: 6px; white-space: nowrap;
+    box-shadow: 1px 1px 0 var(--line);
+  }
+  .system-dot { width: 11px; height: 11px; }
 }
 
 /* ---- Compare page ---- */
