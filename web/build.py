@@ -321,6 +321,12 @@ def _index_entry(rec: PlanetRecord, fiction: dict[str, dict] | None = None) -> d
     fic = (fiction or {}).get(rec.name)
     if fic:
         entry["fic"] = fic["system"]
+    # Sky position for the "your sky tonight" page (absent for pre-sky data releases).
+    if rec.sky:
+        entry["ra"] = round(rec.sky.ra_deg, 2)
+        entry["dec"] = round(rec.sky.dec_deg, 2)
+        if rec.sky.v_mag is not None:
+            entry["vmag"] = round(rec.sky.v_mag, 1)
     return entry
 
 
@@ -443,6 +449,12 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
             n_modelled=len(records),
             build_id=build_id,
             **_cockpit_instruments(records),
+        )
+    )
+    # "Your sky tonight": every host star above the visitor's horizon (same fetched index).
+    (out / "sky.html").write_text(
+        env.get_template("sky.html").render(
+            index_url=f"/planets.index.{build_id}.json", build_id=build_id
         )
     )
     # Guided tours: curated walks, resolved against THIS catalog (see pipeline/tours.py).

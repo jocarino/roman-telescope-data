@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% from "macros.html" import back_link %}
+{% block title %}Your sky tonight · Exoplanet Palette{% endblock %}
+{% block content %}
+<div class="skypage" x-data="{ intro: false }">
+  <div class="site-head">
+    {{ back_link() }}
+    <h1>Your sky tonight</h1>
+    <span class="tagline">every host star above your horizon, right now
+      <button class="info-btn sm" @click="intro = !intro" :class="intro ? 'on' : ''"
+        aria-label="What is this page?" title="What is this page?">i</button></span>
+  </div>
+  <div class="subhead intro-box" x-show="intro" x-cloak>
+    <button class="info-x" @click="intro = false" aria-label="Close">&times;</button>
+    <div class="intro-row">
+      <span class="intro-lbl">The idea</span>
+      <p>Every planet in this catalog orbits a real star at a real spot in Earth's sky. This
+        page filters the whole map down to <strong>what is over your head right now</strong>:
+        set your location (or let the browser set it), and the chart shades away everything
+        below your horizon. Hover a star to identify it; click to see the worlds it carries.</p>
+    </div>
+    <div class="intro-row">
+      <span class="intro-lbl">Honesty</span>
+      <p>What you can ever see is the <strong>star</strong> — no exoplanet is visible to the
+        eye through any telescope. "Naked eye" uses the dark-sky limit (V ≤ 6.5); city skies
+        show far less. Time comes from your device clock; your east–west position is estimated
+        from its time zone unless you press "use my location" (read once, used only on this
+        device — this site has no server). Stars with no measured brightness (microlensing
+        hosts) are never listed as visible.</p>
+    </div>
+  </div>
+
+  <div class="skp-controls">
+    <button class="hzn-btn hzn-geo" id="skp-geo"
+      title="Ask the browser for your position — used once, only on this device">◎ Use my location</button>
+    <div class="hzn-lat">
+      <span class="hzn-lat-name">Viewing from <b id="skp-latlbl"></b></span>
+      <input type="range" class="phase-slider lat-slider" id="skp-lat" min="-65" max="65" step="1"
+        aria-label="Your latitude, from 65° south to 65° north">
+      <div class="phase-scale" aria-hidden="true"><span>65°S</span><span>EQUATOR</span><span>65°N</span></div>
+    </div>
+    <div class="skp-mag" role="group" aria-label="How you are looking at the sky">
+      <button class="skp-mag-btn" data-mag="eye">Naked eye</button>
+      <button class="skp-mag-btn" data-mag="bino">Binoculars</button>
+      <button class="skp-mag-btn" data-mag="any">Any telescope</button>
+    </div>
+  </div>
+
+  <div class="panel skp-panel">
+    <p class="skp-count" id="skp-count" role="status"></p>
+    <div id="skp-chart"></div>
+    <p class="sky-note">Hover a bright dot to identify its star · click to open the worlds at
+      that spot. Dim dots are the rest of the catalog, below your horizon or too faint for the
+      current filter.</p>
+  </div>
+
+  <section class="panel skp-panel" id="skp-spot-panel" hidden>
+    <h3 id="skp-spot-title">At that spot</h3>
+    <div id="skp-spot"></div>
+  </section>
+
+  <section class="panel skp-panel">
+    <h3 id="skp-list-title">Visible now</h3>
+    <p class="census-sub">Brightest first. Altitude is how far above your horizon (90° is
+      straight up); the compass point is where to face.</p>
+    <div id="skp-list"></div>
+  </section>
+
+  <div class="census-tip" id="skp-tip" role="status" aria-live="polite"></div>
+</div>
+
+<style>
+  /* Page-scoped styles (kept out of style.css to avoid cross-session merge churn). */
+  .skypage { max-width: 1040px; margin: 0 auto; }
+  .skp-controls {
+    display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px 22px; margin-top: 14px;
+  }
+  .skp-panel { margin-top: 16px; padding: 14px 16px 16px; }
+  .skp-panel h3 { margin: 0 0 8px; }
+  .skp-mag { display: flex; }
+  .skp-mag-btn {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+    padding: 5px 9px; color: var(--fg-dim); background: var(--bg-3);
+    border: 1px solid var(--line); border-radius: 0; cursor: pointer; margin-left: -1px;
+  }
+  .skp-mag-btn:hover { border-color: var(--accent); color: var(--fg); position: relative; }
+  .skp-mag-btn.on { background: var(--accent); color: #05121f; border-color: var(--accent); }
+  .skp-count {
+    margin: 0 0 8px; font-family: var(--mono); font-size: 11.5px; color: var(--fg);
+  }
+  .skp-count b { color: var(--accent); }
+  #skp-chart svg { display: block; width: 100%; height: auto; }
+  .skp-dot-vis { fill: var(--accent); cursor: pointer; }
+  .skp-dot-vis:hover { stroke: var(--fg); stroke-width: 1; }
+  /* Visible-list rows: one star, its worlds as chips. */
+  .skp-row {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px;
+    padding: 7px 2px; border-top: 1px solid var(--line);
+  }
+  .skp-row:first-child { border-top: none; }
+  .skp-star { font-weight: 600; color: var(--fg); min-width: 130px; }
+  .skp-meta { font-family: var(--mono); font-size: 10.5px; color: var(--fg-dim); }
+  .skp-meta b { color: var(--fg); }
+  .skp-eye { color: var(--accent); font-weight: 700; }
+  .skp-worlds { display: flex; flex-wrap: wrap; gap: 6px; }
+  .skp-world {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px;
+    border: 1px solid var(--line); padding: 2px 7px 2px 3px; color: var(--fg-dim);
+    background: var(--bg-3);
+  }
+  .skp-world:hover { border-color: var(--accent); color: var(--fg); }
+  .skp-world .sw {
+    width: 12px; height: 12px; display: inline-block; border: 1px solid var(--line);
+  }
+  .skp-empty { font-family: var(--mono); font-size: 11.5px; color: var(--fg-dim); margin: 6px 0; }
+</style>
+<script src="/static/sky.js?v={{ build_id }}"></script>
+<script>window.addEventListener("DOMContentLoaded", function () {
+  window.skyInit({ indexUrl: "{{ index_url }}" });
+});</script>
+{% endblock %}

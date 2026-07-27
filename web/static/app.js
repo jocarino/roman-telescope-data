@@ -15,6 +15,38 @@ const ExoRandom = {
   },
 };
 
+// Shared sky maths for the "your horizon" overlay and the /sky.html "your sky tonight"
+// page. All angles in degrees; `lon` is the exact longitude if geolocation was granted,
+// or null to estimate it from the clock's UTC offset (15°/hour — up to an hour of sky
+// off under daylight saving).
+window.ExoSky = {
+  // Local sidereal time: which RA is crossing the observer's meridian right now.
+  // Low-precision GMST, minutes-accurate for decades around J2000.
+  lstDeg(lon) {
+    const d = (Date.now() - Date.UTC(2000, 0, 1, 12)) / 86400000;
+    const lonDeg = lon != null ? lon : (-new Date().getTimezoneOffset() / 60) * 15;
+    return ((280.46061837 + 360.98564736629 * d + lonDeg) % 360 + 360) % 360;
+  },
+  // Altitude above the horizon + azimuth (0°=N, 90°=E) of a sky position, right now.
+  altAzDeg(raDeg, decDeg, latDeg, lon) {
+    const r = Math.PI / 180, phi = latDeg * r, dec = decDeg * r;
+    const H = (this.lstDeg(lon) - raDeg) * r;
+    const sa = Math.sin(phi) * Math.sin(dec) + Math.cos(phi) * Math.cos(dec) * Math.cos(H);
+    const alt = Math.asin(Math.max(-1, Math.min(1, sa))) / r;
+    const az = Math.atan2(-Math.cos(dec) * Math.sin(H),
+      Math.sin(dec) * Math.cos(phi) - Math.cos(dec) * Math.sin(phi) * Math.cos(H)) / r;
+    return { alt: alt, az: (az + 360) % 360 };
+  },
+  compass(azDeg) {
+    return ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][Math.round(azDeg / 45) % 8];
+  },
+  // Declination of the observer's horizon at a given RA: tan(dec) = -cos(H) / tan(lat).
+  horizonDec(latDeg, lstDeg, raDeg) {
+    const r = Math.PI / 180;
+    return Math.atan(-Math.cos((lstDeg - raDeg) * r) / Math.tan(latDeg * r)) / r;
+  },
+};
+
 // Keyboard shortcut: R rolls a random planet on pages that registered a handler
 // (gallery + planet detail). Ignored while typing in a field.
 document.addEventListener("keydown", (e) => {
@@ -1156,21 +1188,9 @@ document.addEventListener("alpine:init", () => {
       const a = Math.abs(this.lat);
       return a < 1 ? "the equator" : a + "° " + (this.lat > 0 ? "N" : "S");
     },
-    // Local sidereal time in degrees: which RA is crossing your meridian right now.
-    // Low-precision GMST (minutes-accurate for decades around J2000) + longitude — exact
-    // if geolocation was granted, otherwise estimated from the clock's UTC offset.
-    _lst() {
-      const d = (Date.now() - Date.UTC(2000, 0, 1, 12)) / 86400000;
-      const lonDeg = this.lon != null ? this.lon : (-new Date().getTimezoneOffset() / 60) * 15;
-      return ((280.46061837 + 360.98564736629 * d + lonDeg) % 360 + 360) % 360;
-    },
-    // Altitude (deg) of the target star for the chosen latitude, right now.
-    _alt(raDeg, decDeg) {
-      const r = Math.PI / 180, phi = this.lat * r, dec = decDeg * r;
-      const H = (this._lst() - raDeg) * r;
-      const s = Math.sin(phi) * Math.sin(dec) + Math.cos(phi) * Math.cos(dec) * Math.cos(H);
-      return Math.asin(Math.max(-1, Math.min(1, s))) / r;
-    },
+    // Thin wrappers over the shared ExoSky maths, bound to this panel's lat/lon.
+    _lst() { return ExoSky.lstDeg(this.lon); },
+    _alt(raDeg, decDeg) { return ExoSky.altAzDeg(raDeg, decDeg, this.lat, this.lon).alt; },
     status() {
       void this.tick;  // re-evaluate on every redraw
       const svg = this.$root.querySelector(".skychart");
@@ -1194,7 +1214,7 @@ document.addEventListener("alpine:init", () => {
     },
     draw() {
       this.tick++;
-      const r = Math.PI / 180, lst = this._lst();
+      const lst = this._lst();
       // At exactly 0° the horizon is a vertical wall in RA; 0.5° draws the same picture
       // without dividing by tan(0).
       const phi = Math.abs(this.lat) < 0.5 ? (this.lat < 0 ? -0.5 : 0.5) : this.lat;
@@ -1204,7 +1224,7 @@ document.addEventListener("alpine:init", () => {
         let pts = "";
         for (let ra = 360; ra >= 0; ra -= 2) {
           // Declination of the horizon at this RA: tan(dec) = -cos(H) / tan(lat).
-          const decH = Math.atan(-Math.cos((lst - ra) * r) / Math.tan(phi * r)) / r;
+          const decH = ExoSky.horizonDec(phi, lst, ra);
           const x = X0 + (1 - ra / 360) * (X1 - X0);
           const y = Y0 + ((90 - decH) / 180) * (Y1 - Y0);
           pts += x.toFixed(1) + "," + y.toFixed(1) + " ";

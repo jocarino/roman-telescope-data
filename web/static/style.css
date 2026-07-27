@@ -1671,6 +1671,11 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 .lat-slider::-webkit-slider-thumb { background: #cf9a4e; }
 .lat-slider::-moz-range-thumb { background: #cf9a4e; }
 .sky-note.hzn-status { color: var(--fg); border-left: 2px solid #cf9a4e; padding-left: 8px; }
+.sky-page-link {
+  display: inline-block; margin-top: 10px; font-family: var(--mono); font-size: 11px;
+  letter-spacing: .05em; text-transform: uppercase;
+}
+.sky-page-link:hover { text-decoration: underline; }
 .sky-facts {
   display: flex; flex-wrap: wrap; gap: 4px 18px;
   margin-top: 10px; font-size: 12px; color: var(--fg-dim);
