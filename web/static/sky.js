@@ -87,12 +87,15 @@
         var led = b.querySelector(".led");
         if (led) led.classList.toggle("on", b.dataset.mag === mag);
       });
-      // The VIEW knob: rotate to the current position, name it in plain English.
+      // The VIEW knob: rotate to the current position, name it in plain English. Its
+      // phone-only twin under the chart names the view you'd switch TO.
       var knob = $("skp-viewknob");
       if (knob) {
         knob.style.setProperty("--a", view === "out" ? "-34deg" : "34deg");
         $("skp-viewval").textContent = view === "out" ? "Standing outside" : "Whole-sky map";
       }
+      $("skp-viewbtn-txt").textContent =
+        view === "out" ? "Switch to whole-sky map" : "Switch to standing outside";
 
       var vis = hosts.filter(function (h) { return h.vis; })
         .sort(function (a, b) { return a.vmag - b.vmag; });
@@ -456,6 +459,7 @@
     viewKnob.addEventListener("keydown", function (e) {
       if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleView(); }
     });
+    $("skp-viewbtn").addEventListener("click", toggleView);
 
     $("skp-count-info").addEventListener("click", function () {
       var full = $("skp-count-full");
