@@ -755,18 +755,25 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
   /* Both back-row controls hang in the gutter: BACK on top, RANDOM stacked just below. */
   .detail-head .back.rand { top: 44px; }
 }
-/* Phones: the back control collapses to just the arrow, and RANDOM to just the dice. With
-   no labels to read, the pair works as a top bar — BACK anchored left, the dice roll on the
-   far right — so the two icons never read as one ambiguous cluster. That needs the row to
-   itself: push the hero onto the next line. */
+/* Phones: the back control collapses to just the arrow, and RANDOM to just the dice. The
+   two icons then bracket the planet — BACK at the left edge, the dice at the right, the
+   planet centred between them — so they never read as one ambiguous cluster AND the
+   controls cost no vertical space of their own. The title centres under the planet to
+   match. Equal-width buttons are what put the planet on the true centre line. */
 @media (max-width: 560px) {
   .back .back-txt { display: none; }
   /* Icon-only, so both glyphs get a bit bigger — the dice pips are unreadable much below
      14px — and a fixed line-height keeps the arrow and the dice the same box height. */
   .back { padding: 7px 11px; font-size: 13px; line-height: 14px; }
   .back .dice { width: 14px; height: 14px; }
-  .detail-head .back.rand { margin-left: auto; }
-  .detail-head .hero-stack { flex-basis: 100%; }
+  .detail-head .back { min-width: 38px; justify-content: center; text-align: center; }
+  .detail-head .back.rand { order: 2; }
+  /* Takes the leftover width between the buttons and centres the planet inside it. */
+  .detail-head .hero-stack { flex: 1 1 auto; display: flex; justify-content: center; }
+  .detail-head .detail-title { order: 3; text-align: center; }
+  /* Centred headings, but body copy still reads left-aligned. */
+  .detail-title .viewnote { text-align: left; }
+  .detail-title .system-strip { justify-content: center; }
 }
 .detail-head { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; margin: 12px 0 22px; }
 .detail-title { flex: 1 1 340px; min-width: 280px; }
