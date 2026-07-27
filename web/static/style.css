@@ -1366,6 +1366,69 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 .hue-cell.on { outline: 2px solid var(--accent); outline-offset: 2px; }
 .hue-cell.rainbow { background: linear-gradient(90deg, #d06bb0, #c9a35c, #3fbfa0, #5b8fd6); }
 
+/* The Roman switch. Sits in the toolbar next to the colour filter because it decides what
+   every swatch in the grid IS, and the filter reads whatever it selects. One button, not two
+   sides: off is the gallery's normal full-spectrum state, on is the four-band view. Like the
+   fiction filter, it wears its own palette (Roman's warm, red-weighted bands) instead of the
+   site accent — this changes what the colours ARE, it isn't another filter chip. */
+.view-bar { display: inline-flex; align-items: center; gap: 8px; position: relative; }
+.view-toggle {
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  background: var(--bg-3); border: 1px solid var(--line); color: var(--fg-dim);
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .5px; text-transform: uppercase;
+  padding: 6px 10px; box-shadow: 3px 3px 0 var(--line);
+}
+.view-toggle:hover { color: var(--fg); border-color: #ff9a4a; }
+.view-toggle:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--line); }
+.view-toggle.on {
+  color: #ffdcbb; background: #2a1206; border-color: #ff9a4a; box-shadow: 3px 3px 0 #7a3a12;
+}
+.tele-ic { flex: none; opacity: .75; }
+.view-toggle:hover .tele-ic, .view-toggle.on .tele-ic { opacity: 1; }
+.view-toggle.on .tele-ic { color: #ff9a4a; }
+/* The four CGI bands, each drawn in the colour of its centre wavelength (575, 660, 730 and
+   835 nm — the last is infrared, so it lights up as good as black). Dead grey until the
+   switch is on, so the button reads as an instrument powering up. */
+.view-bands { display: inline-flex; gap: 2px; }
+.view-bands i {
+  display: block; width: 6px; height: 13px; border: 1px solid rgba(255, 255, 255, .16);
+  filter: saturate(.12) brightness(.55);
+}
+.view-toggle.on .view-bands i { filter: none; }
+.view-note {
+  position: absolute; top: calc(100% + 8px); left: 0; z-index: 40; width: min(420px, 88vw);
+  background: var(--bg-3); border: 1px solid var(--accent); box-shadow: 5px 5px 0 var(--line);
+  padding: 14px 26px 12px 14px; font-size: 12px; line-height: 1.55; color: var(--fg-dim);
+}
+.view-note p { margin: 0 0 8px; }
+.view-note p:last-child { margin-bottom: 0; }
+.view-note b { color: var(--fg); }
+.view-note-foot {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .3px; color: var(--fg-faint);
+  border-top: 1px solid var(--line); padding-top: 8px;
+}
+/* On a phone the bar is too narrow to hang a 420px panel off: drop .view-bar out of the
+   positioning chain so the note resolves against the (sticky, therefore positioned) toolbar
+   and spans it edge to edge, under the whole control block instead of off the screen. */
+@media (max-width: 640px) {
+  .view-bar { position: static; }
+  .view-note { left: 0; right: 0; width: auto; }
+}
+/* Sits on the count row: the filter that a view flip had to drop, said out loud. */
+.view-cleared {
+  flex-basis: 100%; text-align: right; font-family: var(--mono); font-size: 10.5px;
+  letter-spacing: .3px; color: var(--accent);
+}
+.view-cleared b { color: var(--fg); }
+@media (max-width: 640px) { .view-cleared { text-align: left; } }
+
+/* The peek fragment is static and cached, so it carries BOTH colours and the current view
+   picks one — a peek must never show a colour the card behind it isn't wearing. */
+.peek-box .peek-v-roman { display: none; }
+.peek-box[data-view="roman"] div.peek-v-roman { display: flex; }
+.peek-box[data-view="roman"] span.peek-v-roman { display: block; }
+.peek-box[data-view="roman"] .peek-v-full { display: none; }
+
 /* Mobile colour-filter trigger: the button face IS the current colour (rainbow = all). */
 .dd-btn.hue-trigger { padding: 9px; }
 .hue-trigger .hue-chip { width: 20px; height: 20px; margin: 0; vertical-align: 0; display: block; }
