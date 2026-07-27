@@ -269,10 +269,14 @@ document.addEventListener("alpine:init", () => {
       // First paint: the build inlines the head of the default (name-sorted, unfiltered) view,
       // so the first screens of cards render without waiting for the multi-MB index. Deep links
       // change the ordering/filtering, so they wait for the real thing.
-      // ...but only for the plain view. Any filter or sort — from the URL or restored from
-      // last visit — means the boot slice is the wrong set of cards, so wait for the index.
+      // Filters only REMOVE planets and never reorder them, and the boot slice is pre-sorted
+      // with the same name rule results() uses — so a filtered boot slice is still the correct
+      // prefix of the filtered results, and can paint at once. Only a re-sort invalidates it:
+      // a different sort key, or the similar-colour ranking, reorders the whole catalogue, so
+      // those (and only those) wait for the full index.
       const boot = window.PLANETS_BOOT;
-      if (!this.filtersDirty() && boot && boot.length) this._adopt(boot, false);
+      const reordered = this.sort !== this._filterDefaults.sort || !!this.nearId;
+      if (!reordered && boot && boot.length) this._adopt(boot, false);
 
       try {
         const res = await fetch(this.indexUrl);
@@ -994,6 +998,28 @@ document.addEventListener("alpine:init", () => {
     },
     // Scope controls: every knob/button drives real state (and persists across hops):
     setView(v) { this.view = v; this._persist("scopeView", v); this.blink(); this._sweep(); },
+    // ---- Reset the scope ----
+    // Every knob carries across planet pages via localStorage, which is what makes a scope
+    // set up three hops ago feel stuck: you can't tell which knob you turned. This puts the
+    // instrument back to how it ships — full-spectrum channel, classic pixel render, the
+    // planet's own star, the modelled picture, phase cycling from 20°. The stored keys are
+    // cleared too, or the next planet page would just restore what was reset.
+    _SCOPE_DEFAULTS: {
+      view: "full", fidelity: "classic", heroStyle: "retro", illum: "native",
+      heroSource: "model", obsIdx: 0, phaseIdx: 2, phasePlay: true,
+    },
+    scopeDirty() {
+      return Object.keys(this._SCOPE_DEFAULTS).some((k) => this[k] !== this._SCOPE_DEFAULTS[k]);
+    },
+    resetScope() {
+      Object.assign(this, this._SCOPE_DEFAULTS);
+      this._anim = null;  // let the phase cycle restart from the default position
+      ["scopeView", "scopeIllum", "planetStyle", "renderFidelity", "heroSource", "obsTelescope"]
+        .forEach((k) => { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } });
+      this.blink();
+      this._sweep();
+      this.renderAll();
+    },
     // Restart the CRT sweep animation (drop the class for a frame so CSS re-triggers it).
     _sweep() {
       this.sweep = false;
