@@ -12,6 +12,9 @@
   <script src="/static/planet-render.js?v={{ build_id }}"></script>
   <script src="/static/vendor/alpine.min.js" defer></script>
   <script src="/static/app.js?v={{ build_id }}"></script>
+  {# Copy confirmations: one shared overlay readout, so no page shifts its own layout to
+     say "copied". Deferred — nothing calls it before the first click. #}
+  <script src="/static/toast.js?v={{ build_id }}" defer></script>
   {# Jargon: the definitions (one cached file, built from data/glossary.json) and the shared
      hover popover. Deferred and fully delegated — marked terms injected later still work. #}
   <script src="/glossary.terms.{{ build_id }}.js" defer></script>
