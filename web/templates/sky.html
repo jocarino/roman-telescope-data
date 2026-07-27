@@ -37,6 +37,24 @@
   {# Sky first, controls under it — the instrument grammar of the EXOSCOPE and of any real
      radio: the display on top, the dial and switches on the panel beneath. #}
   <div class="panel skp-panel skp-map-panel">
+    {# Arriving from a planet page (/sky.html?planet=…): the star that planet orbits, named
+       and explained before the map is even read — where it is, what it takes to see it, and
+       why the whole-sky view is showing when it is under your feet. #}
+    <div class="skp-focus" id="skp-focus" hidden>
+      <div class="skp-focus-head">
+        <span id="skp-focus-title">The star you came for</span>
+        <span class="skp-focus-btns">
+          {# Phones only: the map is the point there, so where/equipment/honesty collapse
+             behind this and the one-line summary stays. #}
+          <button class="info-btn xs" id="skp-focus-i" aria-expanded="false"
+            aria-label="Why this view, and what it takes to see this star"
+            title="Why this view, and what it takes to see this star">i</button>
+          <button class="info-x" id="skp-focus-x" aria-label="Clear this star">&times;</button>
+        </span>
+      </div>
+      <p class="skp-focus-lead" id="skp-focus-lead"></p>
+      <div class="skp-focus-detail" id="skp-focus-body"></div>
+    </div>
     <div class="skp-chart-wrap">
       <div id="skp-chart"></div>
       <div class="skp-zoom" role="group" aria-label="Zoom the sky map">
@@ -224,6 +242,33 @@
   .skr-cities span { top: 0; font-size: 7.5px; color: var(--fg-faint); letter-spacing: .12em; }
   /* Phone-only view switch (desktop uses the deck's VIEW knob instead). */
   .skr-viewcell { display: none; }
+  /* The star a visitor arrived to see, above the map: amber like everything that describes
+     the real world outside (the ground, the locate lamp), not signal green. */
+  .skp-focus {
+    margin-bottom: 10px; border: 1px solid var(--line); border-left: 3px solid #cf9a4e;
+    background: var(--bg-3); padding: 8px 10px;
+  }
+  .skp-focus-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em;
+    text-transform: uppercase; color: #cf9a4e; margin-bottom: 4px;
+  }
+  /* .info-x is absolutely positioned by default (it corner-pins inside disclosure boxes);
+     here it is one of two buttons in a flex row, so it flows instead. */
+  .skp-focus-btns { display: flex; align-items: center; gap: 6px; }
+  .skp-focus-btns .info-x { position: static; }
+  .skp-focus-star { font-weight: 600; color: var(--fg); }
+  .skp-focus p { margin: 3px 0 0; font-size: 12.5px; color: var(--fg-dim); }
+  .skp-focus p b { color: var(--fg); }
+  .skp-focus .skp-worlds { margin-top: 7px; }
+  /* The one-line summary: always on, phone or desktop. */
+  .skp-focus-lead { margin: 0 !important; font-size: 13px !important; color: var(--fg) !important; }
+  /* Desktop reads the whole card at once, so its ℹ has nothing to reveal. */
+  #skp-focus-i { display: none; }
+  /* Crosshair on the focused star: the same "this one" grammar as the planet page's chart,
+     scaled from JS so it stays the same size on screen at every zoom. */
+  #skp-chart .skp-focus-mark { stroke: #cf9a4e; stroke-width: 1.6; fill: none; }
+  #skp-chart .skp-focus-mark .fm-back { stroke: #05060a; stroke-width: 4.5; opacity: .85; }
   /* Tapped-star results, inside the map panel right under the chart. */
   .skp-spot {
     margin-top: 10px; border: 1px solid var(--line); border-left: 3px solid var(--accent);
@@ -311,6 +356,13 @@
     /* A tap already opens the pinned tooltip with links, so the results panel below the
        chart would just repeat it and eat a screenful. */
     .skp-spot { display: none !important; }
+    /* The map panel goes full-bleed on phones; the focus card keeps the page's own gutter.
+       Vertical space is precious here: the summary line stays, everything else waits behind
+       the ℹ so the map still opens on screen. */
+    .skp-focus { margin: 0 12px 8px; }
+    .skp-focus-detail { display: none; }
+    .skp-focus.open .skp-focus-detail { display: block; }
+    #skp-focus-i { display: inline-flex; }
     .skp-tip { max-width: min(250px, calc(100vw - 24px)); }
   }
   .skp-dot-vis { fill: var(--accent); cursor: pointer; }

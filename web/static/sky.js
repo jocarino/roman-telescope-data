@@ -16,6 +16,13 @@
   var X0 = PL, X1 = W - PR, Y0 = PT, Y1 = H - PB;
   var MAG = { eye: 6.5, bino: 9.5, any: Infinity };
   var MAG_NAME = { eye: "to the naked eye under a dark sky", bino: "with binoculars", any: "with a telescope" };
+  // Bands from least to most equipment; a star needs the first one its magnitude fits in.
+  var BANDS = ["eye", "bino", "any"];
+  var BAND_BTN = { eye: "Naked eye", bino: "Binoculars", any: "Telescope" };
+  function bandFor(vmag) {
+    if (vmag == null) return null;         // no measured brightness: nothing to point at
+    return vmag <= MAG.eye ? "eye" : vmag <= MAG.bino ? "bino" : "any";
+  }
 
   function xOf(ra) { return X0 + (1 - (((ra % 360) + 360) % 360) / 360) * (X1 - X0); }
   function yOf(dec) { return Y0 + ((90 - dec) / 180) * (Y1 - Y0); }
@@ -40,6 +47,19 @@
     var geoState = lon != null ? "ok" : "";
     var selected = null;   // hosts shown in the "at that spot" panel
 
+    // ── arriving from a planet page: /sky.html?planet=<id> (or ?host=<star name>) ──
+    // The visitor asked for one specific star, so the page opens pointed at it: crosshaired
+    // and centred, in the view that can actually show it, with the band widened to the least
+    // equipment that reaches it. Band and view are set in memory only — a deep link must not
+    // rewrite the preferences the visitor set on their own.
+    var q = new URLSearchParams(location.search);
+    var wantPlanet = q.get("planet"), wantHost = q.get("host");
+    var focus = null;          // the host star they came to find
+    var focusWorld = null;     // the planet whose page they came from, when named
+    var focusBand = null;      // band we widened to for it, if we did
+    var focusCentred = false;  // viewBox already moved onto it
+    var viewByUser = false;    // they have since worked the VIEW control themselves
+
     // A host's chart position in the current projection; null = not drawn (below the
     // horizon in the outside view — that sky simply doesn't exist for the observer).
     function posOf(h) {
@@ -61,6 +81,17 @@
         h.planets.push({ id: p.id, name: p.name, hex: p.hex });
       });
       hosts = Object.values(byHost);
+      if (wantPlanet || wantHost) {
+        var hostName = wantHost;
+        if (wantPlanet) {
+          planets.some(function (p) {
+            if (p.id !== wantPlanet) return false;
+            hostName = p.host; focusWorld = p; return true;
+          });
+        }
+        hosts.some(function (h) { return h.name === hostName ? (focus = h, true) : false; });
+        if (focus) aimAtFocus();
+      }
       render();
       // The sky turns 0.25° per minute; keep the page honest while it sits open.
       setInterval(render, 60000);
@@ -80,6 +111,107 @@
     function latLabel() {
       var a = Math.abs(lat);
       return a < 1 ? "the equator" : a + "° " + (lat > 0 ? "N" : "S");
+    }
+
+    // ── the star a visitor arrived to find ────────────────────────────────
+    // Widen the band to the least equipment that reaches it (never narrow one they already
+    // chose — a telescope view still shows a naked-eye star), then pick the view.
+    function aimAtFocus() {
+      var need = bandFor(focus.vmag);
+      if (need && BANDS.indexOf(need) > BANDS.indexOf(mag)) { mag = need; focusBand = need; }
+      chooseFocusView();
+    }
+    // Above the horizon → "standing outside", the view that shows it where you'd look for it.
+    // Below → the whole-sky map, the only view in which sky under your feet exists at all.
+    // Once the visitor works the VIEW control themselves, that choice stands.
+    function chooseFocusView() {
+      if (!focus || viewByUser) return;
+      var next = ExoSky.altAzDeg(focus.ra, focus.dec, lat, lon).alt > 0 ? "out" : "map";
+      if (next !== view) { view = next; vb = null; }
+      focusCentred = false;
+    }
+    // Hours until this star next climbs above the horizon; null if it never sets (already
+    // handled: it would be up) or never rises at all from this latitude.
+    function hoursToRise(h) {
+      var r = Math.PI / 180;
+      var c = -Math.tan(lat * r) * Math.tan(h.dec * r);
+      if (c <= -1 || c >= 1) return null;
+      var H0 = Math.acos(c) / r;                                      // hour angle at rising
+      var H = ((ExoSky.lstDeg(lon) - h.ra) % 360 + 540) % 360 - 180;  // hour angle now
+      return (((-H0 - H) % 360 + 360) % 360) / 15.041;                // Earth turns 15.041°/h
+    }
+    function riseWords(h) {
+      var t = hoursToRise(h);
+      if (t == null) return "It never rises from this latitude — it belongs to the other " +
+        "hemisphere's sky.";
+      if (t < 1) return "It rises in about " + Math.max(1, Math.round(t * 60)) + " minutes, " +
+        "in the east.";
+      var hh = Math.floor(t), mm = Math.round((t - hh) * 60);
+      if (mm === 60) { hh += 1; mm = 0; }
+      return "It rises in about " + hh + " h" + (mm ? " " + mm + " m" : "") + ", in the east.";
+    }
+
+    function drawFocus() {
+      var box = $("skp-focus");
+      if (!focus) { box.hidden = true; return; }
+      box.hidden = false;
+      $("skp-focus-title").textContent = focusWorld
+        ? "The star " + focusWorld.name + " orbits" : "The star you came for";
+
+      var where = focus.alt > 0
+        ? "<b>Above your horizon right now</b> — " + Math.round(focus.alt) + "° up, facing " +
+          ExoSky.compass(focus.az) + ". The crosshair on the map is it."
+        : "<b>Below your horizon right now</b> from " + latLabel() + ", so the whole-sky map " +
+          "is showing instead of the outside view — the crosshair marks where it sits on the " +
+          "celestial sphere. " + riseWords(focus);
+      if (lon == null) {
+        where += " Your east–west position is estimated from your device's clock — press " +
+          "◎ Use my location for the real thing.";
+      }
+
+      var need = bandFor(focus.vmag), gear;
+      if (need == null) {
+        gear = "This star has <b>no measured visual brightness</b> in the catalog — some " +
+          "hosts (microlensing detections, very faint or very red stars) simply carry no V " +
+          "magnitude — so it is never listed as visible here. Its position is still real.";
+      } else {
+        gear = "At magnitude <b>V " + focus.vmag.toFixed(1) + "</b> it takes " +
+          (need === "eye" ? "<b>no equipment at all</b> — naked-eye under a dark sky"
+            : need === "bino" ? "<b>binoculars</b> — too faint for the eye"
+            : "<b>a telescope</b> — well past binocular reach") + ".";
+        if (focusBand) gear += " The band is set to " + BAND_BTN[focusBand] + " for you.";
+      }
+
+      // The one line that always shows: which star, where to look, what it takes. Everything
+      // else is the detail — open on desktop, behind the ℹ on a phone.
+      $("skp-focus-lead").innerHTML =
+        '<span class="skp-focus-star">' + focus.name + "</span> · " +
+        (focus.alt > 0
+          ? Math.round(focus.alt) + "° up, facing " + ExoSky.compass(focus.az)
+          : "below your horizon now") + " · " +
+        (need == null ? "no brightness measured"
+          : need === "eye" ? "naked eye" : need === "bino" ? "binoculars" : "telescope");
+      $("skp-focus-body").innerHTML =
+        "<p>" + where + "</p><p>" + gear + "</p>" +
+        "<p>What you could ever see is the star itself — no exoplanet is visible to the eye " +
+        "through any telescope. " + focus.name + " carries " + focus.planets.length +
+        (focus.planets.length === 1 ? " known world" : " known worlds") + ":</p>" +
+        worldChips(focus);
+    }
+
+    // Centre the viewport on the focused star, zoomed one step in so it is picked out of the
+    // field. Runs once per view change, never on the minute tick — the map must not yank
+    // itself back while someone is panning around.
+    function centreOnFocus() {
+      if (!focus || focusCentred) return;
+      var p = posOf(focus);
+      if (!p) { focusCentred = true; return; }   // below the horizon in the outside view
+      var w = maxVbW() / 2;
+      vb = { x: p.x - w / 2, y: 0, w: w, h: 0 };
+      clampVb();                                  // derives the height from the container
+      vb.y = p.y - vb.h / 2;
+      applyVb();
+      focusCentred = true;
     }
 
     function render() {
@@ -118,6 +250,8 @@
         "eye through any telescope.";
 
       drawChart(vis);
+      centreOnFocus();
+      drawFocus();
       drawList(vis);
       drawSpot();
     }
@@ -220,6 +354,19 @@
       // No in-SVG ground label: the legend is a screen-pinned overlay in the template, so
       // panning and zooming can never move it out of view.
       s += dim + '<polyline class="hzn-line" points="' + groundLine + '"/>' + lit;
+      // Crosshair on the star this visit is about, on top of everything and inert to clicks
+      // (the dot underneath keeps taking them). Its scale is set in applyVb.
+      var fp = focus && posOf(focus);
+      if (fp) {
+        // Drawn twice: a dark backing pass so the mark survives the Kepler field (hundreds of
+        // lit dots packed into one patch), then the amber one over it.
+        var arms = '<circle cx="0" cy="0" r="10"/>' +
+          '<line x1="0" y1="-22" x2="0" y2="-14"/><line x1="0" y1="14" x2="0" y2="22"/>' +
+          '<line x1="-22" y1="0" x2="-14" y2="0"/><line x1="14" y1="0" x2="22" y2="0"/>';
+        s += '<g class="skp-focus-mark" pointer-events="none" data-x="' + fp.x.toFixed(1) +
+          '" data-y="' + fp.y.toFixed(1) + '" transform="translate(' + fp.x.toFixed(1) + " " +
+          fp.y.toFixed(1) + ')"><g class="fm-back">' + arms + "</g>" + arms + "</g>";
+      }
       chartEl.innerHTML = s + "</svg>";
       applyVb();
     }
@@ -262,6 +409,13 @@
       var s = Math.sqrt(vb.w / maxVbW());
       chartEl.style.setProperty("--skp-rvis", (3 * Math.max(0.45, s)).toFixed(2) + "px");
       chartEl.style.setProperty("--skp-rdim", (2 * Math.max(0.5, s)).toFixed(2) + "px");
+      // The crosshair is drawn at a fixed size in SVG units, so rescale it the same way the
+      // dots are — otherwise zooming in blows it up off the screen.
+      var fm = svg.querySelector(".skp-focus-mark");
+      if (fm) {
+        fm.setAttribute("transform", "translate(" + fm.dataset.x + " " + fm.dataset.y +
+          ") scale(" + Math.max(0.45, s).toFixed(3) + ")");
+      }
       // Axis labels are sized in SVG units, so a zoomed-in view magnifies them — worst on
       // a phone, where the fit is already zoomed. Convert a fixed screen size into the
       // current viewBox's units instead, so ticks stay small at every zoom.
@@ -510,6 +664,21 @@
       drawSpot();
     });
 
+    // Phone-only ℹ: unfolds the where/equipment/worlds detail the desktop card shows outright.
+    $("skp-focus-i").addEventListener("click", function () {
+      var open = $("skp-focus").classList.toggle("open");
+      this.classList.toggle("on", open);
+      this.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+
+    // Dismissing the arrived-at star drops the crosshair and the ?planet= from the URL, so a
+    // reload doesn't drag it back.
+    $("skp-focus-x").addEventListener("click", function () {
+      focus = null; focusWorld = null; focusBand = null;
+      if (history.replaceState) history.replaceState(null, "", location.pathname);
+      render();
+    });
+
     var latDebounce = null;
     $("skp-lat").addEventListener("input", function () {
       lat = +this.value;
@@ -526,6 +695,7 @@
         mag = b.dataset.mag;
         localStorage.setItem("skyMag", mag);
         selected = null;
+        focusBand = null;   // they set the band themselves now; stop claiming we did
         render();
       });
     });
@@ -536,6 +706,10 @@
       localStorage.setItem("skyView", view);
       selected = null;
       vb = null;  // re-fit and re-centre for the new projection
+      // Their choice now outranks the deep link's — but keep pointing at the star, in the
+      // projection they just asked for.
+      viewByUser = true;
+      focusCentred = false;
       render();
     }
     function toggleView() { setView(view === "out" ? "map" : "out"); }
@@ -581,7 +755,11 @@
           lon = pos.coords.longitude;
           localStorage.setItem("skyLat", String(lat));
           localStorage.setItem("skyLon", String(lon));
-          geoState = "ok"; updateGeoBtn(); render();
+          geoState = "ok"; updateGeoBtn();
+          // A real position can move the focused star across the horizon — re-decide the
+          // view now that "your sky" means the actual one.
+          if (focus) { recompute(); chooseFocusView(); }
+          render();
         },
         function () { geoState = "err"; updateGeoBtn(); },
         { timeout: 12000, maximumAge: 600000 }
