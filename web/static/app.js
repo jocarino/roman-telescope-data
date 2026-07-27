@@ -432,6 +432,121 @@ document.addEventListener("alpine:init", () => {
     },
   }));
 
+  // 404: the cockpit. Runs the hyperspace window and the RANDOM WORLD key. The window is a
+  // starfield flown through at speed: stars are 3D points streaking as they pass the camera,
+  // drawn into a deliberately low-res buffer and upscaled by the browser, so it pixelates the
+  // same way the planet renders do. Honours prefers-reduced-motion (one static frame) and
+  // stops while the tab is hidden.
+  Alpine.data("cockpit", (cfg) => ({
+    indexUrl: (cfg && cfg.indexUrl) || null,
+    path: "",
+    rolling: false,
+    _raf: 0,
+    _stars: [],
+
+    init() {
+      this.path = location.pathname + location.search || "/";
+      window.__randomGo = () => this.roll();   // the site-wide R shortcut works here too
+      this.$nextTick(() => this.fly());
+    },
+    destroy() {
+      cancelAnimationFrame(this._raf);
+    },
+
+    // Jump to a random planet. Like the detail page, the index isn't on this page, so fetch
+    // it on demand — the key reads "plotting a course…" while that's in flight.
+    async roll() {
+      if (this.rolling) return;
+      if (!window.PLANETS || !window.PLANETS.length) {
+        if (!this.indexUrl) return;
+        this.rolling = true;
+        try {
+          const res = await fetch(this.indexUrl);
+          window.PLANETS = await res.json();
+        } catch (e) {
+          this.rolling = false;
+          return;
+        }
+      }
+      ExoRandom.go(window.PLANETS);
+    },
+
+    fly() {
+      const cv = this.$refs.hyper;
+      if (!cv) return;
+      const ctx = cv.getContext("2d");
+      const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      // One accent-tinted star in six, so the field belongs to the current palette.
+      const accent = getComputedStyle(document.documentElement)
+        .getPropertyValue("--accent").trim() || "#61dafb";
+      const COUNT = 340, SPEED = 0.022, SPREAD = 1.9;
+      const spawn = (s) => {
+        s.x = (Math.random() - 0.5) * SPREAD;
+        s.y = (Math.random() - 0.5) * SPREAD;
+        s.z = 0.35 + Math.random() * 0.65;   // 1 = far, 0 = at the camera
+        s.c = Math.random() < 0.17 ? accent : "#d3dae8";
+        return s;
+      };
+      this._stars = Array.from({ length: COUNT }, () => spawn({}));
+
+      let w = 0, h = 0;
+      const fit = () => {
+        // Fixed 1/3 scale: the chunky pixels are the point, so ignore devicePixelRatio.
+        const r = cv.getBoundingClientRect();
+        w = cv.width = Math.max(1, Math.round(r.width / 3));
+        h = cv.height = Math.max(1, Math.round(r.height / 3));
+        ctx.fillStyle = "#04060a";
+        ctx.fillRect(0, 0, w, h);
+      };
+      fit();
+      // Resizing clears the buffer. Under prefers-reduced-motion nothing is animating, so the
+      // one static frame has to be redrawn or the window is left blank.
+      if (window.ResizeObserver) {
+        new ResizeObserver(() => { fit(); if (still) draw(false); }).observe(cv);
+      }
+
+      const draw = (step) => {
+        // Fade rather than clear: each star leaves a short trail behind it.
+        ctx.fillStyle = step ? "rgba(4, 6, 10, .28)" : "#04060a";
+        ctx.fillRect(0, 0, w, h);
+        const cx = w / 2, cy = h / 2, f = w * 0.62;
+        for (const s of this._stars) {
+          const z0 = s.z;
+          if (step) s.z -= SPEED;
+          if (s.z <= 0.06) { spawn(s); continue; }
+          const x = cx + (s.x / s.z) * f, y = cy + (s.y / s.z) * f;
+          if (x < -40 || x > w + 40 || y < -40 || y > h + 40) { if (step) spawn(s); continue; }
+          const near = 1 - s.z;                       // brighter and fatter as it passes
+          ctx.globalAlpha = Math.min(1, 0.3 + near * 1.2);
+          ctx.fillStyle = s.c;
+          if (step) {
+            const x0 = cx + (s.x / z0) * f, y0 = cy + (s.y / z0) * f;
+            ctx.strokeStyle = s.c;
+            ctx.lineWidth = near > 0.72 ? 2 : 1;
+            ctx.beginPath();
+            ctx.moveTo(x0, y0);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+          } else {
+            ctx.fillRect(Math.round(x), Math.round(y), near > 0.72 ? 2 : 1, near > 0.72 ? 2 : 1);
+          }
+        }
+        ctx.globalAlpha = 1;
+      };
+
+      if (still) { draw(false); return; }
+      const loop = () => {
+        draw(true);
+        this._raf = requestAnimationFrame(loop);
+      };
+      loop();
+      document.addEventListener("visibilitychange", () => {
+        cancelAnimationFrame(this._raf);
+        if (!document.hidden) loop();
+      });
+    },
+  }));
+
   // Compare: two planets side by side, over the same fetched index. Shows the colour-driving
   // data (temperature, host star, atmosphere, size) plus fun facts (distance, discovery).
   Alpine.data("compare", (cfg) => ({
