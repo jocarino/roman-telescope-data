@@ -971,41 +971,35 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
    page. Definitions come from data/glossary.json via the g() macro; the popover itself is
    built once by glossary.js. */
 .gloss {
-  display: inline; margin: 0; padding: 0 1px 2px; border: 0; border-radius: 0;
+  display: inline; margin: 0; padding: 0 0 1px; border: 0; border-radius: 0;
   font: inherit; letter-spacing: inherit; text-transform: inherit; text-align: inherit;
   color: inherit; cursor: help; -webkit-appearance: none; appearance: none;
   background-color: transparent;
-  /* A rule drawn in pixels, not a hairline: 3 on, 2 off, 2 tall. */
+  /* A 1-bit dither underline: one pixel on, one off, one tall, tucked under the baseline.
+     At a glance it reads as texture rather than a line — present, not announcing itself.
+     (A chunkier dashed rule, or any floating marker glyph, pulls the eye off the sentence.) */
   background-image: linear-gradient(90deg,
-    color-mix(in srgb, var(--accent) 62%, transparent) 0 3px, transparent 3px 5px);
+    color-mix(in srgb, var(--accent) 72%, transparent) 0 1px, transparent 1px 2px);
   background-repeat: repeat-x;
-  background-size: 5px 2px;
+  background-size: 2px 1px;
   background-position: 0 100%;
 }
-/* The pixel: one accent square riding high, like a footnote marker rendered on a 1-bit grid. */
-.gloss::after {
-  content: ""; display: inline-block; width: 4px; height: 4px; margin-left: 3px;
-  vertical-align: .5em; background: var(--accent); opacity: .55;
-}
-/* Hover/focus inverts the word into an accent block with a dark glyph — a terminal
-   selection, the same accent-on-dark treatment as .badge.on and the LED buttons. */
+/* Hover/focus fills the dither in — the same pixels, all lit — and brings the word up to
+   full brightness. The definition itself is the real feedback, so this stays a whisper. */
 .gloss:hover, .gloss:focus-visible, .gloss.on {
-  outline: 0; color: #05121f;
-  background-color: var(--accent);
-  background-image: none;
-  text-shadow: none;
-}
-.gloss:hover::after, .gloss:focus-visible::after, .gloss.on::after {
-  background: #05121f; opacity: 1;
+  outline: 0; color: var(--fg);
+  background-image: linear-gradient(90deg, var(--accent) 0 100%);
 }
 /* Chips that already have a border and a fill of their own (the measured/computed/assumed
    origin tags, the provenance badges) opt in with data-term + .gloss-chip: they keep the pixel
    marker so you can tell there's more to read, but skip the underline, which would only fight
    the chip's own box. */
 .gloss-chip { cursor: help; }
+/* A chip has a border of its own, so there is nowhere to tuck an underline: one dim pixel
+   after the label carries the signal instead. Kept small and quiet for the same reason. */
 .gloss-chip::after {
-  content: ""; display: inline-block; width: 4px; height: 4px; margin-left: 4px;
-  vertical-align: .45em; background: var(--accent); opacity: .6;
+  content: ""; display: inline-block; width: 3px; height: 3px; margin-left: 4px;
+  vertical-align: .45em; background: var(--accent); opacity: .45;
 }
 .gloss-chip:hover::after, .gloss-chip.on::after { opacity: 1; }
 /* Keyboard focus still needs a visible ring where the accent block alone could be missed. */
