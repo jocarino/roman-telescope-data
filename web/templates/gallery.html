@@ -92,30 +92,33 @@
     </div>
     {# The signature control: which colour every swatch in the grid IS. Not a display filter —
        the colour chips, the brightness sort and the similar-colour sort all re-key to it, so
-       the whole gallery behaves as though the chosen view were the only colour there is. Both
-       labels say what they are in plain words; the ℹ carries the caveat. #}
+       the whole gallery behaves as though the chosen view were the only colour there is. #}
     <div class="view-bar" x-data="{ note: false }" @keydown.escape="note = false">
       {# One switch, not two sides: off = the full modelled spectrum (the gallery's normal
          state), on = the same planets rebuilt from Roman's four bands. The four chips ARE
          those bands, drawn in the colour of each band's centre wavelength — 835 nm is
-         infrared, so it lights up as good as black. #}
-      <button type="button" class="view-toggle" :class="view === 'roman' ? 'on' : ''"
-        @click="toggleView()" :aria-pressed="view === 'roman'"
-        title="Show every planet as the Roman Coronagraph's four bands would see it">
-        <svg class="tele-ic" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
-          <path d="M1.6 8.9 L9.3 4.4 L10.9 7.2 L3.2 11.7 Z" fill="currentColor"/>
-          <path d="M10.4 6.3 L14.6 3.9 L15.6 5.6 L11.4 8.1 Z" fill="currentColor"/>
-          <path d="M6.2 10.4 L5 14.4 M6.6 10.6 L8.6 14.4 M3.6 14.4 L9.8 14.4"
-            stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/>
-        </svg>
-        <span class="view-toggle-txt">Seen from Roman</span>
-        <span class="view-bands" aria-hidden="true">
-          <i style="background:#ffe000"></i><i style="background:#ff3000"></i>
-          <i style="background:#7a0a00"></i><i style="background:#2e0603"></i>
-        </span>
-      </button>
-      <button class="info-btn sm" @click="note = !note" :class="note ? 'on' : ''"
-        aria-label="What these two views mean" title="What these two views mean">i</button>
+         infrared, so it lights up as good as black. The ℹ is the switch's own right-hand
+         segment (one box, one hairline divider), not a separate button parked beside it. #}
+      <div class="view-switch" :class="view === 'roman' ? 'on' : ''">
+        <button type="button" class="view-toggle" @click="toggleView()"
+          :aria-pressed="view === 'roman'"
+          title="Show every planet as the Roman Coronagraph's four bands would see it">
+          <svg class="tele-ic" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+            <path d="M1.6 8.9 L9.3 4.4 L10.9 7.2 L3.2 11.7 Z" fill="currentColor"/>
+            <path d="M10.4 6.3 L14.6 3.9 L15.6 5.6 L11.4 8.1 Z" fill="currentColor"/>
+            <path d="M6.2 10.4 L5 14.4 M6.6 10.6 L8.6 14.4 M3.6 14.4 L9.8 14.4"
+              stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+          </svg>
+          <span class="view-toggle-txt">Seen from Roman</span>
+          <span class="view-bands" aria-hidden="true">
+            <i style="background:#ffe000"></i><i style="background:#ff3000"></i>
+            <i style="background:#7a0a00"></i><i style="background:#2e0603"></i>
+          </span>
+        </button>
+        <button type="button" class="view-info" @click="note = !note" :class="note ? 'open' : ''"
+          :aria-expanded="note" aria-label="What this switch changes"
+          title="What this switch changes">i</button>
+      </div>
       <div class="view-note" x-show="note" x-cloak @click.outside="note = false">
         <button class="info-x" @click="note = false" aria-label="Close">&times;</button>
         <p><b>Full spectrum</b> — the colour of the planet's whole modelled reflected-light
