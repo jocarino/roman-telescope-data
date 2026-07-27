@@ -36,7 +36,7 @@
 
   {# Sky first, controls under it — the instrument grammar of the EXOSCOPE and of any real
      radio: the display on top, the dial and switches on the panel beneath. #}
-  <div class="panel skp-panel">
+  <div class="panel skp-panel skp-map-panel">
     <div class="skp-chart-wrap">
       <div id="skp-chart"></div>
       <div class="skp-zoom" role="group" aria-label="Zoom the sky map">
@@ -46,6 +46,9 @@
       </div>
       {# Screen-pinned legend, not an SVG label — panning must never lose it. #}
       <div class="skp-ground-lbl" aria-hidden="true">▒ shaded = ground, below your horizon</div>
+      {# The vertical axis, as real DOM text over the chart's left edge: crisp at any zoom
+         and never panned away (in-SVG labels were both scaled and scrollable). #}
+      <div class="skp-yaxis" id="skp-yaxis" aria-hidden="true"></div>
     </div>
     {# What you just tapped, inside the map's own panel: the answer has to appear where the
        eye already is, or a click reads as "nothing happened". #}
@@ -120,11 +123,14 @@
         <span class="knob-name">View</span>
         <span class="knob-val" id="skp-viewval">Standing outside</span>
       </div>
-      {# Phones get a flat button instead of the knob: a knob costs ~120px of precious
-         vertical space for one binary choice. #}
+      {# Phones get latching buttons instead of the knob (a knob costs ~120px of precious
+         vertical space). Both options are shown with the current one lit — a single
+         "switch to…" button looked identical in either state. #}
       <div class="skr-cell skr-viewcell">
-        <button class="led-btn skr-viewbtn" id="skp-viewbtn"><span class="led on"></span><span
-          id="skp-viewbtn-txt">Switch to whole-sky map</span></button>
+        <div class="skr-btns" role="group" aria-label="How the sky is drawn">
+          <button class="led-btn skp-view-btn" data-view="out"><span class="led"></span>Standing outside</button>
+          <button class="led-btn skp-view-btn" data-view="map"><span class="led"></span>Whole-sky map</button>
+        </div>
       </div>
     </div>
   </div>
@@ -263,10 +269,14 @@
   #skp-chart .skp-dot-vis { r: var(--skp-rvis, 3px); }
   #skp-chart .skydot { width: var(--skp-rdim, 2px); height: var(--skp-rdim, 2px); }
   #skp-chart .tick { font-size: var(--skp-tick, 10px); }
-  /* Altitude / declination labels live inside the plot (JS pins them to the viewport's
-     left edge). No halo: at ~8px a stroke eats the letterforms from the outside in — the
-     dim fill alone reads cleanly against the sky, exactly like the compass labels. */
-  #skp-chart .ylab { fill: var(--fg-dim); }
+  /* Altitude / declination axis: HTML, not SVG, so it never scales with zoom or scrolls
+     away with a pan. Each label gets a dark chip so it reads over the starfield. */
+  .skp-yaxis { position: absolute; inset: 0 auto 0 0; width: 46px; pointer-events: none; z-index: 5; }
+  .skp-yaxis span {
+    position: absolute; left: 6px; transform: translateY(-50%);
+    font-family: var(--mono); font-size: 9px; letter-spacing: .04em; color: var(--fg-dim);
+    background: rgba(5, 6, 10, .72); padding: 1px 4px; white-space: nowrap;
+  }
   .skp-zoom { position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; z-index: 5; }
   .skp-zoom button {
     width: 32px; height: 32px; font-family: var(--mono); font-size: 15px; line-height: 1;
@@ -277,7 +287,10 @@
   @media (max-width: 760px) {
     /* Immersive on a phone: the sky breaks out of the panel to the full viewport width and
        most of the screen height — the full declination range stays visible, you pan in RA. */
-    .skp-chart-wrap { width: 100vw; margin-left: calc(50% - 50vw); }
+    /* Full-bleed by shedding the page's 20px padding and the panel's own 16px, NOT by
+       100vw: viewport units include the scrollbar, which made the page 15px wider than the
+       screen and let it scroll sideways — clipping everything pinned to the left edge. */
+    .skp-map-panel { margin-inline: -20px; padding-inline: 0; border-inline: 0; }
     #skp-chart { aspect-ratio: auto; height: 62vh; }
     /* Compact deck: dial, LOCATE, BAND — three tight full-width rows and nothing else.
        The sub-captions go (the buttons already say what they do) and the VIEW knob is
@@ -293,7 +306,7 @@
     .skr-geo, .skr-btns { width: 100%; }
     .skr .led-btn { justify-content: center; padding: 7px 6px; font-size: 9.5px; }
     .skr-btns .led-btn { flex: 1; gap: 5px; }
-    .skr-viewbtn { width: 100%; }
+    .skr-viewcell .skr-btns { width: 100%; }
     .skp-panel .sky-note { margin-top: 8px; }
     /* A tap already opens the pinned tooltip with links, so the results panel below the
        chart would just repeat it and eat a screenful. */

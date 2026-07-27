@@ -9,9 +9,9 @@
 
   // Chart geometry (SVG viewBox units), same conventions as the server-rendered charts:
   // RA increases LEFTWARD, 24h at the left edge, 0h at the right.
-  // Padding is deliberately thin: the altitude/declination labels sit INSIDE the plot (see
-  // .ylab), so an outer gutter would be dead space — and on a zoomed-in phone view every
-  // unit of padding costs several pixels of sky.
+  // Padding is deliberately thin: the vertical scale is an HTML overlay (see .skp-yaxis),
+  // so an outer gutter would be dead space — and on a zoomed-in phone view every unit of
+  // padding costs several pixels of sky.
   var W = 900, H = 400, PL = 8, PR = 8, PT = 8, PB = 20;
   var X0 = PL, X1 = W - PR, Y0 = PT, Y1 = H - PB;
   var MAG = { eye: 6.5, bino: 9.5, any: Infinity };
@@ -98,8 +98,12 @@
         knob.style.setProperty("--a", view === "out" ? "-34deg" : "34deg");
         $("skp-viewval").textContent = view === "out" ? "Standing outside" : "Whole-sky map";
       }
-      $("skp-viewbtn-txt").textContent =
-        view === "out" ? "Switch to whole-sky map" : "Switch to standing outside";
+      document.querySelectorAll(".skp-view-btn[data-view]").forEach(function (b) {
+        var on = b.dataset.view === view;
+        b.classList.toggle("on", on);
+        var l = b.querySelector(".led");
+        if (l) l.classList.toggle("on", on);
+      });
 
       var vis = hosts.filter(function (h) { return h.vis; })
         .sort(function (a, b) { return a.vmag - b.vmag; });
@@ -174,8 +178,7 @@
           var ya = yAlt(alt);
           s += '<line x1="' + X0 + '" y1="' + ya.toFixed(1) + '" x2="' + X1 + '" y2="' +
             ya.toFixed(1) + '" class="grid"/>';
-          s += '<text x="' + (X0 + 4) + '" y="' + (ya + 3).toFixed(1) + '" class="tick ylab">' +
-            alt + "°</text>";
+          // No in-SVG label: the vertical scale is an HTML overlay (drawYAxis).
         });
         var gy = yAlt(0).toFixed(1);
         groundLine = X0 + "," + gy + " " + X1 + "," + gy;
@@ -193,10 +196,7 @@
           var yy = yOf(dec);
           s += '<line x1="' + X0 + '" y1="' + yy.toFixed(1) + '" x2="' + X1 + '" y2="' + yy.toFixed(1) +
             '" class="grid' + (dec === 0 ? " eq" : "") + '"/>';
-          if (dec % 60 === 0) {
-            s += '<text x="' + (X0 + 4) + '" y="' + (yy + 3).toFixed(1) + '" class="tick ylab">' +
-              (dec ? (dec > 0 ? "+" : "") + dec + "°" : "0°") + "</text>";
-          }
+          // Labels come from the HTML overlay (drawYAxis), not the canvas.
         });
         var g = horizonGeom();
         groundLine = g.line;
@@ -271,12 +271,25 @@
         (tickPx * vb.w / (rect2.width || W)).toFixed(2) + "px");
       // Altitude / declination labels ride the viewport's left edge, so panning east-west
       // never leaves the vertical scale unreadable.
-      // Inset comfortably: hugging the exact edge puts them under the container's clip on
-      // the full-bleed phone layout.
-      svg.querySelectorAll(".ylab").forEach(function (t) {
-        t.setAttribute("x", (vb.x + vb.w * 0.03).toFixed(1));
-      });
+      drawYAxis();
     }
+    // The vertical scale, as HTML pinned over the chart's left edge: each tick's canvas y
+    // becomes a percentage of the current viewBox, so it stays put through pans and zooms
+    // and never shrinks below legibility.
+    function drawYAxis() {
+      var box = $("skp-yaxis");
+      if (!box || !vb) return;
+      var ticks = view === "out"
+        ? [[yAlt(60), "60°"], [yAlt(30), "30°"], [yAlt(0), "horizon"]]
+        : [[yOf(60), "+60°"], [yOf(30), "+30°"], [yOf(0), "0°"],
+           [yOf(-30), "−30°"], [yOf(-60), "−60°"]];
+      box.innerHTML = ticks.map(function (t) {
+        var pct = (t[0] - vb.y) / vb.h * 100;
+        if (pct < 2 || pct > 98) return "";  // off the current viewport
+        return '<span style="top:' + pct.toFixed(2) + '%">' + t[1] + "</span>";
+      }).join("");
+    }
+
     function zoomBy(f) {
       if (!vb) return;
       var cx = vb.x + vb.w / 2, cy = vb.y + vb.h / 2;
@@ -517,19 +530,23 @@
       });
     });
     // The VIEW knob toggles between the two projections (click, Enter, or Space).
-    function toggleView() {
-      view = view === "out" ? "map" : "out";
+    function setView(next) {
+      if (next === view) return;
+      view = next;
       localStorage.setItem("skyView", view);
       selected = null;
       vb = null;  // re-fit and re-centre for the new projection
       render();
     }
+    function toggleView() { setView(view === "out" ? "map" : "out"); }
     var viewKnob = $("skp-viewknob");
     viewKnob.addEventListener("click", toggleView);
     viewKnob.addEventListener("keydown", function (e) {
       if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleView(); }
     });
-    $("skp-viewbtn").addEventListener("click", toggleView);
+    document.querySelectorAll(".skp-view-btn[data-view]").forEach(function (b) {
+      b.addEventListener("click", function () { setView(b.dataset.view); });
+    });
 
     $("skp-rx-info").addEventListener("click", function () {
       var bar = $("skp-rx-info-bar");
