@@ -395,12 +395,19 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
 
     # The gallery index is fetched at runtime (not inlined) so index.html stays tiny and the
     # grid scales to thousands of planets. Cache-busted by build_id.
+    index_entries = [_index_entry(r, fiction) for r in records]
     (out / f"planets.index.{build_id}.json").write_text(
-        json.dumps([_index_entry(r, fiction) for r in records], separators=(",", ":"))
+        json.dumps(index_entries, separators=(",", ":"))
     )
+    # Boot slice: the head of the default gallery view (unfiltered, name sort), inlined into
+    # index.html so the first screens of cards paint before the multi-MB index downloads.
+    # The sort rule (lowercase, then exact, plain code-point compare) is mirrored exactly by
+    # the gallery's name sort in app.js — keep the two in sync or first paint will reshuffle.
+    boot_planets = sorted(index_entries, key=lambda e: (e["name"].lower(), e["name"]))[:150]
     gallery_html = env.get_template("gallery.html").render(
         stats=_stats(records),
         index_url=f"/planets.index.{build_id}.json",
+        boot_planets=boot_planets,
         n_modelled=len(records),
         known_total=KNOWN_TOTAL_APPROX,
         build_id=build_id,

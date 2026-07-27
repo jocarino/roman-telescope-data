@@ -30,9 +30,12 @@ document.addEventListener("alpine:init", () => {
   // Gallery: search / filter / sort over a fetched index (window.PLANETS). Cards are rendered
   // incrementally in JS and their planet is drawn only when scrolled into view, so the grid
   // scales to thousands of planets without a heavy server-rendered DOM or an inlined index.
+  // The build does inline a small boot slice (window.PLANETS_BOOT) so first paint doesn't
+  // wait on the full index download; init() swaps in the real index when it arrives.
   Alpine.data("gallery", (cfg) => ({
     indexUrl: (cfg && cfg.indexUrl) || null,
-    loaded: false,
+    loaded: false,        // the FULL index has arrived: counts and dropdowns are trustworthy
+    ready: false,         // enough planets to paint cards (the inlined boot slice counts)
     _results: null,       // cached ordered+filtered array for the current render pass
     _shown: 0,            // how many cards appended to the grid so far
     _batch: 60,           // cards appended per scroll step
@@ -140,7 +143,8 @@ document.addEventListener("alpine:init", () => {
     // Clicking either side of a two-state toggle flips it — including the already-active side.
     toggleStyle() { this.setStyle(this.style === "retro" ? "smooth" : "retro"); },
     toggleFidelity() { this.setFidelity(this.fidelity === "classic" ? "stylised" : "classic"); },
-    // Fetch the index, wire up lazy rendering, and honour /?near= and /?family= deep links.
+    // Paint the inlined boot slice immediately, fetch the full index in the background, and
+    // honour /?near= and /?family= deep links.
     async init() {
       const params = new URLSearchParams(location.search);
       const near = params.get("near");
@@ -150,14 +154,6 @@ document.addEventListener("alpine:init", () => {
       if (params.get("fiction") === "1") this.fic = true;
       const hz = params.get("hz");
       if (hz && this.hzLabels[hz]) this.hz = hz;
-
-      try {
-        const res = await fetch(this.indexUrl);
-        window.PLANETS = await res.json();
-      } catch (e) { window.PLANETS = []; }
-      this._map = {};
-      window.PLANETS.forEach((p) => (this._map[p.id] = p));
-      this.loaded = true;
 
       // Append the next batch as the sentinel nears the viewport (infinite scroll).
       this._loadIO = new IntersectionObserver((entries) => {
@@ -179,17 +175,46 @@ document.addEventListener("alpine:init", () => {
 
       window.__randomGo = () => this.randomGo();  // wire the R shortcut to this gallery
 
-      this._rerender();
+      // First paint: the build inlines the head of the default (name-sorted, unfiltered) view,
+      // so the first screens of cards render without waiting for the multi-MB index. Deep links
+      // change the ordering/filtering, so they wait for the real thing.
+      const boot = window.PLANETS_BOOT;
+      const deepLinked = this.nearId || this.family || this.fic || this.hz !== "all";
+      if (!deepLinked && boot && boot.length) this._adopt(boot, false);
+
+      try {
+        const res = await fetch(this.indexUrl);
+        this._adopt(await res.json(), true);
+      } catch (e) { if (!this.ready) this._adopt([], true); }
+    },
+    // Swap in a planet list. When the full index lands after the boot slice already painted,
+    // keep the cards on screen if they're still the correct prefix of the full results
+    // (they are, unless the user filtered/sorted mid-download); otherwise redraw in place
+    // without the scroll-to-top a user-driven rerender does.
+    _adopt(planets, full) {
+      window.PLANETS = planets;
+      this._map = {};
+      planets.forEach((p) => (this._map[p.id] = p));
+      const first = !this.ready;
+      this.ready = true;
+      if (full) this.loaded = true;
+      if (first) { this._rerender(); return; }
+      const results = this.results();
+      const samePrefix = this._results && this._shown <= results.length &&
+        this._results.slice(0, this._shown).every((p, i) => p.id === results[i].id);
+      this._results = results;
+      if (!samePrefix) { this.$refs.grid.replaceChildren(); this._shown = 0; }
+      this._fill();
     },
     // Jump to a random planet — within the current filters (far more delightful than fully
     // random), falling back to the whole catalog when the filter matches nothing.
     randomGo() {
-      if (!this.loaded) return;
+      if (!this.ready) return;
       ExoRandom.go(this._results && this._results.length ? this._results : window.PLANETS);
     },
     // --- Incremental grid rendering ---------------------------------------------------------
     _rerender() {
-      if (!this.loaded) return;
+      if (!this.ready) return;
       window.scrollTo(0, 0);  // results changed: show them from the top, not mid-scroll
       this._results = this.results();
       this.$refs.grid.replaceChildren();
@@ -198,7 +223,7 @@ document.addEventListener("alpine:init", () => {
     },
     // Append batches until the sentinel is pushed out of the pre-load zone (or results run out).
     _fill() {
-      if (!this.loaded || !this._results) return;
+      if (!this.ready || !this._results) return;
       if (this._shown >= this._results.length) return;
       this._appendBatch();
       requestAnimationFrame(() => {
@@ -208,7 +233,7 @@ document.addEventListener("alpine:init", () => {
       });
     },
     _appendBatch() {
-      if (!this.loaded || !this._results) return;
+      if (!this.ready || !this._results) return;
       const next = this._results.slice(this._shown, this._shown + this._batch);
       if (!next.length) return;
       const frag = document.createDocumentFragment();
@@ -417,7 +442,14 @@ document.addEventListener("alpine:init", () => {
       } else {
         const s = this.sort;
         items.sort((a, b) => {
-          if (s === "name") return a.name.localeCompare(b.name);
+          // Name sort is a plain lowercase code-unit compare, NOT localeCompare: the build
+          // pre-sorts the inlined boot slice with the exact same rule (web/build.py), so the
+          // first-paint cards are guaranteed to be the head of the full sorted list.
+          if (s === "name") {
+            const x = a.name.toLowerCase(), y = b.name.toLowerCase();
+            if (x !== y) return x < y ? -1 : 1;
+            return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+          }
           if (s === "temp") return (b.temp || 0) - (a.temp || 0);
           if (s === "lum") return (b.lum || 0) - (a.lum || 0);
           if (s === "dist") return (a.dist ?? Infinity) - (b.dist ?? Infinity); // nearest, unknowns last
