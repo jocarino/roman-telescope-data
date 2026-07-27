@@ -104,9 +104,11 @@
       {{ dice_icon() }}
     </button>
     {# The hamburger (all viewports): everything except the colour filter + search lives here.
-       Each section collapses (expanded by default) so the menu isn't one long scroll; `shut`
-       tracks which sections the user has folded, and persists while the page is open. #}
-    <div class="dropdown" x-data="{ open: false, shut: {} }" @keydown.escape="open=false"
+       Every section starts collapsed, so the menu opens as a short list of headings rather
+       than one long scroll. Which ones you open is remembered across visits (secOpen/
+       toggleSec on the gallery component, stored in localStorage) — only `open`, the menu
+       itself, is per-page-view state. #}
+    <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
       @click.outside="open=false">
       <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
         :class="sort !== 'name' || prov !== 'all' || ptype !== 'all' || disc !== 'all' || distBand !== 'all' || hz !== 'all' || fic ? 'active' : ''"
@@ -130,18 +132,18 @@
             <span class="fic-count" x-show="loaded" x-cloak x-text="ficCount()"></span>
           </button>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="shut.prov = !shut.prov"
-          :aria-expanded="!shut.prov"><span>How real<span class="dd-sub">modelled vs measured colour</span></span>
-          <span class="dd-chev" x-text="shut.prov ? '▸' : '▾'"></span></button>
-        <div class="dd-sec-body" x-show="!shut.prov">
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('prov')"
+          :aria-expanded="secOpen('prov')"><span>How real<span class="dd-sub">modelled vs measured colour</span></span>
+          <span class="dd-secend"><i class="dd-dot" x-show="secActive('prov')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('prov') ? '▾' : '▸'"></span></span></button>
+        <div class="dd-sec-body" x-show="secOpen('prov')">
           <template x-for="[val, label] in provOptions()" :key="'p' + val">
             <button :class="prov === val ? 'on' : ''" @click="prov = val" x-text="label"></button>
           </template>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="shut.ptype = !shut.ptype"
-          :aria-expanded="!shut.ptype"><span>Planet type<span class="dd-sub">by size + temperature</span></span>
-          <span class="dd-chev" x-text="shut.ptype ? '▸' : '▾'"></span></button>
-        <div class="dd-sec-body" x-show="!shut.ptype">
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('ptype')"
+          :aria-expanded="secOpen('ptype')"><span>Planet type<span class="dd-sub">by size + temperature</span></span>
+          <span class="dd-secend"><i class="dd-dot" x-show="secActive('ptype')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('ptype') ? '▾' : '▸'"></span></span></button>
+        <div class="dd-sec-body" x-show="secOpen('ptype')">
           <template x-for="[val, label] in typeOptions()" :key="'t' + val">
             <button :class="ptype === val ? 'on' : ''" @click="ptype = val" x-text="label"></button>
           </template>
@@ -149,10 +151,10 @@
         {# The habitable-zone lens. "Liquid water" is the question every visitor arrives with,
            so it sits high in the menu — but the label says "could", the options name the
            failure cases plainly, and the ℹ spells out that this is orbital distance only. #}
-        <button type="button" class="dd-head dd-sec" @click="shut.hz = !shut.hz"
-          :aria-expanded="!shut.hz"><span>Liquid water<span class="dd-sub">by habitable zone</span></span>
-          <span class="dd-chev" x-text="shut.hz ? '▸' : '▾'"></span></button>
-        <div class="dd-sec-body" x-show="!shut.hz">
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('hz')"
+          :aria-expanded="secOpen('hz')"><span>Liquid water<span class="dd-sub">by habitable zone</span></span>
+          <span class="dd-secend"><i class="dd-dot" x-show="secActive('hz')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('hz') ? '▾' : '▸'"></span></span></button>
+        <div class="dd-sec-body" x-show="secOpen('hz')">
           <div class="dd-note">Whether the orbit gets about as much starlight as Earth does —
             and whether the planet is small enough to have a surface. It says nothing about
             an atmosphere, which nobody has measured for these planets.</div>
@@ -160,35 +162,35 @@
             <button :class="hz === val ? 'on' : ''" @click="hz = val" x-text="label"></button>
           </template>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="shut.dist = !shut.dist"
-          :aria-expanded="!shut.dist"><span>Distance<span class="dd-sub">from Earth</span></span>
-          <span class="dd-chev" x-text="shut.dist ? '▸' : '▾'"></span></button>
-        <div class="dd-sec-body" x-show="!shut.dist">
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('dist')"
+          :aria-expanded="secOpen('dist')"><span>Distance<span class="dd-sub">from Earth</span></span>
+          <span class="dd-secend"><i class="dd-dot" x-show="secActive('dist')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('dist') ? '▾' : '▸'"></span></span></button>
+        <div class="dd-sec-body" x-show="secOpen('dist')">
           <template x-for="[val, label] in distBands" :key="'d' + val">
             <button :class="distBand === val ? 'on' : ''" @click="distBand = val" x-text="label"></button>
           </template>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="shut.disc = !shut.disc"
-          :aria-expanded="!shut.disc"><span>Discovery</span>
-          <span class="dd-chev" x-text="shut.disc ? '▸' : '▾'"></span></button>
-        <div class="dd-sec-body" x-show="!shut.disc">
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('disc')"
+          :aria-expanded="secOpen('disc')"><span>Discovery</span>
+          <span class="dd-secend"><i class="dd-dot" x-show="secActive('disc')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('disc') ? '▾' : '▸'"></span></span></button>
+        <div class="dd-sec-body" x-show="secOpen('disc')">
           <template x-for="[val, label] in discOptions()" :key="'m' + val">
             <button :class="disc === val ? 'on' : ''" @click="disc = val" x-text="label"></button>
           </template>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="shut.sort = !shut.sort"
-          :aria-expanded="!shut.sort"><span>Sort by</span>
-          <span class="dd-chev" x-text="shut.sort ? '▸' : '▾'"></span></button>
-        <div class="dd-sec-body" x-show="!shut.sort">
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('sort')"
+          :aria-expanded="secOpen('sort')"><span>Sort by</span>
+          <span class="dd-secend"><i class="dd-dot" x-show="secActive('sort')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('sort') ? '▾' : '▸'"></span></span></button>
+        <div class="dd-sec-body" x-show="secOpen('sort')">
           <template x-for="[val, label] in Object.entries(sortLabels)" :key="val">
             <button :class="sort === val && !nearId ? 'on' : ''" @click="setSort(val)"
               x-text="label.replace('Sort: ', '')"></button>
           </template>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="shut.render = !shut.render"
-          :aria-expanded="!shut.render"><span>Planet render</span>
-          <span class="dd-chev" x-text="shut.render ? '▸' : '▾'"></span></button>
-        <div class="dd-sec-body" x-show="!shut.render">
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('render')"
+          :aria-expanded="secOpen('render')"><span>Planet render</span>
+          <span class="dd-chev" x-text="secOpen('render') ? '▾' : '▸'"></span></button>
+        <div class="dd-sec-body" x-show="secOpen('render')">
           <div class="m-menu-row">
             <div class="segmented" role="group" aria-label="Render style">
               <button :class="style === 'smooth' ? 'on' : ''" @click="toggleStyle()">Sphere</button>
@@ -201,10 +203,10 @@
             </div>
           </div>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="shut.accent = !shut.accent"
-          :aria-expanded="!shut.accent"><span>Accent colour</span>
-          <span class="dd-chev" x-text="shut.accent ? '▸' : '▾'"></span></button>
-        <div class="dd-sec-body" x-show="!shut.accent">
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('accent')"
+          :aria-expanded="secOpen('accent')"><span>Accent colour</span>
+          <span class="dd-chev" x-text="secOpen('accent') ? '▾' : '▸'"></span></button>
+        <div class="dd-sec-body" x-show="secOpen('accent')">
           <div class="m-menu-row">
             <div class="accents" role="group" aria-label="Accent colour">
               <template x-for="a in accents" :key="a.id">

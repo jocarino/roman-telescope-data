@@ -402,13 +402,21 @@ button.badge:active, a.badge:active { box-shadow: none; }
   color: var(--fg-dim); white-space: nowrap;
 }
 /* Collapsible section header in the hamburger menu: the whole bar toggles its group,
-   with a chevron marking open/closed. Expanded by default (see gallery template). */
+   with a chevron marking open/closed. Collapsed by default, and which sections you open is
+   remembered across visits (see gallery template). */
 .dd-sec {
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
   width: 100%; background: none; border-left: 0; border-right: 0;
   cursor: pointer; text-align: left;
 }
 .dd-sec:hover, .dd-sec:hover .dd-chev { color: var(--fg); }
+.dd-secend { flex: none; display: inline-flex; align-items: center; gap: 7px; }
+/* Same accent dot the hamburger carries: with the section shut, this is the only sign that
+   a filter inside it is doing something. */
+.dd-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 4px var(--accent);
+}
 .dd-chev { flex: none; color: var(--fg-faint); font-size: 9px; }
 /* Options stack full-width (the .dd-menu flex column no longer reaches them directly). */
 .dd-sec-body { display: flex; flex-direction: column; }
