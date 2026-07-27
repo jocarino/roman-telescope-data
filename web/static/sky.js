@@ -9,7 +9,10 @@
 
   // Chart geometry (SVG viewBox units), same conventions as the server-rendered charts:
   // RA increases LEFTWARD, 24h at the left edge, 0h at the right.
-  var W = 900, H = 400, PL = 46, PR = 16, PT = 16, PB = 30;
+  // Padding is deliberately thin: the altitude/declination labels sit INSIDE the plot (see
+  // .ylab), so an outer gutter would be dead space — and on a zoomed-in phone view every
+  // unit of padding costs several pixels of sky.
+  var W = 900, H = 400, PL = 8, PR = 8, PT = 8, PB = 20;
   var X0 = PL, X1 = W - PR, Y0 = PT, Y1 = H - PB;
   var MAG = { eye: 6.5, bino: 9.5, any: Infinity };
   var MAG_NAME = { eye: "to the naked eye under a dark sky", bino: "with binoculars", any: "with a telescope" };
@@ -18,8 +21,9 @@
   function yOf(dec) { return Y0 + ((90 - dec) / 180) * (Y1 - Y0); }
 
   // "Standing outside" projection: azimuth across (N → E → S → W → N), altitude up,
-  // the ground a flat strip along the bottom (ALT_MIN below the horizon line).
-  var ALT_MIN = -10;
+  // the ground a flat strip along the bottom (ALT_MIN below the horizon line) — just deep
+  // enough to read as ground; every extra degree steals sky.
+  var ALT_MIN = -4;
   function xAz(az) { return X0 + (((az % 360) + 360) % 360) / 360 * (X1 - X0); }
   function yAlt(alt) { return Y0 + ((90 - alt) / (90 - ALT_MIN)) * (Y1 - Y0); }
 
@@ -163,15 +167,15 @@
           s += '<line x1="' + xa.toFixed(1) + '" y1="' + Y0 + '" x2="' + xa.toFixed(1) +
             '" y2="' + Y1 + '" class="grid"/>';
           var aa = i === 0 ? "start" : i === 8 ? "end" : "middle";
-          s += '<text x="' + xa.toFixed(1) + '" y="' + (H - 8) + '" class="tick" ' +
+          s += '<text x="' + xa.toFixed(1) + '" y="' + (H - 6) + '" class="tick" ' +
             'text-anchor="' + aa + '">' + COMP[i] + "</text>";
         }
         [30, 60].forEach(function (alt) {
           var ya = yAlt(alt);
           s += '<line x1="' + X0 + '" y1="' + ya.toFixed(1) + '" x2="' + X1 + '" y2="' +
             ya.toFixed(1) + '" class="grid"/>';
-          s += '<text x="' + (X0 - 5) + '" y="' + (ya + 3).toFixed(1) + '" class="tick" ' +
-            'text-anchor="end">' + alt + "°</text>";
+          s += '<text x="' + (X0 + 4) + '" y="' + (ya + 3).toFixed(1) + '" class="tick ylab">' +
+            alt + "°</text>";
         });
         var gy = yAlt(0).toFixed(1);
         groundLine = X0 + "," + gy + " " + X1 + "," + gy;
@@ -182,7 +186,7 @@
           s += '<line x1="' + xx + '" y1="' + Y0 + '" x2="' + xx + '" y2="' + Y1 + '" class="grid"/>';
           if (hr % 6 === 0) {
             var anch = hr === 24 ? "start" : hr === 0 ? "end" : "middle";
-            s += '<text x="' + xx + '" y="' + (H - 8) + '" class="tick" text-anchor="' + anch + '">' + hr + "h</text>";
+            s += '<text x="' + xx + '" y="' + (H - 6) + '" class="tick" text-anchor="' + anch + '">' + hr + "h</text>";
           }
         }
         [-60, -30, 0, 30, 60].forEach(function (dec) {
@@ -190,7 +194,7 @@
           s += '<line x1="' + X0 + '" y1="' + yy.toFixed(1) + '" x2="' + X1 + '" y2="' + yy.toFixed(1) +
             '" class="grid' + (dec === 0 ? " eq" : "") + '"/>';
           if (dec % 60 === 0) {
-            s += '<text x="' + (X0 - 5) + '" y="' + (yy + 3).toFixed(1) + '" class="tick" text-anchor="end">' +
+            s += '<text x="' + (X0 + 4) + '" y="' + (yy + 3).toFixed(1) + '" class="tick ylab">' +
               (dec ? (dec > 0 ? "+" : "") + dec + "°" : "0°") + "</text>";
           }
         });
@@ -258,6 +262,20 @@
       var s = Math.sqrt(vb.w / maxVbW());
       chartEl.style.setProperty("--skp-rvis", (3 * Math.max(0.45, s)).toFixed(2) + "px");
       chartEl.style.setProperty("--skp-rdim", (2 * Math.max(0.5, s)).toFixed(2) + "px");
+      // Axis labels are sized in SVG units, so a zoomed-in view magnifies them — worst on
+      // a phone, where the fit is already zoomed. Convert a fixed screen size into the
+      // current viewBox's units instead, so ticks stay small at every zoom.
+      var rect2 = chartEl.getBoundingClientRect();
+      var tickPx = matchMedia("(max-width: 760px)").matches ? 8 : 9.5;
+      chartEl.style.setProperty("--skp-tick",
+        (tickPx * vb.w / (rect2.width || W)).toFixed(2) + "px");
+      // Altitude / declination labels ride the viewport's left edge, so panning east-west
+      // never leaves the vertical scale unreadable.
+      // Inset comfortably: hugging the exact edge puts them under the container's clip on
+      // the full-bleed phone layout.
+      svg.querySelectorAll(".ylab").forEach(function (t) {
+        t.setAttribute("x", (vb.x + vb.w * 0.03).toFixed(1));
+      });
     }
     function zoomBy(f) {
       if (!vb) return;
@@ -312,7 +330,8 @@
         vb.y = pinch.py - (m.y - rect.top) / rect.height * vb.h;
         applyVb();
       } else if (drag) {
-        if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 6) dragged = true;
+        // Only a deliberate pan swallows the click — a shaky-hand 3-4px wobble must not.
+        if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 8) dragged = true;
         vb.x = drag.vx - (e.clientX - drag.x) * vb.w / rect.width;
         vb.y = drag.vy - (e.clientY - drag.y) * vb.h / rect.height;
         applyVb();
@@ -420,11 +439,16 @@
         c.classList.toggle("sel", picked.has(+c.dataset.i));
       });
       drawSpot();
-      // Desktop: nudge the results into view. Mobile: stay put — yanking the page away from
-      // the chart mid-exploration is disorienting; the panel sits right below it anyway.
-      if (selected.length && !matchMedia("(max-width: 760px)").matches) {
-        $("skp-spot-panel").scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }
+      // No scrolling: the results render inside the map's own panel, immediately under the
+      // chart, so the answer appears where the eye already is.
+    });
+    $("skp-spot-x").addEventListener("click", function () {
+      selected = null;
+      var svg = chartEl.querySelector("svg");
+      if (svg) svg.querySelectorAll(".skp-dot-vis.sel").forEach(function (c) {
+        c.classList.remove("sel");
+      });
+      drawSpot();
     });
 
     var latDebounce = null;
@@ -460,6 +484,12 @@
       if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleView(); }
     });
     $("skp-viewbtn").addEventListener("click", toggleView);
+
+    $("skp-rx-info").addEventListener("click", function () {
+      var bar = $("skp-rx-info-bar");
+      bar.hidden = !bar.hidden;
+      this.classList.toggle("on", !bar.hidden);
+    });
 
     $("skp-count-info").addEventListener("click", function () {
       var full = $("skp-count-full");

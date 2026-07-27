@@ -47,8 +47,15 @@
       {# Screen-pinned legend, not an SVG label — panning must never lose it. #}
       <div class="skp-ground-lbl" aria-hidden="true">▒ shaded = ground, below your horizon</div>
     </div>
-    <p class="sky-note">Drag to look around · ＋/− to zoom · tap a bright dot for its worlds.
-      Dim dots: below your horizon or too faint for this filter.</p>
+    {# What you just tapped, inside the map's own panel: the answer has to appear where the
+       eye already is, or a click reads as "nothing happened". #}
+    <div class="skp-spot" id="skp-spot-panel" hidden>
+      <div class="skp-spot-head">
+        <span id="skp-spot-title">At that spot</span>
+        <button class="info-x" id="skp-spot-x" aria-label="Clear selection">&times;</button>
+      </div>
+      <div id="skp-spot"></div>
+    </div>
   </div>
 
   {# The receiver: controls as an old radio's front panel — same chassis grammar as the
@@ -59,6 +66,20 @@
       <span class="scope-brand">EXO·RX</span>
       <span class="led on"></span>
       <span class="scope-model">SKY RECEIVER · tuned to your horizon</span>
+      <button class="info-btn sm skr-info-btn" id="skp-rx-info"
+        aria-label="What this panel does" title="What this panel does">i</button>
+    </div>
+    <div class="scope-info skr-info" id="skp-rx-info-bar" hidden>
+      <p><strong>The map above</strong> — drag to look around, ＋/− to zoom, tap a bright dot
+        to see the worlds at that spot. Bright dots are stars you could pick out right now;
+        dim dots are the rest of the catalog: below your horizon, or too faint for the band
+        you have selected.</p>
+      <p><strong>This panel</strong> tunes what the map shows.
+        <strong>Locate</strong> reads your position from the browser (once, on this device
+        only). The <strong>latitude dial</strong> sets where on Earth you are standing — the
+        sky flips as you cross the equator. The <strong>band</strong> buttons set how you are
+        looking: with your eyes, binoculars, or a telescope. <strong>View</strong> switches
+        between the sky as you face it and the whole-sky map.</p>
     </div>
     <div class="skr-deck">
       <div class="skr-cell">
@@ -107,11 +128,6 @@
       </div>
     </div>
   </div>
-
-  <section class="panel skp-panel" id="skp-spot-panel" hidden>
-    <h3 id="skp-spot-title">At that spot</h3>
-    <div id="skp-spot"></div>
-  </section>
 
   <section class="panel skp-panel">
     {# The count lives in this heading (x of total; just the total when they match); the
@@ -165,6 +181,17 @@
     color: var(--fg-faint); text-transform: uppercase;
   }
   .skr .led-btn { font-family: var(--mono); font-size: 10.5px; letter-spacing: .05em; text-transform: uppercase; }
+  /* Selected vs not must be readable at a glance, not just by the lamp: unselected sits
+     recessed and dim, selected lifts to the accent with a lit lamp. */
+  .skr .led-btn { color: var(--fg-faint); background: linear-gradient(180deg, #171b24, #0e1119); }
+  .skr .led-btn:hover:not(:disabled) { color: var(--fg); }
+  .skr .led-btn.on {
+    color: var(--accent);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 22%, #1c222d), #161c26);
+    border-color: color-mix(in srgb, var(--accent) 70%, #05070b);
+  }
+  /* Busy (waiting on the browser's location prompt) — clearly inert, not just "off". */
+  .skr .led-btn:disabled { opacity: .45; filter: grayscale(1); cursor: progress; }
   .skr-btns { display: flex; }
   .skr-btns .led-btn + .led-btn { margin-left: -1px; }
   /* Located lamp glows amber (the real-world/ground colour), not signal green. */
@@ -191,6 +218,20 @@
   .skr-cities span { top: 0; font-size: 7.5px; color: var(--fg-faint); letter-spacing: .12em; }
   /* Phone-only view switch (desktop uses the deck's VIEW knob instead). */
   .skr-viewcell { display: none; }
+  /* Tapped-star results, inside the map panel right under the chart. */
+  .skp-spot {
+    margin-top: 10px; border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    background: var(--bg-3); padding: 8px 10px;
+  }
+  .skp-spot-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 2px;
+  }
+  .skp-spot .skp-row:first-child { border-top: none; }
+  .skr-info-btn { margin-left: auto; }
+  .skr-info { margin: 0; border-top: none; }
+  .skr-info p { font-size: 12.5px; }
   .skp-panel h3 .info-btn { vertical-align: 1px; margin-left: 4px; }
   /* The chart is a draggable viewport onto the sky (the viewBox is driven from JS). */
   .skp-chart-wrap { position: relative; }
@@ -217,9 +258,15 @@
   }
   .skp-count-full b { color: var(--fg); }
   #skp-chart .skp-dot-vis.sel { stroke: var(--fg); stroke-width: 1.5; }
-  /* Dot sizes shrink as you zoom in (set from JS); px = SVG user units here. */
+  /* Dot and label sizes shrink as you zoom in (set from JS); px = SVG user units here.
+     Scoped to this page's chart — the server-rendered planet-page charts keep their own. */
   #skp-chart .skp-dot-vis { r: var(--skp-rvis, 3px); }
   #skp-chart .skydot { width: var(--skp-rdim, 2px); height: var(--skp-rdim, 2px); }
+  #skp-chart .tick { font-size: var(--skp-tick, 10px); }
+  /* Altitude / declination labels live inside the plot (JS pins them to the viewport's
+     left edge). No halo: at ~8px a stroke eats the letterforms from the outside in — the
+     dim fill alone reads cleanly against the sky, exactly like the compass labels. */
+  #skp-chart .ylab { fill: var(--fg-dim); }
   .skp-zoom { position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; z-index: 5; }
   .skp-zoom button {
     width: 32px; height: 32px; font-family: var(--mono); font-size: 15px; line-height: 1;
