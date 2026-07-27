@@ -83,10 +83,11 @@ document.addEventListener("alpine:init", () => {
     fic: false,       // "seen in fiction" toggle: show only planets in the pop-culture overlay
     sort: "name",
     // Which colour the whole gallery is keyed to: "full" (the modelled full spectrum) or
-    // "roman" (what the Coronagraph's four bands would recover). NOT a display filter — every
-    // colour-derived control re-keys to it: the swatch, the colour-family chips, the
-    // brightness sort and the similar-colour sort. Shares the detail page's `scopeView`
-    // storage key, so the choice carries both ways.
+    // "roman" (what the Coronagraph's four bands would recover). Every colour-derived control
+    // re-keys to it: the swatch, the colour-family chips, the brightness sort, the
+    // similar-colour sort. Defaults OFF and is session-only — never restored from storage and
+    // deliberately NOT wired to the planet pages' `scopeView`, so the catalogue you come back
+    // to is the one you left. Only ?view=roman can start it on.
     view: "full",
     famCleared: "",   // family auto-dropped by a view flip (its name), for the toolbar note
     _fcT: null,
@@ -221,10 +222,14 @@ document.addEventListener("alpine:init", () => {
     // sampled, so azure empties out completely. Drop the filter and say why, rather than
     // leaving the visitor staring at an empty grid wondering what broke.
     toggleView() { this.setView(this.view === "roman" ? "full" : "roman"); },
+    // The hold-to-peek loader and the hover-to-spin animator live outside this component and
+    // still have to draw the colour that is on screen. They read this, not localStorage —
+    // the view is session state now, so there is nothing stored for them to read.
+    _publishView() { window.__exoView = this.view; },
     setView(v) {
       if (v === this.view) return;
       this.view = v;
-      try { localStorage.setItem("scopeView", v); } catch (e) { /* ignore */ }
+      this._publishView();
       clearTimeout(this._fcT);
       if (this.family && !this.families().some((f) => f.id === this.family)) {
         this.famCleared = this.familyMeta[this.family].n;
@@ -310,13 +315,13 @@ document.addEventListener("alpine:init", () => {
       if (params.get("fiction") === "1") this.fic = true;
       const hz = params.get("hz");
       if (hz && this.hzLabels[hz]) this.hz = hz;
-      // The view carries over from the planet pages' scope, and a ?view= link wins over it
-      // (so "the gallery as Roman sees it" is a shareable URL, and a ?family= in the same
-      // link is read in the right view).
-      const stored = localStorage.getItem("scopeView");
-      if (stored === "full" || stored === "roman") this.view = stored;
+      // The Roman view always starts OFF. It is deliberately not restored from anywhere: not
+      // from the planet pages' scope (flipping one planet to 4-band must not silently repaint
+      // the whole catalogue on the way back) and not from a previous session. The one way in
+      // is an explicit ?view=roman link, which is somebody asking for it by name.
       const qview = params.get("view");
-      if (qview === "full" || qview === "roman") this.view = qview;
+      if (qview === "roman") this.view = "roman";
+      this._publishView();
 
       // Append the next batch as the sentinel nears the viewport (infinite scroll).
       this._loadIO = new IntersectionObserver((entries) => {
@@ -335,13 +340,11 @@ document.addEventListener("alpine:init", () => {
       // Any filter/sort change re-renders the grid from the top, and is remembered.
       this._filterKeys.forEach((k) =>
         this.$watch(k, () => { this._saveFilters(); this._rerender(); }));
-      // The Roman view is watched separately and deliberately NOT a filter key: it changes
-      // what the colours ARE rather than which planets show, it lives in `scopeView` (shared
-      // with the planet pages), and clearing the filters must not reach across and flip it.
-      // It still forces a full rerender — it can reorder results (brightest, similar-colour)
-      // and every card's swatch is rebuilt from scratch.
+      // The Roman view is watched separately and deliberately NOT a filter key: it is session
+      // state that always starts off, so it must not be written into the remembered filter
+      // blob. It still forces a full rerender — it can reorder results (brightest,
+      // similar-colour) and every card's swatch is rebuilt from scratch.
       this.$watch("view", () => this._rerender());
-
 
       window.__randomGo = () => this.randomGo();  // wire the R shortcut to this gallery
 
@@ -1450,7 +1453,7 @@ document.addEventListener("alpine:init", () => {
       body.innerHTML = html;
       // The fragment is static HTML carrying BOTH colours; the current view decides which one
       // shows (CSS on the data-view attribute) so a peek never contradicts the card behind it.
-      var view = localStorage.getItem("scopeView") === "roman" ? "roman" : "full";
+      var view = window.__exoView === "roman" ? "roman" : "full";
       body.dataset.view = view;
       // The planet itself, drawn with the same engine + settings as the gallery cards.
       var cv = body.querySelector(".peek-planet");
@@ -1531,7 +1534,7 @@ document.addEventListener("alpine:init", () => {
     // Read the view every time rather than caching it: this runs outside the Alpine component,
     // so a card spun up mid-session must use whatever the switch says NOW. Getting this wrong
     // is visible — the planet would snap back to its full-spectrum colours under the cursor.
-    var roman = localStorage.getItem("scopeView") === "roman" && p.rpal;
+    var roman = window.__exoView === "roman" && p.rpal;
     return {
       palette: roman ? p.rpal : p.palette, baseHex: roman ? p.rhex : p.hex,
       radius: p.radius, cloudState: p.cloud, lumY: roman ? p.rlum : p.lum,
