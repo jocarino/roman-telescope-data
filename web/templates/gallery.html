@@ -10,6 +10,14 @@
   </div>
   <div class="subhead intro-box" x-show="intro" x-cloak>
     <button class="info-x" @click="intro = false" aria-label="Close">&times;</button>
+    {# How much of the catalogue this is. It used to be the standing banner over the grid;
+       the banner is gone, but the claim is a scope caveat, not decoration, so it keeps a
+       home here rather than disappearing. #}
+    <div class="intro-row">
+      <span class="intro-lbl">Coverage</span>
+      <p>Modelling <strong>{{ n_modelled }}</strong> of the ~{{ known_total }} known
+        {{ g('exoplanet', 'exoplanets') }} — the nearest that pass our data-completeness gate.</p>
+    </div>
     <div class="intro-row">
       <span class="intro-lbl">The colour</span>
       <p>Computed from each planet's reflected-light spectrum
@@ -41,11 +49,6 @@
       <a class="intro-link" href="/how">How we get the colours →</a>
     </div>
   </div>
-  <p class="subhead lede">Modelling <strong>{{ n_modelled }}</strong> of the ~{{ known_total }}
-    known {{ g('exoplanet', 'exoplanets') }} — the nearest that pass our data-completeness gate.
-    <a class="lede-link" href="/tours">▶ Guided tours →</a>
-    <a class="lede-link" href="/compare">⇄ Compare two planets →</a>
-    <a class="lede-link" href="/census">◧ Colour census →</a></p>
 </div>
 
 {# The head of the default view, inlined so the first cards paint immediately; the gallery
@@ -103,6 +106,40 @@
       aria-label="Random planet" title="Random planet (from current filters) · press R">
       {{ dice_icon() }}
     </button>
+    {# The other ways in (tours, compare, census). These were links in a standing banner over
+       the grid; as an icon menu they cost no vertical space and the toolbar reads as one row
+       of controls. A FOLDED MAP: these three are the only controls here that take you
+       somewhere else (the magnifier, dice and hamburger all act on the grid in place), and of
+       the glyphs tried — compass needle, compass rose, signpost, map — the map was the only
+       one still readable at 16px; the others collapsed into a clock face, a dot and a music
+       note. It also matches the chart language the site already uses ("Where in the sky", and
+       the 404's "isn't on the chart"). The menu spells each destination out in words with a
+       line of plain English under it: the icon is shorthand for those who want it, never the
+       only signpost. #}
+    <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
+      @click.outside="open=false">
+      <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
+        aria-label="Explore: guided tours, compare planets, colour census"
+        title="Explore: guided tours, compare planets, colour census">
+        <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <path d="M1.8 4.2 5.8 2.6v9.2l-4 1.6z" fill="none" stroke="currentColor"
+            stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M5.8 2.6 10.2 4.2v9.2L5.8 11.8z" fill="none" stroke="currentColor"
+            stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M10.2 4.2 14.2 2.6v9.2l-4 1.6z" fill="none" stroke="currentColor"
+            stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="dd-menu nav-menu" x-show="open" x-cloak>
+        <div class="dd-head">Explore<span class="dd-sub">other ways into the catalogue</span></div>
+        <a href="/tours"><i class="nav-gl" aria-hidden="true">▶</i><span>Guided tours<span
+          class="dd-sub">curated walks, one theme at a time</span></span></a>
+        <a href="/compare"><i class="nav-gl" aria-hidden="true">⇄</i><span>Compare two planets<span
+          class="dd-sub">two spectra and palettes, side by side</span></span></a>
+        <a href="/census"><i class="nav-gl" aria-hidden="true">◧</i><span>Colour census<span
+          class="dd-sub">what colour the catalogue is, overall</span></span></a>
+      </div>
+    </div>
     {# The hamburger (all viewports): everything except the colour filter + search lives here.
        Every section starts collapsed, so the menu opens as a short list of headings rather
        than one long scroll. Which ones you open is remembered across visits (secOpen/
