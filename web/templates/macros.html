@@ -801,8 +801,11 @@
       {%- if not rec.is_light_isolable %} — a microlensing host, glimpsed only by its
       gravity{% endif %}. Its position in {{ sky.constellation }} is still known.</p>
     {% endif %}
-    <a class="sky-page-link" href="/sky.html">▸ Your sky tonight — every host star above your
-      horizon right now</a>
+    {# Carries the planet id, so the sky page arrives already pointed at THIS host star:
+       crosshaired, in the view that can actually show it, with the band widened to the
+       least equipment that reaches it. #}
+    <a class="sky-page-link" href="/sky.html?planet={{ rec.id }}">▸ Find {{ rec.host_star.name }}
+      in your sky tonight — every host star above your horizon right now</a>
   </div>
   {% endif %}
 
