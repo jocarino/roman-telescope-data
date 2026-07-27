@@ -17,15 +17,31 @@
   function xOf(ra) { return X0 + (1 - (((ra % 360) + 360) % 360) / 360) * (X1 - X0); }
   function yOf(dec) { return Y0 + ((90 - dec) / 180) * (Y1 - Y0); }
 
+  // "Standing outside" projection: azimuth across (N → E → S → W → N), altitude up,
+  // the ground a flat strip along the bottom (ALT_MIN below the horizon line).
+  var ALT_MIN = -10;
+  function xAz(az) { return X0 + (((az % 360) + 360) % 360) / 360 * (X1 - X0); }
+  function yAlt(alt) { return Y0 + ((90 - alt) / (90 - ALT_MIN)) * (Y1 - Y0); }
+
   window.skyInit = function (cfg) {
     var hosts = [];        // [{name, ra, dec, vmag, planets:[{id,name,hex}], alt, az, vis}]
     var lat = parseFloat(localStorage.getItem("skyLat") || "40");
     var lon = localStorage.getItem("skyLon") != null ? parseFloat(localStorage.getItem("skyLon")) : null;
     var mag = localStorage.getItem("skyMag") || "eye";
+    // "out" (default): the sky as you face it, flat horizon, only what's observable.
+    // "map": the whole celestial sphere with the horizon curved across it.
+    var view = localStorage.getItem("skyView") || "out";
     // A stored longitude means a past "use my location" — show the button as located on
     // load, or a refresh looks like the location was forgotten (it wasn't).
     var geoState = lon != null ? "ok" : "";
     var selected = null;   // hosts shown in the "at that spot" panel
+
+    // A host's chart position in the current projection; null = not drawn (below the
+    // horizon in the outside view — that sky simply doesn't exist for the observer).
+    function posOf(h) {
+      if (view === "out") return h.alt > 0 ? { x: xAz(h.az), y: yAlt(h.alt) } : null;
+      return { x: xOf(h.ra), y: yOf(h.dec) };
+    }
 
     var $ = function (id) { return document.getElementById(id); };
     var chartEl = $("skp-chart"), tipEl = $("skp-tip");
@@ -66,8 +82,11 @@
       recompute();
       $("skp-latlbl").textContent = latLabel();
       $("skp-lat").value = lat;
-      document.querySelectorAll(".skp-mag-btn").forEach(function (b) {
+      document.querySelectorAll(".skp-mag-btn[data-mag]").forEach(function (b) {
         b.classList.toggle("on", b.dataset.mag === mag);
+      });
+      document.querySelectorAll(".skp-mag-btn[data-view]").forEach(function (b) {
+        b.classList.toggle("on", b.dataset.view === view);
       });
 
       var vis = hosts.filter(function (h) { return h.vis; })
@@ -112,6 +131,9 @@
     // until the slider rests — rebuilding the whole SVG per input event visibly lags.
     function updateHorizonOnly() {
       $("skp-latlbl").textContent = latLabel();
+      // Outside view: the horizon is flat and static — it's the STARS that move with
+      // latitude, and that rebuild is exactly what the debounced render is for.
+      if (view === "out") return;
       var svg = chartEl.querySelector("svg");
       if (!svg) return;
       var g = horizonGeom();
@@ -121,35 +143,65 @@
 
     function drawChart(vis) {
       var s = '<svg viewBox="0 0 ' + W + " " + H + '" class="skychart" role="img" ' +
-        'aria-label="Sky map: catalog host stars above your horizon right now">' +
+        'aria-label="' + (view === "out"
+          ? "Your observable sky: catalog host stars by compass direction and height"
+          : "Sky map: catalog host stars above your horizon right now") + '">' +
         '<rect x="' + X0 + '" y="' + Y0 + '" width="' + (X1 - X0) + '" height="' + (Y1 - Y0) +
         '" class="skyframe"/>';
-      for (var hr = 0; hr <= 24; hr += 3) {
-        var xx = X0 + (1 - hr / 24) * (X1 - X0);
-        s += '<line x1="' + xx + '" y1="' + Y0 + '" x2="' + xx + '" y2="' + Y1 + '" class="grid"/>';
-        if (hr % 6 === 0) {
-          var anch = hr === 24 ? "start" : hr === 0 ? "end" : "middle";
-          s += '<text x="' + xx + '" y="' + (H - 8) + '" class="tick" text-anchor="' + anch + '">' + hr + "h</text>";
+      var groundLine, groundFloor;
+
+      if (view === "out") {
+        // Compass across the bottom, altitude up, the ground a flat strip.
+        var COMP = ["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"];
+        for (var i = 0; i <= 8; i++) {
+          var xa = i === 8 ? X1 : xAz(i * 45);
+          s += '<line x1="' + xa.toFixed(1) + '" y1="' + Y0 + '" x2="' + xa.toFixed(1) +
+            '" y2="' + Y1 + '" class="grid"/>';
+          var aa = i === 0 ? "start" : i === 8 ? "end" : "middle";
+          s += '<text x="' + xa.toFixed(1) + '" y="' + (H - 8) + '" class="tick" ' +
+            'text-anchor="' + aa + '">' + COMP[i] + "</text>";
         }
+        [30, 60].forEach(function (alt) {
+          var ya = yAlt(alt);
+          s += '<line x1="' + X0 + '" y1="' + ya.toFixed(1) + '" x2="' + X1 + '" y2="' +
+            ya.toFixed(1) + '" class="grid"/>';
+          s += '<text x="' + (X0 - 5) + '" y="' + (ya + 3).toFixed(1) + '" class="tick" ' +
+            'text-anchor="end">' + alt + "°</text>";
+        });
+        var gy = yAlt(0).toFixed(1);
+        groundLine = X0 + "," + gy + " " + X1 + "," + gy;
+        groundFloor = X0 + "," + gy + " " + X1 + "," + gy + " " + X1 + "," + Y1 + " " + X0 + "," + Y1;
+      } else {
+        for (var hr = 0; hr <= 24; hr += 3) {
+          var xx = X0 + (1 - hr / 24) * (X1 - X0);
+          s += '<line x1="' + xx + '" y1="' + Y0 + '" x2="' + xx + '" y2="' + Y1 + '" class="grid"/>';
+          if (hr % 6 === 0) {
+            var anch = hr === 24 ? "start" : hr === 0 ? "end" : "middle";
+            s += '<text x="' + xx + '" y="' + (H - 8) + '" class="tick" text-anchor="' + anch + '">' + hr + "h</text>";
+          }
+        }
+        [-60, -30, 0, 30, 60].forEach(function (dec) {
+          var yy = yOf(dec);
+          s += '<line x1="' + X0 + '" y1="' + yy.toFixed(1) + '" x2="' + X1 + '" y2="' + yy.toFixed(1) +
+            '" class="grid' + (dec === 0 ? " eq" : "") + '"/>';
+          if (dec % 60 === 0) {
+            s += '<text x="' + (X0 - 5) + '" y="' + (yy + 3).toFixed(1) + '" class="tick" text-anchor="end">' +
+              (dec ? (dec > 0 ? "+" : "") + dec + "°" : "0°") + "</text>";
+          }
+        });
+        var g = horizonGeom();
+        groundLine = g.line;
+        groundFloor = g.floor;
       }
-      [-60, -30, 0, 30, 60].forEach(function (dec) {
-        var yy = yOf(dec);
-        s += '<line x1="' + X0 + '" y1="' + yy.toFixed(1) + '" x2="' + X1 + '" y2="' + yy.toFixed(1) +
-          '" class="grid' + (dec === 0 ? " eq" : "") + '"/>';
-        if (dec % 60 === 0) {
-          s += '<text x="' + (X0 - 5) + '" y="' + (yy + 3).toFixed(1) + '" class="tick" text-anchor="end">' +
-            (dec ? (dec > 0 ? "+" : "") + dec + "°" : "0°") + "</text>";
-        }
-      });
 
-      // Ground first (under the dots): same construction as the planet-page overlay.
-      var g = horizonGeom();
-      s += '<polygon class="hzn-floor" points="' + g.floor + '"/>';
-
-      // Dots: dim = below horizon or too faint; accent = visible under the current filter.
+      // Ground first (under the dots), then dim dots, horizon line, lit dots on top.
+      s += '<polygon class="hzn-floor" points="' + groundFloor + '"/>';
+      // Dots in the current projection; posOf returns null for sky the observer can't see.
       var dim = "", lit = "";
       hosts.forEach(function (h, i) {
-        var x = xOf(h.ra).toFixed(1), y = yOf(h.dec).toFixed(1);
+        var p = posOf(h);
+        if (!p) return;
+        var x = p.x.toFixed(1), y = p.y.toFixed(1);
         if (h.vis) {
           lit += '<circle cx="' + x + '" cy="' + y + '" r="3" class="skp-dot-vis" data-i="' + i + '"/>';
         } else {
@@ -158,7 +210,7 @@
       });
       // No in-SVG ground label: the legend is a screen-pinned overlay in the template, so
       // panning and zooming can never move it out of view.
-      s += dim + '<polyline class="hzn-line" points="' + g.line + '"/>' + lit;
+      s += dim + '<polyline class="hzn-line" points="' + groundLine + '"/>' + lit;
       chartEl.innerHTML = s + "</svg>";
       applyVb();
     }
@@ -184,9 +236,11 @@
       var svg = chartEl.querySelector("svg");
       if (!svg) return;
       if (!vb) {
-        // First layout: fit, centred on what is crossing your meridian right now.
+        // First layout: fit. Outside view centres on where your visible sky is deepest
+        // (south for a northern observer, north for a southern one); the map centres on
+        // what is crossing your meridian right now.
         vb = { w: maxVbW(), h: 0, x: 0, y: 0 };
-        vb.x = xOf(ExoSky.lstDeg(lon)) - vb.w / 2;
+        vb.x = (view === "out" ? xAz(lat >= 0 ? 180 : 0) : xOf(ExoSky.lstDeg(lon))) - vb.w / 2;
       }
       clampVb();
       svg.setAttribute("viewBox",
@@ -345,7 +399,9 @@
       var picked = new Set();
       hosts.forEach(function (h, i) {
         if (!h.vis) return;
-        var dx = xOf(h.ra) - p.x, dy = yOf(h.dec) - p.y;
+        var q = posOf(h);
+        if (!q) return;
+        var dx = q.x - p.x, dy = q.y - p.y;
         if (dx * dx + dy * dy <= R * R) picked.add(i);
       });
       selected = [...picked].map(function (i) { return hosts[i]; })
@@ -373,11 +429,20 @@
       clearTimeout(latDebounce);
       latDebounce = setTimeout(render, 180);
     });
-    document.querySelectorAll(".skp-mag-btn").forEach(function (b) {
+    document.querySelectorAll(".skp-mag-btn[data-mag]").forEach(function (b) {
       b.addEventListener("click", function () {
         mag = b.dataset.mag;
         localStorage.setItem("skyMag", mag);
         selected = null;
+        render();
+      });
+    });
+    document.querySelectorAll(".skp-mag-btn[data-view]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        view = b.dataset.view;
+        localStorage.setItem("skyView", view);
+        selected = null;
+        vb = null;  // re-fit and re-centre for the new projection
         render();
       });
     });

@@ -17,7 +17,11 @@
       <p>Every planet in this catalog orbits a real star at a real spot in Earth's sky. This
         page filters the whole map down to <strong>what is over your head right now</strong>:
         set your location (or let the browser set it), and the chart shades away everything
-        below your horizon. Hover a star to identify it; click to see the worlds it carries.</p>
+        below your horizon. Hover a star to identify it; click to see the worlds it carries.
+        The default view is the sky <strong>as you face it</strong> — compass direction along
+        the bottom, height above the horizon upward, the ground flat under your feet
+        (straight overhead stretches across the top edge). Switch to the whole-sky map for
+        the full celestial sphere with your horizon curved across it.</p>
     </div>
     <div class="intro-row">
       <span class="intro-lbl">Honesty</span>
@@ -43,6 +47,12 @@
       <button class="skp-mag-btn" data-mag="eye">Naked eye</button>
       <button class="skp-mag-btn" data-mag="bino">Binoculars</button>
       <button class="skp-mag-btn" data-mag="any">Any telescope</button>
+    </div>
+    <div class="skp-mag" role="group" aria-label="Chart projection">
+      <button class="skp-mag-btn" data-view="out"
+        title="The sky as you face it: compass direction across, height above the horizon up">Standing outside</button>
+      <button class="skp-mag-btn" data-view="map"
+        title="The entire celestial sphere, with your horizon curved across it">Whole-sky map</button>
     </div>
   </div>
 
