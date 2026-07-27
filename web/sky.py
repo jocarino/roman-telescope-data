@@ -112,10 +112,17 @@ def sky_chart_svg(
         f'<text x="{lx:.1f}" y="{ly:.1f}" class="skylabel" text-anchor="{anchor}">{label}</text>'
     )
 
+    # data-* attrs + the empty hzn group feed the client-side "your horizon" overlay
+    # (app.js): it needs the plot rectangle and the target's coordinates to draw the
+    # observer's horizon at the visitor's clock time. Layered after the dots so the
+    # ground shading dims them, before the marker so the crosshair stays on top.
     return f"""<svg viewBox="0 0 {g.w} {g.h}" class="skychart{g.extra_class}" role="img"
+  data-x0="{x0:.1f}" data-x1="{x1:.1f}" data-y0="{y0:.1f}" data-y1="{y1:.1f}"
+  data-ra="{sky.ra_deg:.4f}" data-dec="{sky.dec_deg:.4f}"
   aria-label="Star chart: the host star's position in the sky, in {sky.constellation}">
   <rect x="{x0:.1f}" y="{y0:.1f}" width="{x1 - x0:.1f}" height="{y1 - y0:.1f}" class="skyframe"/>
   {grid}
   {dots}
+  <g class="hzn"></g>
   {marker}
 </svg>"""

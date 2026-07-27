@@ -1088,6 +1088,116 @@ document.addEventListener("alpine:init", () => {
       PlanetRender.spin(this.$refs.cHero, { ...opts, style: this.heroStyle, frame: frame });
     },
   }));
+
+  // "Your horizon" overlay for the sky chart: draws the observer's horizon — and shades the
+  // ground below it — on the RA/dec map, for a chosen latitude at the visitor's current
+  // clock time. Time comes from the device clock; east-west position is approximated from
+  // the clock's UTC offset (15° of longitude per hour), good to a couple of degrees of sky.
+  // Latitude is the slider, so the north/south difference is explicit, not assumed.
+  Alpine.data("skyhorizon", () => ({
+    sh: false,           // "how to read this chart" popover
+    hz: false,           // horizon overlay on?
+    lat: parseFloat(localStorage.getItem("skyLat") || defaultLat()),
+    tick: 0,             // bumped on every redraw so status() re-evaluates as time passes
+    _timer: null,
+    init() { if (localStorage.getItem("skyHzn") === "1") this.toggleHzn(true); },
+    destroy() { clearInterval(this._timer); },
+    toggleHzn(force) {
+      this.hz = force === true ? true : !this.hz;
+      localStorage.setItem("skyHzn", this.hz ? "1" : "0");
+      clearInterval(this._timer);
+      if (this.hz) {
+        this.draw();
+        // The sky turns 0.25° per minute; redraw once a minute keeps the line honest.
+        this._timer = setInterval(() => this.draw(), 60000);
+      } else {
+        this.$root.querySelectorAll(".skychart .hzn").forEach((g) => (g.innerHTML = ""));
+      }
+    },
+    latChanged() {
+      localStorage.setItem("skyLat", String(this.lat));
+      if (this.hz) this.draw();
+    },
+    latLabel() {
+      const a = Math.abs(this.lat);
+      return a < 1 ? "the equator" : a + "° " + (this.lat > 0 ? "N" : "S");
+    },
+    // Local sidereal time in degrees: which RA is crossing your meridian right now.
+    // Low-precision GMST (minutes-accurate for decades around J2000) + tz-derived longitude.
+    _lst() {
+      const d = (Date.now() - Date.UTC(2000, 0, 1, 12)) / 86400000;
+      const lonDeg = (-new Date().getTimezoneOffset() / 60) * 15;
+      return ((280.46061837 + 360.98564736629 * d + lonDeg) % 360 + 360) % 360;
+    },
+    // Altitude (deg) of the target star for the chosen latitude, right now.
+    _alt(raDeg, decDeg) {
+      const r = Math.PI / 180, phi = this.lat * r, dec = decDeg * r;
+      const H = (this._lst() - raDeg) * r;
+      const s = Math.sin(phi) * Math.sin(dec) + Math.cos(phi) * Math.cos(dec) * Math.cos(H);
+      return Math.asin(Math.max(-1, Math.min(1, s))) / r;
+    },
+    status() {
+      void this.tick;  // re-evaluate on every redraw
+      const svg = this.$root.querySelector(".skychart");
+      if (!svg || !this.hz) return "";
+      const dec = +svg.dataset.dec, phi = this.lat;
+      const from = "from " + this.latLabel();
+      // Culmination bounds: never sets if |lat+dec| > 90, never rises if |lat-dec| > 90.
+      if (Math.abs(phi - dec) > 90)
+        return "This star NEVER RISES " + from + " — it belongs to the " +
+          (dec > 0 ? "northern" : "southern") + " sky. Slide toward the " +
+          (dec > 0 ? "north" : "south") + " and watch it climb above the ground.";
+      if (Math.abs(phi + dec) > 90)
+        return "Circumpolar " + from + ": this star never sets — above the horizon " +
+          "all night, every night of the year.";
+      const alt = this._alt(+svg.dataset.ra, dec);
+      if (alt > 0)
+        return "Above your horizon right now (about " + Math.round(alt) +
+          "° up, " + from + ") — it sets as the sky turns.";
+      return "Below your horizon right now, " + from + " — under the shaded ground. " +
+        "The sky turns 15° per hour, so it rises later; check back tonight.";
+    },
+    draw() {
+      this.tick++;
+      const r = Math.PI / 180, lst = this._lst();
+      // At exactly 0° the horizon is a vertical wall in RA; 0.5° draws the same picture
+      // without dividing by tan(0).
+      const phi = Math.abs(this.lat) < 0.5 ? (this.lat < 0 ? -0.5 : 0.5) : this.lat;
+      this.$root.querySelectorAll(".skychart").forEach((svg) => {
+        const d = svg.dataset;
+        const X0 = +d.x0, X1 = +d.x1, Y0 = +d.y0, Y1 = +d.y1;
+        let pts = "";
+        for (let ra = 360; ra >= 0; ra -= 2) {
+          // Declination of the horizon at this RA: tan(dec) = -cos(H) / tan(lat).
+          const decH = Math.atan(-Math.cos((lst - ra) * r) / Math.tan(phi * r)) / r;
+          const x = X0 + (1 - ra / 360) * (X1 - X0);
+          const y = Y0 + ((90 - decH) / 180) * (Y1 - Y0);
+          pts += x.toFixed(1) + "," + y.toFixed(1) + " ";
+        }
+        // The ground: close the curve along the edge holding the pole you can never see
+        // (bottom for a northern observer, top for a southern one).
+        const edge = phi > 0 ? Y1 : Y0;
+        const floor = pts + X1.toFixed(1) + "," + edge + " " + X0.toFixed(1) + "," + edge;
+        const lblY = phi > 0 ? +Y1 - 6 : +Y0 + 12;
+        const lbl = svg.classList.contains("compact") ? "" :
+          '<text class="hzn-lbl" x="' + (X0 + 8).toFixed(1) + '" y="' + lblY.toFixed(1) +
+          '">GROUND — below your horizon</text>';
+        svg.querySelector(".hzn").innerHTML =
+          '<polygon class="hzn-floor" points="' + floor + '"/>' +
+          '<polyline class="hzn-line" points="' + pts.trim() + '"/>' + lbl;
+      });
+    },
+  }));
+
+  // Best-guess starting latitude from the browser's timezone name — just a friendlier
+  // default for the slider; the visitor corrects it with one drag. Falls back to 40° N.
+  function defaultLat() {
+    let tz = "";
+    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) { /* old browsers */ }
+    if (/Australia|Auckland|Johannesburg|Santiago|Buenos_Aires|Sao_Paulo|Lima|Harare|Nairobi/.test(tz))
+      return "-30";
+    return "40";
+  }
 });
 
 // Card interaction: a normal click/tap navigates to the full planet page (the <a href>);

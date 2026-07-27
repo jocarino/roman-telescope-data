@@ -707,7 +707,7 @@
      from this catalog. Only renders when the data release carries sky positions. #}
   {% if rec.sky and ctx.sky_svg %}
   {%- set sky = rec.sky -%}
-  <div class="panel skypanel" x-data="{ sh: false }">
+  <div class="panel skypanel" x-data="skyhorizon()">
     <div class="dossier-head">
       <h3>Where in the sky</h3>
       <button class="info-btn" @click="sh = !sh" :class="sh ? 'on' : ''" :aria-expanded="sh"
@@ -733,11 +733,32 @@
         <br><br>
         What you could ever see from your backyard is the <strong>star</strong> — no
         exoplanet is visible to the eye through any telescope. But the planet is physically
-        there, inside that point of light.
+        there, inside that point of light. Press <strong>⌂ Your horizon</strong> to see the
+        map the way you'd experience it outside right now: everything below the line is
+        under your feet.
       </div>
     </div>
     <div class="sky-wide">{{ ctx.sky_svg|safe }}</div>
     <div class="sky-compact">{{ ctx.sky_svg_compact|safe }}</div>
+    <div class="sky-hzn-row">
+      <span class="hzn-btn-pair">
+        <button class="hzn-btn" @click="toggleHzn()" :class="hz ? 'on' : ''" :aria-pressed="hz"
+          title="Draw your horizon on the chart">⌂ Your horizon</button>
+        <span x-show="hz" x-cloak>{{ jinfo("Mimics stepping outside right now: the line is your
+          horizon, the shaded part of the map is under your feet, computed from your device's
+          clock. Your east–west position is estimated from the clock's time zone, so the line
+          can sit a degree or two off. Set the slider to your latitude — northern and southern
+          observers stand on opposite sides of the sky, so the ground flips.") }}</span>
+      </span>
+      <div class="hzn-lat" x-show="hz" x-cloak>
+        <span class="hzn-lat-name">Viewing from <b x-text="latLabel()"></b></span>
+        <input type="range" class="phase-slider lat-slider" min="-65" max="65" step="5"
+          x-model.number="lat" @input="latChanged()"
+          aria-label="Your latitude, from 65° south to 65° north">
+        <div class="phase-scale" aria-hidden="true"><span>65°S</span><span>EQUATOR</span><span>65°N</span></div>
+      </div>
+    </div>
+    <p class="sky-note hzn-status" x-show="hz" x-cloak x-text="status()"></p>
     <div class="sky-facts">
       <span>{{ g('constellation', 'Constellation') }} <b>{{ sky.constellation }}</b></span>
       <span>{{ g('right-ascension', 'RA') }} <b>{{ ctx.sky_ra }}</b> ·
