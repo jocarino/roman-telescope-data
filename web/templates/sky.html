@@ -47,7 +47,11 @@
   </div>
 
   <div class="panel skp-panel">
-    <p class="skp-count" id="skp-count" role="status"></p>
+    {# One compact line (mobile vertical space is precious); the full sentence sits behind ℹ. #}
+    <p class="skp-count"><span id="skp-count" role="status"></span>
+      <button class="info-btn xs" id="skp-count-info" aria-label="More about these numbers"
+        title="More about these numbers">i</button></p>
+    <div class="skp-count-full" id="skp-count-full" hidden></div>
     <div class="skp-chart-wrap">
       <div id="skp-chart"></div>
       <div class="skp-zoom" role="group" aria-label="Zoom the sky map">
@@ -58,9 +62,8 @@
       {# Screen-pinned legend, not an SVG label — panning must never lose it. #}
       <div class="skp-ground-lbl" aria-hidden="true">▒ shaded = ground, below your horizon</div>
     </div>
-    <p class="sky-note">Drag the map to look around · ＋/− to zoom. Hover a bright dot to
-      identify its star · click to open the worlds at that spot. Dim dots are the rest of the
-      catalog, below your horizon or too faint for the current filter.</p>
+    <p class="sky-note">Drag to look around · ＋/− to zoom · tap a bright dot for its worlds.
+      Dim dots: below your horizon or too faint for this filter.</p>
   </div>
 
   <section class="panel skp-panel" id="skp-spot-panel" hidden>
@@ -130,11 +133,19 @@
   }
   #skp-chart.dragging svg { cursor: grabbing; }
   .skp-nowrap { white-space: nowrap; }
+  /* Top-left: clear of the bottom RA axis labels, and hemisphere-neutral (for a southern
+     observer the ground shades the TOP of the map, so no bottom pinning). */
   .skp-ground-lbl {
-    position: absolute; left: 10px; bottom: 8px; z-index: 5; pointer-events: none;
+    position: absolute; left: 10px; top: 8px; z-index: 5; pointer-events: none;
     font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase;
     color: #cf9a4e; background: rgba(5, 6, 10, .65); padding: 3px 7px;
   }
+  .skp-count-full {
+    border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    background: var(--bg-3); padding: 8px 10px; margin: 0 0 8px;
+    font-size: 12px; color: var(--fg-dim);
+  }
+  .skp-count-full b { color: var(--fg); }
   #skp-chart .skp-dot-vis.sel { stroke: var(--fg); stroke-width: 1.5; }
   /* Dot sizes shrink as you zoom in (set from JS); px = SVG user units here. */
   #skp-chart .skp-dot-vis { r: var(--skp-rvis, 3px); }

@@ -72,10 +72,16 @@
         .sort(function (a, b) { return a.vmag - b.vmag; });
       var above = hosts.filter(function (h) { return h.alt > 0; }).length;
       var nWorlds = vis.reduce(function (n, h) { return n + h.planets.length; }, 0);
+      // Compact one-liner on the page; the full honest sentence lives behind the ℹ.
       $("skp-count").innerHTML =
+        "showing <b>" + vis.length + "</b> of " + hosts.length + " stars · <b>" +
+        nWorlds + "</b> worlds";
+      $("skp-count-full").innerHTML =
         "<b>" + vis.length + "</b> of this catalog's " + hosts.length + " host stars are " +
         "visible " + MAG_NAME[mag] + " from " + latLabel() + " right now, carrying <b>" +
-        nWorlds + "</b> known worlds (" + above + " are above your horizon at any brightness).";
+        nWorlds + "</b> known worlds. " + above + " hosts are above your horizon at any " +
+        "brightness. What you could ever see is the star — no exoplanet is visible to the " +
+        "eye through any telescope.";
 
       drawChart(vis);
       drawList(vis);
@@ -337,6 +343,12 @@
         selected = null;
         render();
       });
+    });
+
+    $("skp-count-info").addEventListener("click", function () {
+      var full = $("skp-count-full");
+      full.hidden = !full.hidden;
+      this.classList.toggle("on", !full.hidden);
     });
 
     var geoBtn = $("skp-geo");
