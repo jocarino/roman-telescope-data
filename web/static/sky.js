@@ -84,10 +84,15 @@
       $("skp-lat").value = lat;
       document.querySelectorAll(".skp-mag-btn[data-mag]").forEach(function (b) {
         b.classList.toggle("on", b.dataset.mag === mag);
+        var led = b.querySelector(".led");
+        if (led) led.classList.toggle("on", b.dataset.mag === mag);
       });
-      document.querySelectorAll(".skp-mag-btn[data-view]").forEach(function (b) {
-        b.classList.toggle("on", b.dataset.view === view);
-      });
+      // The VIEW knob: rotate to the current position, name it in plain English.
+      var knob = $("skp-viewknob");
+      if (knob) {
+        knob.style.setProperty("--a", view === "out" ? "-34deg" : "34deg");
+        $("skp-viewval").textContent = view === "out" ? "Standing outside" : "Whole-sky map";
+      }
 
       var vis = hosts.filter(function (h) { return h.vis; })
         .sort(function (a, b) { return a.vmag - b.vmag; });
@@ -438,14 +443,18 @@
         render();
       });
     });
-    document.querySelectorAll(".skp-mag-btn[data-view]").forEach(function (b) {
-      b.addEventListener("click", function () {
-        view = b.dataset.view;
-        localStorage.setItem("skyView", view);
-        selected = null;
-        vb = null;  // re-fit and re-centre for the new projection
-        render();
-      });
+    // The VIEW knob toggles between the two projections (click, Enter, or Space).
+    function toggleView() {
+      view = view === "out" ? "map" : "out";
+      localStorage.setItem("skyView", view);
+      selected = null;
+      vb = null;  // re-fit and re-centre for the new projection
+      render();
+    }
+    var viewKnob = $("skp-viewknob");
+    viewKnob.addEventListener("click", toggleView);
+    viewKnob.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleView(); }
     });
 
     $("skp-count-info").addEventListener("click", function () {
@@ -457,11 +466,13 @@
     var geoBtn = $("skp-geo");
     if (!(navigator.geolocation && navigator.geolocation.getCurrentPosition)) geoBtn.hidden = true;
     function updateGeoBtn() {
-      geoBtn.textContent =
+      $("skp-geo-txt").textContent =
         geoState === "busy" ? "… locating" :
-        geoState === "ok" ? "◎ located · " + latLabel() :
-        geoState === "err" ? "◎ no location — use the slider" : "◎ Use my location";
-      geoBtn.classList.toggle("lit", geoState === "ok");
+        geoState === "ok" ? "located · " + latLabel() :
+        geoState === "err" ? "no location — tune the dial" : "Use my location";
+      // The lamp: lit amber once located (see .skr-geo .led.on).
+      $("skp-geo-led").classList.toggle("on", geoState === "ok");
+      geoBtn.classList.toggle("on", geoState === "ok");
       geoBtn.disabled = geoState === "busy";
     }
     function locate() {

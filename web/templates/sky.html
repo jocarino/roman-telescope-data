@@ -34,25 +34,54 @@
     </div>
   </div>
 
-  <div class="skp-controls">
-    <button class="hzn-btn hzn-geo" id="skp-geo"
-      title="Ask the browser for your position — used once, only on this device">◎ Use my location</button>
-    <div class="hzn-lat">
-      <span class="hzn-lat-name">Viewing from <b id="skp-latlbl"></b></span>
-      <input type="range" class="phase-slider lat-slider" id="skp-lat" min="-65" max="65" step="1"
-        aria-label="Your latitude, from 65° south to 65° north">
-      <div class="phase-scale" aria-hidden="true"><span>65°S</span><span>EQUATOR</span><span>65°N</span></div>
+  {# The receiver: controls as an old radio's front panel — same chassis grammar as the
+     EXOSCOPE (scope-unit bezel, brand plate, LED pushbuttons, rotary knob), plus a radio's
+     slide-rule tuning dial for latitude. Every control keeps a plain-English label. #}
+  <div class="scope-unit skr">
+    <div class="scope-top">
+      <span class="scope-brand">EXO·RX</span>
+      <span class="led on"></span>
+      <span class="scope-model">SKY RECEIVER · tuned to your horizon</span>
     </div>
-    <div class="skp-mag" role="group" aria-label="How you are looking at the sky">
-      <button class="skp-mag-btn" data-mag="eye">Naked eye</button>
-      <button class="skp-mag-btn" data-mag="bino">Binoculars</button>
-      <button class="skp-mag-btn" data-mag="any">Any telescope</button>
-    </div>
-    <div class="skp-mag" role="group" aria-label="Chart projection">
-      <button class="skp-mag-btn" data-view="out"
-        title="The sky as you face it: compass direction across, height above the horizon up">Standing outside</button>
-      <button class="skp-mag-btn" data-view="map"
-        title="The entire celestial sphere, with your horizon curved across it">Whole-sky map</button>
+    <div class="skr-deck">
+      <div class="skr-cell">
+        <button class="led-btn skr-geo" id="skp-geo"
+          title="Ask the browser for your position — used once, only on this device"><span
+          class="led" id="skp-geo-led"></span><span id="skp-geo-txt">◎ Use my location</span></button>
+        <span class="skr-lbl">Locate</span>
+      </div>
+      <div class="skr-cell skr-dial">
+        <div class="skr-dial-top">
+          <span class="skr-lbl">Latitude tuning</span>
+          <span class="hzn-lat-name">Viewing from <b id="skp-latlbl"></b></span>
+        </div>
+        <input type="range" class="phase-slider lat-slider skr-slider" id="skp-lat"
+          min="-65" max="65" step="1" aria-label="Your latitude, from 65° south to 65° north">
+        <div class="skr-scale" aria-hidden="true">
+          <span style="left:0">65°S</span><span style="left:26.9%">30°S</span>
+          <span style="left:50%">EQUATOR</span><span style="left:73.1%">30°N</span>
+          <span style="left:100%">65°N</span>
+        </div>
+        <div class="skr-cities" aria-hidden="true">
+          <span style="left:23.9%">SYDNEY</span><span style="left:50%">QUITO</span>
+          <span style="left:79.8%">LISBON</span><span style="left:96%">OSLO</span>
+        </div>
+      </div>
+      <div class="skr-cell">
+        <div class="skr-btns" role="group" aria-label="How you are looking at the sky">
+          <button class="led-btn skp-mag-btn" data-mag="eye"><span class="led"></span>Naked eye</button>
+          <button class="led-btn skp-mag-btn" data-mag="bino"><span class="led"></span>Binoculars</button>
+          <button class="led-btn skp-mag-btn" data-mag="any"><span class="led"></span>Telescope</button>
+        </div>
+        <span class="skr-lbl">Band · how you look</span>
+      </div>
+      <div class="skr-cell knob-cell">
+        <div class="knob" id="skp-viewknob" role="button" tabindex="0" style="--a:-34deg"
+          aria-label="Switch view: standing outside or whole-sky map"
+          title="Switch between the outside view and the whole-sky map"><span class="knob-dot"></span></div>
+        <span class="knob-name">View</span>
+        <span class="knob-val" id="skp-viewval">Standing outside</span>
+      </div>
     </div>
   </div>
 
@@ -115,19 +144,43 @@
 <style>
   /* Page-scoped styles (kept out of style.css to avoid cross-session merge churn). */
   .skypage { max-width: 1040px; margin: 0 auto; }
-  .skp-controls {
-    display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px 22px; margin-top: 14px;
-  }
   .skp-panel { margin-top: 16px; padding: 14px 16px 16px; }
   .skp-panel h3 { margin: 0 0 8px; }
-  .skp-mag { display: flex; }
-  .skp-mag-btn {
-    font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
-    padding: 5px 9px; color: var(--fg-dim); background: var(--bg-3);
-    border: 1px solid var(--line); border-radius: 0; cursor: pointer; margin-left: -1px;
+  /* ── The receiver deck: an old radio's front panel on the scope chassis ── */
+  .skr { margin-top: 14px; }
+  .skr-deck {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 16px 26px; padding: 12px 20px 14px;
   }
-  .skp-mag-btn:hover { border-color: var(--accent); color: var(--fg); position: relative; }
-  .skp-mag-btn.on { background: var(--accent); color: #05121f; border-color: var(--accent); }
+  .skr-cell { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .skr-lbl {
+    font-family: var(--mono); font-size: 8.5px; letter-spacing: .14em;
+    color: var(--fg-faint); text-transform: uppercase;
+  }
+  .skr .led-btn { font-family: var(--mono); font-size: 10.5px; letter-spacing: .05em; text-transform: uppercase; }
+  .skr-btns { display: flex; }
+  .skr-btns .led-btn + .led-btn { margin-left: -1px; }
+  /* Located lamp glows amber (the real-world/ground colour), not signal green. */
+  .skr-geo .led.on { background: #cf9a4e; box-shadow: 0 0 6px #cf9a4e; }
+  /* Slide-rule latitude dial: tick strip + printed scale + faint city names, the old
+     shortwave "where to tune for Paris" touch. */
+  .skr-dial { flex: 1 1 300px; min-width: 260px; align-items: stretch; }
+  .skr-dial-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .skr-slider { margin: 8px 0 0; }
+  .skr-scale {
+    position: relative; height: 16px; margin-top: 3px;
+    background: repeating-linear-gradient(90deg,
+      var(--line) 0 1px, transparent 1px calc(100% / 26));
+    background-size: calc(100% - 1px) 5px; background-repeat: no-repeat;
+  }
+  .skr-scale span, .skr-cities span {
+    position: absolute; top: 6px; transform: translateX(-50%);
+    font-family: var(--mono); font-size: 8.5px; letter-spacing: .08em; color: var(--fg-dim);
+    white-space: nowrap;
+  }
+  .skr-scale span:first-child { transform: none; }
+  .skr-scale span:last-child { transform: translateX(-100%); }
+  .skr-cities { position: relative; height: 11px; }
+  .skr-cities span { top: 0; font-size: 7.5px; color: var(--fg-faint); letter-spacing: .12em; }
   .skp-panel h3 .info-btn { vertical-align: 1px; margin-left: 4px; }
   /* The chart is a draggable viewport onto the sky (the viewBox is driven from JS). */
   .skp-chart-wrap { position: relative; }
@@ -169,12 +222,11 @@
        most of the screen height — the full declination range stays visible, you pan in RA. */
     .skp-chart-wrap { width: 100vw; margin-left: calc(50% - 50vw); }
     #skp-chart { aspect-ratio: auto; height: 62vh; }
-    /* One clean column of controls instead of a ragged wrap. flex:none — the shared
-       .hzn-lat flex-basis (180px) would otherwise become HEIGHT in a column flexbox. */
-    .skp-controls { flex-direction: column; align-items: stretch; gap: 12px; }
-    .skp-controls .hzn-lat { max-width: none; flex: none; }
-    .skp-mag { width: 100%; }
-    .skp-mag-btn { flex: 1; }
+    /* The deck stacks: dial full-width on top, then locate / band / knob, each centred. */
+    .skr-deck { gap: 12px 18px; padding: 10px 14px 12px; }
+    .skr-dial { flex: 1 1 100%; min-width: 0; order: -1; }
+    .skr-cell { width: 100%; }
+    .skr-btns .led-btn { padding: 6px 8px; font-size: 9.5px; }
   }
   .skp-dot-vis { fill: var(--accent); cursor: pointer; }
   .skp-dot-vis:hover { stroke: var(--fg); stroke-width: 1; }
