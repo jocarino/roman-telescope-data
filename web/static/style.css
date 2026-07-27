@@ -703,6 +703,22 @@ button.badge:active, a.badge:active { box-shadow: none; }
     rgba(0, 0, 0, .75) 0 2px, rgba(255, 255, 255, .05) 2px 3px, transparent 3px 6px);
 }
 
+/* Reset row at the foot of the rail: one control that returns every knob to its default.
+   Always present so the rail's height never moves; inert (and visibly so) when there is
+   nothing to reset, lit in the accent when there is. */
+.rail-reset { padding: 0 10px 10px; }
+.reset-btn {
+  width: 100%; padding: 7px 8px; cursor: pointer;
+  background: var(--bg-3); border: 1px solid var(--accent); color: var(--accent);
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .5px; text-transform: uppercase;
+  box-shadow: 2px 2px 0 var(--line);
+}
+.reset-btn:hover:not(:disabled) { background: var(--accent); color: #05121f; }
+.reset-btn:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: none; }
+.reset-btn:disabled {
+  cursor: default; border-color: var(--line); color: var(--fg-faint); box-shadow: none;
+}
+
 /* Bottom bar: the palette as the instrument's OUTPUT stage. */
 .scope-bottom {
   display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
@@ -1496,6 +1512,9 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
   .rail-display .knob-row { justify-content: space-evenly; }
   .rail-measure { display: none; order: 4; margin: 12px; }
   .detail[data-panel="readout"] .rail-measure { display: block; }
+  /* display:contents means every rail child is ordered explicitly or it defaults to 0 and
+     jumps ahead of the knobs. Reset belongs at the very end: it acts on everything above it. */
+  .rail-reset { order: 5; margin: 0 12px 14px; padding: 0; }
   /* Function keys as physical scope keycaps (cf. R&S MXO front panel): rounded caps
      lit from above with real extrusion below, travel on press, active key backlit
      in the accent like a lit Run/Stop key. Skeuomorphic on purpose — like the knobs,

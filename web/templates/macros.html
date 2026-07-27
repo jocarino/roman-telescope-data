@@ -472,6 +472,16 @@
           </div>
           {% endif %}
         </section>
+        {# Every knob above persists across planet pages, so a scope set up several hops back
+           can feel stuck with no clue which knob did it. One control puts the whole instrument
+           back to how it ships. Always rendered and merely inert when there is nothing to
+           reset — a row that came and went would jog the rail's height. #}
+        <i class="rail-vent" aria-hidden="true"></i>
+        <div class="rail-reset">
+          <button type="button" class="reset-btn" @click="resetScope()" :disabled="!scopeDirty()"
+            :title="scopeDirty() ? 'Put every scope knob back to its default'
+              : 'The scope is already at its defaults'">&#10226; Reset scope</button>
+        </div>
       </aside>
       {# Mobile-only function keys: on a phone the measure panel, palette and data card don't
          all fit stacked, so these switch which one is shown. Hidden on desktop (all visible). #}
