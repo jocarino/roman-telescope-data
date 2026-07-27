@@ -58,8 +58,8 @@ Every technical word on the site is defined once, in `data/glossary.json`, and u
 places from that one source:
 
 - **In place.** Templates wrap a term in the `g()` macro (`web/templates/macros.html`):
-  `{{ g('albedo-spectrum', 'albedo spectrum') }}`. It renders a subtle pixel-dotted underline
-  plus a small accent pixel, and `web/static/glossary.js` shows the plain-English definition on
+  `{{ g('albedo-spectrum', 'albedo spectrum') }}`. It renders a 1-bit dither underline
+  (one pixel on, one off — texture rather than a rule), and `web/static/glossary.js` shows the plain-English definition on
   hover, tap or keyboard focus. Events are delegated, so terms inside htmx fragments work too.
   Use `g()` for **terms**; keep the `[i]` info buttons for **controls** (knobs, view switches).
 - **All together.** `/glossary` lists every term grouped by topic, searchable and deep-linkable
