@@ -1,58 +1,84 @@
 {% extends "base.html" %}
 {% from "macros.html" import dice_icon %}
 {% block title %}404 · off the chart · Exoplanet Palette{% endblock %}
-{# The 404 as a ship's cockpit: the window shows hyperspace, the console below offers the
-   three headings out. Every readout on the console is a real value (the path the visitor
-   actually asked for, the real catalog size, the real build) — costume, but not fiction. #}
+{% block bodyclass %}cockpit-page{% endblock %}
+{# The 404 IS the cockpit: the visitor sits in the pilot's seat. The whole upper viewport is
+   the canopy (hyperspace out the glass, hull ceiling and A-pillars framing it), the lower
+   part is the dashboard — instrument screens, blinkenlights, and the three ways out as
+   physical console keys. Costume, not fiction: every value a screen shows is real (the path
+   actually requested, the true catalog size, the build id); the lights are just lights. #}
 {% block content %}
 <div class="cockpit" x-data="cockpit({ indexUrl: '{{ index_url }}' })">
 
-  <div class="scope-unit cockpit-view">
-    <div class="cockpit-glass">
-      <canvas class="hyper" x-ref="hyper" aria-hidden="true"></canvas>
-      {# Corner ticks: a reticle etched on the glass, like the EXOSCOPE's CRT HUD. #}
-      <div class="cockpit-reticle" aria-hidden="true"></div>
-      <div class="cockpit-hud">
-        <span class="cockpit-code">404</span>
-        <h1 class="cockpit-lede">This page isn’t on the chart</h1>
-        <p class="cockpit-sub">Nothing exists at
-          <code class="cockpit-path" x-text="path">this address</code> — you’ve drifted off
-          the map. Pick a heading below and the ship will take you somewhere real.</p>
-      </div>
-    </div>
-    <div class="cockpit-strip">
-      <span class="cockpit-cell"><span class="cockpit-k">Status</span>
-        <span class="cockpit-v">404 · no such page</span></span>
-      <span class="cockpit-cell"><span class="cockpit-k">Requested</span>
-        <span class="cockpit-v mono-ell" x-text="path">—</span></span>
-      <span class="cockpit-cell"><span class="cockpit-k">Catalog</span>
-        <span class="cockpit-v">{{ '{:,}'.format(n_modelled) }} worlds</span></span>
-      <span class="cockpit-cell"><span class="cockpit-k">Build</span>
-        <span class="cockpit-v">{{ build_id }}</span></span>
+  <div class="canopy">
+    <canvas class="hyper" x-ref="hyper" aria-hidden="true"></canvas>
+    <div class="canopy-ceiling" aria-hidden="true"></div>
+    <div class="canopy-pillar l" aria-hidden="true"></div>
+    <div class="canopy-pillar r" aria-hidden="true"></div>
+    <div class="cockpit-hud">
+      <span class="cockpit-code">404</span>
+      <h1 class="cockpit-lede">This page isn’t on the chart</h1>
+      <p class="cockpit-sub">Nothing exists at
+        <code class="cockpit-path" x-text="path">this address</code> — you’ve drifted off the
+        map. Pick a heading on the console below.</p>
     </div>
   </div>
 
-  {# Three headings out. Physical keycaps (the site's one deliberate non-square shape, as on
-     the scope's function keys), each with a plain-English line under the label. #}
-  <nav class="cockpit-keys" aria-label="Where to go instead">
-    <a class="ckey" href="/">
-      <span class="ckey-glyph" aria-hidden="true">◧</span>
-      <span class="ckey-lbl">All planets</span>
-      <span class="ckey-sub">the full gallery, {{ '{:,}'.format(n_modelled) }} worlds</span>
-    </a>
-    <a class="ckey" href="/tours">
-      <span class="ckey-glyph" aria-hidden="true">▶</span>
-      <span class="ckey-lbl">Guided tours</span>
-      <span class="ckey-sub">short curated walks through the catalog</span>
-    </a>
-    <button type="button" class="ckey" @click="roll()" :class="rolling ? 'busy' : ''"
-      title="Jump to a random planet · press R">
-      <span class="ckey-glyph" aria-hidden="true">{{ dice_icon('dice') }}</span>
-      <span class="ckey-lbl">Random world</span>
-      <span class="ckey-sub" x-text="rolling ? 'plotting a course…' : 'roll the dice, land anywhere'"
-        >roll the dice, land anywhere</span>
-    </button>
-  </nav>
-  <p class="cockpit-foot">Keyboard: press <kbd>R</kbd> to roll a random world.</p>
+  <div class="dash">
+    {# Instrument screens: the honest telemetry row. #}
+    <div class="dash-screens" role="status">
+      <span class="dscr"><span class="dscr-k">Status</span>
+        <span class="dscr-v">404 · no such page</span></span>
+      <span class="dscr wide"><span class="dscr-k">Requested</span>
+        <span class="dscr-v" x-text="path">—</span></span>
+      <span class="dscr"><span class="dscr-k">Catalog</span>
+        <span class="dscr-v">{{ '{:,}'.format(n_modelled) }} worlds</span></span>
+      <span class="dscr build"><span class="dscr-k">Build</span>
+        <span class="dscr-v">{{ build_id }}</span></span>
+    </div>
+
+    <div class="dash-main">
+      {# Side clusters: pure set-dressing (lights and meters, deliberately unlabelled so they
+         can't be mistaken for data). Hidden from assistive tech and from narrow screens. #}
+      <div class="dash-cluster l" aria-hidden="true">
+        <span class="led-grid">{% for i in range(14) %}<i></i>{% endfor %}</span>
+        <span class="meter-row">
+          <span class="meter"><i></i></span><span class="meter"><i></i></span><span class="meter"><i></i></span>
+        </span>
+      </div>
+
+      <nav class="dash-console" aria-label="Where to go instead">
+        <span class="console-lbl">◈ Navigation — pick a heading</span>
+        <div class="console-keys">
+          <a class="ckey" href="/">
+            <span class="ckey-glyph" aria-hidden="true">◧</span>
+            <span class="ckey-lbl">All planets</span>
+            <span class="ckey-sub">the full gallery, {{ '{:,}'.format(n_modelled) }} worlds</span>
+          </a>
+          <a class="ckey" href="/tours">
+            <span class="ckey-glyph" aria-hidden="true">▶</span>
+            <span class="ckey-lbl">Guided tours</span>
+            <span class="ckey-sub">short curated walks through the catalog</span>
+          </a>
+          <button type="button" class="ckey" @click="roll()" :class="rolling ? 'busy' : ''"
+            title="Jump to a random planet · press R">
+            <span class="ckey-glyph" aria-hidden="true">{{ dice_icon('dice') }}</span>
+            <span class="ckey-lbl">Random world</span>
+            <span class="ckey-sub"
+              x-text="rolling ? 'plotting a course…' : 'roll the dice, land anywhere'"
+              >roll the dice, land anywhere</span>
+          </button>
+        </div>
+        <p class="cockpit-foot">Keyboard: press <kbd>R</kbd> to roll a random world.</p>
+      </nav>
+
+      <div class="dash-cluster r" aria-hidden="true">
+        <span class="meter-row">
+          <span class="meter"><i></i></span><span class="meter"><i></i></span><span class="meter"><i></i></span>
+        </span>
+        <span class="led-grid">{% for i in range(14) %}<i></i>{% endfor %}</span>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
