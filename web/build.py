@@ -1,5 +1,7 @@
 """Static-site generator: read data/planets.json, render the gallery, per-planet detail
-pages, and htmx detail fragments into an output directory, then copy static assets.
+pages, and the long-press peek fragments into an output directory, then copy static
+assets. (Per-planet DETAIL fragments were once emitted too, for an htmx drawer that no
+longer exists; at ~770 KB × 6k planets they were half the site, so they are gone.)
 
     uv run python -m site.build --out dist
 
@@ -364,7 +366,6 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     if out.exists():
         shutil.rmtree(out)
     (out / "planet").mkdir(parents=True)
-    (out / "fragments" / "planet").mkdir(parents=True)
     (out / "fragments" / "peek").mkdir(parents=True)
     (out / "palettes").mkdir(parents=True)
 
@@ -448,7 +449,6 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
             )
 
     page_tpl = env.get_template("planet.html")
-    frag_tpl = env.get_template("fragments/planet_detail.html")
     peek_tpl = env.get_template("fragments/peek.html")
     # Every host with a known position becomes a faint dot on every planet's sky chart.
     sky_points = [(r.sky.ra_deg, r.sky.dec_deg) for r in records if r.sky]
@@ -459,7 +459,6 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
         ctx = _planet_ctx(rec, fiction, sky_points, tour_membership)
         pid = rec.id
         (out / "planet" / f"{pid}.html").write_text(page_tpl.render(ctx=ctx, build_id=build_id))
-        (out / "fragments" / "planet" / f"{pid}.html").write_text(frag_tpl.render(ctx=ctx))
         (out / "fragments" / "peek" / f"{pid}.html").write_text(peek_tpl.render(ctx=ctx))
 
     shutil.copytree(_STATIC, out / "static")
