@@ -210,32 +210,67 @@
     $("skp-zfit").addEventListener("click", function () { vb = null; applyVb(); });
     window.addEventListener("resize", function () { if (vb) applyVb(); });
 
-    var drag = null, dragged = false;
+    // One pointer drags; two pinch. No wheel zoom — the mouse wheel must keep scrolling
+    // the page (zoom is the buttons or a pinch).
+    var pointers = new Map();  // pointerId -> {x, y}
+    var drag = null, pinch = null, dragged = false;
+    function pinchMid() {
+      var pts = [...pointers.values()];
+      return { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2,
+               d: Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) };
+    }
     chartEl.addEventListener("pointerdown", function (e) {
       if (!vb) return;
-      drag = { x: e.clientX, y: e.clientY, vx: vb.x, vy: vb.y };
-      dragged = false;
-      if (chartEl.setPointerCapture) chartEl.setPointerCapture(e.pointerId);
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      try { chartEl.setPointerCapture(e.pointerId); } catch (err) { /* synthetic events */ }
+      if (pointers.size === 2) {
+        var rect = chartEl.getBoundingClientRect(), m = pinchMid();
+        // Anchor: the sky position under the fingers' midpoint stays under it.
+        pinch = {
+          d0: m.d, w0: vb.w,
+          px: vb.x + (m.x - rect.left) / rect.width * vb.w,
+          py: vb.y + (m.y - rect.top) / rect.height * vb.h,
+        };
+        drag = null;
+        dragged = true;  // a pinch is not a pick either
+      } else if (pointers.size === 1) {
+        drag = { x: e.clientX, y: e.clientY, vx: vb.x, vy: vb.y };
+        dragged = false;
+      }
       chartEl.classList.add("dragging");
     });
     chartEl.addEventListener("pointermove", function (e) {
-      if (!drag) return;
+      if (!pointers.has(e.pointerId)) return;
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       var rect = chartEl.getBoundingClientRect();
-      if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 6) dragged = true;
-      vb.x = drag.vx - (e.clientX - drag.x) * vb.w / rect.width;
-      vb.y = drag.vy - (e.clientY - drag.y) * vb.h / rect.height;
-      applyVb();
+      if (pinch && pointers.size === 2) {
+        var m = pinchMid();
+        vb.w = pinch.w0 * pinch.d0 / Math.max(1, m.d);
+        clampVb();  // derives vb.h from the new width
+        vb.x = pinch.px - (m.x - rect.left) / rect.width * vb.w;
+        vb.y = pinch.py - (m.y - rect.top) / rect.height * vb.h;
+        applyVb();
+      } else if (drag) {
+        if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 6) dragged = true;
+        vb.x = drag.vx - (e.clientX - drag.x) * vb.w / rect.width;
+        vb.y = drag.vy - (e.clientY - drag.y) * vb.h / rect.height;
+        applyVb();
+      }
     });
     ["pointerup", "pointercancel"].forEach(function (ev) {
-      chartEl.addEventListener(ev, function () {
-        drag = null;
-        chartEl.classList.remove("dragging");
+      chartEl.addEventListener(ev, function (e) {
+        pointers.delete(e.pointerId);
+        pinch = null;
+        // Falling from a pinch to one finger restarts a plain drag from here.
+        if (pointers.size === 1 && vb) {
+          var p = [...pointers.values()][0];
+          drag = { x: p.x, y: p.y, vx: vb.x, vy: vb.y };
+        } else {
+          drag = null;
+        }
+        if (!pointers.size) chartEl.classList.remove("dragging");
       });
     });
-    chartEl.addEventListener("wheel", function (e) {
-      e.preventDefault();
-      zoomBy(e.deltaY < 0 ? 1.2 : 1 / 1.2);
-    }, { passive: false });
 
     function starMeta(h) {
       return "V " + h.vmag.toFixed(1) + " · " + Math.round(h.alt) + "° up, facing " +
