@@ -439,6 +439,9 @@ document.addEventListener("alpine:init", () => {
   // stops while the tab is hidden.
   Alpine.data("cockpit", (cfg) => ({
     indexUrl: (cfg && cfg.indexUrl) || null,
+    nearest: (cfg && cfg.nearest) || [],   // the 3 nearest catalog worlds (id, name, ly, ra)
+    spec: (cfg && cfg.spec) || null,       // one real reflected-light curve (id, name, vals)
+    warp: true,                            // the switch on the console: hyperspace <-> drift
     path: "",
     rolling: false,
     _raf: 0,
@@ -510,9 +513,10 @@ document.addEventListener("alpine:init", () => {
         ctx.fillStyle = step ? "rgba(4, 6, 10, .28)" : "#04060a";
         ctx.fillRect(0, 0, w, h);
         const cx = w / 2, cy = h / 2, f = w * 0.62;
+        const sp = this.warp ? SPEED : SPEED * 0.12;   // the console switch is real
         for (const s of this._stars) {
           const z0 = s.z;
-          if (step) s.z -= SPEED;
+          if (step) s.z -= sp;
           if (s.z <= 0.06) { spawn(s); continue; }
           const x = cx + (s.x / s.z) * f, y = cy + (s.y / s.z) * f;
           if (x < -40 || x > w + 40 || y < -40 || y > h + 40) { if (step) spawn(s); continue; }
@@ -534,21 +538,16 @@ document.addEventListener("alpine:init", () => {
         ctx.globalAlpha = 1;
       };
 
-      // Dashboard instruments (desktop only — the pods are display:none on phones): a radar
-      // sweep and a scrolling signal trace on green phosphor. Decorative and unlabelled by
-      // design; they share the starfield's frame loop and reduced-motion behaviour.
+      // Dashboard instruments, drawing REAL data on green phosphor. The radar plots the
+      // three nearest catalog worlds at their true sky bearings (RA as the compass angle,
+      // distance rank as the ring); the trace is a real planet's reflected-light curve
+      // with a slow scan cursor. Both are captioned and linked in the markup — the
+      // canvases are the picture, the links are the data.
       const radar = this.$refs.radar, wave = this.$refs.wave;
       const rc = radar && radar.getContext("2d"), wc = wave && wave.getContext("2d");
       const PHOS = "#4ade80";
-      const blips = [[0.63, 0.3], [0.3, 0.6], [0.72, 0.74]];
+      const maxLy = Math.max(...this.nearest.map((p) => p.ly), 1);
       let t = 0;
-      if (wc) {   // prefill the whole trace so the instrument is never an empty screen
-        wc.fillStyle = "#040a06"; wc.fillRect(0, 0, wave.width, wave.height);
-        wc.fillStyle = PHOS;
-        for (let x = 0; x < wave.width; x++) {
-          wc.fillRect(x, Math.round(wave.height / 2 + Math.sin((x - wave.width) * 0.11) * wave.height * 0.27), 1, 2);
-        }
-      }
       const decor = (step) => {
         if (step) t += 1;
         if (rc) {
@@ -558,31 +557,32 @@ document.addEventListener("alpine:init", () => {
           rc.strokeStyle = "rgba(74, 222, 128, .3)";
           rc.beginPath(); rc.arc(cx, cy, W * 0.42, 0, 6.284); rc.stroke();
           rc.beginPath(); rc.arc(cx, cy, W * 0.22, 0, 6.284); rc.stroke();
-          const a = t * 0.045;
+          const a = t * 0.03;
           rc.strokeStyle = PHOS;
           rc.beginPath(); rc.moveTo(cx, cy);
           rc.lineTo(cx + Math.cos(a) * W * 0.42, cy + Math.sin(a) * W * 0.42); rc.stroke();
-          for (const [bx, by] of blips) {   // contacts light as the sweep passes, then fade
-            const ang = Math.atan2(by * H - cy, bx * W - cx);
+          this.nearest.forEach((p, i) => {   // real worlds: RA -> bearing, distance -> ring
+            const ang = (p.ra || 0) * Math.PI / 180;
+            const r = W * (0.16 + 0.26 * (p.ly / maxLy));
+            const bx = cx + Math.cos(ang) * r, by = cy + Math.sin(ang) * r;
             let d = (a - ang) % 6.283; if (d < 0) d += 6.283;
-            const glow = Math.max(0, 1 - d / 1.4);
-            if (glow > 0.03) {
-              rc.globalAlpha = glow; rc.fillStyle = PHOS;
-              rc.fillRect(Math.round(bx * W), Math.round(by * H), 2, 2);
-              rc.globalAlpha = 1;
-            }
-          }
+            rc.globalAlpha = Math.max(0.35, 1 - d / 2.2);   // never fully dark: they're real
+            rc.fillStyle = PHOS;
+            rc.fillRect(Math.round(bx) - 1, Math.round(by) - 1, i === 0 ? 3 : 2, i === 0 ? 3 : 2);
+            rc.globalAlpha = 1;
+          });
         }
-        if (wc) {
-          const W = wave.width, H = wave.height;
-          if (step) {   // scroll left one column, plot the next sample at the right edge
-            wc.drawImage(wave, -1, 0);
-            wc.fillStyle = "#040a06"; wc.fillRect(W - 1, 0, 1, H);
-            const y = H / 2 + Math.sin(t * 0.11) * H * 0.27 + (Math.random() - 0.5) * 3;
-            wc.fillStyle = PHOS; wc.fillRect(W - 1, Math.round(y), 1, 2);
-          } else {
-            wc.fillStyle = PHOS;
-            for (let x = 0; x < W; x++) wc.fillRect(x, Math.round(H / 2 + Math.sin(x * 0.11) * H * 0.27), 1, 2);
+        if (wc && this.spec && this.spec.vals.length) {
+          const W = wave.width, H = wave.height, vals = this.spec.vals;
+          wc.fillStyle = "#040a06"; wc.fillRect(0, 0, W, H);
+          wc.fillStyle = PHOS;
+          for (let x = 0; x < W; x++) {   // the real albedo curve, resampled to the screen
+            const v = vals[Math.min(vals.length - 1, Math.floor((x / W) * vals.length))];
+            wc.fillRect(x, Math.round(2 + (1 - v) * (H - 6)), 1, 2);
+          }
+          if (step) {   // slow scan cursor, so the instrument reads as live
+            const x = t % (W * 2) < W ? t % W : W - 1 - (t % W);
+            wc.fillStyle = "rgba(74, 222, 128, .35)"; wc.fillRect(x, 0, 1, H);
           }
         }
       };

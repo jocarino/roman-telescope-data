@@ -2,39 +2,36 @@
 {% from "macros.html" import dice_icon %}
 {% block title %}404 · off the chart · Exoplanet Palette{% endblock %}
 {% block bodyclass %}cockpit-page{% endblock %}
-{# The 404 IS the cockpit: the visitor sits in the pilot's seat. The upper viewport is the
-   canopy — hyperspace out the glass, an overhead console hanging from the hull ceiling,
-   angled side walls wrapping the view — and the lower band is the dashboard: instrument
-   screens, a radar and a signal trace, switch banks, and the three ways out as physical
-   console keys. Costume, not fiction: every LABELLED value is real (the path actually
-   requested, the true catalog size, the build id); everything decorative is unlabelled and
-   aria-hidden so it can't be mistaken for data. #}
+{# The 404 IS the cockpit: hyperspace out the canopy glass, the ship's console below. Same
+   rule as everywhere else on the site — the costume never invents data. Every instrument
+   here shows something real: the telemetry row is the actual request, the radar plots the
+   three genuinely nearest catalog worlds (each a link), the signal trace is a real planet's
+   reflected-light curve (a link too), and the one switch really controls the warp. #}
 {% block content %}
-<div class="cockpit" x-data="cockpit({ indexUrl: '{{ index_url }}' })">
+<div class="cockpit" x-data="cockpit({ indexUrl: '{{ index_url }}',
+    nearest: {{ nearest|tojson|forceescape }}, spec: {{ spec|tojson|forceescape }} })">
 
   <div class="canopy">
     <canvas class="hyper" x-ref="hyper" aria-hidden="true"></canvas>
     <div class="canopy-glare" aria-hidden="true"></div>
-    {# Hull ceiling + the overhead console pods hanging from it. #}
-    <div class="overhead" aria-hidden="true">
-      <span class="oh-pod l"><i></i><i class="on"></i><i></i><i class="on amber"></i><i></i></span>
-      <span class="oh-pod r"><i class="on green"></i><i></i><i class="on"></i><i></i><i class="on green"></i></span>
-    </div>
+    <div class="overhead" aria-hidden="true"></div>
     <div class="canopy-wall l" aria-hidden="true"></div>
     <div class="canopy-wall r" aria-hidden="true"></div>
+    {# The message, projected on the glass as a flat HUD panel. #}
     <div class="cockpit-hud">
-      <span class="cockpit-code">404</span>
-      <h1 class="cockpit-lede">This page isn’t on the chart</h1>
-      <p class="cockpit-sub">Nothing exists at
-        <code class="cockpit-path" x-text="path">this address</code> — you’ve drifted off the
-        map. Pick a heading on the console below.</p>
+      <div class="hud-panel">
+        <span class="cockpit-code">404</span>
+        <h1 class="cockpit-lede">This page isn’t on the chart</h1>
+        <p class="cockpit-sub">Nothing exists at
+          <code class="cockpit-path" x-text="path">this address</code> — you’ve drifted off
+          the map. Pick a heading on the console below.</p>
+      </div>
     </div>
   </div>
 
   <div class="dash">
-    {# Instrument screens: the honest telemetry row. #}
+    {# Telemetry: the honest readout of what just happened. #}
     <div class="dash-screens" role="status">
-      <span class="scr-flank" aria-hidden="true">{% for i in range(6) %}<i></i>{% endfor %}</span>
       <span class="dscr"><span class="dscr-k">Status</span>
         <span class="dscr-v">404 · no such page</span></span>
       <span class="dscr wide"><span class="dscr-k">Requested</span>
@@ -43,27 +40,19 @@
         <span class="dscr-v">{{ '{:,}'.format(n_modelled) }} worlds</span></span>
       <span class="dscr build"><span class="dscr-k">Build</span>
         <span class="dscr-v">{{ build_id }}</span></span>
-      <span class="scr-flank" aria-hidden="true">{% for i in range(6) %}<i></i>{% endfor %}</span>
-    </div>
-
-    {# Narrow screens lose the side pods; this slim strip keeps SOME instruments between the
-       telemetry and the keys so the console still reads as a console. #}
-    <div class="m-inst" aria-hidden="true">
-      <span class="led-grid">{% for i in range(14) %}<i></i>{% endfor %}</span>
-      <span class="meter-row">
-        <span class="meter"><i></i></span><span class="meter"><i></i></span><span class="meter"><i></i></span>
-      </span>
-      <span class="sw-bank"><i class="sw dn"></i><i class="sw"></i><i class="sw dn"></i><i class="sw dn"></i></span>
     </div>
 
     <div class="dash-main">
-      {# Side pods: living instruments and switch gear — set-dressing, deliberately
-         unlabelled so none of it can be mistaken for data. #}
-      <div class="dash-pod l" aria-hidden="true">
-        <canvas class="pod-scope" x-ref="radar" width="64" height="64"></canvas>
-        <span class="sw-bank"><i class="sw dn"></i><i class="sw"></i><i class="sw dn"></i><i
-          class="sw"></i><i class="sw dn"></i><i class="sw dn"></i></span>
-        <span class="led-grid">{% for i in range(14) %}<i></i>{% endfor %}</span>
+      {# Radar: the three NEAREST known exoplanets, plotted at their real sky bearings —
+         you're lost, so the ship shows you what's actually close. Each is a link. #}
+      <div class="dash-pod l">
+        <span class="pod-lbl">Nearest worlds</span>
+        <canvas class="pod-scope" x-ref="radar" width="64" height="64" aria-hidden="true"></canvas>
+        <span class="pod-links">
+          {% for p in nearest %}
+          <a class="pod-link" href="/planet/{{ p.id }}">{{ p.name }} · {{ p.ly }} ly</a>
+          {% endfor %}
+        </span>
       </div>
 
       <nav class="dash-console" aria-label="Where to go instead">
@@ -88,16 +77,24 @@
               >roll the dice, land anywhere</span>
           </button>
         </div>
-        <p class="cockpit-foot">Keyboard: press <kbd>R</kbd> to roll a random world.</p>
+        <div class="console-foot">
+          <button type="button" class="sw-ctl" @click="warp = !warp" :aria-pressed="warp"
+            title="Slow the view out the window to a drift, or punch it back to warp">
+            <span class="sw" :class="warp ? 'dn' : ''" aria-hidden="true"></span>
+            <span class="sw-ctl-lbl" x-text="warp ? 'WARP · ON' : 'WARP · OFF'">WARP · ON</span>
+          </button>
+          <p class="cockpit-foot">Keyboard: press <kbd>R</kbd> to roll a random world.</p>
+        </div>
       </nav>
 
-      <div class="dash-pod r" aria-hidden="true">
-        <canvas class="pod-scope wide" x-ref="wave" width="96" height="40"></canvas>
-        <span class="sw-bank"><i class="sw"></i><i class="sw dn"></i><i class="sw dn"></i><i
-          class="sw"></i><i class="sw dn"></i><i class="sw"></i></span>
-        <span class="meter-row">
-          <span class="meter"><i></i></span><span class="meter"><i></i></span><span class="meter"><i></i></span>
-        </span>
+      {# Signal trace: a real reflected-light spectrum from the catalog, and the switch that
+         really drives the view out the window. #}
+      <div class="dash-pod r">
+        {% if spec %}
+        <span class="pod-lbl">Reflected light · modelled</span>
+        <canvas class="pod-scope wide" x-ref="wave" width="96" height="40" aria-hidden="true"></canvas>
+        <a class="pod-link" href="/planet/{{ spec.id }}">{{ spec.name }} →</a>
+        {% endif %}
       </div>
     </div>
   </div>
