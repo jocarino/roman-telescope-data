@@ -270,7 +270,11 @@
      starts empty, the component fills it in batches as you scroll. #}
   <div class="grid" x-ref="grid"></div>
   <div class="grid-sentinel" x-ref="sentinel" aria-hidden="true"></div>
-  <p class="grid-empty" x-show="loaded && count() === 0" x-cloak>No planets match these filters.</p>
+  {# Filters now outlive the visit, so the empty grid has to offer a way out: without it, a
+     filter set weeks ago (or a discovery method that left the data) leaves a blank page with
+     no obvious cause. #}
+  <p class="grid-empty" x-show="loaded && count() === 0" x-cloak>No planets match these filters.
+    <button type="button" class="empty-clear" @click="clearFilters()">Clear all filters</button></p>
 
   <button class="to-top" x-show="scrolled" x-cloak
     @click="window.scrollTo({ top: 0, behavior: 'smooth' })"
