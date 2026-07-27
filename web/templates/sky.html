@@ -57,11 +57,6 @@
   </div>
 
   <div class="panel skp-panel">
-    {# One compact line (mobile vertical space is precious); the full sentence sits behind ℹ. #}
-    <p class="skp-count"><span id="skp-count" role="status"></span>
-      <button class="info-btn xs" id="skp-count-info" aria-label="More about these numbers"
-        title="More about these numbers">i</button></p>
-    <div class="skp-count-full" id="skp-count-full" hidden></div>
     <div class="skp-chart-wrap">
       <div id="skp-chart"></div>
       <div class="skp-zoom" role="group" aria-label="Zoom the sky map">
@@ -82,7 +77,12 @@
   </section>
 
   <section class="panel skp-panel">
-    <h3 id="skp-list-title">Visible now</h3>
+    {# The count lives in this heading (x of total; just the total when they match); the
+       full honest sentence sits behind the ℹ — mobile vertical space is precious. #}
+    <h3><span id="skp-list-title">Visible now</span>
+      <button class="info-btn xs" id="skp-count-info" aria-label="More about these numbers"
+        title="More about these numbers">i</button></h3>
+    <div class="skp-count-full" id="skp-count-full" hidden></div>
     <p class="census-sub">Brightest first. Altitude is how far above your horizon (90° is
       straight up); the compass point is where to face.</p>
     <div id="skp-list"></div>
@@ -128,10 +128,7 @@
   }
   .skp-mag-btn:hover { border-color: var(--accent); color: var(--fg); position: relative; }
   .skp-mag-btn.on { background: var(--accent); color: #05121f; border-color: var(--accent); }
-  .skp-count {
-    margin: 0 0 8px; font-family: var(--mono); font-size: 11.5px; color: var(--fg);
-  }
-  .skp-count b { color: var(--accent); }
+  .skp-panel h3 .info-btn { vertical-align: 1px; margin-left: 4px; }
   /* The chart is a draggable viewport onto the sky (the viewBox is driven from JS). */
   .skp-chart-wrap { position: relative; }
   #skp-chart { overflow: hidden; aspect-ratio: 900 / 400; }

@@ -93,10 +93,7 @@
         .sort(function (a, b) { return a.vmag - b.vmag; });
       var above = hosts.filter(function (h) { return h.alt > 0; }).length;
       var nWorlds = vis.reduce(function (n, h) { return n + h.planets.length; }, 0);
-      // Compact one-liner on the page; the full honest sentence lives behind the ℹ.
-      $("skp-count").innerHTML =
-        "showing <b>" + vis.length + "</b> of " + hosts.length + " stars · <b>" +
-        nWorlds + "</b> worlds";
+      // The count lives in the list heading; the full honest sentence behind its ℹ.
       $("skp-count-full").innerHTML =
         "<b>" + vis.length + "</b> of this catalog's " + hosts.length + " host stars are " +
         "visible " + MAG_NAME[mag] + " from " + latLabel() + " right now, carrying <b>" +
@@ -348,8 +345,12 @@
     }
 
     function drawList(vis) {
-      $("skp-list-title").textContent = "Visible " + MAG_NAME[mag].replace("to the ", "") +
-        " · " + vis.length + (vis.length === 1 ? " star" : " stars");
+      // "92 of 4274 stars"; when everything shows, just "4274 stars".
+      var count = vis.length === hosts.length
+        ? hosts.length + (hosts.length === 1 ? " star" : " stars")
+        : vis.length + " of " + hosts.length + " stars";
+      $("skp-list-title").textContent =
+        "Visible " + MAG_NAME[mag].replace("to the ", "") + " · " + count;
       $("skp-list").innerHTML = vis.length
         ? vis.map(rowHtml).join("")
         : '<p class="skp-empty">Nothing above your horizon passes this filter right now — ' +
