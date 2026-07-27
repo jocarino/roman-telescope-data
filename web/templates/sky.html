@@ -34,6 +34,23 @@
     </div>
   </div>
 
+  {# Sky first, controls under it — the instrument grammar of the EXOSCOPE and of any real
+     radio: the display on top, the dial and switches on the panel beneath. #}
+  <div class="panel skp-panel">
+    <div class="skp-chart-wrap">
+      <div id="skp-chart"></div>
+      <div class="skp-zoom" role="group" aria-label="Zoom the sky map">
+        <button id="skp-zin" aria-label="Zoom in">+</button>
+        <button id="skp-zout" aria-label="Zoom out">−</button>
+        <button id="skp-zfit" aria-label="Fit the whole sky" title="Whole sky">⊡</button>
+      </div>
+      {# Screen-pinned legend, not an SVG label — panning must never lose it. #}
+      <div class="skp-ground-lbl" aria-hidden="true">▒ shaded = ground, below your horizon</div>
+    </div>
+    <p class="sky-note">Drag to look around · ＋/− to zoom · tap a bright dot for its worlds.
+      Dim dots: below your horizon or too faint for this filter.</p>
+  </div>
+
   {# The receiver: controls as an old radio's front panel — same chassis grammar as the
      EXOSCOPE (scope-unit bezel, brand plate, LED pushbuttons, rotary knob), plus a radio's
      slide-rule tuning dial for latitude. Every control keeps a plain-English label. #}
@@ -82,26 +99,13 @@
         <span class="knob-name">View</span>
         <span class="knob-val" id="skp-viewval">Standing outside</span>
       </div>
-    </div>
-  </div>
-
-  <div class="panel skp-panel">
-    <div class="skp-chart-wrap">
-      <div id="skp-chart"></div>
-      <div class="skp-zoom" role="group" aria-label="Zoom the sky map">
-        <button id="skp-zin" aria-label="Zoom in">+</button>
-        <button id="skp-zout" aria-label="Zoom out">−</button>
-        <button id="skp-zfit" aria-label="Fit the whole sky" title="Whole sky">⊡</button>
+      {# Phones get a flat button instead of the knob: a knob costs ~120px of precious
+         vertical space for one binary choice. #}
+      <div class="skr-cell skr-viewcell">
+        <button class="led-btn skr-viewbtn" id="skp-viewbtn"><span class="led on"></span><span
+          id="skp-viewbtn-txt">Switch to whole-sky map</span></button>
       </div>
-      {# Screen-pinned legend, not an SVG label — panning must never lose it. #}
-      <div class="skp-ground-lbl" aria-hidden="true">▒ shaded = ground, below your horizon</div>
     </div>
-    {# Phone-only twin of the deck's VIEW knob: a knob needs ~120px of precious vertical
-       space, and the switch belongs beside the thing it switches. #}
-    <button class="led-btn skr-viewbtn" id="skp-viewbtn"><span class="led on"></span><span
-      id="skp-viewbtn-txt">Switch to whole-sky map</span></button>
-    <p class="sky-note">Drag to look around · ＋/− to zoom · tap a bright dot for its worlds.
-      Dim dots: below your horizon or too faint for this filter.</p>
   </div>
 
   <section class="panel skp-panel" id="skp-spot-panel" hidden>
@@ -185,8 +189,8 @@
   .skr-scale span:last-child { transform: translateX(-100%); }
   .skr-cities { position: relative; height: 11px; }
   .skr-cities span { top: 0; font-size: 7.5px; color: var(--fg-faint); letter-spacing: .12em; }
-  /* Phone-only view switch under the chart (desktop uses the deck's VIEW knob). */
-  .skr-viewbtn { display: none; }
+  /* Phone-only view switch (desktop uses the deck's VIEW knob instead). */
+  .skr-viewcell { display: none; }
   .skp-panel h3 .info-btn { vertical-align: 1px; margin-left: 4px; }
   /* The chart is a draggable viewport onto the sky (the viewBox is driven from JS). */
   .skp-chart-wrap { position: relative; }
@@ -235,16 +239,14 @@
     .skr-dial { flex: 1 1 100%; min-width: 0; order: -1; }
     .skr-cell { width: 100%; gap: 4px; }
     .skr-cell > .skr-lbl, .skr-cities, .skr .knob-cell { display: none; }
+    .skr-viewcell { display: flex; }
     .skr-dial-top { font-size: 11px; }
     .skr-slider { margin-top: 6px; }
     .skr-scale { height: 14px; }
     .skr-geo, .skr-btns { width: 100%; }
     .skr .led-btn { justify-content: center; padding: 7px 6px; font-size: 9.5px; }
     .skr-btns .led-btn { flex: 1; gap: 5px; }
-    .skr-viewbtn {
-      display: flex; width: 100%; margin-top: 10px; justify-content: center;
-      font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
-    }
+    .skr-viewbtn { width: 100%; }
     .skp-panel .sky-note { margin-top: 8px; }
   }
   .skp-dot-vis { fill: var(--accent); cursor: pointer; }
