@@ -395,6 +395,23 @@ button.badge:active, a.badge:active { box-shadow: none; }
 /* Exclude the colour swatches: repainting their background near-black on hover hid the colour. */
 .dd-menu button:not(.acc):hover { background: var(--bg-3); color: var(--fg); }
 .dd-menu button.on { color: var(--accent); }
+
+/* ---- Explore menu: the three other ways into the site (tours / compare / census) ----
+   These replaced a standing banner over the grid, so they are real links, not buttons, and
+   need the row chrome the generic .dd-menu rules only give to <button>. Right-aligned like
+   the hamburger's menu so it never runs off the right edge. */
+.nav-menu { min-width: 244px; left: auto; right: 0; }
+.nav-menu a {
+  display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px;
+  color: var(--fg-dim); font-size: 13px; text-decoration: none;
+  border-top: 1px solid var(--line);
+}
+.nav-menu a:hover { background: var(--bg-3); color: var(--fg); text-decoration: none; }
+.nav-menu a:hover .nav-gl { color: var(--accent); }
+.nav-gl { flex: none; width: 14px; font-style: normal; color: var(--fg-faint); line-height: 1.5; }
+/* The one-line explanation under each destination inherits .dd-sub, which is muted by
+   default; keep it muted even while the row itself lightens on hover. */
+.nav-menu a .dd-sub { color: var(--fg-faint); white-space: normal; }
 /* Little header explaining what the dropdown filters on. */
 .dd-head {
   padding: 9px 12px 8px; border-bottom: 1px solid var(--line); cursor: default;
