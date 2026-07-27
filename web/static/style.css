@@ -851,7 +851,33 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 .legend .k.roman { border-color: var(--accent); border-top-style: dashed; }
 
 .foot { margin-top: 40px; color: var(--fg-faint); font-size: 12px; }
-.copied { color: #86e0aa; font-size: 12px; align-self: center; }
+/* ---- Copy confirmation toast ----
+   Fixed and out of the flow on purpose: the confirmation used to be inline text in the
+   button row, so every copy widened the row and jogged the buttons sideways. Styled as a
+   small instrument readout — square, hard offset shadow, mono caps, a lit accent LED. */
+.toast {
+  position: fixed; z-index: 95;
+  left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  transform: translate(-50%, 10px);
+  display: flex; align-items: center; gap: 9px;
+  max-width: min(400px, calc(100vw - 28px));
+  padding: 10px 14px;
+  background: #04070c; border: 1px solid var(--accent); border-left-width: 4px;
+  box-shadow: 4px 4px 0 #05070b, 0 0 16px color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--fg); font: 12px/1.2 var(--mono);
+  text-transform: uppercase; letter-spacing: .07em;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity .16s ease-out, transform .16s ease-out, visibility .16s;
+}
+.toast.on { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+.toast-led {
+  width: 7px; height: 7px; flex: none; background: var(--accent);
+  box-shadow: 0 0 7px var(--accent);
+}
+.toast-msg { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) {
+  .toast { transition: opacity .1s linear, visibility .1s; transform: translate(-50%, 0); }
+}
 
 /* Hold-to-peek overlay (gallery): up only while a card is pressed, gone on release. */
 .peek {

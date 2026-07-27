@@ -36,12 +36,10 @@ document.addEventListener("alpine:init", () => {
     pad(k) { return String(k).padStart(2, "0"); },
 
     // The palette block is the site's shared one, which calls copy() on a swatch click.
-    msg: "",
+    // Confirmation goes to the shared overlay toast, as everywhere else on the site.
     copy(hex) {
       navigator.clipboard?.writeText(hex);
-      this.msg = "copied " + hex;
-      clearTimeout(this._flash);
-      this._flash = setTimeout(() => (this.msg = ""), 1600);
+      if (window.exoToast) window.exoToast("copied " + hex);
     },
 
     _sync(pushHash) {

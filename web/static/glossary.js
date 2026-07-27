@@ -115,9 +115,20 @@
     pinned = true;
   });
 
+  // Keyboard focus opens the definition too — but ONLY keyboard focus. A tap focuses the
+  // button before the click lands, so treating every focusin as "open" meant the tap opened
+  // it and the click that followed saw it already pinned and toggled it straight back shut:
+  // two taps to see anything on touch. :focus-visible is exactly the "not a pointer" test.
+  // Where it is unsupported we simply don't open on focus; Enter/Space still fire click, so
+  // keyboard users keep a way in and touch users keep their single tap.
+  function keyboardFocused(node) {
+    try { return node.matches(":focus-visible"); } catch (e) { return false; }
+  }
+
   document.addEventListener("focusin", function (ev) {
     var t = target(ev);
-    if (t) { show(t); pinned = true; } else if (cur && pinned) hide();
+    if (t) { if (keyboardFocused(t)) { show(t); pinned = true; } }
+    else if (cur && pinned) hide();
   });
 
   document.addEventListener("keydown", function (ev) {

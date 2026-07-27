@@ -848,7 +848,6 @@ document.addEventListener("alpine:init", () => {
     // Host star ("the lamp") swatch — injected by init; sunLampHex is the Sun's own colour,
     // for the lamp panel to follow the Light-source knob.
     starHex: null, starLabel: "", sunLampHex: null,
-    msg: "",
     help: false,       // dossier "how to read this" expandable (ℹ button)
     info: null,        // which scope explainer is open: 'view' | 'style' | 'source' | null
     panel: "palette",  // mobile-only: which info panel shows ('readout' | 'palette' | 'data')
@@ -1042,11 +1041,9 @@ document.addEventListener("alpine:init", () => {
       try { localStorage.setItem("renderFidelity", f); } catch (e) { /* ignore */ }
       this.renderAll();
     },
-    flash(m) {
-      this.msg = m;
-      clearTimeout(this._t);
-      this._t = setTimeout(() => (this.msg = ""), 1600);
-    },
+    // Confirmation goes to the shared overlay toast (toast.js), never into the button row —
+    // inline text there re-flowed the row on every copy.
+    flash(m) { if (window.exoToast) window.exoToast(m); },
     copy(hex) {
       navigator.clipboard?.writeText(hex);
       this.flash("copied " + hex);
