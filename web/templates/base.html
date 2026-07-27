@@ -17,7 +17,7 @@
   <script src="/glossary.terms.{{ build_id }}.js" defer></script>
   <script src="/static/glossary.js?v={{ build_id }}" defer></script>
 </head>
-<body>
+<body class="{% block bodyclass %}{% endblock %}">
   <div class="wrap">
     {% block content %}{% endblock %}
   </div>
