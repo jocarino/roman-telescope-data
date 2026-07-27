@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros.html" import back_link %}
+{% from "macros.html" import back_link, g %}
 {% block title %}Guided tours · Exoplanet Palette{% endblock %}
 {% block content %}
 <div class="tours-index" x-data="{ intro: false }">
@@ -26,8 +26,9 @@
     </div>
     <div class="intro-row">
       <span class="intro-lbl">Honesty</span>
-      <p><strong>Every colour is computed from physics, not photographed</strong> — except the
-        five solar-system worlds on the first tour, whose spectra were really measured.</p>
+      <p><strong>Every colour is {{ g('modelled', 'computed from physics') }}, not
+        photographed</strong> — except the five solar-system worlds on the first tour, whose
+        spectra were really {{ g('measured-spectrum', 'measured') }}.</p>
     </div>
   </div>
   <p class="subhead lede">{{ tours|length }} tours · pick one and walk it.
