@@ -394,25 +394,53 @@
     }
 
     // ── interactions ──────────────────────────────────────────────────────
-    chartEl.addEventListener("mousemove", function (e) {
-      var t = e.target.closest && e.target.closest(".skp-dot-vis");
-      if (!t) { tipEl.style.display = "none"; return; }
-      var h = hosts[+t.dataset.i];
-      // Worlds inline, capped at 5 with an honest ellipsis (some systems carry 6+).
+    // One tooltip, two modes. Hovering previews a star (inert, follows the cursor);
+    // clicking or tapping PINS it, and the worlds become real links — which is the whole
+    // interaction on a phone, where there is no hover and the panel below is redundant.
+    var pinned = false;
+
+    // Worlds capped at 5 with an honest ellipsis (some systems carry 6+).
+    function tipStar(h, linked) {
       var rows = h.planets.slice(0, 5).map(function (p) {
-        return '<span class="ct-sw" style="background:' + p.hex + '"></span>' + p.name;
+        var sw = '<span class="ct-sw" style="background:' + p.hex + '"></span>';
+        return linked
+          ? '<a class="ct-world" href="/planet/' + p.id + '">' + sw + p.name + "</a>"
+          : sw + p.name;
       });
       if (h.planets.length > 5) {
         rows.push('<span class="ct-dim">… and ' + (h.planets.length - 5) + " more</span>");
       }
-      tipEl.innerHTML = "<b>" + h.name + "</b><br><span class='ct-dim'>" + starMeta(h) +
-        "</span><br>" + rows.join("<br>") +
+      return "<b>" + h.name + "</b><br><span class='ct-dim'>" + starMeta(h) + "</span><br>" +
+        rows.join("<br>");
+    }
+
+    function placeTip(x, y) {
+      var w = 250, h = tipEl.offsetHeight || 140;
+      tipEl.style.left = Math.max(6, Math.min(x + 14, window.innerWidth - w - 6)) + "px";
+      // Flip above the point when there is no room below.
+      tipEl.style.top = (y + 14 + h > window.innerHeight ? Math.max(6, y - h - 10) : y + 14) + "px";
+    }
+
+    function hideTip() {
+      pinned = false;
+      tipEl.classList.remove("pinned");
+      tipEl.style.display = "none";
+    }
+
+    chartEl.addEventListener("mousemove", function (e) {
+      if (pinned) return;  // a pinned tooltip is not replaced by passing hovers
+      var t = e.target.closest && e.target.closest(".skp-dot-vis");
+      if (!t) { tipEl.style.display = "none"; return; }
+      tipEl.innerHTML = tipStar(hosts[+t.dataset.i], false) +
         "<br><span class='ct-dim'>click to open</span>";
       tipEl.style.display = "block";
-      tipEl.style.left = Math.min(e.clientX + 14, window.innerWidth - 270) + "px";
-      tipEl.style.top = e.clientY + 14 + "px";
+      placeTip(e.clientX, e.clientY);
     });
-    chartEl.addEventListener("mouseleave", function () { tipEl.style.display = "none"; });
+    chartEl.addEventListener("mouseleave", function () { if (!pinned) tipEl.style.display = "none"; });
+    // Any tap outside the pinned tooltip dismisses it (the chart's own handler re-pins).
+    document.addEventListener("pointerdown", function (e) {
+      if (pinned && !tipEl.contains(e.target)) hideTip();
+    }, true);
     chartEl.addEventListener("click", function (e) {
       if (dragged) { dragged = false; return; }  // a pan is not a pick
       var svg = chartEl.querySelector("svg");
@@ -439,8 +467,26 @@
         c.classList.toggle("sel", picked.has(+c.dataset.i));
       });
       drawSpot();
-      // No scrolling: the results render inside the map's own panel, immediately under the
-      // chart, so the answer appears where the eye already is.
+      // Pin the tooltip at the tap with tappable worlds — on a phone this IS the result
+      // (the panel below is hidden there); on desktop it doubles as the click affordance
+      // the hover promised. No scrolling either way.
+      if (selected.length) {
+        var head = '<button class="ct-x" id="skp-tip-x" aria-label="Close">&times;</button>';
+        var body = selected.slice(0, 3).map(function (h) { return tipStar(h, true); })
+          .join('<span class="ct-sep"></span>');
+        if (selected.length > 3) {
+          body += '<span class="ct-sep"></span><span class="ct-dim">… and ' +
+            (selected.length - 3) + " more stars at this spot</span>";
+        }
+        tipEl.innerHTML = head + body;
+        tipEl.style.display = "block";
+        pinned = true;
+        tipEl.classList.add("pinned");
+        placeTip(e.clientX, e.clientY);
+        $("skp-tip-x").addEventListener("click", hideTip);
+      } else {
+        hideTip();
+      }
     });
     $("skp-spot-x").addEventListener("click", function () {
       selected = null;
