@@ -22,7 +22,9 @@
     var lat = parseFloat(localStorage.getItem("skyLat") || "40");
     var lon = localStorage.getItem("skyLon") != null ? parseFloat(localStorage.getItem("skyLon")) : null;
     var mag = localStorage.getItem("skyMag") || "eye";
-    var geoState = "";
+    // A stored longitude means a past "use my location" — show the button as located on
+    // load, or a refresh looks like the location was forgotten (it wasn't).
+    var geoState = lon != null ? "ok" : "";
     var selected = null;   // hosts shown in the "at that spot" panel
 
     var $ = function (id) { return document.getElementById(id); };

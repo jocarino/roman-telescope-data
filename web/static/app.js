@@ -1137,7 +1137,12 @@ document.addEventListener("alpine:init", () => {
     geoState: "",        // "" | "busy" | "ok" | "err"
     tick: 0,             // bumped on every redraw so status() re-evaluates as time passes
     _timer: null,
-    init() { if (localStorage.getItem("skyHzn") === "1") this.toggleHzn(true); },
+    init() {
+      // A stored longitude means a past "use my location" — reflect it on load, or a
+      // refresh looks like the location was forgotten (it wasn't; it's still in use).
+      if (this.lon != null) this.geoState = "ok";
+      if (localStorage.getItem("skyHzn") === "1") this.toggleHzn(true);
+    },
     // One-shot device location -> slider latitude + exact longitude. Explicit button press
     // only (the browser asks); the coordinates never leave the device — there is no server.
     useLocation() {
