@@ -6,9 +6,9 @@
   <div class="site-head">
     {{ back_link() }}
     <h1>Your sky tonight</h1>
-    <span class="tagline">every host star above your horizon, right now
+    <span class="tagline">every host star above your horizon, <span class="skp-nowrap">right now
       <button class="info-btn sm" @click="intro = !intro" :class="intro ? 'on' : ''"
-        aria-label="What is this page?" title="What is this page?">i</button></span>
+        aria-label="What is this page?" title="What is this page?">i</button></span></span>
   </div>
   <div class="subhead intro-box" x-show="intro" x-cloak>
     <button class="info-x" @click="intro = false" aria-label="Close">&times;</button>
@@ -55,6 +55,8 @@
         <button id="skp-zout" aria-label="Zoom out">−</button>
         <button id="skp-zfit" aria-label="Fit the whole sky" title="Whole sky">⊡</button>
       </div>
+      {# Screen-pinned legend, not an SVG label — panning must never lose it. #}
+      <div class="skp-ground-lbl" aria-hidden="true">▒ shaded = ground, below your horizon</div>
     </div>
     <p class="sky-note">Drag the map to look around · ＋/− to zoom. Hover a bright dot to
       identify its star · click to open the worlds at that spot. Dim dots are the rest of the
@@ -122,9 +124,18 @@
   #skp-chart { overflow: hidden; aspect-ratio: 900 / 400; }
   #skp-chart svg {
     display: block; width: 100%; height: 100%;
-    touch-action: none; cursor: grab; user-select: none;
+    /* pan-y: vertical touch drags keep scrolling the page (the mobile strip has no vertical
+       pan to give anyway); JS switches to 'none' only while vertically zoomed in. */
+    touch-action: pan-y; cursor: grab; user-select: none;
   }
   #skp-chart.dragging svg { cursor: grabbing; }
+  .skp-nowrap { white-space: nowrap; }
+  .skp-ground-lbl {
+    position: absolute; left: 10px; bottom: 8px; z-index: 5; pointer-events: none;
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase;
+    color: #cf9a4e; background: rgba(5, 6, 10, .65); padding: 3px 7px;
+  }
+  #skp-chart .skp-dot-vis.sel { stroke: var(--fg); stroke-width: 1.5; }
   /* Dot sizes shrink as you zoom in (set from JS); px = SVG user units here. */
   #skp-chart .skp-dot-vis { r: var(--skp-rvis, 3px); }
   #skp-chart .skydot { width: var(--skp-rdim, 2px); height: var(--skp-rdim, 2px); }
@@ -140,6 +151,12 @@
        most of the screen height — the full declination range stays visible, you pan in RA. */
     .skp-chart-wrap { width: 100vw; margin-left: calc(50% - 50vw); }
     #skp-chart { aspect-ratio: auto; height: 62vh; }
+    /* One clean column of controls instead of a ragged wrap. flex:none — the shared
+       .hzn-lat flex-basis (180px) would otherwise become HEIGHT in a column flexbox. */
+    .skp-controls { flex-direction: column; align-items: stretch; gap: 12px; }
+    .skp-controls .hzn-lat { max-width: none; flex: none; }
+    .skp-mag { width: 100%; }
+    .skp-mag-btn { flex: 1; }
   }
   .skp-dot-vis { fill: var(--accent); cursor: pointer; }
   .skp-dot-vis:hover { stroke: var(--fg); stroke-width: 1; }

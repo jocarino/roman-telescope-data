@@ -96,7 +96,6 @@
       return {
         line: pts.trim(),
         floor: pts + X1 + "," + edge + " " + X0 + "," + edge,
-        lblY: phi > 0 ? Y1 - 6 : Y0 + 12,
       };
     }
 
@@ -110,7 +109,6 @@
       var g = horizonGeom();
       svg.querySelector(".hzn-line").setAttribute("points", g.line);
       svg.querySelector(".hzn-floor").setAttribute("points", g.floor);
-      svg.querySelector(".hzn-lbl").setAttribute("y", g.lblY);
     }
 
     function drawChart(vis) {
@@ -150,8 +148,9 @@
           dim += '<rect x="' + (x - 1) + '" y="' + (y - 1) + '" width="2" height="2" class="skydot"/>';
         }
       });
+      // No in-SVG ground label: the legend is a screen-pinned overlay in the template, so
+      // panning and zooming can never move it out of view.
       s += dim + '<polyline class="hzn-line" points="' + g.line + '"/>' + lit;
-      s += '<text class="hzn-lbl" x="' + (X0 + 8) + '" y="' + g.lblY + '">GROUND — below your horizon</text>';
       chartEl.innerHTML = s + "</svg>";
       applyVb();
     }
@@ -184,6 +183,10 @@
       clampVb();
       svg.setAttribute("viewBox",
         vb.x.toFixed(1) + " " + vb.y.toFixed(1) + " " + vb.w.toFixed(1) + " " + vb.h.toFixed(1));
+      // While the full declination range is in view there is no vertical pan to give, so
+      // vertical touch drags stay with the browser (page scroll). Only a vertically zoomed
+      // view claims them.
+      svg.style.touchAction = vb.h >= H - 0.5 ? "pan-y" : "none";
       // Dots shrink (in SVG units) as you zoom, so they stay dot-sized on screen.
       var s = Math.sqrt(vb.w / maxVbW());
       chartEl.style.setProperty("--skp-rvis", (3 * Math.max(0.45, s)).toFixed(2) + "px");
@@ -296,13 +299,24 @@
       var p = pt.matrixTransform(svg.getScreenCTM().inverse());
       // Pick radius ≈ 9 screen px in current-viewBox SVG units, so taps work at any zoom.
       var R = Math.max(4, 9 * (vb ? vb.w : W) / svg.getBoundingClientRect().width);
-      selected = hosts.filter(function (h) {
-        if (!h.vis) return false;
+      var picked = new Set();
+      hosts.forEach(function (h, i) {
+        if (!h.vis) return;
         var dx = xOf(h.ra) - p.x, dy = yOf(h.dec) - p.y;
-        return dx * dx + dy * dy <= R * R;
-      }).sort(function (a, b) { return a.vmag - b.vmag; });
+        if (dx * dx + dy * dy <= R * R) picked.add(i);
+      });
+      selected = [...picked].map(function (i) { return hosts[i]; })
+        .sort(function (a, b) { return a.vmag - b.vmag; });
+      // Ring the picked dots so the tap visibly lands even before scrolling to the panel.
+      svg.querySelectorAll(".skp-dot-vis").forEach(function (c) {
+        c.classList.toggle("sel", picked.has(+c.dataset.i));
+      });
       drawSpot();
-      if (selected.length) $("skp-spot-panel").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      // Desktop: nudge the results into view. Mobile: stay put — yanking the page away from
+      // the chart mid-exploration is disorienting; the panel sits right below it anyway.
+      if (selected.length && !matchMedia("(max-width: 760px)").matches) {
+        $("skp-spot-panel").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
     });
 
     var latDebounce = null;
