@@ -157,6 +157,39 @@ document.addEventListener("alpine:init", () => {
       { id: "violet", name: "Vaporwave" },
       { id: "mono", name: "Mono" },
     ],
+    // Which sections of the filter/sort menu are open. All shut by default — expanded, the
+    // menu is a wall of options you have to scroll past to reach anything — and the set the
+    // user opens is remembered across visits, like the accent/style/fidelity prefs.
+    // Stored as the list of OPEN keys rather than shut ones, so a section added in a later
+    // release starts collapsed too instead of inheriting someone's old storage.
+    openSec: (() => {
+      const o = {};
+      try {
+        const saved = JSON.parse(localStorage.getItem("menuSections") || "[]");
+        if (Array.isArray(saved)) saved.forEach((k) => { o[k] = true; });
+      } catch (e) { /* ignore */ }
+      return o;
+    })(),
+    secOpen(k) { return !!this.openSec[k]; },
+    // Whether a section holds a non-default choice. Collapsed sections would otherwise hide
+    // an active filter completely, so the heading carries the same small accent dot the
+    // hamburger button itself uses. Kept in step with that button's `active` condition.
+    secActive(k) {
+      if (k === "prov") return this.prov !== "all";
+      if (k === "ptype") return this.ptype !== "all";
+      if (k === "hz") return this.hz !== "all";
+      if (k === "dist") return this.distBand !== "all";
+      if (k === "disc") return this.disc !== "all";
+      if (k === "sort") return this.sort !== "name";
+      return false;  // render + accent are display prefs, not filters: no value is "set"
+    },
+    toggleSec(k) {
+      this.openSec[k] = !this.openSec[k];
+      try {
+        localStorage.setItem("menuSections",
+          JSON.stringify(Object.keys(this.openSec).filter((s) => this.openSec[s])));
+      } catch (e) { /* ignore */ }
+    },
     setAccent(a) {
       this.accent = a;
       try { localStorage.setItem("accent", a); } catch (e) { /* ignore */ }
