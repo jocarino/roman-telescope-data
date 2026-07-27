@@ -48,10 +48,17 @@
 
   <div class="panel skp-panel">
     <p class="skp-count" id="skp-count" role="status"></p>
-    <div id="skp-chart"></div>
-    <p class="sky-note">Hover a bright dot to identify its star · click to open the worlds at
-      that spot. Dim dots are the rest of the catalog, below your horizon or too faint for the
-      current filter.</p>
+    <div class="skp-chart-wrap">
+      <div id="skp-chart"></div>
+      <div class="skp-zoom" role="group" aria-label="Zoom the sky map">
+        <button id="skp-zin" aria-label="Zoom in">+</button>
+        <button id="skp-zout" aria-label="Zoom out">−</button>
+        <button id="skp-zfit" aria-label="Fit the whole sky" title="Whole sky">⊡</button>
+      </div>
+    </div>
+    <p class="sky-note">Drag the map to look around · ＋/− to zoom. Hover a bright dot to
+      identify its star · click to open the worlds at that spot. Dim dots are the rest of the
+      catalog, below your horizon or too faint for the current filter.</p>
   </div>
 
   <section class="panel skp-panel" id="skp-spot-panel" hidden>
@@ -110,7 +117,30 @@
     margin: 0 0 8px; font-family: var(--mono); font-size: 11.5px; color: var(--fg);
   }
   .skp-count b { color: var(--accent); }
-  #skp-chart svg { display: block; width: 100%; height: auto; }
+  /* The chart is a draggable viewport onto the sky (the viewBox is driven from JS). */
+  .skp-chart-wrap { position: relative; }
+  #skp-chart { overflow: hidden; aspect-ratio: 900 / 400; }
+  #skp-chart svg {
+    display: block; width: 100%; height: 100%;
+    touch-action: none; cursor: grab; user-select: none;
+  }
+  #skp-chart.dragging svg { cursor: grabbing; }
+  /* Dot sizes shrink as you zoom in (set from JS); px = SVG user units here. */
+  #skp-chart .skp-dot-vis { r: var(--skp-rvis, 3px); }
+  #skp-chart .skydot { width: var(--skp-rdim, 2px); height: var(--skp-rdim, 2px); }
+  .skp-zoom { position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; z-index: 5; }
+  .skp-zoom button {
+    width: 32px; height: 32px; font-family: var(--mono); font-size: 15px; line-height: 1;
+    background: var(--bg-3); color: var(--fg-dim); border: 1px solid var(--line);
+    border-radius: 0; cursor: pointer;
+  }
+  .skp-zoom button:hover { border-color: var(--accent); color: var(--fg); }
+  @media (max-width: 760px) {
+    /* Immersive on a phone: the sky breaks out of the panel to the full viewport width and
+       most of the screen height — the full declination range stays visible, you pan in RA. */
+    .skp-chart-wrap { width: 100vw; margin-left: calc(50% - 50vw); }
+    #skp-chart { aspect-ratio: auto; height: 62vh; }
+  }
   .skp-dot-vis { fill: var(--accent); cursor: pointer; }
   .skp-dot-vis:hover { stroke: var(--fg); stroke-width: 1; }
   /* Visible-list rows: one star, its worlds as chips. */

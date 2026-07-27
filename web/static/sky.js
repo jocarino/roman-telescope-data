@@ -153,7 +153,80 @@
       s += dim + '<polyline class="hzn-line" points="' + g.line + '"/>' + lit;
       s += '<text class="hzn-lbl" x="' + (X0 + 8) + '" y="' + g.lblY + '">GROUND — below your horizon</text>';
       chartEl.innerHTML = s + "</svg>";
+      applyVb();
     }
+
+    // ── pan & zoom: the chart is a viewport onto the sky, driven via the viewBox ──────
+    // On a phone the container is tall and full-bleed, so "fit" already means zoomed into
+    // a pannable strip (full declination range, drag through RA); on desktop "fit" is the
+    // whole map. The viewBox aspect always matches the container, so nothing distorts.
+    var vb = null;  // {x, y, w, h} in SVG units; null until first laid out
+    function maxVbW() {
+      var rect = chartEl.getBoundingClientRect();
+      if (!rect.width || !rect.height) return W;
+      return Math.min(W, H * rect.width / rect.height);
+    }
+    function clampVb() {
+      var rect = chartEl.getBoundingClientRect();
+      vb.w = Math.max(120, Math.min(vb.w, maxVbW()));
+      vb.h = rect.width ? Math.min(H, vb.w * rect.height / rect.width) : H;
+      vb.x = Math.max(0, Math.min(vb.x, W - vb.w));
+      vb.y = Math.max(0, Math.min(vb.y, H - vb.h));
+    }
+    function applyVb() {
+      var svg = chartEl.querySelector("svg");
+      if (!svg) return;
+      if (!vb) {
+        // First layout: fit, centred on what is crossing your meridian right now.
+        vb = { w: maxVbW(), h: 0, x: 0, y: 0 };
+        vb.x = xOf(ExoSky.lstDeg(lon)) - vb.w / 2;
+      }
+      clampVb();
+      svg.setAttribute("viewBox",
+        vb.x.toFixed(1) + " " + vb.y.toFixed(1) + " " + vb.w.toFixed(1) + " " + vb.h.toFixed(1));
+      // Dots shrink (in SVG units) as you zoom, so they stay dot-sized on screen.
+      var s = Math.sqrt(vb.w / maxVbW());
+      chartEl.style.setProperty("--skp-rvis", (3 * Math.max(0.45, s)).toFixed(2) + "px");
+      chartEl.style.setProperty("--skp-rdim", (2 * Math.max(0.5, s)).toFixed(2) + "px");
+    }
+    function zoomBy(f) {
+      if (!vb) return;
+      var cx = vb.x + vb.w / 2, cy = vb.y + vb.h / 2;
+      vb.w /= f; vb.h /= f;
+      vb.x = cx - vb.w / 2; vb.y = cy - vb.h / 2;
+      applyVb();
+    }
+    $("skp-zin").addEventListener("click", function () { zoomBy(1.5); });
+    $("skp-zout").addEventListener("click", function () { zoomBy(1 / 1.5); });
+    $("skp-zfit").addEventListener("click", function () { vb = null; applyVb(); });
+    window.addEventListener("resize", function () { if (vb) applyVb(); });
+
+    var drag = null, dragged = false;
+    chartEl.addEventListener("pointerdown", function (e) {
+      if (!vb) return;
+      drag = { x: e.clientX, y: e.clientY, vx: vb.x, vy: vb.y };
+      dragged = false;
+      if (chartEl.setPointerCapture) chartEl.setPointerCapture(e.pointerId);
+      chartEl.classList.add("dragging");
+    });
+    chartEl.addEventListener("pointermove", function (e) {
+      if (!drag) return;
+      var rect = chartEl.getBoundingClientRect();
+      if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 6) dragged = true;
+      vb.x = drag.vx - (e.clientX - drag.x) * vb.w / rect.width;
+      vb.y = drag.vy - (e.clientY - drag.y) * vb.h / rect.height;
+      applyVb();
+    });
+    ["pointerup", "pointercancel"].forEach(function (ev) {
+      chartEl.addEventListener(ev, function () {
+        drag = null;
+        chartEl.classList.remove("dragging");
+      });
+    });
+    chartEl.addEventListener("wheel", function (e) {
+      e.preventDefault();
+      zoomBy(e.deltaY < 0 ? 1.2 : 1 / 1.2);
+    }, { passive: false });
 
     function starMeta(h) {
       return "V " + h.vmag.toFixed(1) + " · " + Math.round(h.alt) + "° up, facing " +
@@ -213,6 +286,7 @@
     });
     chartEl.addEventListener("mouseleave", function () { tipEl.style.display = "none"; });
     chartEl.addEventListener("click", function (e) {
+      if (dragged) { dragged = false; return; }  // a pan is not a pick
       var svg = chartEl.querySelector("svg");
       if (!svg) return;
       // Click in SVG coords; collect every visible star within a small radius, so one click
@@ -220,8 +294,8 @@
       var pt = svg.createSVGPoint();
       pt.x = e.clientX; pt.y = e.clientY;
       var p = pt.matrixTransform(svg.getScreenCTM().inverse());
-      // Pick radius ≈ 9 screen px in SVG units, so taps work on a phone-sized chart too.
-      var R = Math.max(10, 9 * W / svg.getBoundingClientRect().width);
+      // Pick radius ≈ 9 screen px in current-viewBox SVG units, so taps work at any zoom.
+      var R = Math.max(4, 9 * (vb ? vb.w : W) / svg.getBoundingClientRect().width);
       selected = hosts.filter(function (h) {
         if (!h.vis) return false;
         var dx = xOf(h.ra) - p.x, dy = yOf(h.dec) - p.y;
