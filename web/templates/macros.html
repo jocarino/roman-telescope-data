@@ -353,8 +353,12 @@
         <div class="hud hud-top">
           <button class="hud-ch ch1" :class="view === 'full' ? 'live' : ''"
             @click="setView('full')" title="Show the full-spectrum colour">
-            <span class="sw"></span>CH1 FULL <code x-text="sunSet() ? sunHex : '{{ tc.hex }}'">{{ tc.hex }}</code><span
-              class="hud-sun" x-show="sunSet()" x-cloak title="Re-lit by the Sun">&#9737; SUN-LIT</span></button>
+            {# The CH1 hex follows the Light-source knob, but no SUN-LIT chip rides here: the
+               trace beside it is A(λ), which is the same curve under any star, so a chip on
+               the glass reads as if the plot were re-lit. The PALETTE OUT label and the
+               duotone below already name the Sun-lit state, next to the colours it changes. #}
+            <span class="sw"></span>CH1 FULL <code
+              x-text="sunSet() ? sunHex : '{{ tc.hex }}'">{{ tc.hex }}</code></button>
           <button class="hud-ch ch2" :class="view === 'roman' ? 'live' : ''"
             @click="setView('roman')" title="Show the Roman four-band colour">
             <span class="sw"></span>CH2 ROMAN <code>{{ rv.hex }}</code></button>
