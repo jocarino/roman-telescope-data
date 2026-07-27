@@ -7,11 +7,20 @@
   <meta name="description" content="The colour scheme of every known exoplanet, derived from physics.">
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <script>try{document.documentElement.setAttribute("data-accent",localStorage.getItem("accent")||"tron");}catch(e){}</script>
+  {# The pixel face is used on every page, but it is only discovered once the stylesheet has
+     parsed. Preloading it runs that fetch alongside the CSS instead of after it. crossorigin
+     is required even same-origin: fonts fetch in CORS mode, and without it the preload misses
+     and the browser downloads the file twice. #}
+  <link rel="preload" href="/static/fonts/Silkscreen-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/static/style.css?v={{ build_id }}">
   <style>[x-cloak]{display:none !important}</style>
-  <script src="/static/planet-render.js?v={{ build_id }}"></script>
+  {# All deferred, so none of them hold up the first paint. Order still matters and is load
+     order, not an accident: app.js registers its components on Alpine's `alpine:init`, so it
+     has to run before Alpine does — deferred scripts execute in document order, which keeps
+     that guarantee while letting the parser run straight past all three. #}
+  <script src="/static/planet-render.js?v={{ build_id }}" defer></script>
+  <script src="/static/app.js?v={{ build_id }}" defer></script>
   <script src="/static/vendor/alpine.min.js" defer></script>
-  <script src="/static/app.js?v={{ build_id }}"></script>
   {# Copy confirmations: one shared overlay readout, so no page shifts its own layout to
      say "copied". Deferred — nothing calls it before the first click. #}
   <script src="/static/toast.js?v={{ build_id }}" defer></script>

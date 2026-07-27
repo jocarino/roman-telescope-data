@@ -1,5 +1,10 @@
 // Alpine components + the gallery hold-to-peek. No build step; plain ES.
 
+// One reusable collator for name sorting. `String.localeCompare` builds its collation rules on
+// every call, which is thousands of times over a catalogue this size; a hoisted Intl.Collator
+// does that work once. Same ordering, just not rebuilt per comparison.
+const NAME_COLLATOR = new Intl.Collator();
+
 // Random-planet jump, shared by the gallery button, the detail-page button and the R key.
 // `pool` is the list to roll over (e.g. the gallery's filtered results); falls back to the
 // full index. Never lands on the planet already on screen (unless it's the only one).
@@ -72,8 +77,9 @@ document.addEventListener("alpine:init", () => {
     _shown: 0,            // how many cards appended to the grid so far
     _batch: 60,           // cards appended per scroll step
     _map: null,           // id -> planet lookup
-    _raf: 0,              // pending rAF handle for the throttled draw pass
     _loadIO: null,        // appends the next batch as the sentinel nears the viewport
+    _drawIO: null,        // draws each card's planet as it nears the viewport
+    _qT: 0,               // pending debounce timer for the search box
     q: "",
     prov: "all",
     ptype: "all",
@@ -329,17 +335,26 @@ document.addEventListener("alpine:init", () => {
       }, { rootMargin: "800px" });
       this._loadIO.observe(this.$refs.sentinel);
 
-      // Draw each planet lazily: a rAF-throttled pass draws in-viewport, not-yet-drawn cards.
-      const onScroll = () => {
-        if (this._raf) return;
-        this._raf = requestAnimationFrame(() => { this._raf = 0; this._drawVisible(); });
-      };
-      window.addEventListener("scroll", onScroll, { passive: true });
-      window.addEventListener("resize", onScroll, { passive: true });
+      // Draw each planet lazily, one observer entry per card. The browser tells us when a card
+      // nears the viewport instead of us re-scanning the grid on every scroll frame — that old
+      // pass walked every card appended so far, so scrolling got steadily more expensive the
+      // deeper you went. rootMargin keeps the one-screen lead-in the scan used to have.
+      this._drawIO = new IntersectionObserver((entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) this._draw(e.target); });
+      }, { rootMargin: "100% 0px" });
 
       // Any filter/sort change re-renders the grid from the top, and is remembered.
-      this._filterKeys.forEach((k) =>
-        this.$watch(k, () => { this._saveFilters(); this._rerender(); }));
+      // Typing is the exception: "q" changes on every keystroke, and a rerender re-filters and
+      // re-sorts the whole catalogue, then tears the grid down and rebuilds it. Coalesce a
+      // burst of typing into a single pass instead of doing that per character.
+      this._filterKeys.forEach((k) => {
+        if (k === "q") return;
+        this.$watch(k, () => { this._saveFilters(); this._rerender(); });
+      });
+      this.$watch("q", () => {
+        clearTimeout(this._qT);
+        this._qT = setTimeout(() => { this._saveFilters(); this._rerender(); }, 140);
+      });
       // The Roman view is watched separately and deliberately NOT a filter key: it is session
       // state that always starts off, so it must not be written into the remembered filter
       // blob. It still forces a full rerender — it can reorder results (brightest,
@@ -381,7 +396,7 @@ document.addEventListener("alpine:init", () => {
       const samePrefix = this._results && this._shown <= results.length &&
         this._results.slice(0, this._shown).every((p, i) => p.id === results[i].id);
       this._results = results;
-      if (!samePrefix) { this.$refs.grid.replaceChildren(); this._shown = 0; }
+      if (!samePrefix) this._clearGrid();
       this._fill();
     },
     // Jump to a random planet — within the current filters (far more delightful than fully
@@ -391,12 +406,19 @@ document.addEventListener("alpine:init", () => {
       ExoRandom.go(this._results && this._results.length ? this._results : window.PLANETS);
     },
     // --- Incremental grid rendering ---------------------------------------------------------
+    // Drop every card. The draw observer holds a reference to each canvas it watches, so it has
+    // to be disconnected rather than left pointing at detached nodes — otherwise every filter
+    // change would leak another gridful. _appendBatch re-observes the cards it adds.
+    _clearGrid() {
+      if (this._drawIO) this._drawIO.disconnect();
+      this.$refs.grid.replaceChildren();
+      this._shown = 0;
+    },
     _rerender() {
       if (!this.ready) return;
       window.scrollTo(0, 0);  // results changed: show them from the top, not mid-scroll
       this._results = this.results();
-      this.$refs.grid.replaceChildren();
-      this._shown = 0;
+      this._clearGrid();
       this._fill();
     },
     // Append batches until the sentinel is pushed out of the pre-load zone (or results run out).
@@ -415,21 +437,36 @@ document.addEventListener("alpine:init", () => {
       const next = this._results.slice(this._shown, this._shown + this._batch);
       if (!next.length) return;
       const frag = document.createDocumentFragment();
-      next.forEach((p) => frag.appendChild(this._makeCard(p)));
+      const fresh = [];
+      next.forEach((p) => {
+        const card = this._makeCard(p);
+        fresh.push(card.firstChild);   // the canvas, appended first in _makeCard
+        frag.appendChild(card);
+      });
       this.$refs.grid.appendChild(frag);
       this._shown += next.length;
-      this._drawVisible();
+      // Observe only once the cards are actually in the document — a target handed to an
+      // IntersectionObserver while it is still inside the DocumentFragment never reports back.
+      if (this._drawIO) fresh.forEach((cv) => this._drawIO.observe(cv));
+      this._drawNew(fresh);
     },
-    // Draw any appended card whose planet isn't drawn yet and is within ~a screen of the viewport.
-    _drawVisible() {
-      if (!window.PlanetRender || !this.$refs.grid) return;
+    // Draw one card's planet, once. A drawn card stops being observed.
+    _draw(cv) {
+      if (cv.dataset.drawn || !window.PlanetRender) return;
+      this._drawCanvas(cv);
+      cv.dataset.drawn = "1";
+      if (this._drawIO) this._drawIO.unobserve(cv);
+    },
+    // Paint the cards of a freshly appended batch that already sit in view. The observer would
+    // get to them a beat later, which is fine while scrolling but would show one frame of empty
+    // cards on first paint — so the batch just added is drawn synchronously. Cost is bounded by
+    // the batch size, not by how much of the catalogue is already on the page.
+    _drawNew(canvases) {
+      if (!window.PlanetRender) return;
       const pad = window.innerHeight;
-      this.$refs.grid.querySelectorAll(".card-planet:not([data-drawn])").forEach((cv) => {
+      canvases.forEach((cv) => {
         const r = cv.getBoundingClientRect();
-        if (r.bottom > -pad && r.top < window.innerHeight + pad) {
-          this._drawCanvas(cv);
-          cv.dataset.drawn = "1";
-        }
+        if (r.bottom > -pad && r.top < window.innerHeight + pad) this._draw(cv);
       });
     },
     _makeCard(p) {
@@ -492,9 +529,15 @@ document.addEventListener("alpine:init", () => {
     },
     _redrawAll() {
       if (!this.$refs.grid) return;
-      // Style/fidelity changed: invalidate every card, redraw the visible ones now, rest on scroll.
-      this.$refs.grid.querySelectorAll(".card-planet").forEach((cv) => cv.removeAttribute("data-drawn"));
-      this._drawVisible();
+      // Style/fidelity changed: every card is stale. Repaint what's on screen right away, and
+      // hand the rest back to the observer so they redraw if they're scrolled to again.
+      const pad = window.innerHeight;
+      this.$refs.grid.querySelectorAll(".card-planet").forEach((cv) => {
+        cv.removeAttribute("data-drawn");
+        const r = cv.getBoundingClientRect();
+        if (r.bottom > -pad && r.top < window.innerHeight + pad) this._draw(cv);
+        else if (this._drawIO) this._drawIO.observe(cv);
+      });
     },
     // Colour families actually present in the data, in canonical order, with a swatch + label.
     // (The `this.loaded` read makes these reactive to the async fetch populating window.PLANETS.)
@@ -876,7 +919,7 @@ document.addEventListener("alpine:init", () => {
         if (this.ptypeF !== "all" && p.ptype !== this.ptypeF) return false;
         if (q && !((p.name + " " + p.host).toLowerCase().includes(q))) return false;
         return true;
-      }).sort((x, y) => x.name.localeCompare(y.name));
+      }).sort((x, y) => NAME_COLLATOR.compare(x.name, y.name));
     },
     fmtLy(p) { return p.dist_ly != null ? p.dist_ly.toLocaleString() + " ly" : "distance n/a"; },
     swap() { [this.aId, this.bId] = [this.bId, this.aId]; },

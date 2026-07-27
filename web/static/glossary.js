@@ -2,7 +2,7 @@
 // plain-English definition on hover, on tap, or on keyboard focus.
 //
 // One shared popover for the whole page, driven by delegated events on document — so terms
-// that arrive later (the htmx planet drawer, the hold-to-peek card, JS-rendered gallery
+// that arrive later (the hold-to-peek card, JS-rendered gallery
 // cards) need no wiring at all. Definitions come from window.GLOSSARY, emitted at build time
 // from data/glossary.json. If that file is missing the marks stay readable and simply do
 // nothing, which is the honest failure mode for an explanation layer.

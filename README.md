@@ -44,7 +44,7 @@ uv run python -m web.build --out dist           # render gallery + detail pages 
 python3 -m http.server 8799 --directory dist    # preview at http://localhost:8799
 ```
 
-htmx loads planet-detail fragments into a drawer; Alpine.js drives search / filter / sort and
+Long-pressing a gallery card peeks its detail fragment; Alpine.js drives search / filter / sort and
 the true↔Roman toggle; palettes export as hex, CSS variables, or `.ase`. Also on the site: a
 colour census of the whole catalog (`/census`), a phase slider with an automatic full
 lunar-cycle animation in the EXOSCOPE (per-planet random phases on the gallery), a "Seen in
@@ -60,7 +60,7 @@ places from that one source:
 - **In place.** Templates wrap a term in the `g()` macro (`web/templates/macros.html`):
   `{{ g('albedo-spectrum', 'albedo spectrum') }}`. It renders a subtle pixel-dotted
   underline, and `web/static/glossary.js` shows the plain-English definition on
-  hover, tap or keyboard focus. Events are delegated, so terms inside htmx fragments work too.
+  hover, tap or keyboard focus. Events are delegated, so terms inside fetched peek fragments work too.
   Use `g()` for **terms**; keep the `[i]` info buttons for **controls** (knobs, view switches).
 - **All together.** `/glossary` lists every term grouped by topic, searchable and deep-linkable
   (`/glossary#quadrature`). It is deliberately **not linked from the nav** — you reach it by URL,
@@ -149,9 +149,9 @@ should — enforced by `tests/test_sanity_gate.py`:
   record (zone, surface class, insolation, zone edges in AU, and the caveats that must be
   shown with any verdict). Drives the gallery's "Liquid water" filter (deep-linkable as
   `/?hz=water`), the card badge, and the orbit diagram on each planet page.
-- **`web/`** — Jinja2 static-site generator + htmx + Alpine.js, a pure static consumer of
+- **`web/`** — Jinja2 static-site generator + Alpine.js, a pure static consumer of
   `planets.json` (no colour maths client-side). Renders a gallery, per-planet detail pages,
-  and htmx drawer fragments into `dist/`.
+  and the long-press peek fragments into `dist/`.
 
 ### Conventions
 
