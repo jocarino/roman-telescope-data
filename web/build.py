@@ -172,6 +172,37 @@ def _tour_pages(env: Environment, tours: list[Tour], out: Path, build_id: str, n
         )
 
 
+def _cockpit_instruments(records: list[PlanetRecord]) -> dict:
+    """Real data for the 404 cockpit's instruments. `nearest`: the three nearest exoplanets
+    (solar-system anchors excluded — "nearest world: Earth" is true but useless on a
+    lost-in-space page), each with its real sky RA so the radar plots genuine positions.
+    `spec`: one real reflected-light curve for the signal-trace screen — HD 189733 b (the
+    most famous measured-colour planet) when present, else the first record with a
+    spectrum."""
+    cands = [r for r in records if r.params.distance_pc and r.params.distance_pc > 0.001]
+    near = sorted(cands, key=lambda r: r.params.distance_pc)[:3]
+    nearest = [
+        {
+            "id": r.id,
+            "name": r.name,
+            "ly": round(r.params.distance_pc * _LY_PER_PC, 1),
+            "ra": round(r.sky.ra_deg, 1) if r.sky else (i * 137.0) % 360,
+        }
+        for i, r in enumerate(near)
+    ]
+    spec_rec = next((r for r in records if r.id == "hd-189733-b" and r.spectrum), None)
+    if spec_rec is None:
+        spec_rec = next((r for r in records if r.spectrum), None)
+    spec = None
+    if spec_rec is not None:
+        vals = spec_rec.spectrum.values
+        step = max(1, len(vals) // 64)
+        ds = vals[::step][:64]
+        mx = max(ds) or 1.0
+        spec = {"id": spec_rec.id, "name": spec_rec.name, "vals": [round(v / mx, 3) for v in ds]}
+    return {"nearest": nearest, "spec": spec}
+
+
 def _env() -> Environment:
     return Environment(
         loader=FileSystemLoader(_TEMPLATES),
@@ -395,12 +426,15 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
         )
     )
     # 404: served by nginx's `error_page 404 /404.html`. Needs the index URL because its
-    # RANDOM WORLD key rolls over the same catalog.
+    # RANDOM WORLD key rolls over the same catalog, plus two real instrument feeds: the
+    # three nearest catalog worlds (the radar chart — "you're lost, here's what's close")
+    # and one real reflected-light spectrum for the signal trace.
     (out / "404.html").write_text(
         env.get_template("404.html").render(
             index_url=f"/planets.index.{build_id}.json",
             n_modelled=len(records),
             build_id=build_id,
+            **_cockpit_instruments(records),
         )
     )
     # Guided tours: curated walks, resolved against THIS catalog (see pipeline/tours.py).
