@@ -1092,15 +1092,46 @@ document.addEventListener("alpine:init", () => {
   // "Your horizon" overlay for the sky chart: draws the observer's horizon — and shades the
   // ground below it — on the RA/dec map, for a chosen latitude at the visitor's current
   // clock time. Time comes from the device clock; east-west position is approximated from
-  // the clock's UTC offset (15° of longitude per hour), good to a couple of degrees of sky.
+  // the clock's UTC offset (15° of longitude per hour) — up to an hour of sky off under
+  // daylight saving — or taken exactly from geolocation via "use my location".
   // Latitude is the slider, so the north/south difference is explicit, not assumed.
   Alpine.data("skyhorizon", () => ({
     sh: false,           // "how to read this chart" popover
     hz: false,           // horizon overlay on?
     lat: parseFloat(localStorage.getItem("skyLat") || defaultLat()),
+    // Exact longitude from geolocation, if ever granted; null = fall back to the tz estimate.
+    lon: localStorage.getItem("skyLon") != null ? parseFloat(localStorage.getItem("skyLon")) : null,
+    geoAvail: !!(navigator.geolocation && navigator.geolocation.getCurrentPosition),
+    geoState: "",        // "" | "busy" | "ok" | "err"
     tick: 0,             // bumped on every redraw so status() re-evaluates as time passes
     _timer: null,
     init() { if (localStorage.getItem("skyHzn") === "1") this.toggleHzn(true); },
+    // One-shot device location -> slider latitude + exact longitude. Explicit button press
+    // only (the browser asks); the coordinates never leave the device — there is no server.
+    useLocation() {
+      if (!this.geoAvail || this.geoState === "busy") return;
+      this.geoState = "busy";
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          // Slider range is ±65°; clamping only matters for polar visitors, whose sky the
+          // chart edge distortion misrepresents anyway.
+          this.lat = Math.max(-65, Math.min(65, Math.round(pos.coords.latitude)));
+          this.lon = pos.coords.longitude;
+          localStorage.setItem("skyLat", String(this.lat));
+          localStorage.setItem("skyLon", String(this.lon));
+          this.geoState = "ok";
+          if (this.hz) this.draw();
+        },
+        () => { this.geoState = "err"; },
+        { timeout: 12000, maximumAge: 600000 }
+      );
+    },
+    geoLabel() {
+      if (this.geoState === "busy") return "… locating";
+      if (this.geoState === "ok") return "◎ located · " + this.latLabel();
+      if (this.geoState === "err") return "◎ no location — use the slider";
+      return "◎ Use my location";
+    },
     destroy() { clearInterval(this._timer); },
     toggleHzn(force) {
       this.hz = force === true ? true : !this.hz;
@@ -1115,6 +1146,9 @@ document.addEventListener("alpine:init", () => {
       }
     },
     latChanged() {
+      // A manual drag un-claims "located" (the label would lie); the exact longitude is
+      // kept — moving the slider explores latitudes, it doesn't move you east-west.
+      if (this.geoState === "ok") this.geoState = "";
       localStorage.setItem("skyLat", String(this.lat));
       if (this.hz) this.draw();
     },
@@ -1123,10 +1157,11 @@ document.addEventListener("alpine:init", () => {
       return a < 1 ? "the equator" : a + "° " + (this.lat > 0 ? "N" : "S");
     },
     // Local sidereal time in degrees: which RA is crossing your meridian right now.
-    // Low-precision GMST (minutes-accurate for decades around J2000) + tz-derived longitude.
+    // Low-precision GMST (minutes-accurate for decades around J2000) + longitude — exact
+    // if geolocation was granted, otherwise estimated from the clock's UTC offset.
     _lst() {
       const d = (Date.now() - Date.UTC(2000, 0, 1, 12)) / 86400000;
-      const lonDeg = (-new Date().getTimezoneOffset() / 60) * 15;
+      const lonDeg = this.lon != null ? this.lon : (-new Date().getTimezoneOffset() / 60) * 15;
       return ((280.46061837 + 360.98564736629 * d + lonDeg) % 360 + 360) % 360;
     },
     // Altitude (deg) of the target star for the chosen latitude, right now.

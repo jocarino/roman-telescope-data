@@ -1663,6 +1663,8 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 .hzn-btn.on {
   color: #05121f; background: #cf9a4e; border-color: #cf9a4e; box-shadow: 2px 2px 0 #000;
 }
+.hzn-btn.hzn-geo:disabled { opacity: .6; cursor: wait; }
+.hzn-btn.hzn-geo.lit { color: #cf9a4e; border-color: #cf9a4e; }
 .hzn-lat { flex: 1 1 180px; max-width: 260px; }
 .hzn-lat-name { font-size: 11px; color: var(--fg-dim); }
 .hzn-lat-name b { color: var(--fg); }

@@ -746,13 +746,21 @@
           title="Draw your horizon on the chart">⌂ Your horizon</button>
         <span x-show="hz" x-cloak>{{ jinfo("Mimics stepping outside right now: the line is your
           horizon, the shaded part of the map is under your feet, computed from your device's
-          clock. Your east–west position is estimated from the clock's time zone, so the line
-          can sit a degree or two off. Set the slider to your latitude — northern and southern
-          observers stand on opposite sides of the sky, so the ground flips.") }}</span>
+          clock. Set the slider to your latitude — northern and southern observers stand on
+          opposite sides of the sky, so the ground flips. Your east–west position is estimated
+          from the clock's time zone — daylight saving and wide zones can put that up to an
+          hour of sky (15°) off. Pressing 'use my location' asks the browser for your position
+          instead and sets latitude and longitude exactly. It is read once and used only on
+          this device — this site has no server to send it to.") }}</span>
       </span>
+      <button class="hzn-btn hzn-geo" x-show="hz && geoAvail" x-cloak
+        @click="useLocation()" :disabled="geoState === 'busy'" :class="geoState === 'ok' ? 'lit' : ''"
+        x-text="geoLabel()"
+        title="Ask the browser for your position — used once, only on this device"></button>
       <div class="hzn-lat" x-show="hz" x-cloak>
         <span class="hzn-lat-name">Viewing from <b x-text="latLabel()"></b></span>
-        <input type="range" class="phase-slider lat-slider" min="-65" max="65" step="5"
+        {# step 1 so a geolocated latitude (e.g. 38°) isn't snapped to a coarser grid #}
+        <input type="range" class="phase-slider lat-slider" min="-65" max="65" step="1"
           x-model.number="lat" @input="latChanged()"
           aria-label="Your latitude, from 65° south to 65° north">
         <div class="phase-scale" aria-hidden="true"><span>65°S</span><span>EQUATOR</span><span>65°N</span></div>
