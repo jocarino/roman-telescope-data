@@ -1724,3 +1724,128 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
   padding: 6px 12px 8px; font-size: 11px; line-height: 1.5; color: var(--fg-faint);
   border-bottom: 1px solid var(--line);
 }
+
+/* ---- 404: the cockpit ----
+   A ship's console. The window is a pixel-quantised hyperspace canvas (same deliberate
+   low-res look as the planet renders), the strip under it reads out real values, and the
+   three ways out are physical keycaps — the same "physical control" exception to the
+   square-corner rule as the scope's function keys and knobs. */
+.cockpit { margin: 8px 0 28px; }
+.cockpit-view { margin-top: 0; }
+.cockpit-glass {
+  position: relative; overflow: hidden; background: #04060a;
+  aspect-ratio: 20 / 9; max-height: 460px;
+}
+.hyper {
+  position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+  image-rendering: pixelated; image-rendering: crisp-edges;
+}
+/* Reticle etched on the glass: four corner ticks, nothing that fights the copy. */
+.cockpit-reticle {
+  position: absolute; inset: 14px; pointer-events: none;
+  --tick: linear-gradient(var(--accent), var(--accent));
+  background-image: var(--tick), var(--tick), var(--tick), var(--tick),
+    var(--tick), var(--tick), var(--tick), var(--tick);
+  background-repeat: no-repeat;
+  background-size: 18px 1px, 1px 18px, 18px 1px, 1px 18px,
+    18px 1px, 1px 18px, 18px 1px, 1px 18px;
+  background-position:
+    left top, left top, right top, right top,
+    left bottom, left bottom, right bottom, right bottom;
+  opacity: .5;
+}
+.cockpit-hud {
+  position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; gap: 6px;
+  padding: 26px 22px;
+  /* The copy has to stay readable over moving stars: darken only the middle of the glass. */
+  background: radial-gradient(ellipse 74% 82% at 50% 50%, rgba(4, 6, 10, .93) 0%,
+    rgba(4, 6, 10, .78) 45%, rgba(4, 6, 10, 0) 100%);
+}
+.cockpit-code {
+  font-family: var(--pixel); -webkit-font-smoothing: none; font-smooth: never;
+  font-size: 58px; line-height: 1; letter-spacing: 4px; color: var(--accent);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.cockpit-lede { margin: 6px 0 0; font-size: 22px; letter-spacing: -.01em; }
+.cockpit-sub {
+  margin: 0; max-width: 46ch; font-size: 13.5px; line-height: 1.55; color: var(--fg-dim);
+}
+.cockpit-path {
+  font-family: var(--mono); font-size: 12.5px; color: var(--fg);
+  background: var(--bg-3); border: 1px solid var(--line); padding: 1px 6px;
+  overflow-wrap: anywhere;
+}
+/* Telemetry strip: same on-glass HUD language as the scope's rows. */
+.cockpit-strip {
+  display: flex; flex-wrap: wrap; gap: 6px 26px; padding: 10px 22px;
+  border-top: 1px solid #05070b; background: linear-gradient(180deg, #141821, #0d1017);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05);
+}
+.cockpit-cell { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.cockpit-k {
+  font-family: var(--mono); font-size: 8.5px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--fg-faint); flex: none;
+}
+.cockpit-v { font-family: var(--mono); font-size: 10.5px; color: var(--fg-dim); }
+.cockpit-v.mono-ell {
+  max-width: 30ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* The three headings out, as keycaps. */
+.cockpit-keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px; }
+.ckey {
+  display: block; text-align: left; padding: 13px 15px 15px; cursor: pointer;
+  border-radius: 5px; border: 1px solid #05070b; border-top-color: #39414f;
+  background: linear-gradient(180deg, #2a3140 0%, #1c212c 45%, #141821 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .12), inset 0 -2px 3px rgba(0, 0, 0, .45),
+    0 3px 0 #05070b, 0 5px 7px rgba(0, 0, 0, .55);
+  color: var(--fg-dim); font: inherit;
+  transition: border-color .12s, color .12s;
+}
+.ckey:hover { border-top-color: var(--accent); color: var(--fg); }
+.ckey:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 2px 4px rgba(0, 0, 0, .5),
+    0 1px 0 #05070b;
+}
+.ckey-glyph {
+  display: block; color: var(--accent); font-size: 13px; line-height: 1; margin-bottom: 8px;
+}
+.ckey-glyph .dice { width: 14px; height: 14px; display: block; }
+.ckey-lbl {
+  display: block; font-family: var(--mono); font-size: 11.5px; letter-spacing: .8px;
+  text-transform: uppercase; color: var(--fg);
+}
+.ckey-sub { display: block; margin-top: 4px; font-size: 12px; line-height: 1.4; color: var(--fg-faint); }
+.ckey.busy { color: var(--accent); }
+.cockpit-foot {
+  margin: 14px 0 0; font-family: var(--mono); font-size: 9.5px; letter-spacing: .5px;
+  text-transform: uppercase; color: var(--fg-faint);
+}
+.cockpit-foot kbd {
+  font-family: var(--mono); font-size: 9.5px; color: var(--fg-dim); padding: 1px 5px;
+  border: 1px solid var(--line); background: var(--bg-3);
+}
+
+/* Phones: a shorter window (the copy needs the room more than the stars do) and the keys
+   stacked full-width, each still one tap target. */
+@media (max-width: 640px) {
+  .cockpit-glass { aspect-ratio: 4 / 3; max-height: 340px; }
+  .cockpit-code { font-size: 42px; letter-spacing: 3px; }
+  .cockpit-lede { font-size: 18px; }
+  .cockpit-sub { font-size: 12.5px; }
+  /* The copy runs nearly edge to edge here, so the scrim has to reach the edges with it. */
+  .cockpit-hud {
+    padding: 18px 16px; gap: 4px;
+    background: radial-gradient(ellipse 96% 78% at 50% 50%, rgba(4, 6, 10, .95) 0%,
+      rgba(4, 6, 10, .9) 55%, rgba(4, 6, 10, .35) 100%);
+  }
+  .cockpit-strip { gap: 4px 16px; padding: 9px 14px; }
+  .cockpit-v.mono-ell { max-width: 22ch; }
+  .cockpit-keys { grid-template-columns: 1fr; gap: 10px; margin-top: 14px; }
+  .ckey { padding: 11px 13px 13px; }
+  .ckey-glyph { margin-bottom: 6px; }
+}

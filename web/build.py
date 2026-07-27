@@ -394,6 +394,15 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
             index_url=f"/planets.index.{build_id}.json", build_id=build_id
         )
     )
+    # 404: served by nginx's `error_page 404 /404.html`. Needs the index URL because its
+    # RANDOM WORLD key rolls over the same catalog.
+    (out / "404.html").write_text(
+        env.get_template("404.html").render(
+            index_url=f"/planets.index.{build_id}.json",
+            n_modelled=len(records),
+            build_id=build_id,
+        )
+    )
     # Guided tours: curated walks, resolved against THIS catalog (see pipeline/tours.py).
     tours = resolve_tours(records)
     _tour_pages(env, tours, out, build_id, len(records))
