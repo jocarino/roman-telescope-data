@@ -201,6 +201,14 @@ def make_handler(directory: Path, label: str, port: int):
                 idx = os.path.join(path, "index.html")
                 if os.path.isfile(idx):
                     return self._serve_html(idx)
+                # Nothing matched: hand back the site's own cockpit 404 page with a real 404
+                # status, the way production does (`error_page 404 /404.html` in nginx.conf).
+                # The clean-URL rewrite above was already mirrored; the error page was not, so
+                # a preview miss showed http.server's stdlib "Error response" instead — the
+                # exact kind of difference between preview and deploy this server exists to hide.
+                custom_404 = os.path.join(str(directory), "404.html")
+                if os.path.isfile(custom_404):
+                    return self._serve_html(custom_404, status=404)
             if os.path.isdir(path):
                 for idx in ("index.html", "index.htm"):
                     if os.path.exists(os.path.join(path, idx)):
@@ -210,7 +218,7 @@ def make_handler(directory: Path, label: str, port: int):
                 return self._serve_html(path)
             return super().send_head()
 
-        def _serve_html(self, path: str):
+        def _serve_html(self, path: str, status: int = 200):
             try:
                 body = Path(path).read_bytes()
             except OSError:
@@ -220,7 +228,7 @@ def make_handler(directory: Path, label: str, port: int):
                 body = body.replace(b"</body>", badge + b"</body>", 1)
             else:
                 body += badge
-            self.send_response(200)
+            self.send_response(status)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
             self.send_header("Cache-Control", "no-store")
