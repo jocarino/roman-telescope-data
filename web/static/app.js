@@ -82,6 +82,14 @@ document.addEventListener("alpine:init", () => {
     hz: "all",        // habitable-zone lens: see hzLabels
     fic: false,       // "seen in fiction" toggle: show only planets in the pop-culture overlay
     sort: "name",
+    // Which colour the whole gallery is keyed to: "full" (the modelled full spectrum) or
+    // "roman" (what the Coronagraph's four bands would recover). NOT a display filter — every
+    // colour-derived control re-keys to it: the swatch, the colour-family chips, the
+    // brightness sort and the similar-colour sort. Shares the detail page's `scopeView`
+    // storage key, so the choice carries both ways.
+    view: "full",
+    famCleared: "",   // family auto-dropped by a view flip (its name), for the toolbar note
+    _fcT: null,
     scrolled: false,  // page scrolled past the header: toolbar is stuck, TOP button shows
     // Labels for the custom (retro) dropdowns.
     provLabels: {
@@ -208,6 +216,31 @@ document.addEventListener("alpine:init", () => {
     // Clicking either side of a two-state toggle flips it — including the already-active side.
     toggleStyle() { this.setStyle(this.style === "retro" ? "smooth" : "retro"); },
     toggleFidelity() { this.setFidelity(this.fidelity === "classic" ? "stylised" : "classic"); },
+    // Flipping the view changes what every swatch IS, so a colour family selected in one view
+    // can have no members in the other — Roman's bluest band is 575 nm and nothing below it is
+    // sampled, so azure empties out completely. Drop the filter and say why, rather than
+    // leaving the visitor staring at an empty grid wondering what broke.
+    toggleView() { this.setView(this.view === "roman" ? "full" : "roman"); },
+    setView(v) {
+      if (v === this.view) return;
+      this.view = v;
+      try { localStorage.setItem("scopeView", v); } catch (e) { /* ignore */ }
+      clearTimeout(this._fcT);
+      if (this.family && !this.families().some((f) => f.id === this.family)) {
+        this.famCleared = this.familyMeta[this.family].n;
+        this.family = null;
+        this._fcT = setTimeout(() => (this.famCleared = ""), 7000);
+      } else {
+        this.famCleared = "";
+      }
+    },
+    // The colour this planet wears in the current view. The `r*` fields are written by the
+    // build; fall back to the full-spectrum colour if an entry predates them (a cached boot
+    // slice from an older build) so a card is never blank.
+    hexOf(p) { return this.view === "roman" && p.rhex ? p.rhex : p.hex; },
+    palOf(p) { return this.view === "roman" && p.rpal ? p.rpal : p.palette; },
+    famOf(p) { return this.view === "roman" && p.rfam ? p.rfam : p.family; },
+    lumOf(p) { return this.view === "roman" && p.rlum != null ? p.rlum : p.lum; },
     // Paint the inlined boot slice immediately, fetch the full index in the background, and
     // honour /?near= and /?family= deep links.
     // ---- Filter permanence ----
@@ -277,6 +310,13 @@ document.addEventListener("alpine:init", () => {
       if (params.get("fiction") === "1") this.fic = true;
       const hz = params.get("hz");
       if (hz && this.hzLabels[hz]) this.hz = hz;
+      // The view carries over from the planet pages' scope, and a ?view= link wins over it
+      // (so "the gallery as Roman sees it" is a shareable URL, and a ?family= in the same
+      // link is read in the right view).
+      const stored = localStorage.getItem("scopeView");
+      if (stored === "full" || stored === "roman") this.view = stored;
+      const qview = params.get("view");
+      if (qview === "full" || qview === "roman") this.view = qview;
 
       // Append the next batch as the sentinel nears the viewport (infinite scroll).
       this._loadIO = new IntersectionObserver((entries) => {
@@ -295,6 +335,13 @@ document.addEventListener("alpine:init", () => {
       // Any filter/sort change re-renders the grid from the top, and is remembered.
       this._filterKeys.forEach((k) =>
         this.$watch(k, () => { this._saveFilters(); this._rerender(); }));
+      // The Roman view is watched separately and deliberately NOT a filter key: it changes
+      // what the colours ARE rather than which planets show, it lives in `scopeView` (shared
+      // with the planet pages), and clearing the filters must not reach across and flip it.
+      // It still forces a full rerender — it can reorder results (brightest, similar-colour)
+      // and every card's swatch is rebuilt from scratch.
+      this.$watch("view", () => this._rerender());
+
 
       window.__randomGo = () => this.randomGo();  // wire the R shortcut to this gallery
 
@@ -404,9 +451,10 @@ document.addEventListener("alpine:init", () => {
       const hex = document.createElement("span");
       hex.className = "badge hex";
       const chip = document.createElement("i");
-      chip.className = "chip"; chip.style.background = p.hex;
+      const ph = this.hexOf(p);
+      chip.className = "chip"; chip.style.background = ph;
       hex.appendChild(chip);
-      hex.appendChild(document.createTextNode(p.hex));
+      hex.appendChild(document.createTextNode(ph));
       meta.appendChild(hex);
       // Only the strongest case earns a card badge: right distance AND a plausible surface.
       // Everything weaker is left to the planet page, where the caveats travel with it.
@@ -434,8 +482,8 @@ document.addEventListener("alpine:init", () => {
       if (!p || !window.PlanetRender) return;
       cv.classList.toggle("pixel", this.style === "retro");
       window.PlanetRender.render(cv, {
-        palette: p.palette, baseHex: p.hex, radius: p.radius, cloudState: p.cloud, lumY: p.lum,
-        style: this.style, fidelity: this.fidelity,
+        palette: this.palOf(p), baseHex: this.hexOf(p), radius: p.radius, cloudState: p.cloud,
+        lumY: this.lumOf(p), style: this.style, fidelity: this.fidelity,
         phase: window.PlanetRender.hashPhase(p.id),
       });
     },
@@ -449,7 +497,7 @@ document.addEventListener("alpine:init", () => {
     // (The `this.loaded` read makes these reactive to the async fetch populating window.PLANETS.)
     families() {
       if (!this.loaded) return [];
-      const present = new Set(window.PLANETS.map((x) => x.family));
+      const present = new Set(window.PLANETS.map((x) => this.famOf(x)));
       return this.familyOrder.filter((f) => present.has(f))
         .map((f) => ({ id: f, name: this.familyMeta[f].n, colour: this.familyMeta[f].c }));
     },
@@ -526,7 +574,7 @@ document.addEventListener("alpine:init", () => {
     nearHex() {
       if (!this.loaded) return "#000";
       const p = window.PLANETS.find((x) => x.id === this.nearId);
-      return p ? p.hex : "#000";
+      return p ? this.hexOf(p) : "#000";
     },
     // Perceptual colour distance (ΔE76 over CIE Lab), computed from the displayed hex so it
     // matches exactly what the eye sees. Cheap enough to run over the whole set on each sort.
@@ -553,7 +601,7 @@ document.addEventListener("alpine:init", () => {
         if (this.disc !== "all" && p.disc !== this.disc) return false;
         if (this.distBand !== "all" && this._distBandOf(p.dist_ly) !== this.distBand) return false;
         if (this.hz !== "all" && this._hzOf(p) !== this.hz) return false;
-        if (this.family && p.family !== this.family) return false;
+        if (this.family && this.famOf(p) !== this.family) return false;
         if (this.fic && !p.fic) return false;
         if (this.q) {
           const s = (p.name + " " + p.host).toLowerCase();
@@ -564,8 +612,8 @@ document.addEventListener("alpine:init", () => {
       const ref = this.nearId && all.find((x) => x.id === this.nearId);
       if (ref) {
         // Similar-colour sort: rank by perceptual distance to the reference planet's colour.
-        const rl = this._lab(ref.hex), dc = {};
-        const dist = (p) => (dc[p.id] ??= this._de(this._lab(p.hex), rl));
+        const rl = this._lab(this.hexOf(ref)), dc = {};
+        const dist = (p) => (dc[p.id] ??= this._de(this._lab(this.hexOf(p)), rl));
         items.sort((a, b) => dist(a) - dist(b));
       } else {
         const s = this.sort;
@@ -579,7 +627,7 @@ document.addEventListener("alpine:init", () => {
             return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
           }
           if (s === "temp") return (b.temp || 0) - (a.temp || 0);
-          if (s === "lum") return (b.lum || 0) - (a.lum || 0);
+          if (s === "lum") return (this.lumOf(b) || 0) - (this.lumOf(a) || 0);
           if (s === "dist") return (a.dist ?? Infinity) - (b.dist ?? Infinity); // nearest, unknowns last
           if (s === "de") return (b.de || 0) - (a.de || 0);
           return 0;
@@ -1400,6 +1448,10 @@ document.addEventListener("alpine:init", () => {
       // Only if this press is still being held on the same card.
       if (downCard !== card) return;
       body.innerHTML = html;
+      // The fragment is static HTML carrying BOTH colours; the current view decides which one
+      // shows (CSS on the data-view attribute) so a peek never contradicts the card behind it.
+      var view = localStorage.getItem("scopeView") === "roman" ? "roman" : "full";
+      body.dataset.view = view;
       // The planet itself, drawn with the same engine + settings as the gallery cards.
       var cv = body.querySelector(".peek-planet");
       var pl = cv && window.PlanetRender && (window.PLANETS || []).find(function (x) {
@@ -1407,9 +1459,11 @@ document.addEventListener("alpine:init", () => {
       });
       if (pl) {
         var style = localStorage.getItem("planetStyle") || "retro";
+        var roman = view === "roman" && pl.rpal;
         cv.classList.toggle("pixel", style === "retro");
         window.PlanetRender.render(cv, {
-          palette: pl.palette, radius: pl.radius, cloudState: pl.cloud, lumY: pl.lum,
+          palette: roman ? pl.rpal : pl.palette, baseHex: roman ? pl.rhex : pl.hex,
+          radius: pl.radius, cloudState: pl.cloud, lumY: roman ? pl.rlum : pl.lum,
           style: style, fidelity: localStorage.getItem("renderFidelity") || "classic",
           phase: window.PlanetRender.hashPhase(pl.id),
         });
@@ -1474,8 +1528,13 @@ document.addEventListener("alpine:init", () => {
     var p = null;
     for (var i = 0; i < list.length; i++) if (list[i].id === cv.dataset.id) { p = list[i]; break; }
     if (!p) return null;
+    // Read the view every time rather than caching it: this runs outside the Alpine component,
+    // so a card spun up mid-session must use whatever the switch says NOW. Getting this wrong
+    // is visible — the planet would snap back to its full-spectrum colours under the cursor.
+    var roman = localStorage.getItem("scopeView") === "roman" && p.rpal;
     return {
-      palette: p.palette, radius: p.radius, cloudState: p.cloud, lumY: p.lum,
+      palette: roman ? p.rpal : p.palette, baseHex: roman ? p.rhex : p.hex,
+      radius: p.radius, cloudState: p.cloud, lumY: roman ? p.rlum : p.lum,
       style: localStorage.getItem("planetStyle") || "retro",
       fidelity: localStorage.getItem("renderFidelity") || "classic",
       phase: window.PlanetRender.hashPhase(p.id),

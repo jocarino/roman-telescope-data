@@ -296,6 +296,14 @@ def _index_entry(rec: PlanetRecord, fiction: dict[str, dict] | None = None) -> d
             rec.params.radius_r_earth, rec.params.mass_m_earth, rec.params.equilibrium_temp_k
         ),
         "disc": rec.discovery.method,
+        # The same four things again, as Roman's four bands would recover them. The gallery's
+        # "seen from Roman" view swaps every colour-derived control onto these (swatch, colour
+        # family, brightness sort, similar-colour sort), so the whole grid behaves as if the
+        # four-band colour were the only colour there is. Costs ~90 bytes/planet in the index.
+        "rhex": view.colour.hex,
+        "rfam": colour_family(tuple(view.colour.srgb)),
+        "rlum": round(view.colour.luminance_y, 5),
+        "rpal": [s.hex for s in view.colour.palette],
         # Habitable-zone lens: the zone the orbit falls in, and whether the planet is small
         # enough to have a surface. The gallery derives "could hold liquid water" from both.
         "hz": rec.habitability.zone if rec.habitability else "unknown",
@@ -337,11 +345,21 @@ def _stats(records: list[PlanetRecord]) -> dict:
         for v in r.instrument_views
         if v.reconstruction_error
     ]
+    # How many planets change colour FAMILY between the two views — the honest headline for
+    # "how much colour identity survives Roman's filter set", and the number the gallery's
+    # view-toggle explainer quotes. Derived, never hardcoded, so it stays true as data changes.
+    shifted = sum(
+        1
+        for r in records
+        if colour_family(tuple(r.true_colour.srgb))
+        != colour_family(tuple(r.instrument_views[0].colour.srgb))
+    )
     return {
         "total": len(records),
         "median_de": f"{statistics.median(des):.1f}" if des else "—",
         "cgi_targets": sum(1 for r in records if r.provenance == "simulated-cgi"),
         "microlensing": sum(1 for r in records if not r.is_light_isolable),
+        "family_shift_pct": round(100 * shifted / len(records)) if records else 0,
     }
 
 

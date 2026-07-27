@@ -34,14 +34,24 @@
     <span class="peek-step-sub">geometric albedo across 380–780 nm</span>
   </div>
 
+  {# Both colours are emitted; the gallery's current view decides which one is visible (the
+     peek loader stamps data-view on the container). The fragment is static and cached, so it
+     cannot be rendered per-view — but it must never show a colour the card behind it isn't. #}
+  {%- set rv = rec.instrument_views[0].colour -%}
   <div class="peek-step">
     <span class="peek-step-lbl">→ Colour</span>
-    <div class="peek-colour">
+    <div class="peek-colour peek-v-full">
       <span class="peek-swatch" style="background: {{ tc.hex }}"></span>
       <code>{{ tc.hex }}</code>
       <span class="peek-step-sub">brightness Y {{ '%.3f'|format(tc.luminance_y) }}{% if tc.out_of_gamut %} · outside sRGB{% endif %}</span>
     </div>
-    <span class="peek-step-sub">via CIE 1931 colour matching</span>
+    <div class="peek-colour peek-v-roman">
+      <span class="peek-swatch" style="background: {{ rv.hex }}"></span>
+      <code>{{ rv.hex }}</code>
+      <span class="peek-step-sub">brightness Y {{ '%.3f'|format(rv.luminance_y) }}{% if rv.out_of_gamut %} · outside sRGB{% endif %}</span>
+    </div>
+    <span class="peek-step-sub peek-v-full">via CIE 1931 colour matching · full spectrum</span>
+    <span class="peek-step-sub peek-v-roman">rebuilt from Roman's four bands, not the full spectrum</span>
   </div>
 </div>
 
