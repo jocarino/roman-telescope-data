@@ -28,31 +28,41 @@
         technical meaning, the precise version is in the longer paragraph, not hidden.</p>
     </div>
     <div class="intro-foot">
-      <span><b id="gl-count">{{ terms|length }}</b> terms · {{ categories|length }} groups</span>
+      <span>Hover a marked word anywhere; the whole list is here.</span>
       <a class="intro-link" href="/how">How we get the colours →</a>
     </div>
   </div>
 
+  {# The instrument readout: what this "device" currently holds, in the same HUD language as
+     the EXOSCOPE's channel bar. The count is live — it tracks the filters below. #}
+  <div class="gl-hud">
+    <span class="gl-hud-id">▌GLOSSARY</span>
+    <span class="gl-hud-cell">TERMS <b id="gl-count">{{ '%03d'|format(terms|length) }}</b></span>
+    <span class="gl-hud-cell">GROUPS <b>{{ '%02d'|format(categories|length) }}</b></span>
+    <span class="gl-hud-run"><i class="led on"></i>READY</span>
+  </div>
+
   <div class="gl-controls">
+    {# Terminal prompt rather than a magnifier: this page is a lookup, and the > reads as one. #}
     <label class="search gl-search">
-      <svg class="search-mag" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-        <circle cx="7" cy="7" r="4.3" fill="none" stroke="currentColor" stroke-width="1.6"/>
-        <path d="M10.4 10.4L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-      </svg>
+      <span class="gl-prompt" aria-hidden="true">&gt;</span>
       <input type="search" id="gl-q" placeholder="Search a term or a definition…"
         aria-label="Search the glossary" autocomplete="off">
     </label>
+    {# Group filters as the scope's lit channel buttons — same primitive as the VIEW selector. #}
     <div class="gl-cats" role="group" aria-label="Jump to a group">
-      <button type="button" class="gl-cat on" data-cat="">All</button>
+      <button type="button" class="led-btn gl-cat on" data-cat="">
+        <i class="led on"></i>All</button>
       {% for c in categories %}
-      <button type="button" class="gl-cat" data-cat="{{ c.id }}"
-        title="{{ c.name }}">{{ c.short if c.short else c.name }}</button>
+      <button type="button" class="led-btn gl-cat" data-cat="{{ c.id }}"
+        title="{{ c.name }}"><i class="led"></i>{{ c.short if c.short else c.name }}</button>
       {% endfor %}
     </div>
   </div>
 
-  <p class="gl-none" id="gl-none" hidden>No term matches that. Try a plainer word — the
-    definitions are searched too.</p>
+  {# Empty state as a terminal response, not a web app's shrug. #}
+  <p class="gl-none" id="gl-none" hidden><b>NO MATCH</b> — try a plainer word; the definitions
+    are searched too, not just the terms.</p>
 
   {% for c in categories %}
   {%- set entries = terms | selectattr('category', 'equalto', c.id) | list -%}
@@ -65,11 +75,12 @@
     {% if c.blurb %}<p class="gl-sec-blurb">{{ c.blurb }}</p>{% endif %}
     <dl class="gl-list">
       {% for t in entries %}
+      {# Catalog number: entries are addressed like readings on an instrument, not bullets. #}
       <div class="gl-entry" id="{{ t.id }}" data-cat="{{ c.id }}"
         data-k="{{ (t.term ~ ' ' ~ (t.aliases|join(' ') if t.aliases else '') ~ ' ' ~ t.short ~ ' ' ~ t.long)|lower }}">
         <dt class="gl-term">
           <a class="gl-anchor" href="#{{ t.id }}" aria-label="Link to {{ t.term }}">#</a>
-          {{ t.term }}
+          <span class="gl-no">[{{ '%03d'|format(loop.index) }}]</span>{{ t.term }}
           {% if t.aliases %}<span class="gl-alias">also: {{ t.aliases|join(' · ') }}</span>{% endif %}
         </dt>
         <dd class="gl-def">
@@ -101,32 +112,59 @@
      .gloss mark and its popover DO live in style.css — they appear on every page. */
   .gl-page { max-width: 900px; margin: 0 auto; }
   .gl-intro { display: block; }
+
+  /* ── The readout strip: what the "device" holds, in the EXOSCOPE's HUD language ── */
+  .gl-hud {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; margin-top: 16px;
+    padding: 7px 12px; position: relative; overflow: hidden;
+    background: linear-gradient(180deg, #0a0f16, #05080d);
+    border: 1px solid #000; outline: 1px solid var(--line);
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--fg-faint);
+  }
+  .gl-hud::after {  /* scanlines, same recipe as the scope screen */
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(to bottom,
+      rgba(0, 0, 0, 0) 0 2px, rgba(0, 0, 0, .3) 3px);
+  }
+  .gl-hud-id {
+    color: var(--accent); letter-spacing: 1.6px;
+    text-shadow: 0 0 7px color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  .gl-hud-cell b { color: var(--fg); font-weight: 600; margin-left: 5px; letter-spacing: 1px; }
+  .gl-hud-run { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
+
   /* Sticky, so the filters stay reachable however far down the list you are. Solid black
      (not a fade): the chips can wrap to two rows, and a gradient let text show through. */
   .gl-controls {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 18px 0 6px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 10px 0 6px;
     position: sticky; top: 0; z-index: 30; padding: 10px 0;
     background: #000; border-bottom: 1px solid var(--line);
   }
   /* The search field is always open here (unlike the gallery's magnifier, which collapses to
      an icon), so it also needs its placeholder back — the gallery hides it while collapsed. */
   .gl-search { flex: 1 1 240px; max-width: 380px; }
-  .gl-search input { width: 100%; cursor: text; }
+  .gl-search input { width: 100%; cursor: text; padding-left: 30px; }
   .gl-search input::placeholder { color: var(--fg-faint); }
+  .gl-prompt {
+    position: absolute; left: 12px; font-family: var(--mono); font-size: 13px; font-weight: 700;
+    color: var(--accent); pointer-events: none;
+    text-shadow: 0 0 7px color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  /* Group filters reuse .led-btn (the scope's VIEW selector) — only the sizing is local. */
   .gl-cats { display: flex; flex-wrap: wrap; gap: 6px; }
   .gl-cat {
-    border: 1px solid var(--line); background: var(--bg-3); color: var(--fg-dim);
-    font-family: var(--mono); font-size: 9.5px; letter-spacing: .5px; text-transform: uppercase;
-    padding: 6px 9px; cursor: pointer; box-shadow: 2px 2px 0 var(--line);
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: .8px; text-transform: uppercase;
+    padding: 6px 10px; gap: 6px;
   }
-  .gl-cat:hover { color: var(--fg); border-color: var(--accent); }
-  .gl-cat.on {
-    background: var(--accent); color: #05121f; border-color: var(--accent); box-shadow: none;
-    transform: translate(1px, 1px);
-  }
+
   .gl-sec { margin-top: 18px; padding: 16px 18px 6px; }
-  .gl-sec-head { display: flex; align-items: baseline; gap: 8px; }
+  /* Module heading: label, count, then a rule running to the edge — the .rail-lbl idiom. */
+  .gl-sec-head { display: flex; align-items: center; gap: 9px; }
   .gl-sec-head h3 { margin: 0; }
+  .gl-sec-head::after {
+    content: ""; flex: 1; height: 1px; background: var(--line);
+  }
   .gl-sec-n {
     font-family: var(--mono); font-size: 10px; color: var(--fg-faint);
     border: 1px solid var(--line); padding: 1px 5px;
@@ -137,9 +175,17 @@
   .gl-entry:first-child { border-top: 0; padding-top: 10px; }
   /* Deep-link flash: the accent bar marks which entry the URL hash pointed at. */
   .gl-entry:target { border-left: 4px solid var(--accent); padding-left: 12px; margin-left: -16px; }
+  /* Terminal readout, not the pixel font: per the house rule the bitmap face is reserved for
+     the brand title and gallery planet names — at this length it would be a wall of pixels. */
   .gl-term {
-    font-family: var(--pixel); -webkit-font-smoothing: none; font-smooth: never;
-    font-size: 12px; letter-spacing: .5px; color: var(--fg); line-height: 1.6;
+    font-family: var(--mono); font-size: 13px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--accent); line-height: 1.6;
+    text-shadow: 0 0 8px color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+  /* Catalog number: entries are addressed like channels on an instrument. */
+  .gl-no {
+    margin-right: 8px; color: var(--fg-faint); font-weight: 400; letter-spacing: .5px;
+    text-shadow: none;
   }
   /* Deep-link handle in the left gutter, so revealing it never shifts the term itself. */
   .gl-anchor {
@@ -161,7 +207,14 @@
     color: var(--fg-faint); margin-right: 6px;
   }
   .gl-see a { margin-right: 10px; }
-  .gl-none { margin: 24px 0; color: var(--fg-dim); font-size: 13px; }
+  .gl-none {
+    margin: 18px 0; padding: 10px 14px; color: var(--fg-dim); font-size: 12.5px;
+    background: var(--bg-3); border: 1px solid var(--line); border-left: 4px solid var(--accent);
+  }
+  .gl-none::before { content: "> "; color: var(--accent); font-weight: 700; }
+  .gl-none b {
+    color: var(--accent); font-family: var(--mono); letter-spacing: 1px; margin-right: 2px;
+  }
   .gl-foot { margin-top: 22px; }
   .gl-foot code { font-family: var(--mono); font-size: 11.5px; color: var(--fg); }
   @media (max-width: 640px) {
@@ -196,14 +249,22 @@
       s.hidden = !s.querySelector(".gl-entry:not([hidden])");
     });
     none.hidden = shown > 0;
-    count.textContent = shown;
+    // Zero-padded, so the readout keeps its width as the count changes.
+    count.textContent = String(shown).padStart(3, "0");
+  }
+
+  // The lit channel is both the button and its LED.
+  function light(b, on) {
+    b.classList.toggle("on", on);
+    var led = b.querySelector(".led");
+    if (led) led.classList.toggle("on", on);
   }
 
   q.addEventListener("input", apply);
   cats.forEach(function (b) {
     b.addEventListener("click", function () {
       cat = b.dataset.cat;
-      cats.forEach(function (o) { o.classList.toggle("on", o === b); });
+      cats.forEach(function (o) { light(o, o === b); });
       apply();
       // Jumping to a group from the top should show it, not leave you mid-page.
       if (cat) window.scrollTo({ top: 0, behavior: "smooth" });
@@ -218,7 +279,7 @@
     if (!el || !el.classList.contains("gl-entry")) return;
     if (el.hidden || (el.closest(".gl-sec") || {}).hidden) {
       q.value = ""; cat = "";
-      cats.forEach(function (o) { o.classList.toggle("on", !o.dataset.cat); });
+      cats.forEach(function (o) { light(o, !o.dataset.cat); });
       apply();
       el.scrollIntoView({ block: "center" });
     }
