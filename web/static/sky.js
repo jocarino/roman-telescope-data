@@ -82,9 +82,38 @@
       drawSpot();
     }
 
-    function drawChart(vis) {
+    // Horizon line + ground polygon + label position for the current lat/lon, in SVG units.
+    function horizonGeom() {
       var phi = Math.abs(lat) < 0.5 ? (lat < 0 ? -0.5 : 0.5) : lat;
       var lst = ExoSky.lstDeg(lon);
+      var pts = "";
+      for (var ra = 360; ra >= 0; ra -= 2) {
+        pts += xOf(ra === 360 ? 359.999 : ra).toFixed(1) + "," +
+          yOf(ExoSky.horizonDec(phi, lst, ra)).toFixed(1) + " ";
+      }
+      pts = pts.replace(/^([\d.]+),/, X0 + ",");  // pin the first sample to the exact left edge
+      var edge = phi > 0 ? Y1 : Y0;
+      return {
+        line: pts.trim(),
+        floor: pts + X1 + "," + edge + " " + X0 + "," + edge,
+        lblY: phi > 0 ? Y1 - 6 : Y0 + 12,
+      };
+    }
+
+    // Cheap per-drag update: move only the horizon line and ground shading in place, leaving
+    // the ~4k star dots alone. The full render (dot visibility, counts, lists) is debounced
+    // until the slider rests — rebuilding the whole SVG per input event visibly lags.
+    function updateHorizonOnly() {
+      $("skp-latlbl").textContent = latLabel();
+      var svg = chartEl.querySelector("svg");
+      if (!svg) return;
+      var g = horizonGeom();
+      svg.querySelector(".hzn-line").setAttribute("points", g.line);
+      svg.querySelector(".hzn-floor").setAttribute("points", g.floor);
+      svg.querySelector(".hzn-lbl").setAttribute("y", g.lblY);
+    }
+
+    function drawChart(vis) {
       var s = '<svg viewBox="0 0 ' + W + " " + H + '" class="skychart" role="img" ' +
         'aria-label="Sky map: catalog host stars above your horizon right now">' +
         '<rect x="' + X0 + '" y="' + Y0 + '" width="' + (X1 - X0) + '" height="' + (Y1 - Y0) +
@@ -108,13 +137,8 @@
       });
 
       // Ground first (under the dots): same construction as the planet-page overlay.
-      var pts = "";
-      for (var ra = 360; ra >= 0; ra -= 2) {
-        pts += xOf(ra === 360 ? 359.999 : ra).toFixed(1) + "," + yOf(ExoSky.horizonDec(phi, lst, ra)).toFixed(1) + " ";
-      }
-      pts = pts.replace(/^([\d.]+),/, X0 + ",");  // pin the first sample to the exact left edge
-      var edge = phi > 0 ? Y1 : Y0;
-      s += '<polygon class="hzn-floor" points="' + pts + X1 + "," + edge + " " + X0 + "," + edge + '"/>';
+      var g = horizonGeom();
+      s += '<polygon class="hzn-floor" points="' + g.floor + '"/>';
 
       // Dots: dim = below horizon or too faint; accent = visible under the current filter.
       var dim = "", lit = "";
@@ -126,9 +150,8 @@
           dim += '<rect x="' + (x - 1) + '" y="' + (y - 1) + '" width="2" height="2" class="skydot"/>';
         }
       });
-      s += dim + '<polyline class="hzn-line" points="' + pts.trim() + '"/>' + lit;
-      var lblY = phi > 0 ? Y1 - 6 : Y0 + 12;
-      s += '<text class="hzn-lbl" x="' + (X0 + 8) + '" y="' + lblY + '">GROUND — below your horizon</text>';
+      s += dim + '<polyline class="hzn-line" points="' + g.line + '"/>' + lit;
+      s += '<text class="hzn-lbl" x="' + (X0 + 8) + '" y="' + g.lblY + '">GROUND — below your horizon</text>';
       chartEl.innerHTML = s + "</svg>";
     }
 
@@ -174,10 +197,18 @@
       var t = e.target.closest && e.target.closest(".skp-dot-vis");
       if (!t) { tipEl.style.display = "none"; return; }
       var h = hosts[+t.dataset.i];
+      // Worlds inline, capped at 5 with an honest ellipsis (some systems carry 6+).
+      var rows = h.planets.slice(0, 5).map(function (p) {
+        return '<span class="ct-sw" style="background:' + p.hex + '"></span>' + p.name;
+      });
+      if (h.planets.length > 5) {
+        rows.push('<span class="ct-dim">… and ' + (h.planets.length - 5) + " more</span>");
+      }
       tipEl.innerHTML = "<b>" + h.name + "</b><br><span class='ct-dim'>" + starMeta(h) +
-        "</span><br><span class='ct-dim'>click for its worlds</span>";
+        "</span><br>" + rows.join("<br>") +
+        "<br><span class='ct-dim'>click to open</span>";
       tipEl.style.display = "block";
-      tipEl.style.left = Math.min(e.clientX + 14, window.innerWidth - 260) + "px";
+      tipEl.style.left = Math.min(e.clientX + 14, window.innerWidth - 270) + "px";
       tipEl.style.top = e.clientY + 14 + "px";
     });
     chartEl.addEventListener("mouseleave", function () { tipEl.style.display = "none"; });
@@ -200,12 +231,16 @@
       if (selected.length) $("skp-spot-panel").scrollIntoView({ behavior: "smooth", block: "nearest" });
     });
 
+    var latDebounce = null;
     $("skp-lat").addEventListener("input", function () {
       lat = +this.value;
-      if (geoState === "ok") geoState = "";
+      if (geoState === "ok") { geoState = ""; updateGeoBtn(); }
       localStorage.setItem("skyLat", String(lat));
-      updateGeoBtn();
-      render();
+      // Instant feedback (label + horizon curve); the expensive dot/list rebuild waits
+      // until the slider has rested for a beat.
+      updateHorizonOnly();
+      clearTimeout(latDebounce);
+      latDebounce = setTimeout(render, 180);
     });
     document.querySelectorAll(".skp-mag-btn").forEach(function (b) {
       b.addEventListener("click", function () {
@@ -226,7 +261,7 @@
       geoBtn.classList.toggle("lit", geoState === "ok");
       geoBtn.disabled = geoState === "busy";
     }
-    geoBtn.addEventListener("click", function () {
+    function locate() {
       if (geoState === "busy") return;
       geoState = "busy"; updateGeoBtn();
       navigator.geolocation.getCurrentPosition(
@@ -240,7 +275,24 @@
         function () { geoState = "err"; updateGeoBtn(); },
         { timeout: 12000, maximumAge: 600000 }
       );
-    });
+    }
+    geoBtn.addEventListener("click", locate);
     updateGeoBtn();
+
+    // First-visit prompt: our own retro dialog, shown once — the browser's real permission
+    // dialog only appears if the visitor says yes here. Any dismissal is remembered; never
+    // shown again once a location is stored either.
+    var modal = $("skp-modal");
+    function closeModal() {
+      modal.hidden = true;
+      localStorage.setItem("skyGeoAsked", "1");
+    }
+    if (modal && !geoBtn.hidden && lon == null && !localStorage.getItem("skyGeoAsked")) {
+      modal.hidden = false;
+      $("skp-modal-yes").addEventListener("click", function () { closeModal(); locate(); });
+      $("skp-modal-no").addEventListener("click", closeModal);
+      $("skp-modal-x").addEventListener("click", closeModal);
+      modal.addEventListener("click", function (e) { if (e.target === modal) closeModal(); });
+    }
   };
 })();

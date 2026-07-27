@@ -66,7 +66,28 @@
     <div id="skp-list"></div>
   </section>
 
-  <div class="census-tip" id="skp-tip" role="status" aria-live="polite"></div>
+  <div class="skp-tip" id="skp-tip" role="status" aria-live="polite"></div>
+
+  {# One-time retro prompt: offer geolocation up front, in our own UI (the browser's own
+     permission dialog only appears if the visitor says yes here). Declining is remembered. #}
+  <div class="skp-modal-wrap" id="skp-modal" hidden>
+    <div class="skp-modal" role="dialog" aria-modal="true" aria-labelledby="skp-modal-title">
+      <div class="skp-modal-head">
+        <span id="skp-modal-title">▚ locate · your portion of the sky</span>
+        <button class="info-x" id="skp-modal-x" aria-label="No thanks">&times;</button>
+      </div>
+      <div class="skp-modal-body">
+        <p>This page can use your device's location to work out which of these stars are over
+          <em>your</em> head right now — your horizon, your piece of the sky.</p>
+        <p class="skp-modal-fine">Read once, used only on this device, never sent anywhere —
+          this site has no server. Saying no just means you set the latitude slider yourself.</p>
+      </div>
+      <div class="skp-modal-actions">
+        <button class="hzn-btn skp-modal-yes" id="skp-modal-yes">◎ Use my location</button>
+        <button class="hzn-btn" id="skp-modal-no">No thanks — I'll use the slider</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <style>
@@ -113,6 +134,43 @@
     width: 12px; height: 12px; display: inline-block; border: 1px solid var(--line);
   }
   .skp-empty { font-family: var(--mono); font-size: 11.5px; color: var(--fg-dim); margin: 6px 0; }
+  /* Hover tooltip (fixed-position, follows the cursor). */
+  .skp-tip {
+    position: fixed; z-index: 40; display: none; pointer-events: none;
+    border: 1px solid var(--accent); background: var(--bg-3); box-shadow: 3px 3px 0 #000;
+    padding: 7px 10px; font-family: var(--mono); font-size: 11px; color: var(--fg);
+    max-width: 250px; line-height: 1.55;
+  }
+  .skp-tip .ct-dim { color: var(--fg-dim); }
+  .skp-tip .ct-sw {
+    display: inline-block; width: 10px; height: 10px; margin-right: 6px;
+    border: 1px solid var(--line); vertical-align: -1px;
+  }
+  /* The one-time "use your location?" prompt, in the amber real-world theme. */
+  .skp-modal-wrap {
+    position: fixed; inset: 0; z-index: 60; display: flex;
+    align-items: center; justify-content: center; background: rgba(4, 6, 10, .65);
+  }
+  /* display:flex above would silently defeat the hidden attribute — keep it authoritative. */
+  .skp-modal-wrap[hidden] { display: none; }
+  .skp-modal {
+    max-width: 430px; margin: 16px; border: 1px solid #cf9a4e;
+    background: var(--bg-3); box-shadow: 6px 6px 0 #000;
+  }
+  .skp-modal-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    padding: 8px 12px; border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
+    text-transform: uppercase; color: #cf9a4e;
+  }
+  .skp-modal-body { padding: 12px 14px 2px; }
+  .skp-modal-body p { margin: 0 0 10px; font-size: 13px; color: var(--fg); }
+  .skp-modal-body .skp-modal-fine { font-size: 11.5px; color: var(--fg-dim); }
+  .skp-modal-actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 2px 14px 14px; }
+  .skp-modal-yes {
+    background: #cf9a4e; color: #05121f; border-color: #cf9a4e; box-shadow: 2px 2px 0 #000;
+  }
+  .skp-modal-yes:hover { color: #05121f; }
 </style>
 <script src="/static/sky.js?v={{ build_id }}"></script>
 <script>window.addEventListener("DOMContentLoaded", function () {
