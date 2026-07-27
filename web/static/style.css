@@ -1726,20 +1726,24 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 }
 
 
+
 /* ---- 404: the whole page is the cockpit ----
-   The visitor sits in the pilot's seat: hyperspace fills the canopy above (hull ceiling +
-   angled A-pillars framing the glass), and the lower band is the ship's dashboard —
-   instrument screens showing real telemetry, decorative light clusters, and the three ways
-   out as physical console keys. Keys, meters and LEDs are skeuomorphic on purpose (physical
-   controls — same exception to the square-corner rule as the scope's knobs and keycaps). */
+   The visitor sits in the pilot's seat. Above: the canopy — hyperspace out the glass, hull
+   ceiling with an overhead console hanging from it, angled side walls wrapping the view, a
+   faint glare across the glass. Below: the dashboard — instrument screens with real
+   telemetry, a radar sweep and a signal trace on green phosphor, switch banks and lights
+   (decorative, unlabelled, aria-hidden), and the three headings out as physical console
+   keys. Keys, switches, meters and LEDs are skeuomorphic on purpose — physical controls,
+   the same exception to the square-corner rule as the scope's knobs and keycaps. */
 body.cockpit-page .wrap { max-width: none; padding: 0; }
 .cockpit {
   --hull-hi: #39414f; --hull: #171b25; --hull-dk: #0b0e15; --hull-edge: #05070b;
+  --phos: #4ade80;
   min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
   background: var(--hull-dk);
 }
 
-/* ── The canopy: everything above the dash is glass. ── */
+/* ── The canopy. ── */
 .canopy {
   position: relative; overflow: hidden; background: #04060a;
   /* Absorbs exactly the viewport space the dash doesn't need, so the whole cockpit fits
@@ -1750,35 +1754,78 @@ body.cockpit-page .wrap { max-width: none; padding: 0; }
   position: absolute; inset: 0; width: 100%; height: 100%; display: block;
   image-rendering: pixelated; image-rendering: crisp-edges;
 }
-/* Hull ceiling: a riveted lattice strip across the top of the glass. */
-.canopy-ceiling {
-  position: absolute; top: 0; left: 0; right: 0; height: 30px; z-index: 2;
+/* A streak of reflected cabin light across the glass — what makes it read as GLASS. */
+.canopy-glare {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    linear-gradient(115deg,
+      transparent 38%, rgba(255, 255, 255, .05) 41%, rgba(255, 255, 255, .015) 46%,
+      transparent 50%, transparent 56%, rgba(255, 255, 255, .03) 58%, transparent 62%),
+    radial-gradient(ellipse 88% 80% at 50% 46%, transparent 62%, rgba(0, 0, 0, .42) 100%);
+}
+/* Hull ceiling: a riveted lattice strip, with two overhead console pods hanging off it. */
+.overhead {
+  position: absolute; top: 0; left: 0; right: 0; height: 34px; z-index: 2;
   background:
     repeating-linear-gradient(45deg, transparent 0 9px, rgba(255, 255, 255, .05) 9px 10px),
     repeating-linear-gradient(-45deg, transparent 0 9px, rgba(0, 0, 0, .5) 9px 10px),
-    linear-gradient(180deg, #1e242f, var(--hull));
+    linear-gradient(180deg, #202632, var(--hull));
   border-bottom: 2px solid var(--hull-edge);
   box-shadow: 0 1px 0 var(--hull-hi), 0 4px 10px rgba(0, 0, 0, .6);
 }
-/* A-pillars: angled struts down each side, so the window reads as a canopy, not a rectangle.
-   The glass widens toward the dash, like leaning forward over the console. */
-.canopy-pillar {
-  position: absolute; top: 0; bottom: 0; width: 13%; z-index: 2;
+.oh-pod {
+  position: absolute; top: 100%; margin-top: 2px; display: flex; gap: 7px; padding: 7px 11px;
+  background: linear-gradient(180deg, #1d2330, #11151e);
+  border: 1px solid var(--hull-edge); border-top: 0;
+  box-shadow: 0 3px 7px rgba(0, 0, 0, .55), inset 0 -1px 0 rgba(255, 255, 255, .05);
+}
+/* Emissive core: a lit accent bar along the pod's underside — the light source itself. */
+.oh-pod::before {
+  content: ""; position: absolute; left: 4px; right: 4px; bottom: -2px; height: 3px;
+  background: color-mix(in srgb, var(--accent) 85%, white);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 80%, transparent);
+}
+/* And its cone of light falling onto the glass — light on the glass proves the glass. */
+.oh-pod::after {
+  content: ""; position: absolute; top: 100%; left: -55%; right: -55%; height: 170px;
+  pointer-events: none;
+  background: radial-gradient(ellipse 62% 100% at 50% 0,
+    color-mix(in srgb, var(--accent) 22%, transparent),
+    color-mix(in srgb, var(--accent) 7%, transparent) 45%, transparent 72%);
+}
+.oh-pod.l { left: 19%; } .oh-pod.r { right: 19%; }
+.oh-pod i { width: 9px; height: 9px; background: #232936; border: 1px solid #000; }
+.oh-pod i.on { background: color-mix(in srgb, var(--accent) 80%, #0a0a0a); box-shadow: 0 0 5px color-mix(in srgb, var(--accent) 60%, transparent); }
+.oh-pod i.on.amber { background: #b98a3a; box-shadow: 0 0 5px rgba(224, 176, 80, .45); }
+.oh-pod i.on.green { background: #3f9f63; box-shadow: 0 0 5px rgba(74, 222, 128, .5); }
+.oh-pod i.on:nth-child(odd) { animation: led-blink 3.4s steps(1) infinite; }
+/* Side walls: wide angled panels with seam lines, so the glass sits in a hull, not a border. */
+.canopy-wall {
+  position: absolute; top: 0; bottom: 0; width: 15%; z-index: 2;
   filter: drop-shadow(0 0 1px var(--hull-hi));
 }
-.canopy-pillar::before {
+.canopy-wall::before {
   content: ""; position: absolute; inset: 0;
-  background: linear-gradient(180deg, #1e242f, #10141c);
+  background:
+    repeating-linear-gradient(180deg, transparent 0 38px, rgba(255, 255, 255, .09) 38px 40px, rgba(0, 0, 0, .35) 40px 42px),
+    linear-gradient(180deg, #232a37 0%, #171c26 55%, #0e1119 100%);
 }
-.canopy-pillar.l { left: 0; }
-.canopy-pillar.l::before { clip-path: polygon(0 0, 100% 0, 16% 100%, 0 100%); }
-.canopy-pillar.r { right: 0; }
-.canopy-pillar.r::before { clip-path: polygon(0 0, 100% 0, 100% 100%, 84% 100%); }
+/* One greeble per wall: a small vent of slats, mid-height, well inside the wedge. */
+.canopy-wall::after {
+  content: ""; position: absolute; top: 34%; width: 26px; height: 38px;
+  background: repeating-linear-gradient(180deg, #05070b 0 4px, #2a303d 4px 6px);
+  border: 1px solid var(--hull-edge); box-shadow: 0 1px 0 rgba(255, 255, 255, .06);
+}
+.canopy-wall.l { left: 0; }
+.canopy-wall.l::before { clip-path: polygon(0 0, 100% 0, 18% 100%, 0 100%); }
+.canopy-wall.l::after { left: 12%; }
+.canopy-wall.r { right: 0; }
+.canopy-wall.r::before { clip-path: polygon(0 0, 100% 0, 100% 100%, 82% 100%); }
+.canopy-wall.r::after { right: 12%; }
 
-/* The message, projected on the glass. Scrim darkens only the middle so stars stay lively
-   at the edges but the copy is always readable. */
+/* The message, projected on the glass; scrim darkens only the middle. */
 .cockpit-hud {
-  position: absolute; inset: 30px 8% 0; z-index: 3; display: flex; flex-direction: column;
+  position: absolute; inset: 34px 15% 0; z-index: 3; display: flex; flex-direction: column;
   align-items: center; justify-content: center; text-align: center; gap: 6px; padding: 18px;
   background: radial-gradient(ellipse 62% 74% at 50% 50%, rgba(4, 6, 10, .93) 0%,
     rgba(4, 6, 10, .74) 48%, rgba(4, 6, 10, 0) 100%);
@@ -1806,10 +1853,28 @@ body.cockpit-page .wrap { max-width: none; padding: 0; }
   box-shadow: 0 -1px 0 var(--hull-hi), 0 -8px 20px rgba(0, 0, 0, .55);
   padding: 0 0 max(16px, env(safe-area-inset-bottom));
 }
+/* The cowl: the console's hood rises over the bottom of the glass, so the dash visibly sits
+   UNDER the canopy instead of after it — this is what fuses the two zones into one hull. */
+.dash::before {
+  content: ""; position: absolute; left: 0; right: 0; top: -58px; height: 59px;
+  background: linear-gradient(180deg, #343c4c 0%, #2a3140 34%, #1d2330 100%);
+  clip-path: polygon(0 100%, 0 58%, 14% 44%, 36% 4%, 64% 4%, 86% 44%, 100% 58%, 100% 100%);
+  filter: drop-shadow(0 -2px 0 rgba(255, 255, 255, .13)) drop-shadow(0 -8px 12px rgba(0, 0, 0, .6));
+}
+/* The cowl's dark underside: the shadow it casts back onto itself, so it reads as a ledge. */
+.dash::after {
+  content: ""; position: absolute; left: 0; right: 0; top: -6px; height: 10px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .45), transparent);
+  clip-path: polygon(0 100%, 0 30%, 14% 20%, 36% 0, 64% 0, 86% 20%, 100% 30%, 100% 100%);
+}
 /* Instrument screens: small CRTs, accent-glow on near-black. Real values only. */
 .dash-screens {
-  display: flex; flex-wrap: wrap; justify-content: center; align-items: stretch;
-  gap: 10px; padding: 14px 18px 6px;
+  position: relative;
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+  gap: 10px; margin: 14px 18px 0; padding: 9px 12px;
+  background: linear-gradient(180deg, #1c2230, #141822);
+  border: 1px solid var(--hull-edge);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), inset 0 0 18px rgba(0, 0, 0, .3);
 }
 .dscr {
   display: flex; flex-direction: column; gap: 3px; min-width: 0; padding: 7px 12px 8px;
@@ -1831,18 +1896,54 @@ body.cockpit-page .wrap { max-width: none; padding: 0; }
   max-width: 34ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
+/* Everything below the telemetry sits on ONE console plate — a single physical surface,
+   not floating boxes on a background. */
 .dash-main {
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(auto, 640px) minmax(0, 1fr);
-  align-items: stretch; gap: 14px; padding: 8px 18px 4px;
+  align-items: stretch; gap: 14px; margin: -1px 18px 4px; padding: 12px;
+  background: linear-gradient(180deg, #1a1f2a, #12151d);
+  border: 1px solid var(--hull-edge);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), inset 0 0 24px rgba(0, 0, 0, .35);
 }
-/* Side clusters: angled panels of lights and meters — set dressing, deliberately unlabelled. */
-.dash-cluster {
-  display: flex; flex-direction: column; gap: 14px; align-items: center; justify-content: center;
+/* Slatted greebles flanking the telemetry row: flexed wide so the sub-panel is dense from
+   edge to edge instead of huddling in the centre. */
+.scr-flank { flex: 1 1 0; display: flex; gap: 8px; align-items: center; justify-content: space-evenly; padding: 0 6px; min-width: 0; overflow: hidden; }
+.scr-flank i {
+  width: 8px; height: 28px; flex: none;
+  background: repeating-linear-gradient(180deg, #05070b 0 3px, #2a303d 3px 5px);
+  border: 1px solid var(--hull-edge);
+}
+/* The narrow-screen instrument strip lives between telemetry and keys; desktop has the
+   full side pods instead. */
+.m-inst { display: none; }
+/* Side pods: angled panels of living instruments and switch gear — set dressing. */
+.dash-pod {
+  display: flex; flex-direction: column; gap: 13px; align-items: center; justify-content: center;
   padding: 20px 14px 12px; background: linear-gradient(180deg, #1e2430, #141822);
   border: 1px solid var(--hull-edge); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
 }
-.dash-cluster.l { clip-path: polygon(0 0, 100% 14px, 100% 100%, 0 100%); }
-.dash-cluster.r { clip-path: polygon(0 14px, 100% 0, 100% 100%, 0 100%); }
+.dash-pod.l { clip-path: polygon(0 0, 100% 14px, 100% 100%, 0 100%); }
+.dash-pod.r { clip-path: polygon(0 14px, 100% 0, 100% 100%, 0 100%); }
+/* Green-phosphor instrument CRTs (radar sweep / signal trace), pixel-upscaled like the rest. */
+.pod-scope {
+  width: 108px; height: 108px; display: block;
+  image-rendering: pixelated; image-rendering: crisp-edges;
+  background: #040a06; border: 1px solid #000;
+  box-shadow: inset 0 0 14px rgba(74, 222, 128, .14), 0 1px 0 var(--hull-hi);
+}
+.pod-scope.wide { width: 150px; height: 62px; }
+/* Toggle-switch bank: little levers, some thrown (lit in the accent). */
+.sw-bank { display: flex; gap: 9px; }
+.sw { position: relative; width: 11px; height: 24px; background: #0a0d13; border: 1px solid #000; }
+.sw::after {
+  content: ""; position: absolute; left: 2px; right: 2px; top: 2px; height: 9px;
+  background: linear-gradient(180deg, #5a6274, #39414f);
+}
+.sw.dn::after {
+  top: auto; bottom: 2px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 85%, white), var(--accent));
+  box-shadow: 0 0 5px color-mix(in srgb, var(--accent) 55%, transparent);
+}
 .led-grid { display: grid; grid-template-columns: repeat(7, 9px); gap: 7px; }
 .led-grid i { width: 9px; height: 9px; background: #232936; border: 1px solid #000; }
 .led-grid i:nth-child(3n)  { background: color-mix(in srgb, var(--accent) 75%, #0a0a0a); box-shadow: 0 0 5px color-mix(in srgb, var(--accent) 60%, transparent); }
@@ -1875,20 +1976,22 @@ body.cockpit-page .wrap { max-width: none; padding: 0; }
 .console-keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .ckey {
   display: block; text-align: center; padding: 14px 12px 15px; cursor: pointer;
-  border-radius: 6px; border: 1px solid #05070b; border-top-color: #39414f;
-  background: linear-gradient(180deg, #2a3140 0%, #1c212c 45%, #141821 100%);
+  border-radius: 6px; border: 1px solid #05070b; border-top-color: #5a6478;
+  background: linear-gradient(180deg, #343d4f 0%, #1e2430 48%, #151a23 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .12), inset 0 -2px 3px rgba(0, 0, 0, .45),
-    0 3px 0 #05070b, 0 5px 7px rgba(0, 0, 0, .55);
+    inset 0 2px 0 rgba(255, 255, 255, .2), inset 0 -3px 4px rgba(0, 0, 0, .5),
+    0 5px 0 #04060a, 0 8px 12px rgba(0, 0, 0, .6);
   color: var(--fg-dim); font: inherit;
   transition: border-color .12s, color .12s;
 }
 .ckey:hover { border-top-color: var(--accent); color: var(--fg); }
+.ckey:hover .ckey-lbl { text-shadow: 0 0 7px color-mix(in srgb, var(--accent) 45%, transparent); }
+/* Pressing a key travels it the full height of its own shadow. */
 .ckey:active {
-  transform: translateY(3px);
+  transform: translateY(5px);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 2px 4px rgba(0, 0, 0, .5),
-    0 1px 0 #05070b;
+    inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 3px 5px rgba(0, 0, 0, .55),
+    0 0 0 #04060a, 0 1px 3px rgba(0, 0, 0, .5);
 }
 .ckey-glyph {
   display: flex; justify-content: center; color: var(--accent);
@@ -1912,29 +2015,58 @@ body.cockpit-page .wrap { max-width: none; padding: 0; }
 /* No R key on a touchscreen — the hint would be noise. */
 @media (pointer: coarse) { .cockpit-foot { display: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .led-grid i, .meter i { animation: none; }
+  .led-grid i, .meter i, .oh-pod i.on { animation: none; }
 }
 
-/* Phones: the canopy gives some height back to the console, pillars slim down, the side
-   clusters go (lights-for-lights'-sake shouldn't cost screen room), keys stack full-width. */
+/* Wide screens: the pod light cones need more presence against the pure-black field than
+   the tablet's smaller glass does. */
+@media (min-width: 901px) {
+  .oh-pod::after {
+    background: radial-gradient(ellipse 62% 100% at 50% 0,
+      color-mix(in srgb, var(--accent) 30%, transparent),
+      color-mix(in srgb, var(--accent) 10%, transparent) 48%, transparent 74%);
+  }
+}
+
+/* Phones: the side pods go (set-dressing shouldn't cost screen room), the overhead pods and
+   walls slim down, the build screen yields so telemetry stays one row, keys stack. */
 @media (max-width: 900px) {
-  .dash-main { grid-template-columns: 1fr; padding: 8px 14px 4px; }
-  .dash-cluster { display: none; }
+  .dash-main { grid-template-columns: 1fr; margin: 8px 14px 4px; padding: 10px; }
+  .dash-pod { display: none; }
+  .scr-flank { display: none; }
+  .m-inst {
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between;
+    margin: 6px 14px 0; padding: 9px 12px;
+    background: linear-gradient(180deg, #1e2430, #161a24);
+    border: 1px solid var(--hull-edge); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
+  }
+  .m-inst .led-grid { grid-template-columns: repeat(7, 8px); gap: 6px; }
+  .m-inst .led-grid i { width: 8px; height: 8px; }
+  .m-inst .meter { height: 30px; }
+  .m-inst .sw { height: 20px; }
 }
 @media (max-width: 640px) {
   .canopy { min-height: 250px; }
-  .canopy-ceiling { height: 22px; }
-  .canopy-pillar { width: 10%; }
+  .overhead { height: 24px; }
+  .oh-pod { gap: 4px; padding: 4px 6px; }
+  .oh-pod i { width: 6px; height: 6px; }
+  .oh-pod.l { left: 8%; } .oh-pod.r { right: 8%; }
+  .oh-pod::after { height: 56px; }
+  .canopy-wall { width: 9%; }
+  .canopy-wall::after { display: none; }
   .cockpit-hud {
     inset: 22px 4% 0;
     background: radial-gradient(ellipse 88% 76% at 50% 50%, rgba(4, 6, 10, .94) 0%,
       rgba(4, 6, 10, .86) 55%, rgba(4, 6, 10, .2) 100%);
   }
   .cockpit-code { font-size: 42px; letter-spacing: 3px; }
+  .dash::before { top: -30px; height: 31px; }
+  .dash::after { top: -4px; height: 7px; }
+  .oh-pod::after { height: 90px; }
   .cockpit-lede { font-size: 18px; }
   .cockpit-sub { font-size: 12.5px; }
-  .dash-screens { gap: 6px; padding: 12px 12px 4px; }
-  .dscr { padding: 6px 10px 7px; }
+  .dash-screens { gap: 6px; margin: 12px 10px 0; padding: 7px 8px; }
+  .dscr { padding: 6px 9px 7px; }
   .dscr.wide .dscr-v { max-width: 24ch; }
   /* Three screens fit one row; the build id is the first thing to give. */
   .dscr.build { display: none; }

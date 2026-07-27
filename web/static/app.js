@@ -534,9 +534,63 @@ document.addEventListener("alpine:init", () => {
         ctx.globalAlpha = 1;
       };
 
-      if (still) { draw(false); return; }
+      // Dashboard instruments (desktop only — the pods are display:none on phones): a radar
+      // sweep and a scrolling signal trace on green phosphor. Decorative and unlabelled by
+      // design; they share the starfield's frame loop and reduced-motion behaviour.
+      const radar = this.$refs.radar, wave = this.$refs.wave;
+      const rc = radar && radar.getContext("2d"), wc = wave && wave.getContext("2d");
+      const PHOS = "#4ade80";
+      const blips = [[0.63, 0.3], [0.3, 0.6], [0.72, 0.74]];
+      let t = 0;
+      if (wc) {   // prefill the whole trace so the instrument is never an empty screen
+        wc.fillStyle = "#040a06"; wc.fillRect(0, 0, wave.width, wave.height);
+        wc.fillStyle = PHOS;
+        for (let x = 0; x < wave.width; x++) {
+          wc.fillRect(x, Math.round(wave.height / 2 + Math.sin((x - wave.width) * 0.11) * wave.height * 0.27), 1, 2);
+        }
+      }
+      const decor = (step) => {
+        if (step) t += 1;
+        if (rc) {
+          const W = radar.width, H = radar.height, cx = W / 2, cy = H / 2;
+          rc.fillStyle = step ? "rgba(4, 10, 6, .14)" : "#040a06";   // phosphor persistence
+          rc.fillRect(0, 0, W, H);
+          rc.strokeStyle = "rgba(74, 222, 128, .3)";
+          rc.beginPath(); rc.arc(cx, cy, W * 0.42, 0, 6.284); rc.stroke();
+          rc.beginPath(); rc.arc(cx, cy, W * 0.22, 0, 6.284); rc.stroke();
+          const a = t * 0.045;
+          rc.strokeStyle = PHOS;
+          rc.beginPath(); rc.moveTo(cx, cy);
+          rc.lineTo(cx + Math.cos(a) * W * 0.42, cy + Math.sin(a) * W * 0.42); rc.stroke();
+          for (const [bx, by] of blips) {   // contacts light as the sweep passes, then fade
+            const ang = Math.atan2(by * H - cy, bx * W - cx);
+            let d = (a - ang) % 6.283; if (d < 0) d += 6.283;
+            const glow = Math.max(0, 1 - d / 1.4);
+            if (glow > 0.03) {
+              rc.globalAlpha = glow; rc.fillStyle = PHOS;
+              rc.fillRect(Math.round(bx * W), Math.round(by * H), 2, 2);
+              rc.globalAlpha = 1;
+            }
+          }
+        }
+        if (wc) {
+          const W = wave.width, H = wave.height;
+          if (step) {   // scroll left one column, plot the next sample at the right edge
+            wc.drawImage(wave, -1, 0);
+            wc.fillStyle = "#040a06"; wc.fillRect(W - 1, 0, 1, H);
+            const y = H / 2 + Math.sin(t * 0.11) * H * 0.27 + (Math.random() - 0.5) * 3;
+            wc.fillStyle = PHOS; wc.fillRect(W - 1, Math.round(y), 1, 2);
+          } else {
+            wc.fillStyle = PHOS;
+            for (let x = 0; x < W; x++) wc.fillRect(x, Math.round(H / 2 + Math.sin(x * 0.11) * H * 0.27), 1, 2);
+          }
+        }
+      };
+
+      if (still) { draw(false); decor(false); return; }
       const loop = () => {
         draw(true);
+        decor(true);
         this._raf = requestAnimationFrame(loop);
       };
       loop();
