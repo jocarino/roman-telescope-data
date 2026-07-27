@@ -536,30 +536,57 @@ document.addEventListener("alpine:init", () => {
       return [r, m].filter(Boolean).join(" · ") || "n/a";
     },
     _disc(p) { return [p.disc, p.year].filter(Boolean).join(" · ") || "n/a"; },
+    // Detection method with its glossary mark (the same mapping the planet page uses).
+    _discMarked(p) {
+      const term = {
+        "Radial Velocity": "radial-velocity", Transit: "transit", Imaging: "direct-imaging",
+        Microlensing: "microlensing",
+        "Transit Timing Variations": "transit-timing-variations",
+      }[p.disc];
+      const marked = term ? this._gloss(term, p.disc) : p.disc;
+      return [marked, p.year].filter(Boolean).join(" · ") || "n/a";
+    },
     _typeLabel(t) { return (this.typeLabelsC && this.typeLabelsC[t]) || t || "n/a"; },
     typeLabelsC: {
       rocky: "Rocky", "super-earth": "Super-Earth", neptune: "Neptune-like",
       "gas-giant": "Gas giant", "hot-jupiter": "Hot Jupiter", unknown: "Unknown",
     },
+    // Planet-type value with its glossary mark, for the comparison table (rendered x-html).
+    _typeMarked(t) {
+      const term = {
+        rocky: "rocky-planet", "super-earth": "super-earth", neptune: "neptune-like",
+        "gas-giant": "gas-giant", "hot-jupiter": "hot-jupiter",
+      }[t];
+      const label = this._typeLabel(t);
+      return term && window.glossHTML ? window.glossHTML(term, label) : label;
+    },
+    // Jargon in a comparison row label. Falls back to the bare word if glossary.js is absent.
+    _gloss(id, text) { return window.glossHTML ? window.glossHTML(id, text) : text; },
     // The comparison table, grouped. `diff` flags rows where the two differ, for highlighting.
     groups() {
       const A = this.a(), B = this.b();
       if (!A || !B) return [];
       const row = (label, fa, fb) => ({ label, a: fa, b: fb });
+      // Labels and the type values carry glossary marks, so the same words explain themselves
+      // here exactly as they do on a planet page. Rendered with x-html (our own strings only).
       return [
         { title: "What drives the colour", rows: [
           row("Colour", A.hex, B.hex),
-          row("Equilibrium temp", this._n(A.temp, " K", 0), this._n(B.temp, " K", 0)),
-          row("Host star", this._star(A), this._star(B)),
-          row("Atmosphere", A.cloud, B.cloud),
-          row("Metallicity", this._n(A.metal, "× solar", 1), this._n(B.metal, "× solar", 1)),
+          row(this._gloss("equilibrium-temperature", "Equilibrium temp"),
+            this._n(A.temp, " K", 0), this._n(B.temp, " K", 0)),
+          row(this._gloss("host-star", "Host star"), this._star(A), this._star(B)),
+          row(this._gloss("cloud-deck", "Atmosphere"), A.cloud, B.cloud),
+          row(this._gloss("metallicity", "Metallicity"),
+            this._n(A.metal, "× solar", 1), this._n(B.metal, "× solar", 1)),
         ] },
         { title: "The planets", rows: [
-          row("Type", this._typeLabel(A.ptype), this._typeLabel(B.ptype)),
+          row("Type", this._typeMarked(A.ptype), this._typeMarked(B.ptype)),
           row("Size", this._size(A), this._size(B)),
-          row("Distance from Earth", this._n(A.dist_ly, " ly"), this._n(B.dist_ly, " ly")),
-          row("Orbit (semi-major axis)", this._n(A.sma, " AU", 2), this._n(B.sma, " AU", 2)),
-          row("Discovery", this._disc(A), this._disc(B)),
+          row(this._gloss("light-year", "Distance from Earth"),
+            this._n(A.dist_ly, " ly"), this._n(B.dist_ly, " ly")),
+          row(this._gloss("semi-major-axis", "Orbit (semi-major axis)"),
+            this._n(A.sma, " AU", 2), this._n(B.sma, " AU", 2)),
+          row("Discovery", this._discMarked(A), this._discMarked(B)),
         ] },
       ];
     },
@@ -572,7 +599,7 @@ document.addEventListener("alpine:init", () => {
       const cooler = hotter === A ? B : A;
       const parts = [];
       if ((hotter.temp || 0) - (cooler.temp || 0) > 300) {
-        parts.push(`<strong>${hotter.name}</strong> is much hotter (${Math.round(hotter.temp)} K vs ${Math.round(cooler.temp)} K), so sodium absorption drives it bluer and darker, while <strong>${cooler.name}</strong> is cool enough for brighter clouds`);
+        parts.push(`<strong>${hotter.name}</strong> is much hotter (${Math.round(hotter.temp)} K vs ${Math.round(cooler.temp)} K), so ${this._gloss("sodium-absorption", "sodium absorption")} drives it bluer and darker, while <strong>${cooler.name}</strong> is cool enough for brighter ${this._gloss("cloud-deck", "clouds")}`);
       }
       if (Math.abs((A.starTeff || 0) - (B.starTeff || 0)) > 1200) {
         const redder = (A.starTeff || 9999) <= (B.starTeff || 9999) ? A : B;

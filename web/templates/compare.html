@@ -76,11 +76,13 @@
     <template x-for="grp in groups()" :key="grp.title">
       <div class="cmp-group">
         <div class="cmp-group-head" x-text="grp.title"></div>
+        {# x-html, not x-text: labels and a few values carry the jargon mark (built by
+           glossHTML from our own strings — nothing here comes from user input). #}
         <template x-for="row in grp.rows" :key="row.label">
           <div class="cmp-row">
-            <div class="cmp-va" x-text="row.a"></div>
-            <div class="cmp-mid" x-text="row.label"></div>
-            <div class="cmp-vb" x-text="row.b"></div>
+            <div class="cmp-va" x-html="row.a"></div>
+            <div class="cmp-mid" x-html="row.label"></div>
+            <div class="cmp-vb" x-html="row.b"></div>
           </div>
         </template>
       </div>

@@ -992,6 +992,16 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
   background-image: linear-gradient(90deg, var(--accent) 0 100%);
 }
 .gloss:hover::after, .gloss:focus-visible::after, .gloss.on::after { opacity: 1; }
+/* Chips that already have a border and a fill of their own (the measured/computed/assumed
+   origin tags, the provenance badges) opt in with data-term + .gloss-chip: they keep the pixel
+   marker so you can tell there's more to read, but skip the underline, which would only fight
+   the chip's own box. */
+.gloss-chip { cursor: help; }
+.gloss-chip::after {
+  content: ""; display: inline-block; width: 3px; height: 3px; margin-left: 4px;
+  vertical-align: .45em; background: currentColor; opacity: .6;
+}
+.gloss-chip:hover::after, .gloss-chip.on::after { opacity: 1; }
 /* Keyboard focus still needs a visible ring where the accent block alone could be missed. */
 .gloss:focus-visible { box-shadow: 0 0 0 1px var(--accent); }
 

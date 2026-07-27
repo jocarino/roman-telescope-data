@@ -42,6 +42,23 @@
       "seeAlso": ["albedo-spectrum", "neptune-like"]
     },
     {
+      "id": "sodium-absorption",
+      "term": "Sodium absorption",
+      "category": "light",
+      "short": "On the hottest planets, sodium vapour in the atmosphere swallows yellow light near 589 nm — one reason cloud-free hot Jupiters come out dark and blue-tinted.",
+      "long": "Above roughly 1,000 K, sodium and potassium stay as vapour in a giant planet's atmosphere instead of condensing out. Sodium absorbs very strongly in a pair of lines in the yellow (the same 589 nm doublet that makes street lamps orange), and pressure-broadens into a wide trough that eats much of the middle of the visible spectrum. Combined with the absence of reflective clouds, that is why the hottest Jupiters are among the darkest objects in this catalog.",
+      "aliases": ["alkali absorption"],
+      "seeAlso": ["hot-jupiter", "cloud-deck", "geometric-albedo"]
+    },
+    {
+      "id": "ice-giant",
+      "term": "Ice giant",
+      "category": "planets",
+      "short": "A giant planet made largely of heavier compounds — water, ammonia, methane — rather than mostly hydrogen and helium. Uranus and Neptune are the local pair.",
+      "long": "Smaller and denser than the gas giants, ice giants hold a deep hot fluid mantle of water, ammonia and methane under a hydrogen-helium atmosphere. ('Ice' here means the compounds, not the temperature.) Their methane-rich upper atmospheres absorb red light strongly, which gives Uranus and Neptune — and their exoplanet counterparts — their blue-green colour.",
+      "seeAlso": ["neptune-like", "gas-giant", "methane-absorption"]
+    },
+    {
       "id": "cloud-deck",
       "term": "Cloud deck",
       "category": "light",

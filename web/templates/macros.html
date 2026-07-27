@@ -1,5 +1,15 @@
 {# Reusable UI pieces. #}
 
+{# Detection method (as the Archive spells it) -> its glossary term. Used by both places a
+   method is shown: the title badge and the planet data card. #}
+{% set DISC_TERMS = {
+  'Radial Velocity': 'radial-velocity',
+  'Transit': 'transit',
+  'Imaging': 'direct-imaging',
+  'Microlensing': 'microlensing',
+  'Transit Timing Variations': 'transit-timing-variations'
+} %}
+
 {# The one back-to-gallery control, shared by every page. Place it as the FIRST child of the
    page's title row (.site-head / .detail-head) so it sits to the LEFT of the title. #}
 {% macro back_link() -%}
@@ -20,6 +30,8 @@
 </svg>
 {%- endmacro %}
 
+{# The honesty badge. It is also jargon in its own right, so it carries data-term: hovering it
+   gives the same definition as the word anywhere else (see the g() macro below). #}
 {% macro provenance_badge(rec) -%}
   {%- set labels = {
     'model': 'Modelled',
@@ -29,12 +41,23 @@
     'measured-hwo': 'HWO: measured',
     'measured-albedo': 'Spectrum: measured'
   } -%}
-  <span class="badge {{ rec.provenance }}">{{ labels.get(rec.provenance, rec.provenance) }}</span>
+  {%- set terms = {
+    'model': 'modelled',
+    'simulated-cgi': 'simulated',
+    'measured-cgi': 'measured',
+    'model-microlensing': 'modelled',
+    'measured-hwo': 'measured',
+    'measured-albedo': 'measured-spectrum'
+  } -%}
+  <span class="badge {{ rec.provenance }}{{ ' gloss-chip' if terms.get(rec.provenance) }}"
+    {%- if terms.get(rec.provenance) %} data-term="{{ terms[rec.provenance] }}"{% endif %}>{{ labels.get(rec.provenance, rec.provenance) }}</span>
 {%- endmacro %}
 
-{# Per-value origin tag: measured (real Archive datum) / computed (derived) / assumed (archetype). #}
+{# Per-value origin tag: measured (real Archive datum) / computed (derived) / assumed (archetype).
+   All three are glossary terms, so the chip hands off to the shared popover rather than
+   carrying its own title text that could drift from the glossary. #}
 {% macro src_tag(src) -%}
-  {%- if src %}<span class="src src-{{ src }}" title="{{ {'measured': 'Real measurement from the NASA Exoplanet Archive', 'computed': 'Derived from the star + orbit', 'assumed': 'Archetype assumption — no data for this planet'}[src] }}">{{ src }}</span>{% endif -%}
+  {%- if src %}<span class="src src-{{ src }} gloss-chip" data-term="{{ src }}">{{ src }}</span>{% endif -%}
 {%- endmacro %}
 
 {# Jargon mark. Wraps a term that has an entry in data/glossary.json: the pixel-dotted rule
@@ -48,7 +71,9 @@
 <button type="button" class="gloss" data-term="{{ id }}" aria-expanded="false">{{ text if text else id }}</button>
 {%- endmacro %}
 
-{# A small terminal [i] beside a label that reveals a plain-English tooltip (hover or tap). #}
+{# A small terminal [i] beside a label that reveals a plain-English tooltip (hover or tap).
+   Every jargon call site moved to g() above, so this has no users on this branch — keep it:
+   it is the control-level tooltip primitive, and in-flight branches still call it. #}
 {% macro jinfo(expl) -%}
 <span class="tip" x-data="{ t: false }" @click.outside="t = false"><button class="info-btn xs"
   @click="t = !t" :class="t ? 'on' : ''" aria-label="What does this mean?">i</button><span
@@ -154,10 +179,12 @@
     </div>
     <div class="detail-title">
       <h1>{{ rec.name }}</h1>
+      {# The star line is three pieces of jargon in a row for a newcomer: its class (K2 V) and
+         its surface temperature. Both are marked; the name itself is just a name. #}
       <div class="host"><span class="lamp-dot" style="background: {{ ctx.star.hex }}"
           title="{{ rec.host_star.name }}'s own colour — the lamp lighting this planet (details below)"></span>{{ rec.host_star.name }}
-        {%- if rec.host_star.spectral_type %} · {{ rec.host_star.spectral_type }}{% endif -%}
-        {%- if rec.host_star.teff_k %} · {{ rec.host_star.teff_k|round|int }} K{% endif -%}
+        {%- if rec.host_star.spectral_type %} · {{ g('spectral-type', rec.host_star.spectral_type) }}{% endif -%}
+        {%- if rec.host_star.teff_k %} · {{ rec.host_star.teff_k|round|int }} {{ g('kelvin', 'K') }}{% endif -%}
       </div>
       {# The description here tracks what the hero is showing: the modelled caption, or,
          when the Source knob is on Telescope, the real image's details + credit, in full.
@@ -169,7 +196,8 @@
           :aria-expanded="descOpen">more <span x-text="descOpen ? '▴' : '▾'"></span></button>
         <div class="desc-body" :class="descOpen ? 'open' : ''">
           <div class="title-badges">{{ provenance_badge(rec) }}
-            <span class="badge">{{ rec.discovery.method }}</span></div>
+            <span class="badge{{ ' gloss-chip' if DISC_TERMS.get(rec.discovery.method) }}"
+              {%- if DISC_TERMS.get(rec.discovery.method) %} data-term="{{ DISC_TERMS[rec.discovery.method] }}"{% endif %}>{{ rec.discovery.method }}</span></div>
           <p class="viewnote" x-show="heroSource !== 'telescope'"
             x-text="view === 'full' ? fullCap : romanCap"></p>
           {% if rec.real_observations %}
@@ -606,13 +634,12 @@
         <div class="dossier-sub">Planet</div>
         {%- set src = rec.params.sources -%}
         <table class="params">
-          <tr><td>{{ g('equilibrium-temperature', 'Equilibrium temp') }}</td><td>{{ (rec.params.equilibrium_temp_k|round|int ~ ' K') if rec.params.equilibrium_temp_k else 'n/a' }}{% if src and rec.params.equilibrium_temp_k %} {{ src_tag(src.equilibrium_temp_k) }}{% endif %}</td></tr>
+          <tr><td>{{ g('equilibrium-temperature', 'Equilibrium temp') }}</td><td>{{ (rec.params.equilibrium_temp_k|round|int ~ ' ') if rec.params.equilibrium_temp_k else 'n/a' }}{% if rec.params.equilibrium_temp_k %}{{ g('kelvin', 'K') }}{% endif %}{% if src and rec.params.equilibrium_temp_k %} {{ src_tag(src.equilibrium_temp_k) }}{% endif %}</td></tr>
           <tr><td>Radius</td><td>{{ (rec.params.radius_r_earth|round(2) ~ ' ') if rec.params.radius_r_earth else 'n/a' }}{% if rec.params.radius_r_earth %}{{ g('earth-radius', 'R⊕') }}{% endif %}{% if src and rec.params.radius_r_earth %} {{ src_tag(src.radius_r_earth) }}{% endif %}</td></tr>
           <tr><td>Mass</td><td>{{ (rec.params.mass_m_earth|round(1) ~ ' ') if rec.params.mass_m_earth else 'n/a' }}{% if rec.params.mass_m_earth %}{{ g('earth-mass', 'M⊕') }}{% endif %}{% if src and rec.params.mass_m_earth %} {{ src_tag(src.mass_m_earth) }}{% endif %}</td></tr>
           <tr><td>{{ g('semi-major-axis', 'Semi-major axis') }}</td><td>{{ (rec.params.semi_major_axis_au|round(3) ~ ' ') if rec.params.semi_major_axis_au else 'n/a' }}{% if rec.params.semi_major_axis_au %}{{ g('astronomical-unit', 'AU') }}{% endif %}{% if src and rec.params.semi_major_axis_au %} {{ src_tag(src.semi_major_axis_au) }}{% endif %}</td></tr>
           <tr><td>Distance from Earth</td><td>{{ ((rec.params.distance_pc * 3.26156)|round(1) ~ ' ') if rec.params.distance_pc else 'n/a' }}{% if rec.params.distance_pc %}{{ g('light-year', 'ly') }}{% endif %}{% if src and rec.params.distance_pc %} {{ src_tag(src.distance_pc) }}{% endif %}</td></tr>
-          {%- set disc_terms = {'Radial Velocity': 'radial-velocity', 'Transit': 'transit', 'Imaging': 'direct-imaging', 'Microlensing': 'microlensing', 'Transit Timing Variations': 'transit-timing-variations'} -%}
-          <tr><td>Discovery</td><td>{% if disc_terms.get(rec.discovery.method) %}{{ g(disc_terms[rec.discovery.method], rec.discovery.method) }}{% else %}{{ rec.discovery.method }}{% endif %}{{ (' · ' ~ rec.discovery.year) if rec.discovery.year else '' }}</td></tr>
+          <tr><td>Discovery</td><td>{% if DISC_TERMS.get(rec.discovery.method) %}{{ g(DISC_TERMS[rec.discovery.method], rec.discovery.method) }}{% else %}{{ rec.discovery.method }}{% endif %}{{ (' · ' ~ rec.discovery.year) if rec.discovery.year else '' }}</td></tr>
         </table>
       </div>
     </div>
@@ -696,10 +723,11 @@
         Every faint dot is another star in this catalog with a modelled planet.
         <br><br>
         Like any flat map of a sphere, it distorts: the top and bottom edges are the
-        celestial <strong>poles</strong>, each a single point smeared across the full width
-        (the brighter mid-line is the celestial equator). The dense <strong>white
-        patch</strong> near 19h, +45° is the Kepler field — one small region the Kepler
-        telescope stared at for four years, piling up hundreds of discoveries. The dots map
+        {{ g('celestial-equator', 'celestial poles') }}, each a single point smeared across
+        the full width (the brighter mid-line is the celestial equator). The dense
+        <strong>white patch</strong> near 19h, +45° is the {{ g('kepler-field', 'Kepler field') }}
+        — one small region the Kepler telescope stared at for four years, piling up hundreds
+        of discoveries. The dots map
         where we <em>looked</em>, not where planets are.
         <br><br>
         What you could ever see from your backyard is the <strong>star</strong> — no
