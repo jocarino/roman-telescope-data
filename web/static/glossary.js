@@ -104,12 +104,18 @@
     document.addEventListener("mouseleave", function () { if (!pinned) hide(); });
   }
 
-  // Tap (and click) pins the definition open; tapping the same term again closes it. This is
-  // the only path on touch, where there is no hover to rely on.
+  // Tap pins the definition open; tapping the same term again closes it. This is the only
+  // path on touch, where there is no hover to rely on.
   document.addEventListener("click", function (ev) {
     var t = target(ev);
     if (!t) { if (cur) hide(); return; }
     ev.preventDefault();
+    // Where the pointer hovers, hover already governs open AND close, and the popover is
+    // mouse-enterable, so a click must not pin: pinning strands the box open after the
+    // cursor leaves, and toggling it shut leaves the term dead under a cursor that hasn't
+    // moved (no fresh mouseover fires until you leave and come back). On hover devices a
+    // click just re-shows what hover was already showing.
+    if (canHover) { show(t); return; }
     if (cur === t && pinned) { hide(); return; }
     show(t);
     pinned = true;

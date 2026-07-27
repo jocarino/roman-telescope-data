@@ -1280,12 +1280,6 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
   display: inline-block; width: 11px; height: 11px; border: 1px solid #000;
   vertical-align: -1px; margin: 0 4px 0 2px;
 }
-/* On-glass tag beside the CH1 hex while the Sun-lit variant is showing. */
-.hud-sun {
-  font-family: var(--pixel); font-size: 6.5px; letter-spacing: .4px; padding: 1px 3px;
-  border: 1px solid currentColor; margin-left: 2px;
-}
-
 /* ---- RUN LED: slow pulse for life, quick white flash on view change ---- */
 .led.on { animation: ledpulse 2.4s ease-in-out infinite; }
 @keyframes ledpulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
