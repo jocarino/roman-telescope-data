@@ -875,6 +875,18 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 .legend .k.true { border-color: var(--fg); }
 .legend .k.roman { border-color: var(--accent); border-top-style: dashed; }
 
+/* The empty grid's escape hatch. Filters persist between visits, so this is the one control
+   that always gets you back to the whole catalogue. Standard badge chrome: square, hard
+   offset shadow, accent text, tactile on press. */
+.empty-clear {
+  margin-left: 10px; padding: 6px 10px; cursor: pointer;
+  background: var(--bg-3); border: 1px solid var(--accent); color: var(--accent);
+  font-family: var(--mono); font-size: 11px; letter-spacing: .4px; text-transform: uppercase;
+  box-shadow: 2px 2px 0 var(--line);
+}
+.empty-clear:hover { background: var(--accent); color: #05121f; }
+.empty-clear:active { transform: translate(1px, 1px); box-shadow: none; }
+
 .foot { margin-top: 40px; color: var(--fg-faint); font-size: 12px; }
 /* ---- Copy confirmation toast ----
    Fixed and out of the flow on purpose: the confirmation used to be inline text in the

@@ -210,8 +210,66 @@ document.addEventListener("alpine:init", () => {
     toggleFidelity() { this.setFidelity(this.fidelity === "classic" ? "stylised" : "classic"); },
     // Paint the inlined boot slice immediately, fetch the full index in the background, and
     // honour /?near= and /?family= deep links.
+    // ---- Filter permanence ----
+    // Where you are in a 5,764-planet catalogue is worth keeping: open a planet, come back
+    // (browser Back, or ALL PLANETS, which is a plain link to "/") and the grid is as you
+    // left it. Only non-default values are written, so clearing everything removes the entry
+    // rather than leaving a fossil behind.
+    _filterKeys: ["q", "prov", "ptype", "disc", "distBand", "hz", "family", "fic", "sort", "nearId"],
+    _filterDefaults: {
+      q: "", prov: "all", ptype: "all", disc: "all", distBand: "all", hz: "all",
+      family: null, fic: false, sort: "name", nearId: null,
+    },
+    filtersDirty() {
+      return this._filterKeys.some((k) => this[k] !== this._filterDefaults[k]);
+    },
+    clearFilters() {
+      this._filterKeys.forEach((k) => { this[k] = this._filterDefaults[k]; });
+    },
+    _saveFilters() {
+      const out = {};
+      this._filterKeys.forEach((k) => {
+        if (this[k] !== this._filterDefaults[k]) out[k] = this[k];
+      });
+      try {
+        if (Object.keys(out).length) localStorage.setItem("galleryFilters", JSON.stringify(out));
+        else localStorage.removeItem("galleryFilters");
+      } catch (e) { /* ignore */ }
+    },
+    // Restored BEFORE the query string is read, so an explicit deep link (?family=, ?near=,
+    // ?hz=, ?fiction=1) always beats whatever happened to be on screen last time.
+    _restoreFilters() {
+      let saved = null;
+      try { saved = JSON.parse(localStorage.getItem("galleryFilters") || "null"); }
+      catch (e) { return; }
+      if (!saved || typeof saved !== "object") return;
+      const ok = {
+        prov: (v) => v in this.provLabels,
+        ptype: (v) => v in this.typeLabels,
+        hz: (v) => v in this.hzLabels,
+        family: (v) => v in this.familyMeta,
+        sort: (v) => v in this.sortLabels,
+        distBand: (v) => this.distBands.some(([id]) => id === v),
+        fic: (v) => typeof v === "boolean",
+        q: (v) => typeof v === "string",
+        // disc holds raw discovery-method names from the index, which hasn't loaded yet, and
+        // nearId is a planet id — neither can be checked here. A stale one matches nothing,
+        // and the empty grid offers a reset.
+        disc: (v) => typeof v === "string",
+        nearId: (v) => typeof v === "string",
+      };
+      this._filterKeys.forEach((k) => {
+        if (k in saved && ok[k] && ok[k](saved[k])) this[k] = saved[k];
+      });
+    },
     async init() {
       const params = new URLSearchParams(location.search);
+      // A URL that names a view (?near=, ?family=, ?fiction=, ?hz=) is someone asking for
+      // that exact view — a shared or bookmarked link has to look the same for everybody, so
+      // it starts from the defaults. Only an unqualified visit to "/" restores what you last
+      // had on screen; that is the case the back button hits.
+      const linked = ["near", "family", "fiction", "hz"].some((k) => params.has(k));
+      if (!linked) this._restoreFilters();
       const near = params.get("near");
       if (near) this.nearId = near;
       const fam = params.get("family");
@@ -234,18 +292,19 @@ document.addEventListener("alpine:init", () => {
       window.addEventListener("scroll", onScroll, { passive: true });
       window.addEventListener("resize", onScroll, { passive: true });
 
-      // Any filter/sort change re-renders the grid from the top.
-      ["q", "prov", "ptype", "disc", "distBand", "hz", "family", "fic", "sort", "nearId"].forEach((k) =>
-        this.$watch(k, () => this._rerender()));
+      // Any filter/sort change re-renders the grid from the top, and is remembered.
+      this._filterKeys.forEach((k) =>
+        this.$watch(k, () => { this._saveFilters(); this._rerender(); }));
 
       window.__randomGo = () => this.randomGo();  // wire the R shortcut to this gallery
 
       // First paint: the build inlines the head of the default (name-sorted, unfiltered) view,
       // so the first screens of cards render without waiting for the multi-MB index. Deep links
       // change the ordering/filtering, so they wait for the real thing.
+      // ...but only for the plain view. Any filter or sort — from the URL or restored from
+      // last visit — means the boot slice is the wrong set of cards, so wait for the index.
       const boot = window.PLANETS_BOOT;
-      const deepLinked = this.nearId || this.family || this.fic || this.hz !== "all";
-      if (!deepLinked && boot && boot.length) this._adopt(boot, false);
+      if (!this.filtersDirty() && boot && boot.length) this._adopt(boot, false);
 
       try {
         const res = await fetch(this.indexUrl);
