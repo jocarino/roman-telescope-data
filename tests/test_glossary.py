@@ -16,8 +16,14 @@ from web.build import _glossary_runtime_js, _load_glossary
 
 _ROOT = Path(__file__).resolve().parents[1]
 _TEMPLATES = _ROOT / "web" / "templates"
-# g('term-id') / g("term-id", 'label') — the jargon macro's call sites.
+_STATIC = _ROOT / "web" / "static"
+# Three ways a term gets marked, all of which must name a real entry:
+#   g('term-id') / g("term-id", 'label')  — the Jinja macro
+#   data-term="term-id"                   — chips that keep their own styling (src/provenance)
+#   glossHTML("term-id", "label")         — the JS equivalent, for copy built in app.js/census.js
 _G_CALL = re.compile(r"\bg\(\s*['\"]([a-z0-9-]+)['\"]")
+_DATA_TERM = re.compile(r'data-term="([a-z0-9-]+)"')
+_JS_CALL = re.compile(r"(?:glossHTML|_gloss|\bg)\(\s*['\"]([a-z0-9-]+)['\"]")
 
 
 def _doc() -> dict:
@@ -55,10 +61,40 @@ def test_see_also_targets_exist():
 
 @pytest.mark.parametrize("tpl", sorted(_TEMPLATES.rglob("*.html")))
 def test_templates_only_mark_defined_terms(tpl: Path):
-    """A g('…') call with no glossary entry would render a mark that explains nothing."""
+    """A mark with no glossary entry would render an affordance that explains nothing."""
     ids = _term_ids()
-    for term in _G_CALL.findall(tpl.read_text()):
+    text = tpl.read_text()
+    for term in _G_CALL.findall(text):
         assert term in ids, f"{tpl.name}: g('{term}') has no entry in data/glossary.json"
+    for term in _DATA_TERM.findall(text):
+        assert term in ids, f'{tpl.name}: data-term="{term}" has no entry in data/glossary.json'
+
+
+def test_chip_vocabularies_are_defined():
+    """The chips (origin tags, provenance badges, discovery badges) build their data-term from
+    Jinja lookup tables, so no regex over the templates can see the ids. Pin the vocabularies
+    here instead: renaming a glossary entry without updating those maps would otherwise leave a
+    chip that looks explainable and explains nothing."""
+    ids = _term_ids()
+    chip_terms = {
+        # src_tag(): the per-value origin tags.
+        "measured", "computed", "assumed",
+        # provenance_badge(): how real this planet's colour is.
+        "modelled", "simulated", "measured-spectrum",
+        # DISC_TERMS: detection methods, on the title badge and the data card.
+        "radial-velocity", "transit", "direct-imaging", "microlensing",
+        "transit-timing-variations",
+    }
+    missing = sorted(t for t in chip_terms if t not in ids)
+    assert not missing, f"chips reference undefined glossary terms: {missing}"
+
+
+@pytest.mark.parametrize("js", sorted(_STATIC.glob("*.js")))
+def test_js_only_marks_defined_terms(js: Path):
+    """Copy built in JS (the compare table, the census tiles) marks terms the same way."""
+    ids = _term_ids()
+    for term in _JS_CALL.findall(js.read_text()):
+        assert term in ids, f"{js.name}: glossHTML('{term}') has no entry in data/glossary.json"
 
 
 def test_runtime_payload_is_small_and_complete():

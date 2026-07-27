@@ -277,10 +277,12 @@
     var des = PLANETS.map(function (p) { return p.de; }).sort(function (a, b) { return a - b; });
     var median = des[Math.floor(des.length / 2)] || 0;
     function tile(v, l) { return '<span class="cs-tile"><b>' + v + "</b>" + l + "</span>"; }
+    // Jargon in the tiles gets the same hover mark as everywhere else (glossary.js).
+    function g(id, text) { return window.glossHTML ? window.glossHTML(id, text) : text; }
     mount.innerHTML =
-      tile(PLANETS.length, "planets modelled") +
-      tile(Object.keys(fams).length, "colour families") +
-      tile("ΔE " + median.toFixed(1), "median Roman colour error");
+      tile(PLANETS.length, "planets " + g("modelled")) +
+      tile(Object.keys(fams).length, g("colour-family", "colour families")) +
+      tile(g("delta-e2000", "ΔE") + " " + median.toFixed(1), "median Roman colour error");
   }
 
   window.censusInit = function (cfg) {

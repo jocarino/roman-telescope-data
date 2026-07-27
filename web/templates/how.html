@@ -98,7 +98,7 @@
     <h3>Light it with its own star</h3>
     <p class="how-body">A mirror is only as colourful as what it reflects. The same planet looks
       different under a cool red dwarf than under a Sun-like star, so we multiply the albedo
-      spectrum by the host star's own spectrum — modelled as a
+      spectrum by the {{ g('host-star', 'host star') }}'s own spectrum — modelled as a
       {{ g('blackbody') }} at the star's measured
       {{ g('effective-temperature', 'temperature') }}. The product is the
       reflected light that would actually leave the planet and reach an observer.</p>
@@ -197,7 +197,7 @@
         Spectral accents: restrict F(λ) to a window [λ₁,&nbsp;λ₂] (e.g. around a CH₄ band
         edge), re-run the CIE conversion on that slice alone, and keep the resulting colour,
         labelled with its source wavelength. Palettes export as hex, CSS variables or an
-        <code>.ase</code> swatch file for design tools.</p>
+        {{ g('ase-file', '.ase') }} swatch file for design tools.</p>
     {{ maths_close() }}
   </section>
 
@@ -238,14 +238,14 @@
         measurement it would take is the
         star-weighted mean albedo inside the band:</p>
       <span class="formula">value<sub>band</sub> = ∫<sub>band</sub> A(λ)·S(λ) dλ / ∫<sub>band</sub> S(λ) dλ</span>
-      <p>Bands: 575&nbsp;nm (10% width), 660 and 730&nbsp;nm (6%, the spectroscopy channels),
+      <p>Bands: 575&nbsp;nm (10% width), 660 and 730&nbsp;nm (6%, the {{ g('spectroscopy') }} channels),
         835&nbsp;nm (15%). To get a colour back we interpolate the four samples across the
         visible grid and re-run step&nbsp;3. Below 575&nbsp;nm Roman receives <strong>zero
         information</strong> — precisely the blue-violet region where many of these planets
         live — so the reconstruction holds the spectrum flat there rather than inventing data.
         That honesty is why blue planets lose the most colour in the Roman view. For Roman's
         ~dozen {{ g('tech-demo-target', 'tech-demo targets') }}, real measured
-        {{ g('photometry') }} will one day replace the simulated
+        {{ g('photometry') }} will one day replace the {{ g('simulated') }}
         band values — the only real colours any of these planets will ever have.</p>
     {{ maths_close() }}
   </section>
@@ -255,7 +255,7 @@
     Exoplanet Archive</a>. Every page states its model assumptions — cloud state, metallicity,
     spectrum engine — and tags each value as {{ g('measured') }}, {{ g('computed') }} or
     {{ g('assumed') }}.
-    <strong>Modelled, not photographed</strong> — that's the whole point.</p>
+    <strong>{{ g('modelled', 'Modelled') }}, not photographed</strong> — that's the whole point.</p>
 
   {{ back_link() }}
 </div>

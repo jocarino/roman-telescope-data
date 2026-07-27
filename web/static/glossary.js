@@ -73,10 +73,25 @@
     if (pop) pop.classList.remove("open");
   }
 
+  // Anything carrying data-term is explainable. The .gloss class only supplies the visual
+  // mark, so chips with their own look (the measured/computed/assumed tags, the provenance
+  // badges) can opt into the definition without fighting their own styling.
   function target(ev) {
     var t = ev.target;
-    return t && t.closest ? t.closest(".gloss") : null;
+    return t && t.closest ? t.closest("[data-term]") : null;
   }
+
+  // Same mark, built in JS — for copy that isn't server-rendered (the compare table's row
+  // labels, the census stat tiles). Text is escaped; ids come from our own code, never input.
+  // An id with no entry degrades to plain text: a mark that explains nothing is worse than
+  // no mark, and unlike the templates there is no build-time check to catch a typo here.
+  window.glossHTML = function (id, text) {
+    var d = document.createElement("div");
+    d.textContent = text == null ? id : text;
+    if (window.GLOSSARY && !window.GLOSSARY[id]) return d.innerHTML;
+    return '<button type="button" class="gloss" data-term="' + id + '" aria-expanded="false">' +
+      d.innerHTML + "</button>";
+  };
 
   if (canHover) {
     document.addEventListener("mouseover", function (ev) {
