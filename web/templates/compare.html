@@ -9,7 +9,7 @@
   <span class="tagline">two worlds side by side — what makes their colours differ</span>
 </div>
 
-<div class="compare" x-data="compare({ indexUrl: '{{ index_url }}' })" x-cloak>
+<div class="compare" x-data="compare({ indexUrl: '{{ index_url }}', extraUrl: '{{ extra_url }}' })" x-cloak>
   {# Two slots. Each shows the current selection right away; click to open the browser. #}
   <div class="cmp-slots">
     <button class="cmp-slot" @click="openPicker('a')" :class="a() ? 'filled' : ''">

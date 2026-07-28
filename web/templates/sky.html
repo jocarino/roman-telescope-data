@@ -446,6 +446,6 @@
 </style>
 <script src="/static/sky.js?v={{ build_id }}"></script>
 <script>window.addEventListener("DOMContentLoaded", function () {
-  window.skyInit({ indexUrl: "{{ index_url }}" });
+  window.skyInit({ indexUrl: "{{ index_url }}", extraUrl: "{{ extra_url }}" });
 });</script>
 {% endblock %}

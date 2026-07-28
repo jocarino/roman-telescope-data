@@ -261,5 +261,80 @@
     return ((10 + 130 * t) * Math.PI) / 180;
   }
 
-  window.PlanetRender = { render: render, spin: spin, stop: stop, hashPhase: hashPhase };
+  // The 5-stop designer ramp, derived from the base hex. This is a straight port of
+  // pipeline/palette/derive.py: same fixed lightness stops, same HLS round-trip, same
+  // half-to-even rounding on the way back to 8-bit. It has to agree with Python exactly,
+  // because the same ramp is rendered server-side on planet and tour pages — tests/
+  // test_palette_ramp_js.py checks all ~11.5k palettes byte for byte.
+  //
+  // It lives here rather than in the index because it is a pure function of a hex the index
+  // already carries: shipping five more hexes per planet (twice over, for the Roman view) was
+  // ~29% of the gallery index for information every client can recompute in microseconds.
+  // Built with the same expression as Python, NOT written out as literals: 0.88 - 0.18 is not
+  // exactly 0.7 in binary, so the computed stops are 0.7049999999999998 / 0.8799999999999999.
+  // Typing the round numbers instead lands the odd channel on the far side of a .5 boundary
+  // and the ramps disagree with the server by 1/255.
+  var RAMP_L_MIN = 0.18, RAMP_L_MAX = 0.88, RAMP_N = 5;
+  var RAMP_L = [];
+  for (var _i = 0; _i < RAMP_N; _i++) {
+    RAMP_L.push(RAMP_L_MIN + ((RAMP_L_MAX - RAMP_L_MIN) * _i) / (RAMP_N - 1));
+  }
+
+  function pyRound(x) {
+    // Python's round(): halves go to even, not up. Matters on exact .5 boundaries only.
+    var f = Math.floor(x), d = x - f;
+    if (d > 0.5) return f + 1;
+    if (d < 0.5) return f;
+    return f % 2 === 0 ? f : f + 1;
+  }
+
+  function rgbToHls(r, g, b) {
+    var maxc = Math.max(r, g, b), minc = Math.min(r, g, b);
+    var sumc = maxc + minc, rangec = maxc - minc, l = sumc / 2;
+    if (minc === maxc) return [0, l, 0];
+    var s = l <= 0.5 ? rangec / sumc : rangec / (2 - maxc - minc);
+    var rc = (maxc - r) / rangec, gc = (maxc - g) / rangec, bc = (maxc - b) / rangec;
+    var h = r === maxc ? bc - gc : g === maxc ? 2 + rc - bc : 4 + gc - rc;
+    h = (h / 6) % 1;
+    if (h < 0) h += 1;                       // JS % keeps sign; Python's does not
+    return [h, l, s];
+  }
+
+  function hlsChannel(m1, m2, hue) {
+    hue = hue % 1;
+    if (hue < 0) hue += 1;
+    if (hue < 1 / 6) return m1 + (m2 - m1) * hue * 6;
+    if (hue < 0.5) return m2;
+    if (hue < 2 / 3) return m1 + (m2 - m1) * (2 / 3 - hue) * 6;
+    return m1;
+  }
+
+  function hlsToRgb(h, l, s) {
+    if (s === 0) return [l, l, l];
+    var m2 = l <= 0.5 ? l * (1 + s) : l + s - l * s;
+    var m1 = 2 * l - m2;
+    return [hlsChannel(m1, m2, h + 1 / 3), hlsChannel(m1, m2, h), hlsChannel(m1, m2, h - 1 / 3)];
+  }
+
+  function hex2 (n) { return (n < 16 ? "0" : "") + n.toString(16); }
+
+  // base hex -> ["#rrggbb" x5], shade-2 → tint-2.
+  function ramp(baseHex) {
+    var h = String(baseHex || "").replace("#", "");
+    if (h.length !== 6) return [baseHex, baseHex, baseHex, baseHex, baseHex];
+    var r = parseInt(h.slice(0, 2), 16) / 255,
+        g = parseInt(h.slice(2, 4), 16) / 255,
+        b = parseInt(h.slice(4, 6), 16) / 255;
+    var hls = rgbToHls(r, g, b);
+    var out = [];
+    for (var i = 0; i < RAMP_L.length; i++) {
+      var c = hlsToRgb(hls[0], RAMP_L[i], hls[2]);
+      out.push("#" + hex2(pyRound(c[0] * 255)) + hex2(pyRound(c[1] * 255)) + hex2(pyRound(c[2] * 255)));
+    }
+    return out;
+  }
+
+  window.PlanetRender = {
+    render: render, spin: spin, stop: stop, hashPhase: hashPhase, ramp: ramp,
+  };
 })();

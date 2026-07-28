@@ -9,6 +9,7 @@ of them from the full-spectrum colour by accident would leave the filters quietl
 from __future__ import annotations
 
 from pipeline.colour.family import colour_family
+from pipeline.palette.derive import derive_palette_from_hex
 from tests.test_tours import make_record
 from web.build import _index_entry, _stats
 
@@ -39,8 +40,14 @@ def test_index_entry_carries_the_roman_colour_separately():
     e = _index_entry(_record())
     assert e["hex"] == "#5a78d2"
     assert e["rhex"] == "#cd783c"
-    assert e["rpal"] == ["#1a0f07", "#5c3a1d", "#9c6534", "#cd783c", "#e6b58f"]
-    assert e["rpal"] != e["palette"]
+    # The 5-stop ramps are no longer shipped in the index — they are a pure function of these
+    # two hexes and the browser derives them (PlanetRender.ramp; parity pinned by
+    # tests/test_palette_ramp_js.py). Both hexes are here, so both ramps stay recoverable.
+    assert "rpal" not in e and "palette" not in e
+    assert [s.hex for s in derive_palette_from_hex(e["rhex"])] == [
+        "#492913", "#905125", "#ce7b40", "#e0ac87", "#f3ddce"
+    ]
+    assert derive_palette_from_hex(e["rhex"]) != derive_palette_from_hex(e["hex"])
 
 
 def test_roman_family_comes_from_the_roman_colour():

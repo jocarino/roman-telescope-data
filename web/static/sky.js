@@ -71,7 +71,18 @@
     var chartEl = $("skp-chart"), tipEl = $("skp-tip");
 
     // ── data ──────────────────────────────────────────────────────────────
-    fetch(cfg.indexUrl).then(function (r) { return r.json(); }).then(function (planets) {
+    // RA/Dec/magnitude live in a companion file (a parallel array in the same order as the
+    // index), so the gallery and census never download coordinates they don't plot.
+    Promise.all([
+      fetch(cfg.indexUrl).then(function (r) { return r.json(); }),
+      cfg.extraUrl
+        ? fetch(cfg.extraUrl).then(function (r) { return r.json(); }).catch(function () { return null; })
+        : Promise.resolve(null),
+    ]).then(function (both) {
+      var core = both[0], extra = both[1];
+      var planets = extra && extra.length === core.length
+        ? core.map(function (p, i) { return Object.assign({}, p, extra[i]); })
+        : core;
       var byHost = {};
       planets.forEach(function (p) {
         if (p.ra == null) return;
