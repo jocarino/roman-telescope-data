@@ -46,11 +46,34 @@ python3 -m http.server 8799 --directory dist    # preview at http://localhost:87
 
 Long-pressing a gallery card peeks its detail fragment; Alpine.js drives search / filter / sort and
 the true↔Roman toggle; palettes export as hex, CSS variables, or `.ase`. Also on the site: a
-colour census of the whole catalog (`/census`), a phase slider with an automatic full
+colour census of the whole catalog (`/census`), the Roman target board (`/roman` — see below),
+a phase slider with an automatic full
 lunar-cycle animation in the EXOSCOPE (per-planet random phases on the gallery), a "Seen in
 fiction" overlay, and clean extensionless URLs. No backend, no build toolchain beyond Python.
 `web.build` streams one planet at a time, so rendering all 5,759 pages takes ~7 s locally
 (`dist/` ≈ 477 MB; the runtime gallery index ≈ 2.5 MB).
+
+### The Roman target board (`/roman`)
+
+The namesake page: the shortlist of exoplanets Roman's coronagraph could plausibly catch in
+reflected light, each with the four-band colour we predict **and an empty slot beside it for
+the colour Roman measures**. Plus a live countdown to launch (30 Aug 2026).
+
+- **Words** are curated in `data/roman-targets.json`; **planet data** is re-joined against the
+  current `planets.json` on every build (`pipeline/roman_board.py`), exactly like guided tours.
+  Nothing is frozen, so the board cannot go stale as the catalog changes.
+- **The join is by explicit `catalog_id`, never by slugging the published name.** The names do
+  not always match ours — the literature's `pi Men b` is `HD 39091 b` (`hd-39091-b`) here. This
+  is the alias problem `docs/roman-measured-data.md` flags for ingestion day, solved up front.
+- **Targets we have no colour for stay on the board** as visibly empty rows saying why, rather
+  than being dropped — an honest gap beats a tidy list.
+- The eligible list is Table 4 of [Carrión-González et al. (2021)](https://arxiv.org/abs/2104.04296);
+  26/10/3 planets qualify under its optimistic/intermediate/pessimistic scenarios. Per-planet
+  access probabilities are deliberately **not** transcribed — the board computes the maximum
+  angular separation itself (`1000·a/d` mas) from data every record already carries.
+- **The slots fill themselves.** A slot flips from predicted to measured off the record's own
+  `measured-cgi` provenance, which the swap seam sets the moment a real photometry file lands.
+  Drop the file, rebuild — no edit to the template, the resolver, or the curated JSON.
 
 ### Jargon and the glossary
 

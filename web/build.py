@@ -38,6 +38,7 @@ from pipeline.illuminant.blackbody import SUN
 from pipeline.models import PaletteStopModel, PlanetRecord, PlanetsFile
 from pipeline.palette.derive import derive_palette_from_hex
 from pipeline.palette.export import ase_bytes
+from pipeline.roman_board import resolve as resolve_board
 from pipeline.sky import format_dec, format_ra
 from pipeline.tours import Tour, TourStop
 from pipeline.tours import resolve as resolve_tours
@@ -558,6 +559,26 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
             build_id=build_id,
         )
     )
+    # The Roman target board: the shortlist of planets whose colours could one day be measured
+    # rather than modelled, joined onto THIS catalog (see pipeline/roman_board.py). Skipped
+    # entirely when the curated file is absent, exactly like tours.
+    board = resolve_board(records)
+    if board is not None:
+        hole_left, hole_width = board.dark_hole_span
+        (out / "roman.html").write_text(
+            env.get_template("roman.html").render(
+                board=board,
+                mission=board.mission,
+                instrument=board.instrument,
+                source=board.source,
+                inner_mas=board.instrument.get("dark_hole_inner_mas", 150.0),
+                outer_mas=board.instrument.get("dark_hole_outer_mas", 450.0),
+                hole_left=hole_left,
+                hole_width=hole_width,
+                build_id=build_id,
+            )
+        )
+
     # Tour pages themselves (the walks were resolved before the gallery, which links them).
     _tour_pages(env, tours, out, build_id, len(records))
     tour_membership: dict[str, list[dict]] = {}

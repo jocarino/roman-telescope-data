@@ -1,0 +1,87 @@
+{
+  "_comment": [
+    "The Roman target board: the shortlist of exoplanets Roman's coronagraph could plausibly",
+    "see in reflected light, and the launch it is waiting on. Curated by hand and kept OUT of",
+    "planets.json — like data/tours.json, the WORDS live here and the planet data is re-joined",
+    "against the catalogue of the moment on every build (pipeline/roman_board.py).",
+    "",
+    "IMPORTANT — the `catalog_id` field. The published target names and our planet ids do NOT",
+    "always slug-match: the paper's 'pi Men b' is 'HD 39091 b' in the Archive's composite table",
+    "(id hd-39091-b), and 'psi 1 Dra B b' is 'psi1 Dra B b' (id psi1-dra-b-b). This is exactly",
+    "the alias problem docs/roman-measured-data.md flags for ingestion day, so the join is by an",
+    "EXPLICIT id written here, never by slugging the display name. A target with catalog_id null",
+    "is genuinely absent from our catalogue and renders as an unmodelled slot.",
+    "",
+    "Deliberately NOT recorded here: the per-planet P_access percentages from the source paper's",
+    "Table 4. They are real numbers in a real paper, but transcribing 26 of them by hand invites",
+    "a wrong digit sitting on the page forever. The board instead shows the maximum angular",
+    "separation it computes itself, from the semi-major axis and distance already in each record."
+  ],
+
+  "mission": {
+    "name": "Nancy Grace Roman Space Telescope",
+    "launch_utc": "2026-08-30T11:20:00Z",
+    "launch_display": "30 August 2026, 07:20 EDT",
+    "vehicle": "Falcon Heavy",
+    "site": "Kennedy Space Center, LC-39A",
+    "launch_note": "NASA set this date in June 2026, pulling the launch roughly eight months ahead of its earlier commitment of no later than May 2027.",
+    "after_launch": "The coronagraph is a technology demonstration, switched on after commissioning rather than on day one. NASA has not published fixed dates for individual target observations, so this board counts down to the launch — the one date that is announced — and nothing more.",
+    "source_url": "https://science.nasa.gov/mission/roman-space-telescope/"
+  },
+
+  "instrument": {
+    "dark_hole_inner_mas": 150.0,
+    "dark_hole_outer_mas": 450.0,
+    "dark_hole_note": "Roman's coronagraph works in an annulus — a 'dark hole' — from about 0.15 to 0.45 arcseconds around the star. Closer in, the starlight is not suppressed; further out, the instrument stops looking.",
+    "contrast_note": "Its tech-demo requirement is raw contrast better than 1 part in 10 million inside that annulus."
+  },
+
+  "source": {
+    "title": "Catalogue of exoplanets accessible in reflected starlight to the Nancy Grace Roman Space Telescope",
+    "authors": "Carrión-González et al. (2021)",
+    "journal": "Astronomy & Astrophysics 651, A7",
+    "url": "https://arxiv.org/abs/2104.04296",
+    "counts": {"optimistic": 26, "intermediate": 10, "pessimistic": 3},
+    "counts_quote": "At our reference wavelength λ = 575 nm, the number of Roman-accessible exoplanets in the optimistic, intermediate, and pessimistic CGI scenarios is 26, 10, and 3, respectively.",
+    "all_scenarios_quote": "HD 219134 h, 47 UMa c, and eps Eri b are the only planets that would be accessible in all three scenarios with P_access > 25%.",
+    "note": "The list below is that paper's Table 4 — planets whose host stars are brighter than V = 7 and whose chance of being observable exceeds 25% under optimistic assumptions. The paper does not enumerate which ten make up its intermediate scenario, so this board does not guess: it marks only the three it names as accessible under every scenario."
+  },
+
+  "targets": [
+    {"name": "HD 219134 h", "catalog_id": "hd-219134-h", "all_scenarios": true},
+    {"name": "47 UMa c", "catalog_id": "47-uma-c", "all_scenarios": true},
+    {"name": "eps Eri b", "catalog_id": "eps-eri-b", "all_scenarios": true,
+     "note": "The nearest of the lot, and the widest-swinging: at its furthest it opens out past the coronagraph's outer edge."},
+
+    {"name": "47 UMa b", "catalog_id": "47-uma-b"},
+    {"name": "ups And d", "catalog_id": "ups-and-d"},
+    {"name": "14 Her b", "catalog_id": "14-her-b"},
+    {"name": "55 Cnc d", "catalog_id": "55-cnc-d"},
+    {"name": "HD 154345 b", "catalog_id": "hd-154345-b"},
+    {"name": "HD 190360 b", "catalog_id": "hd-190360-b"},
+    {"name": "HD 217107 c", "catalog_id": "hd-217107-c"},
+    {"name": "HD 134987 c", "catalog_id": "hd-134987-c"},
+    {"name": "HD 160691 c", "catalog_id": "hd-160691-c"},
+    {"name": "HD 219077 b", "catalog_id": "hd-219077-b"},
+    {"name": "HD 142 c", "catalog_id": "hd-142-c"},
+    {"name": "HD 192310 c", "catalog_id": "hd-192310-c"},
+    {"name": "HD 62509 b", "catalog_id": "hd-62509-b",
+     "note": "Pollux — the brightest star with a known planet, and one of the brightest stars in the sky."},
+    {"name": "gam Cep b", "catalog_id": "gam-cep-b"},
+    {"name": "HR 5183 b", "catalog_id": "hr-5183-b",
+     "note": "On an extraordinarily stretched orbit, which swings it right across the coronagraph's working range."},
+    {"name": "pi Men b", "catalog_id": "hd-39091-b",
+     "note": "The Archive's composite table calls this one HD 39091 b — the same planet under its catalogue name."},
+    {"name": "psi 1 Dra B b", "catalog_id": "psi1-dra-b-b"},
+    {"name": "tau Cet f", "catalog_id": "tau-cet-f"},
+    {"name": "HD 156411 b", "catalog_id": "hd-156411-b",
+     "note": "The hardest case on the list: even at its widest it stays well inside the coronagraph's inner edge."},
+    {"name": "HD 100546 b", "catalog_id": "hd-100546-b",
+     "note": "A young giant still embedded in its birth disc, far enough out that it glows with its own heat as much as it reflects."},
+
+    {"name": "tau Cet e", "catalog_id": null,
+     "note": "Not carried in the Exoplanet Archive's composite-parameters table for our data release — the signal has been contested since — so we have no parameters to model a colour from."},
+    {"name": "HD 114613 b", "catalog_id": null,
+     "note": "Likewise absent from the Archive's composite-parameters table for our data release, so there is nothing here to colour."}
+  ]
+}

@@ -2207,3 +2207,201 @@ body.cockpit-page .wrap { max-width: none; padding: 0; }
   .console-keys { grid-template-columns: 1fr; gap: 10px; }
   .ckey { padding: 12px 12px 13px; }
 }
+
+/* ============================================================================
+   THE ROMAN TARGET BOARD (/roman)
+   The project's namesake page: who Roman could look at, a launch clock, and one
+   pointedly empty slot per planet for the colour it has not measured yet.
+   Retro rules as everywhere else — square corners, hard offset shadows, mono
+   labels — with the accent reserved for the two things that carry meaning here:
+   the coronagraph's working ring, and any slot that has actually been filled.
+   ============================================================================ */
+
+.rtb { padding-bottom: 40px; }
+
+/* ---- Launch clock ---- */
+.rtb-launch {
+  background: var(--bg-3); border: 1px solid var(--line);
+  box-shadow: 4px 4px 0 var(--line); padding: 16px 18px 14px; margin: 18px 0 22px;
+}
+.rtb-launch-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; margin-bottom: 12px;
+}
+.rtb-lbl {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .8px;
+  text-transform: uppercase; color: var(--accent);
+}
+.rtb-vehicle {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .4px; color: var(--fg-faint);
+}
+.rtb-clock { display: flex; gap: 10px; flex-wrap: wrap; }
+.rtb-unit {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  min-width: 68px; padding: 10px 12px 8px;
+  background: #000; border: 1px solid var(--line);
+}
+.rtb-unit b {
+  font-family: var(--mono); font-size: 28px; line-height: 1; color: var(--fg);
+  font-variant-numeric: tabular-nums; letter-spacing: 1px;
+}
+.rtb-unit:first-child b { color: var(--accent); }
+.rtb-unit span {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .7px;
+  text-transform: uppercase; color: var(--fg-faint);
+}
+.rtb-when { margin: 12px 0 0; font-size: 12.5px; color: var(--fg-dim); }
+.rtb-when b { color: var(--fg); }
+.rtb-note { margin: 8px 0 0; font-size: 12px; line-height: 1.6; color: var(--fg-dim); }
+.rtb-note.dim { color: var(--fg-faint); }
+/* Desktop has the room: the launch prose is always open and its ℹ has no job. The phone
+   rules at the bottom of this block invert both — they must stay AFTER this to win. */
+.rtb-note-info { display: none; }
+/* Once the rocket is up, the clock stops being the point — the observations are. */
+.rtb-launch.is-launched .rtb-unit:first-child b { color: var(--fg); }
+
+/* ---- Status strip ---- */
+.rtb-status {
+  display: flex; gap: 22px; flex-wrap: wrap; align-items: flex-start;
+  padding: 14px 16px; margin-bottom: 20px;
+  background: var(--bg-3); border: 1px solid var(--line); border-left: 4px solid var(--accent);
+}
+.rtb-stat { display: flex; flex-direction: column; gap: 2px; }
+.rtb-big {
+  font-family: var(--mono); font-size: 24px; line-height: 1; color: var(--fg-dim);
+  font-variant-numeric: tabular-nums;
+}
+/* Zero measured colours is the honest state today; the moment it is not, it lights up. */
+.rtb-big.lit { color: var(--accent); }
+.rtb-stat span {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .6px;
+  text-transform: uppercase; color: var(--fg-faint);
+}
+.rtb-status-say {
+  flex: 1 1 320px; margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--fg-dim);
+}
+
+/* ---- The shared separation scale ---- */
+.rtb-legend {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 14px;
+}
+/* The tick labels are absolutely positioned and hang below the bar, so they take no space of
+   their own. This reserves it — without it they land on the legend's own key text once it
+   wraps to a second line (narrow screens), and on the first row of the board below. */
+.rtb-legend .rtb-scale { margin-bottom: 16px; }
+.rtb-legend-t { font-size: 12.5px; color: var(--fg-dim); }
+.rtb-legend-k {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .4px; color: var(--fg-faint);
+}
+.rtb-scale {
+  position: relative; flex: 1 1 220px; min-width: 160px; height: 12px;
+  background: #000; border: 1px solid var(--line);
+}
+.rtb-scale.sm { height: 8px; flex: 1 1 auto; }
+/* The coronagraph's working annulus — the only lit region on the bar, because it is the
+   only region that means anything. */
+.rtb-hole {
+  position: absolute; top: 0; bottom: 0;
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+  border-left: 1px solid var(--accent); border-right: 1px solid var(--accent);
+}
+.rtb-tick { position: absolute; top: 14px; transform: translateX(-50%); }
+.rtb-tick i {
+  font-family: var(--mono); font-size: 9px; font-style: normal; color: var(--accent);
+}
+.rtb-mark {
+  position: absolute; top: -3px; width: 3px; height: 14px; background: var(--fg);
+  transform: translateX(-1.5px);
+}
+/* A planet that never opens far enough, or that swings past the outer edge, is drawn
+   hollow — the geometry is the caveat, so the marker carries it. */
+.rtb-mark.r-inside, .rtb-mark.r-beyond { background: var(--fg-faint); }
+
+/* ---- The board ---- */
+.rtb-board { list-style: none; margin: 0 0 26px; padding: 0; display: grid; gap: 10px; }
+.rtb-slot {
+  display: grid; gap: 10px 18px; align-items: center; padding: 12px 14px;
+  grid-template-columns: minmax(180px, 1.1fr) auto minmax(150px, 1fr);
+  background: var(--bg-3); border: 1px solid var(--line);
+}
+.rtb-slot:hover { border-color: var(--fg-faint); }
+.rtb-slot.is-measured { border-color: var(--accent); box-shadow: 3px 3px 0 var(--accent); }
+.rtb-slot.is-unmodelled { opacity: .62; }
+
+.rtb-id { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.rtb-name { font-size: 13.5px; color: var(--fg); letter-spacing: .2px; }
+a.rtb-name:hover { color: var(--accent); }
+.rtb-host { font-size: 11px; color: var(--fg-faint); }
+.rtb-tag {
+  align-self: flex-start; margin-top: 3px; padding: 2px 7px;
+  font-family: var(--mono); font-size: 8.5px; letter-spacing: .5px; text-transform: uppercase;
+  color: var(--accent); border: 1px solid var(--accent);
+}
+
+/* The pair: prediction beside the space kept for the measurement. */
+.rtb-pair { display: flex; gap: 10px; }
+.rtb-half { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.rtb-half-l {
+  font-family: var(--mono); font-size: 8.5px; letter-spacing: .6px;
+  text-transform: uppercase; color: var(--fg-faint);
+}
+.rtb-sw { width: 62px; height: 34px; border: 1px solid var(--line); display: block; }
+/* The empty slot. Hatched rather than blank so it reads as reserved-and-waiting, not as a
+   swatch that failed to load. */
+.rtb-sw.is-void {
+  background: repeating-linear-gradient(
+    -45deg, transparent 0 4px, color-mix(in srgb, var(--fg-faint) 34%, transparent) 4px 5px);
+  border-style: dashed; border-color: var(--fg-faint);
+}
+.rtb-hex {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .3px; color: var(--fg-dim);
+}
+.rtb-hex.dim { color: var(--fg-faint); }
+
+.rtb-reach { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.rtb-mas {
+  font-family: var(--mono); font-size: 10.5px; color: var(--fg-dim);
+  font-variant-numeric: tabular-nums;
+}
+.rtb-mas i { font-style: normal; font-size: 9.5px; color: var(--fg-faint); }
+.rtb-note-row {
+  grid-column: 1 / -1; margin: 0; padding-top: 8px; border-top: 1px solid var(--line);
+  font-size: 12px; line-height: 1.6; color: var(--fg-dim);
+}
+
+/* ---- Provenance ---- */
+.rtb-src {
+  background: var(--bg-3); border: 1px solid var(--line); padding: 16px 18px;
+}
+.rtb-src h2 {
+  margin: 0 0 10px; font-family: var(--mono); font-size: 11px; letter-spacing: .7px;
+  text-transform: uppercase; color: var(--accent); font-weight: normal;
+}
+.rtb-src p { margin: 0 0 9px; font-size: 12.5px; line-height: 1.65; color: var(--fg-dim); }
+.rtb-src p:last-child { margin-bottom: 0; }
+.rtb-src b { color: var(--fg); }
+.rtb-quote {
+  padding-left: 12px; border-left: 2px solid var(--line); color: var(--fg-faint) !important;
+  font-style: italic;
+}
+.rtb-foot { display: flex; gap: 20px; flex-wrap: wrap; margin: 20px 0 0; font-size: 13px; }
+
+/* ---- Narrow screens ----
+   The three-column slot stacks. Vertical space is precious on a phone, so the pair and the
+   scale sit on one row rather than each taking a band of their own. */
+@media (max-width: 720px) {
+  .rtb-slot { grid-template-columns: 1fr; gap: 9px; }
+  .rtb-pair { gap: 14px; }
+  .rtb-sw { width: 100%; min-width: 76px; }
+  .rtb-half { flex: 1 1 0; }
+  .rtb-unit { min-width: 0; flex: 1 1 60px; padding: 9px 6px 7px; }
+  .rtb-unit b { font-size: 22px; }
+  .rtb-status { gap: 16px; }
+  .rtb-legend { gap: 8px; }
+  .rtb-legend-k { flex-basis: 100%; }
+  /* Vertical space is precious on a phone: the launch prose collapses behind the ℹ beside
+     the LAUNCH label, so the board starts within a screen of the clock. */
+  .rtb-note-info { display: inline-flex; }
+  .rtb-notes { display: none; }
+  .rtb-notes.open { display: block; }
+}
