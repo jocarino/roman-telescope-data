@@ -596,6 +596,101 @@
     </div>
   </div>
 
+  {# ── Where in the sky: the "go outside and look at it" chart. The crosshair is this
+     planet's host star at its real J2000 position; every faint dot is another host star
+     from this catalog. Only renders when the data release carries sky positions. #}
+  {% if rec.sky and ctx.sky_svg %}
+  {%- set sky = rec.sky -%}
+  <div class="panel skypanel" x-data="skyhorizon()">
+    <div class="dossier-head">
+      <h3>Where in the sky</h3>
+      <button class="info-btn" @click="sh = !sh" :class="sh ? 'on' : ''" :aria-expanded="sh"
+        title="How to read this chart" aria-label="How to read this chart">i</button>
+    </div>
+    <div class="dossier-help" x-show="sh" x-cloak>
+      <div class="assume">
+        <button class="info-x" @click="sh = false" aria-label="Close">&times;</button>
+        The whole sky flattened into one map, in the coordinates printed star charts use:
+        <strong>right ascension</strong> (the sky's longitude, in hours — running right to
+        left, as on a chart held overhead) and <strong>declination</strong> (the sky's
+        latitude — positive means northern sky, negative southern). The
+        <strong>crosshair</strong> marks {{ rec.host_star.name }}, this planet's host star.
+        Every faint dot is another star in this catalog with a modelled planet.
+        <br><br>
+        Like any flat map of a sphere, it distorts: the top and bottom edges are the
+        {{ g('celestial-equator', 'celestial poles') }}, each a single point smeared across
+        the full width (the brighter mid-line is the celestial equator). The dense
+        <strong>white patch</strong> near 19h, +45° is the {{ g('kepler-field', 'Kepler field') }}
+        — one small region the Kepler telescope stared at for four years, piling up hundreds
+        of discoveries. The dots map
+        where we <em>looked</em>, not where planets are.
+        <br><br>
+        What you could ever see from your backyard is the <strong>star</strong> — no
+        exoplanet is visible to the eye through any telescope. But the planet is physically
+        there, inside that point of light. Press <strong>⌂ Your horizon</strong> to see the
+        map the way you'd experience it outside right now: everything below the line is
+        under your feet.
+      </div>
+    </div>
+    <div class="sky-wide">{{ ctx.sky_svg|safe }}</div>
+    <div class="sky-compact">{{ ctx.sky_svg_compact|safe }}</div>
+    <div class="sky-hzn-row">
+      <span class="hzn-btn-pair">
+        <button class="hzn-btn" @click="toggleHzn()" :class="hz ? 'on' : ''" :aria-pressed="hz"
+          title="Draw your horizon on the chart">⌂ Your horizon</button>
+        <span x-show="hz" x-cloak>{{ jinfo("Mimics stepping outside right now: the line is your
+          horizon, the shaded part of the map is under your feet, computed from your device's
+          clock. Set the slider to your latitude — northern and southern observers stand on
+          opposite sides of the sky, so the ground flips. Your east–west position is estimated
+          from the clock's time zone — daylight saving and wide zones can put that up to an
+          hour of sky (15°) off. Pressing 'use my location' asks the browser for your position
+          instead and sets latitude and longitude exactly. It is read once and used only on
+          this device — this site has no server to send it to.", "Your horizon") }}</span>
+      </span>
+      <button class="hzn-btn hzn-geo" x-show="hz && geoAvail" x-cloak
+        @click="useLocation()" :disabled="geoState === 'busy'" :class="geoState === 'ok' ? 'lit' : ''"
+        x-text="geoLabel()"
+        title="Ask the browser for your position — used once, only on this device"></button>
+      <div class="hzn-lat" x-show="hz" x-cloak>
+        <span class="hzn-lat-name">Viewing from <b x-text="latLabel()"></b></span>
+        {# step 1 so a geolocated latitude (e.g. 38°) isn't snapped to a coarser grid #}
+        <input type="range" class="phase-slider lat-slider" min="-65" max="65" step="1"
+          x-model.number="lat" @input="latChanged()"
+          aria-label="Your latitude, from 65° south to 65° north">
+        <div class="phase-scale" aria-hidden="true"><span>65°S</span><span>EQUATOR</span><span>65°N</span></div>
+      </div>
+    </div>
+    <p class="sky-note hzn-status" x-show="hz" x-cloak x-text="status()"></p>
+    <div class="sky-facts">
+      <span>{{ g('constellation', 'Constellation') }} <b>{{ sky.constellation }}</b></span>
+      <span>{{ g('right-ascension', 'RA') }} <b>{{ ctx.sky_ra }}</b> ·
+        {{ g('declination', 'Dec') }} <b>{{ ctx.sky_dec }}</b></span>
+      <span>{{ g('apparent-magnitude', 'Star brightness') }}
+        <b>{{ ('V ' ~ sky.v_mag|round(1)) if sky.v_mag is not none else 'unmeasured' }}</b></span>
+    </div>
+    {% if sky.naked_eye %}
+    <p class="sky-note vis"><span class="sky-eye">◉ NAKED-EYE STAR</span> — at magnitude
+      {{ sky.v_mag|round(1) }}, {{ rec.host_star.name }} is bright enough to find without a
+      telescope under a dark sky. Look toward {{ sky.constellation }}: the planet is far too
+      faint for any eye, but it is really there, in that point of light.</p>
+    {% elif sky.v_mag is not none %}
+    <p class="sky-note">At magnitude {{ sky.v_mag|round(1) }} this star is below the
+      naked-eye limit (≈ 6.5 under a dark sky) —
+      {{ 'binoculars' if sky.v_mag <= 9.5 else 'telescope' }} territory. It still sits at
+      these coordinates, in {{ sky.constellation }}.</p>
+    {% else %}
+    <p class="sky-note">No brightness measurement for this star
+      {%- if not rec.is_light_isolable %} — a microlensing host, glimpsed only by its
+      gravity{% endif %}. Its position in {{ sky.constellation }} is still known.</p>
+    {% endif %}
+    {# Carries the planet id, so the sky page arrives already pointed at THIS host star:
+       crosshaired, in the view that can actually show it, with the band widened to the
+       least equipment that reaches it. #}
+    <a class="sky-page-link" href="/sky.html?planet={{ rec.id }}">▸ Find {{ rec.host_star.name }}
+      in your sky tonight — every host star above your horizon right now</a>
+  </div>
+  {% endif %}
+
   {# ── Model space: the same planet somewhere else, and under other assumptions. ──────────
      Everything here is anchored so that the planet's real orbit and the pipeline's real
      assumptions reproduce the swatch above exactly — the sliders start on the truth and move
@@ -934,101 +1029,6 @@
       </li>
       {% endfor %}
     </ul>
-  </div>
-  {% endif %}
-
-  {# ── Where in the sky: the "go outside and look at it" chart. The crosshair is this
-     planet's host star at its real J2000 position; every faint dot is another host star
-     from this catalog. Only renders when the data release carries sky positions. #}
-  {% if rec.sky and ctx.sky_svg %}
-  {%- set sky = rec.sky -%}
-  <div class="panel skypanel" x-data="skyhorizon()">
-    <div class="dossier-head">
-      <h3>Where in the sky</h3>
-      <button class="info-btn" @click="sh = !sh" :class="sh ? 'on' : ''" :aria-expanded="sh"
-        title="How to read this chart" aria-label="How to read this chart">i</button>
-    </div>
-    <div class="dossier-help" x-show="sh" x-cloak>
-      <div class="assume">
-        <button class="info-x" @click="sh = false" aria-label="Close">&times;</button>
-        The whole sky flattened into one map, in the coordinates printed star charts use:
-        <strong>right ascension</strong> (the sky's longitude, in hours — running right to
-        left, as on a chart held overhead) and <strong>declination</strong> (the sky's
-        latitude — positive means northern sky, negative southern). The
-        <strong>crosshair</strong> marks {{ rec.host_star.name }}, this planet's host star.
-        Every faint dot is another star in this catalog with a modelled planet.
-        <br><br>
-        Like any flat map of a sphere, it distorts: the top and bottom edges are the
-        {{ g('celestial-equator', 'celestial poles') }}, each a single point smeared across
-        the full width (the brighter mid-line is the celestial equator). The dense
-        <strong>white patch</strong> near 19h, +45° is the {{ g('kepler-field', 'Kepler field') }}
-        — one small region the Kepler telescope stared at for four years, piling up hundreds
-        of discoveries. The dots map
-        where we <em>looked</em>, not where planets are.
-        <br><br>
-        What you could ever see from your backyard is the <strong>star</strong> — no
-        exoplanet is visible to the eye through any telescope. But the planet is physically
-        there, inside that point of light. Press <strong>⌂ Your horizon</strong> to see the
-        map the way you'd experience it outside right now: everything below the line is
-        under your feet.
-      </div>
-    </div>
-    <div class="sky-wide">{{ ctx.sky_svg|safe }}</div>
-    <div class="sky-compact">{{ ctx.sky_svg_compact|safe }}</div>
-    <div class="sky-hzn-row">
-      <span class="hzn-btn-pair">
-        <button class="hzn-btn" @click="toggleHzn()" :class="hz ? 'on' : ''" :aria-pressed="hz"
-          title="Draw your horizon on the chart">⌂ Your horizon</button>
-        <span x-show="hz" x-cloak>{{ jinfo("Mimics stepping outside right now: the line is your
-          horizon, the shaded part of the map is under your feet, computed from your device's
-          clock. Set the slider to your latitude — northern and southern observers stand on
-          opposite sides of the sky, so the ground flips. Your east–west position is estimated
-          from the clock's time zone — daylight saving and wide zones can put that up to an
-          hour of sky (15°) off. Pressing 'use my location' asks the browser for your position
-          instead and sets latitude and longitude exactly. It is read once and used only on
-          this device — this site has no server to send it to.", "Your horizon") }}</span>
-      </span>
-      <button class="hzn-btn hzn-geo" x-show="hz && geoAvail" x-cloak
-        @click="useLocation()" :disabled="geoState === 'busy'" :class="geoState === 'ok' ? 'lit' : ''"
-        x-text="geoLabel()"
-        title="Ask the browser for your position — used once, only on this device"></button>
-      <div class="hzn-lat" x-show="hz" x-cloak>
-        <span class="hzn-lat-name">Viewing from <b x-text="latLabel()"></b></span>
-        {# step 1 so a geolocated latitude (e.g. 38°) isn't snapped to a coarser grid #}
-        <input type="range" class="phase-slider lat-slider" min="-65" max="65" step="1"
-          x-model.number="lat" @input="latChanged()"
-          aria-label="Your latitude, from 65° south to 65° north">
-        <div class="phase-scale" aria-hidden="true"><span>65°S</span><span>EQUATOR</span><span>65°N</span></div>
-      </div>
-    </div>
-    <p class="sky-note hzn-status" x-show="hz" x-cloak x-text="status()"></p>
-    <div class="sky-facts">
-      <span>{{ g('constellation', 'Constellation') }} <b>{{ sky.constellation }}</b></span>
-      <span>{{ g('right-ascension', 'RA') }} <b>{{ ctx.sky_ra }}</b> ·
-        {{ g('declination', 'Dec') }} <b>{{ ctx.sky_dec }}</b></span>
-      <span>{{ g('apparent-magnitude', 'Star brightness') }}
-        <b>{{ ('V ' ~ sky.v_mag|round(1)) if sky.v_mag is not none else 'unmeasured' }}</b></span>
-    </div>
-    {% if sky.naked_eye %}
-    <p class="sky-note vis"><span class="sky-eye">◉ NAKED-EYE STAR</span> — at magnitude
-      {{ sky.v_mag|round(1) }}, {{ rec.host_star.name }} is bright enough to find without a
-      telescope under a dark sky. Look toward {{ sky.constellation }}: the planet is far too
-      faint for any eye, but it is really there, in that point of light.</p>
-    {% elif sky.v_mag is not none %}
-    <p class="sky-note">At magnitude {{ sky.v_mag|round(1) }} this star is below the
-      naked-eye limit (≈ 6.5 under a dark sky) —
-      {{ 'binoculars' if sky.v_mag <= 9.5 else 'telescope' }} territory. It still sits at
-      these coordinates, in {{ sky.constellation }}.</p>
-    {% else %}
-    <p class="sky-note">No brightness measurement for this star
-      {%- if not rec.is_light_isolable %} — a microlensing host, glimpsed only by its
-      gravity{% endif %}. Its position in {{ sky.constellation }} is still known.</p>
-    {% endif %}
-    {# Carries the planet id, so the sky page arrives already pointed at THIS host star:
-       crosshaired, in the view that can actually show it, with the band widened to the
-       least equipment that reaches it. #}
-    <a class="sky-page-link" href="/sky.html?planet={{ rec.id }}">▸ Find {{ rec.host_star.name }}
-      in your sky tonight — every host star above your horizon right now</a>
   </div>
   {% endif %}
 
