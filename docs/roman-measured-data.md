@@ -64,6 +64,13 @@ caption ("Measured: real Roman photometry in four bands…").
    the real "how much colour Roman's four bands preserved" — the project's headline
    number, now with actual data in it.
 
+   **Also check `/roman`, the target board.** That planet's empty "Measured" slot should now
+   be filled with the real colour, its row outlined in the accent, and the board's headline
+   count should read 1 instead of 0. This needs no edit anywhere: the board reads the same
+   `measured-cgi` provenance this seam sets (`pipeline/roman_board.py`). If the planet is not
+   on the board, check its `catalog_id` in `data/roman-targets.json` — the board joins on that
+   explicit id, not on the name, precisely because of the alias problem in the caveats below.
+
 5. **Ship**: `scripts/release-data.sh` → commit `data/RELEASE` (and the measured JSON —
    it is small and IS committed; only `planets.json` is release-hosted) → push. The
    deploy webhook does the rest.

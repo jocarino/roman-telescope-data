@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% from "macros.html" import back_link, g %}
+{% block title %}The Roman target board · Exoplanet Palette{% endblock %}
+{% block content %}
+<div class="rtb" x-data="{ intro: false, why: false, notes: false }">
+
+  <div class="site-head">
+    {{ back_link() }}
+    <h1>The Roman target board</h1>
+    <span class="tagline">the handful of planets whose colours could stop being predictions
+      <button class="info-btn sm" @click="intro = !intro" :class="intro ? 'on' : ''"
+        aria-label="What is this board?" title="What is this board?">i</button></span>
+  </div>
+
+  <div class="subhead intro-box" x-show="intro" x-cloak>
+    <button class="info-x" @click="intro = false" aria-label="Close">&times;</button>
+    <div class="intro-row">
+      <span class="intro-lbl">The idea</span>
+      <p>Every colour on this site is {{ g('modelled', 'computed from physics') }} — worked out
+        from what a planet is made of and what its star shines on it. Nobody has ever measured
+        the visible colour of a planet around another star. The
+        {{ g('roman-space-telescope', 'Roman Space Telescope') }} carries an instrument that
+        could, for a few dozen planets at most. This page is the list of those planets, and a
+        deliberately empty space beside each one, waiting.</p>
+    </div>
+    <div class="intro-row">
+      <span class="intro-lbl">Why so few</span>
+      <p>A planet next to its star is like a firefly next to a lighthouse. Roman's
+        {{ g('coronagraph', 'coronagraph') }} blocks the starlight, but it only works in a ring
+        around the star — roughly {{ inner_mas|round|int }} to {{ outer_mas|round|int }}
+        thousandths of an arcsecond out. A planet has to be far enough from its star, and its
+        star close enough to us, to fall in that ring. Almost none are.</p>
+    </div>
+    <div class="intro-row">
+      <span class="intro-lbl">The empty slots</span>
+      <p>Each planet below shows the colour we <em>predict</em> Roman's four filters would
+        report. Beside it is a second, empty slot for the colour Roman actually
+        {{ g('measured', 'measures') }}. Those slots are empty because the measurements do not
+        exist yet. The day one lands, it goes in the slot — and this site stops being entirely
+        a prediction.</p>
+    </div>
+    <div class="intro-row">
+      <span class="intro-lbl">Honesty</span>
+      <p>Roman's coronagraph is a {{ g('tech-demo-target', 'technology demonstration') }}, not a
+        survey: it is there to prove the technique works. Which planets it observes, and when,
+        is not a published schedule. This board shows who is <em>eligible</em>, drawn from the
+        published study named at the bottom — not a promise that any particular planet will be
+        looked at.</p>
+    </div>
+  </div>
+
+  {# ── The countdown ───────────────────────────────────────────────────────────────────────
+     The one date that is actually announced. Filled in by roman-board.js at view time; the
+     launch date itself is printed as plain text below, so a reader with no JavaScript still
+     gets the fact and loses only the ticking. #}
+  <section class="rtb-launch panel" data-launch="{{ mission.launch_utc }}">
+    <div class="rtb-launch-head">
+      <span class="rtb-lbl">Launch
+        {# Phone only: the two paragraphs below are worth reading but not worth a screen of
+           scrolling before the board itself. On desktop they simply stay open. #}
+        <button class="info-btn xs rtb-note-info" @click="notes = !notes" :class="notes ? 'on' : ''"
+          aria-label="Why this date, and what happens after launch"
+          title="Why this date, and what happens after launch">i</button></span>
+      <span class="rtb-vehicle">{{ mission.vehicle }} · {{ mission.site }}</span>
+    </div>
+    <div class="rtb-clock" role="timer" aria-live="off">
+      <div class="rtb-unit"><b data-rtb="d">––</b><span>days</span></div>
+      <div class="rtb-unit"><b data-rtb="h">––</b><span>hours</span></div>
+      <div class="rtb-unit"><b data-rtb="m">––</b><span>min</span></div>
+      <div class="rtb-unit"><b data-rtb="s">––</b><span>sec</span></div>
+    </div>
+    <p class="rtb-when"><b data-rtb="when">{{ mission.launch_display }}</b></p>
+    <div class="rtb-notes" :class="notes ? 'open' : ''">
+      <p class="rtb-note">{{ mission.launch_note }}</p>
+      <p class="rtb-note dim">{{ mission.after_launch }}</p>
+    </div>
+  </section>
+
+  {# ── Status strip: the headline number, and for now it is zero. ───────────────────────── #}
+  <div class="rtb-status">
+    <div class="rtb-stat">
+      <b class="rtb-big {{ 'lit' if board.any_measured else '' }}">{{ board.n_measured }}</b>
+      <span>colours measured</span>
+    </div>
+    <div class="rtb-stat">
+      <b class="rtb-big">{{ board.n_awaiting }}</b>
+      <span>slots awaiting</span>
+    </div>
+    <div class="rtb-stat">
+      <b class="rtb-big">{{ board.n_targets }}</b>
+      <span>eligible planets</span>
+    </div>
+    <p class="rtb-status-say">
+      {% if board.any_measured %}
+        Real Roman photometry has landed. The filled slots below are measurements, not models.
+      {% else %}
+        No exoplanet has ever had its visible colour measured. Every swatch below is a
+        prediction — which is exactly what makes the empty column worth watching.
+      {% endif %}
+    </p>
+  </div>
+
+  {# ── Scale legend: one shared bar, explained once. ─────────────────────────────────────── #}
+  <div class="rtb-legend">
+    <span class="rtb-legend-t">How far each planet swings from its star
+      <button class="info-btn xs" @click="why = !why" :class="why ? 'on' : ''"
+        aria-label="What does this bar show?" title="What does this bar show?">i</button></span>
+    <div class="rtb-scale" aria-hidden="true">
+      <span class="rtb-hole" style="left: {{ hole_left }}%; width: {{ hole_width }}%"></span>
+      <span class="rtb-tick" style="left: {{ hole_left }}%"><i>{{ inner_mas|round|int }}</i></span>
+      <span class="rtb-tick" style="left: {{ hole_left + hole_width }}%"><i>{{ outer_mas|round|int }}</i></span>
+    </div>
+    <span class="rtb-legend-k">the lit band is where Roman's coronagraph can see</span>
+  </div>
+  <div class="subhead intro-box" x-show="why" x-cloak>
+    <button class="info-x" @click="why = false" aria-label="Close">&times;</button>
+    <div class="intro-row">
+      <span class="intro-lbl">The bar</span>
+      <p>Each planet's marker sits at the <em>widest</em> it can ever appear from its star, seen
+        from Earth, measured in thousandths of an arcsecond. We work that out from the planet's
+        orbit and its distance — both on its own page. The lit band is the ring Roman's
+        coronagraph works in, {{ inner_mas|round|int }} to {{ outer_mas|round|int }}.</p>
+    </div>
+    <div class="intro-row">
+      <span class="intro-lbl">What it does not say</span>
+      <p>Landing in the band is necessary, not sufficient. Orbits are tilted, and a planet spends
+        much of its year closer in than its widest point, so being eligible on paper is not the
+        same as being catchable on the night Roman looks. Working out those odds properly is what
+        the study below did; this bar is the intuition, not the calculation.</p>
+    </div>
+  </div>
+
+  {# ── The board ────────────────────────────────────────────────────────────────────────── #}
+  <ol class="rtb-board">
+    {% for slot in board.slots %}
+    <li class="rtb-slot{{ ' is-unmodelled' if not slot.modelled }}{{ ' is-measured' if slot.measured }}">
+
+      <div class="rtb-id">
+        {% if slot.modelled %}
+        <a class="rtb-name" href="/planet/{{ slot.record.id }}">{{ slot.record.name }}</a>
+        {% else %}
+        <span class="rtb-name">{{ slot.name }}</span>
+        {% endif %}
+        <span class="rtb-host">
+          {% if slot.modelled %}{{ slot.host }}{% if slot.distance_ly %} ·
+            {{ '{:,.1f}'.format(slot.distance_ly) }} light-years{% endif %}
+          {% else %}not in our catalogue{% endif %}
+        </span>
+        {% if slot.all_scenarios %}
+        <span class="rtb-tag" title="Named by the source study as reachable under all three of its scenarios">most reachable</span>
+        {% endif %}
+      </div>
+
+      {# The pair. Left: what we predict. Right: what Roman measured — empty, and meant to be. #}
+      <div class="rtb-pair">
+        <div class="rtb-half">
+          <span class="rtb-half-l">Predicted</span>
+          {% if slot.predicted_hex %}
+          <span class="rtb-sw" style="background: {{ slot.predicted_hex }}"></span>
+          <span class="rtb-hex">{{ slot.predicted_hex }}</span>
+          {% else %}
+          <span class="rtb-sw is-void"></span>
+          <span class="rtb-hex dim">no model</span>
+          {% endif %}
+        </div>
+        <div class="rtb-half">
+          <span class="rtb-half-l">Measured{% if slot.epoch %} · {{ slot.epoch }}{% endif %}</span>
+          {% if slot.measured %}
+          <span class="rtb-sw" style="background: {{ slot.measured_hex }}"></span>
+          <span class="rtb-hex">{{ slot.measured_hex }}</span>
+          {% else %}
+          <span class="rtb-sw is-void" aria-label="No measurement yet"></span>
+          <span class="rtb-hex dim">awaiting Roman</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="rtb-reach">
+        {% if slot.bar_pos is not none %}
+        <div class="rtb-scale sm">
+          <span class="rtb-hole" style="left: {{ hole_left }}%; width: {{ hole_width }}%"></span>
+          <span class="rtb-mark r-{{ slot.reach }}" style="left: {{ slot.bar_pos }}%"></span>
+        </div>
+        <span class="rtb-mas">{{ '{:,.0f}'.format(slot.separation_mas) }}
+          <i>mas at widest{% if slot.reach == 'inside' %} · inside the ring{% elif slot.reach == 'beyond' %} · past the outer edge{% endif %}</i></span>
+        {% else %}
+        <span class="rtb-mas dim"><i>no orbit on file</i></span>
+        {% endif %}
+      </div>
+
+      {% if slot.note %}
+      <p class="rtb-note-row">{{ slot.note }}</p>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+
+  {# ── Provenance. The whole board rests on one paper; say so, and link it. ─────────────── #}
+  <section class="rtb-src panel">
+    <h2>Where this list comes from</h2>
+    <p>The eligible planets are Table 4 of <a href="{{ source.url }}" rel="noopener">{{ source.title }}</a>,
+      {{ source.authors }}, {{ source.journal }} — planets around stars brighter than magnitude 7
+      with better than a one-in-four chance of being observable.</p>
+    <p class="rtb-quote">“{{ source.counts_quote }}”</p>
+    <p>{{ source.note }} Of those, <b>{{ board.n_modelled }}</b> are in our catalogue and have a
+      modelled colour here; {{ board.n_targets - board.n_modelled }} are not, and say why on
+      their own row.</p>
+    <p class="rtb-note dim">Launch date and vehicle: <a href="{{ mission.source_url }}" rel="noopener">NASA</a>.
+      {{ instrument.dark_hole_note }} {{ instrument.contrast_note }}</p>
+  </section>
+
+  <p class="rtb-foot"><a href="/how">How we get the colours →</a>
+    <a href="/">◧ Browse all planets →</a></p>
+</div>
+
+{# Not deferred: it registers no Alpine component and touches only its own nodes, so running it
+   at parse time keeps the clock from showing dashes for a frame longer than it must. #}
+<script src="/static/roman-board.js?v={{ build_id }}"></script>
+{% endblock %}
