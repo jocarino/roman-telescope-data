@@ -1113,10 +1113,14 @@ document.addEventListener("alpine:init", () => {
     init() {
       const v = localStorage.getItem("scopeView");
       if (v === "full" || v === "roman") this.view = v;
-      // The Light-source knob position also survives hops — but only onto planets that
-      // carry a Sun-swap (all should; the guard keeps a missing one from wedging the UI).
+      const fromPlanet = document.referrer.includes("/planet/");
+      // The Light-source knob carries only across planet-to-planet hops, never onto a page
+      // you arrived at fresh or from the gallery. Every other knob is a rendering
+      // preference; this one restates the physics — a sticky "sun" would silently re-light
+      // a K-giant's planet by a G2 V star, and hand it a hex the gallery card never showed.
+      // Same rule (and the same reason) as the telescope photo below.
       const il = localStorage.getItem("scopeIllum");
-      if (il === "sun" && this.hasSun) this.illum = "sun";
+      if (il === "sun" && this.hasSun && fromPlanet) this.illum = "sun";
       // Shape shares the gallery's Sphere/Pixel key so both pages always agree.
       const hs = localStorage.getItem("planetStyle");
       if (hs === "retro" || hs === "smooth") this.heroStyle = hs;
@@ -1126,7 +1130,6 @@ document.addEventListener("alpine:init", () => {
       // The real photo persists only across planet-to-planet hops (same-system links);
       // arriving from the gallery or a fresh visit always opens on the modelled render.
       const src = localStorage.getItem("heroSource");
-      const fromPlanet = document.referrer.includes("/planet/");
       this.heroSource =
         src === "telescope" && fromPlanet && this.obs.length ? "telescope" : "model";
       window.__randomGo = () => this.randomGo();  // wire the R shortcut to this page
@@ -1225,6 +1228,14 @@ document.addEventListener("alpine:init", () => {
     // full-spectrum colour (the Roman channel has no lamp of its own to show).
     lampHex() { return this.sunlit() ? this.sunLampHex : this.starHex; },
     lampLabel() { return this.sunlit() ? "The Sun · G2 V · 5772 K" : this.starLabel; },
+    // The caption under the lamp. Swapped, this is NOT the light the planet reflects — it's
+    // a hypothetical. Saying otherwise would be the one flat falsehood on the page, so the
+    // wording flips with the knob and the real star stays named right beside it.
+    lampCap() {
+      return this.sunlit()
+        ? "a stand-in — not the light this planet reflects"
+        : "the light this planet reflects";
+    },
     duoBase() { return this.sunlit() ? this.sunHex : this.fullHex; },
     copyDuo() {
       navigator.clipboard?.writeText(this.lampHex() + ", " + this.duoBase());
