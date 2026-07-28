@@ -596,6 +596,204 @@
     </div>
   </div>
 
+  {# ── Model space: the same planet somewhere else, and under other assumptions. ──────────
+     Everything here is anchored so that the planet's real orbit and the pipeline's real
+     assumptions reproduce the swatch above exactly — the sliders start on the truth and move
+     away from it, never the other way round. See web/modelspace.py. ── #}
+  {% if ctx.modelspace %}{% set ms = ctx.modelspace %}
+  <div x-data="modelspace({{ ms|tojson|forceescape }})">
+
+    <div class="panel movepanel">
+      <div class="dossier-head">
+        <h3>Move this planet <span class="lamp-tag">WHAT IF IT ORBITED SOMEWHERE ELSE?</span></h3>
+        <button class="info-btn" @click="toggleInfo('move')" :class="info === 'move' ? 'on' : ''"
+          :aria-expanded="info === 'move'" title="How can we know this?"
+          aria-label="How can we know what it would look like elsewhere?">i</button>
+      </div>
+      <div class="dossier-help" x-show="info === 'move'" x-cloak>
+        <div class="assume">
+          <button class="info-x" @click="info = ''" aria-label="Close">&times;</button>
+          <p>A planet's colour is mostly a consequence of <strong>where it is</strong>. Drag it
+            inward and it heats up: methane breaks apart, cloud decks boil away, sodium starts
+            eating the yellow out of its star's light. Drag it outward and everything freezes
+            and condenses back. This slider re-runs the colour model at each distance and shows
+            you the result.</p>
+          <p>Temperature is scaled from this planet's own
+            {{ g('equilibrium-temperature', 'equilibrium temperature') }} as distance to the
+            power of −½, holding the star fixed — so at its real orbit the slider reproduces
+            the colour at the top of this page <em>exactly</em>, and moves away from there.</p>
+          <p><strong>This is not a measurement.</strong> It is one model's opinion about a
+            planet that is not where we put it.
+            {% if ms.measured_base %}This world's starting colour <em>is</em> real — it comes
+            from a measured spectrum — but the moment you move the slider you are looking at a
+            model.{% endif %}</p>
+          {% if ms.cahoy %}
+          <p>The marks under the slider are the {{ g('cahoy-grid', 'Cahoy et al. 2010') }}
+            reference grid — independently published model spectra at 0.8, 2, 5 and 10 AU, the
+            set the Roman Coronagraph community uses. Click one to jump there and compare.
+            <strong>Where the two disagree, that gap is the honest size of the uncertainty</strong>
+            — the grid models cloud condensation chemistry that our smooth model only
+            approximates. The grid is computed for a Sun-like star, so its distances are used
+            as published rather than rescaled for this host.</p>
+          {% endif %}
+        </div>
+      </div>
+      <div class="ms-grid">
+        <div class="ms-view">
+          <canvas class="ms-canvas" x-ref="msCanvas" width="256" height="256"
+            aria-label="{{ rec.name }} rendered at the chosen orbital distance"></canvas>
+          <div class="ms-id">
+            <span class="ms-swatch" :style="{ background: hex() }"
+              style="background: {{ tc.hex }}"></span>
+            <code class="ms-hex" @click="copy(hex())" title="Copy this hex"
+              x-text="hex()">{{ tc.hex }}</code>
+            <span class="ms-athome" x-show="atHome()">its real orbit</span>
+          </div>
+        </div>
+        <div class="ms-controls">
+          <div class="ro-row"><span>{{ g('semi-major-axis', 'DISTANCE') }}</span>
+            <b x-text="auText()"></b></div>
+          <div class="ro-row"><span>{{ g('equilibrium-temperature', 'TEMPERATURE') }}</span>
+            <b x-text="tempText()"></b></div>
+          <div class="ro-row"><span>{{ g('luminance', 'BRIGHTNESS') }}</span>
+            <b x-text="lumText()"></b></div>
+          <div class="ms-regime" x-text="regimeText()"></div>
+          <div class="ms-slider-wrap">
+            <input type="range" class="phase-slider ms-slider" min="0" :max="n() - 1"
+              step="1" x-model.number="idx" @input="moved()"
+              aria-label="Orbital distance: drag left to move the planet closer to its star, right to move it further out">
+            <div class="ms-marks" aria-hidden="true">
+              <i class="ms-home-mark" :style="{ left: homePct() }"
+                title="Where this planet really orbits"></i>
+              <template x-for="c in cahoy" :key="c.au">
+                <button type="button" class="ms-tick" :style="{ left: cahoyPct(c) }"
+                  @click="gotoCahoy(c)"
+                  :title="'Cahoy grid reference at ' + c.au + ' AU — click to jump here'"
+                  :aria-label="'Jump to the Cahoy grid distance ' + c.au + ' AU'">
+                  <span class="ms-tick-sw" :style="{ background: c.h }"></span>
+                </button>
+              </template>
+            </div>
+          </div>
+          <div class="phase-scale ms-scale" aria-hidden="true">
+            <span>CLOSER · HOTTER</span><span>FURTHER · COLDER</span>
+          </div>
+          <div class="ms-foot">
+            <span class="ms-move" x-text="moveText()"></span>
+            <button type="button" class="reset-btn ms-reset" @click="goHome()" :disabled="atHome()"
+              :title="atHome() ? 'Already at its real orbit' : 'Put the planet back where it really is'">&#10226;
+              Back to its real orbit</button>
+          </div>
+          {% if ms.cahoy %}
+          <div class="ms-legend"><i class="ms-legend-tick"></i>{{ g('cahoy-grid', 'Cahoy 2010') }}
+            reference grid — click a mark to compare the two models there</div>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if ms.year %}
+      {# ── The colour year: the same track, indexed by time instead of by the slider. ── #}
+      <div class="ms-year">
+        <div class="ms-year-head">
+          <span class="knob-name">A year on this planet
+            <button class="info-btn xs" @click="toggleInfo('year')"
+              :class="info === 'year' ? 'on' : ''" aria-label="What is a colour year?"
+              title="What is a colour year?">i</button></span>
+          <button type="button" class="phase-play ms-play" @click="toggleYear()"
+            :class="playing ? 'on' : ''" :aria-pressed="playing"
+            :title="playing ? 'Stop the orbit' : 'Watch one whole orbit'"
+            x-text="playing ? '❚❚ stop' : '▶ watch one orbit'"></button>
+        </div>
+        <p class="ms-year-line">Its orbit is
+          <strong>{{ g('eccentricity', 'stretched') }}</strong> (e&nbsp;=&nbsp;{{ ms.year.e }}), so
+          it does not stay at one distance:
+          {%- if ms.year.q and ms.year.Q %} it runs from
+          <strong>{{ '%.3g'|format(ms.year.q) }}&nbsp;AU</strong> at its closest to
+          <strong>{{ '%.3g'|format(ms.year.Q) }}&nbsp;AU</strong> at its furthest,
+          {%- else %} its furthest point is
+          <strong>{{ '%.1f'|format((1 + ms.year.e) / (1 - ms.year.e)) }}×</strong> further out
+          than its closest (its orbit's size in AU has not been measured),
+          {%- endif %} and its modelled colour changes as it goes. It moves fastest when
+          closest, so it spends only <strong x-text="hotText()"></strong> near that scorching
+          inner point.</p>
+        <div class="dossier-help" x-show="info === 'year'" x-cloak>
+          <div class="assume">
+            <button class="info-x" @click="info = ''" aria-label="Close">&times;</button>
+            <p>This is not a second model — it is the slider above, driven by the clock instead
+              of by your hand. The planet's distance around one orbit comes from solving
+              Kepler's equation, in equal steps of <em>time</em>, which is why the loop dwells
+              out in the cold and flashes through
+              {{ g('periastron', 'periastron') }} rather than spending half the year at each end.</p>
+            <p><strong>The caveat that matters:</strong> every colour here assumes the
+              atmosphere is instantly in balance with the starlight falling on it. Real
+              atmospheres lag — clouds and chemistry take far longer to catch up than a fast
+              periastron pass allows. Treat this as where the model points, not as a forecast
+              of what a telescope would see on a given night.</p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    {# ── What-if: the assumptions, as knobs rather than as a disclaimer. ── #}
+    <div class="panel whatifpanel">
+      <div class="dossier-head">
+        <h3>How much of this colour is the model's opinion?
+          <span class="lamp-tag">CHANGE ONE ASSUMPTION</span></h3>
+        <button class="info-btn" @click="toggleInfo('whatif')" :class="info === 'whatif' ? 'on' : ''"
+          :aria-expanded="info === 'whatif'" title="Why does this matter?"
+          aria-label="Why do the model assumptions matter?">i</button>
+      </div>
+      <div class="dossier-help" x-show="info === 'whatif'" x-cloak>
+        <div class="assume">
+          <button class="info-x" @click="info = ''" aria-label="Close">&times;</button>
+          <p>Nobody has measured this planet's clouds or its
+            {{ g('metallicity') }}. The pipeline has to assume both to produce a colour at all,
+            and it says so on every page. Here you can turn those assumptions and watch what
+            they were worth.</p>
+          <p>Each swatch changes <strong>exactly one</strong> assumption and re-runs the model;
+            everything else, including the planet's real temperature and its star, is held
+            fixed. The number under each is
+            {{ g('delta-e2000', 'ΔE2000') }}, the standard measure of how far apart two colours
+            look: below about 2 the eye cannot tell, above about 10 they are plainly different
+            colours.</p>
+          <p>A planet whose swatches barely move is one where the assumptions do not matter
+            much. One where they swing wildly is a planet whose colour you should trust less —
+            and that is worth being able to see rather than being asked to take on trust.</p>
+        </div>
+      </div>
+      <div class="wi-grid">
+        <div class="ms-view">
+          <canvas class="ms-canvas" x-ref="wiCanvas" width="256" height="256"
+            aria-label="{{ rec.name }} under the chosen model assumption"></canvas>
+          <div class="ms-id">
+            <span class="ms-swatch" :style="{ background: whatIfHex() }"
+              style="background: {{ tc.hex }}"></span>
+            <code class="ms-hex" @click="copy(whatIfHex())" title="Copy this hex"
+              x-text="whatIfHex()">{{ tc.hex }}</code>
+            <span class="ms-athome" x-text="deText()"></span>
+          </div>
+        </div>
+        <div class="wi-side">
+          <div class="wi-chips">
+            <button type="button" class="wi-chip" :class="picked === null ? 'on' : ''"
+              @click="picked = null; paintWhatIf()"
+              title="The assumptions the pipeline actually used">
+              <span class="wi-sw" style="background: {{ tc.hex }}"></span>As modelled</button>
+            <template x-for="v in whatif" :key="v.id">
+              <button type="button" class="wi-chip" :class="picked === v.id ? 'on' : ''"
+                @click="pick(v.id)" :title="v.detail">
+                <span class="wi-sw" :style="{ background: v.h }"></span><span x-text="v.label"></span>
+                <b class="wi-de" x-text="'ΔE ' + v.de"></b></button>
+            </template>
+          </div>
+          <p class="wi-detail" x-text="whatIfDetail()"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   {# ── Planet data card: colour + planet stats; provenance & model assumptions on the ℹ ── #}
   <div class="panel dossier">
     <div class="dossier-head">

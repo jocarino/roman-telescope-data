@@ -103,6 +103,36 @@ class CahoyProvider:
         return np.clip(alb, 0.0, 1.0)
 
 
+# The grid's four native star-planet distances. Published values, not a discretisation we
+# chose — `cahoy_reference_points` marks exactly these on the migration slider.
+CAHOY_DISTANCES_AU: tuple[float, ...] = (0.8, 2.0, 5.0, 10.0)
+
+
+def grid_albedo_at(
+    wavelengths_nm: np.ndarray,
+    *,
+    dist_au: float,
+    metallicity: float,
+    grid_dir: Path = CAHOY_GRID_DIR,
+) -> np.ndarray:
+    """Full-phase albedo the grid itself publishes at one of its distances, at the nearest
+    available metallicity (which also picks the Jupiter/Neptune class — the two classes occupy
+    disjoint metallicity ranges: 1-3× vs 10-30× solar).
+
+    Raises ProviderUnavailable when the grid is not installed, like every other entry point
+    here, so callers can degrade rather than break.
+    """
+    points = _load_manifest(grid_dir)
+    at_distance = [p for p in points if abs(p.dist_au - dist_au) < 1e-6]
+    if not at_distance:
+        raise ProviderUnavailable(f"Cahoy grid has no point at {dist_au} AU.")
+    point = min(
+        at_distance,
+        key=lambda p: abs(np.log10(p.metallicity) - np.log10(max(metallicity, 0.1))),
+    )
+    return CahoyProvider(point).geometric_albedo(wavelengths_nm)
+
+
 def _nearest(points: list[_GridPoint], dist_au: float, metallicity: float) -> _GridPoint:
     def cost(p: _GridPoint) -> float:
         return (np.log10(p.dist_au) - np.log10(max(dist_au, 0.1))) ** 2 + (

@@ -2452,3 +2452,126 @@ a.rtb-name:hover { color: var(--accent); }
   .rtb-notes { display: none; }
   .rtb-notes.open { display: block; }
 }
+
+/* ---- MODEL SPACE: move the planet, and turn the model's assumptions ----------------------
+   Two panels sharing one Alpine component (web/static/modelspace.js). Both are "what if"
+   surfaces, so both keep the real planet's swatch on screen to compare against and neither
+   ever restyles the page hero — what you are looking at is explicitly not this planet. */
+
+/* The controls get a hard maximum: on a wide panel a 1fr second column stretches the readout
+   rows to ~900px, leaving each label marooned from its value at the far end of the row. */
+.ms-grid, .wi-grid {
+  display: grid; grid-template-columns: auto minmax(260px, 560px);
+  gap: 18px 26px; margin-top: 14px; align-items: start; justify-content: start;
+}
+.ms-view { display: flex; flex-direction: column; gap: 9px; align-items: flex-start; }
+.ms-canvas {
+  width: 128px; height: 128px; display: block; background: transparent;
+  border: 1px solid var(--line); box-shadow: 3px 3px 0 var(--line);
+}
+.ms-id { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ms-swatch {
+  width: 26px; height: 26px; flex: none; border: 1px solid var(--line);
+  box-shadow: 2px 2px 0 var(--line);
+}
+.ms-hex {
+  font-family: var(--mono); font-size: 11px; cursor: pointer;
+  background: var(--bg-3); border: 1px solid var(--line); padding: 2px 6px; color: var(--fg);
+}
+.ms-hex:hover { border-color: var(--accent); color: var(--accent); }
+.ms-athome {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--fg-faint);
+}
+.ms-controls { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+/* The regime name is the sentence the slider is really writing, so it gets the accent and
+   enough room not to reflow the panel as it changes between short and long names. */
+.ms-regime {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--accent); margin: 7px 0 2px; min-height: 2.4em;
+}
+
+/* The slider, plus the reference marks that sit under it. The marks track is inset by half a
+   thumb width at each end so a mark lines up with where the thumb centre actually stops. */
+/* Two bands under the track, not one: the planet's real orbit often sits almost exactly on a
+   Cahoy grid distance (Jupiter's 5.2 AU against the grid's 5 AU), and stacked in one band the
+   "REAL" label lands underneath a tick and both become unreadable. */
+.ms-slider-wrap { position: relative; padding-bottom: 34px; }
+.ms-slider { margin-top: 2px; }
+.ms-marks { position: absolute; left: 7px; right: 7px; bottom: 0; height: 32px; }
+.ms-home-mark {
+  position: absolute; top: 0; width: 1px; height: 7px; background: var(--fg-dim);
+  transform: translateX(-.5px);
+}
+.ms-home-mark::after {
+  content: "REAL"; position: absolute; top: 7px; left: 50%; transform: translateX(-50%);
+  font-family: var(--pixel); font-size: 6px; letter-spacing: .3px; color: var(--fg-faint);
+}
+.ms-tick {
+  position: absolute; top: 21px; transform: translateX(-50%); padding: 0; cursor: pointer;
+  background: none; border: 0; line-height: 0;
+}
+.ms-tick-sw {
+  display: block; width: 9px; height: 9px; border: 1px solid var(--line);
+}
+.ms-tick:hover .ms-tick-sw, .ms-tick:focus-visible .ms-tick-sw { border-color: var(--accent); }
+.ms-scale { margin-top: 2px; }
+.ms-foot {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  flex-wrap: wrap; margin-top: 10px;
+}
+.ms-move {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--fg-dim);
+}
+/* .reset-btn is full-width in the scope rail, where it is the only control on its row. Here
+   it shares a row with the "3× further out" readout, so it sizes to its own label. */
+.ms-reset { width: auto; font-size: 9px; padding: 5px 9px; }
+.ms-legend {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .03em; color: var(--fg-faint);
+  display: flex; align-items: center; gap: 6px; margin-top: 8px;
+}
+/* Filled, not hollow: an empty bordered square in front of a line of text reads as an
+   unticked checkbox. This is a key for the marks above, so it looks like one of them. */
+.ms-legend-tick {
+  width: 9px; height: 9px; flex: none; border: 1px solid var(--line);
+  background: var(--fg-faint);
+}
+
+/* ---- The colour year: one orbit, on the clock ---- */
+.ms-year { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+.ms-year-head {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  flex-wrap: wrap;
+}
+.ms-play { font-size: 8.5px; padding: 4px 7px; }
+.ms-year-line { margin: 8px 0 0; font-size: 12.5px; line-height: 1.55; color: var(--fg-dim); }
+.ms-year-line strong { color: var(--fg); }
+
+/* ---- What-if chips: one assumption each ---- */
+.wi-side { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.wi-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.wi-chip {
+  display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .02em; text-align: left;
+  color: var(--fg-dim); background: var(--bg-3); border: 1px solid var(--line);
+  border-radius: 0; padding: 5px 8px; box-shadow: 2px 2px 0 var(--line);
+}
+.wi-chip:hover { border-color: var(--accent); color: var(--fg); }
+.wi-chip.on { border-color: var(--accent); color: var(--accent); box-shadow: 2px 2px 0 var(--accent); }
+.wi-chip:active { transform: translate(1px, 1px); box-shadow: none; }
+.wi-sw { width: 15px; height: 15px; flex: none; border: 1px solid var(--line); }
+.wi-de { font-size: 9px; color: var(--fg-faint); font-weight: inherit; }
+.wi-chip.on .wi-de { color: var(--accent); }
+.wi-detail { margin: 0; font-size: 12.5px; line-height: 1.55; color: var(--fg-dim); min-height: 3.1em; }
+
+@media (max-width: 720px) {
+  .ms-grid, .wi-grid { grid-template-columns: 1fr; gap: 14px; }
+  /* Vertical space is precious on a phone: the render shrinks and sits beside its swatch
+     rather than stacking above it, so the slider stays within the first screen. */
+  .ms-view { flex-direction: row; align-items: center; gap: 12px; }
+  .ms-canvas { width: 84px; height: 84px; }
+  .ms-id { flex-direction: column; align-items: flex-start; gap: 5px; }
+  .ms-regime { min-height: 0; }
+  .wi-detail { min-height: 0; }
+}

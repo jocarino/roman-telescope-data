@@ -63,10 +63,18 @@ def model_for(
     equilibrium_temp_k: float | None,
     radius_r_earth: float | None,
     mass_m_earth: float | None = None,
+    metallicity_override: float | None = None,
 ) -> AlbedoModel:
+    """`metallicity_override` replaces the mass-metallicity relation's value — the knob the
+    what-if panel turns (pipeline.modelspace). Ignored for rocky worlds, which carry no
+    meaningful atmospheric metallicity. None (the default) = derive it from mass as usual."""
     t = equilibrium_temp_k if equilibrium_temp_k is not None else 300.0
     radius = radius_r_earth if radius_r_earth is not None else 8.0
-    z_rel = _metallicity(mass_m_earth, radius_r_earth)
+    z_rel = (
+        metallicity_override
+        if metallicity_override is not None
+        else _metallicity(mass_m_earth, radius_r_earth)
+    )
 
     if radius < 1.6:
         # Rocky: grey, but albedo + Rayleigh drift a little with temperature so terrestrial
