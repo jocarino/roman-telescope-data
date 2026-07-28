@@ -315,6 +315,10 @@ a.badge:active { transform: translateY(1px); }
    toolbar, kept to one compact line so it costs almost nothing above the grid. Sits with the
    count, right-aligned on desktop and left-aligned once the toolbar stacks. */
 .fchips {
+  /* One height for every chip in the row, "Clear all" included: the × inside a filter chip is
+     sized as a touch target, and left to itself it pushed those chips taller than the plain
+     button beside them. Both variants read the same variable so the row stays a single band. */
+  --fchip-h: 28px;
   flex: 0 0 100%; width: 100%; min-width: 0;
   display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
   justify-content: flex-end; margin-top: 6px;
@@ -324,7 +328,8 @@ a.badge:active { transform: translateY(1px); }
   color: var(--fg-faint); margin-right: 2px;
 }
 .fchip {
-  display: inline-flex; align-items: center; gap: 6px; padding: 4px 4px 4px 8px;
+  display: inline-flex; align-items: center; gap: 6px; padding: 0 4px 0 8px;
+  min-height: var(--fchip-h);
   border: 1px solid var(--line); background: var(--bg-3); color: var(--fg);
   font-family: var(--mono); font-size: 11px; letter-spacing: .2px; line-height: 1.4;
   white-space: nowrap; max-width: 100%;
@@ -336,22 +341,24 @@ a.badge:active { transform: translateY(1px); }
    and on a phone it is the difference between removing a filter and opening a planet. */
 .fchip-x {
   border: 0; background: none; color: var(--fg-dim); cursor: pointer; font-size: 14px;
-  line-height: 1; font-family: inherit; min-width: 26px; min-height: 26px;
+  line-height: 1; font-family: inherit; min-width: 26px;
+  /* Stretches to the chip's full height instead of setting it — the target stays as big as
+     it was without making the chip taller than the button next to it. */
+  align-self: stretch;
   display: inline-flex; align-items: center; justify-content: center; padding: 0;
 }
 .fchip-x:hover, .fchip-x:focus-visible { color: var(--accent); }
 /* The catch-all only earns its place once there are several chips to catch. */
 .fchip-clear {
-  padding: 4px 9px; cursor: pointer; color: var(--accent); border-color: var(--accent);
-  text-transform: uppercase; letter-spacing: .6px; font-size: 10px; min-height: 26px;
+  padding: 0 9px; cursor: pointer; color: var(--accent); border-color: var(--accent);
+  text-transform: uppercase; letter-spacing: .6px; font-size: 10px;
 }
 .fchip-clear:hover { background: var(--accent); color: var(--bg); }
 @media (max-width: 640px) { .fchips { justify-content: flex-start; } }
 /* Touch: nothing hovers, so the × has to be big enough to hit first time. */
 @media (pointer: coarse) {
-  .fchip { padding-top: 2px; padding-bottom: 2px; }
-  .fchip-x { min-width: 34px; min-height: 34px; }
-  .fchip-clear { min-height: 34px; }
+  .fchips { --fchip-h: 36px; }
+  .fchip-x { min-width: 34px; }
 }
 /* "Find similar colours" action shares the palette-action pill look, flagged in the accent. */
 .badge.similar { color: var(--accent); border-color: var(--accent); }
