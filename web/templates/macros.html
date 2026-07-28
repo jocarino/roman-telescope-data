@@ -522,7 +522,13 @@
      follows the Light-source knob (its own star ⇄ the Sun) where that knob exists. ── #}
   <div class="panel lamp" x-data="{ lh: false }">
     <div class="dossier-head">
-      <h3>{{ g('host-star', 'Host star') }} <span class="lamp-tag">{{ g('the-lamp', 'THE LAMP') }}</span></h3>
+      {# Swapped, the panel is no longer showing the host star at all, so the heading stops
+         claiming it is: "Host star ▸ THE LAMP" becomes "Light source ▸ SWAPPED FOR THE SUN".
+         Server-rendered in the native state, which is now what a fresh arrival always gets. #}
+      <h3><span x-show="!sunlit()">{{ g('host-star', 'Host star') }}</span><span
+        x-show="sunlit()" x-cloak>Light source</span> <span class="lamp-tag"
+        x-show="!sunlit()">{{ g('the-lamp', 'THE LAMP') }}</span><span
+        class="lamp-tag swapped" x-show="sunlit()" x-cloak>SWAPPED FOR THE SUN</span></h3>
       <button class="info-btn" @click="lh = !lh" :class="lh ? 'on' : ''" :aria-expanded="lh"
         title="Why show the star's colour?" aria-label="Why show the star's colour?">i</button>
     </div>
@@ -553,7 +559,11 @@
           <span class="lamp-name" x-text="lampLabel()">{{ star_label|trim }}</span>
           <code class="lamp-hex" @click="copy(lampHex())" title="Copy the star's hex"
             x-text="lampHex()">{{ ctx.star.hex }}</code>
-          <span class="lamp-cap">the light this planet reflects</span>
+          <span class="lamp-cap" x-text="lampCap()">the light this planet reflects</span>
+          {# Swapped, the real star never leaves the screen — the hypothetical lamp is above
+             it, the fact is here. #}
+          <span class="lamp-cap lamp-real" x-show="sunlit()" x-cloak>its real star:
+            <b x-text="starLabel"></b></span>
         </div>
       </div>
       <div class="duo-col">
@@ -639,6 +649,12 @@
           x-text="view === 'roman' ? 'Roman four-band' : (sunlit() ? 'full-spectrum model, lit by the Sun' : 'full-spectrum model')"></span></div>
         <table class="params">
           <tr><td>Base hex</td><td><code x-text="curHex()">{{ tc.hex }}</code></td></tr>
+          {# Sun-lit, the base hex above is NOT the colour the gallery card shows for this
+             planet — the card is always lit by the planet's own star. Two numbers for one
+             planet with nothing joining them reads as a bug, so name the other one here. #}
+          <tr x-show="sunlit()" x-cloak><td>Lit by its own star</td>
+            <td><code x-text="fullHex"></code>
+              <span class="hex-note">— the colour on its gallery card</span></td></tr>
           <tr><td>{{ g('luminance', 'Reflected brightness (Y)') }}</td><td x-text="curLum().toFixed(3)"></td></tr>
           <tr><td>Out of {{ g('gamut', 'sRGB gamut') }}</td><td x-text="curOog() ? 'yes' : 'no'"></td></tr>
         </table>

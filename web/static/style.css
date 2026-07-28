@@ -1221,6 +1221,13 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
   font-family: var(--mono); font-size: 10px; letter-spacing: .04em; text-transform: uppercase;
   color: var(--fg-faint);
 }
+/* Amber, not accent: the swap is a state flag, not something you can click — same language as
+   the out-of-gamut LED. It marks the two places the page would otherwise read as fact:
+   the heading tag, and the line naming the star the planet is actually lit by. */
+.lamp-tag.swapped { color: #ffb000; border-color: #ffb000; }
+.lamp-cap.lamp-real { color: var(--fg-dim); }
+.lamp-cap.lamp-real b { color: #ffb000; font-weight: inherit; }
+.hex-note { font-family: var(--mono); font-size: 10px; color: var(--fg-faint); }
 .duo-col { display: flex; flex-direction: column; gap: 8px; }
 .duo-lbl {
   font-family: var(--mono); font-size: 10px; letter-spacing: .05em; text-transform: uppercase;
