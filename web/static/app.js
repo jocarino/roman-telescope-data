@@ -87,7 +87,7 @@ document.addEventListener("alpine:init", () => {
     distBand: "all",
     hz: "all",        // habitable-zone lens: see hzLabels
     fic: false,       // "seen in fiction" toggle: show only planets in the pop-culture overlay
-    sort: "name",
+    sort: "curated",  // the gallery's default order — see sortLabels and _filterDefaults
     // Which colour the whole gallery is keyed to: "full" (the modelled full spectrum) or
     // "roman" (what the Coronagraph's four bands would recover). Every colour-derived control
     // re-keys to it: the swatch, the colour-family chips, the brightness sort, the
@@ -129,9 +129,14 @@ document.addEventListener("alpine:init", () => {
       ["far", "300–1,500 ly", 1500],
       ["remote", "> 1,500 ly", Infinity],
     ],
+    // "curated" is the default and deliberately first: alphabetical opens the catalogue on a
+    // wall of near-identical cream giants, which is the least representative thing here. The
+    // curated order (pipeline/curate.py, shipped as each planet's "c") opens on the five
+    // solar-system worlds we can check against real measurements, then deals one card of every
+    // colour family in turn. Name is still here, one click away, for looking something up.
     sortLabels: {
-      name: "Sort: name", temp: "Sort: hottest", lum: "Sort: brightest",
-      dist: "Sort: nearest Earth", de: "Sort: colour lost to Roman",
+      curated: "Sort: curated", name: "Sort: name", temp: "Sort: hottest",
+      lum: "Sort: brightest", dist: "Sort: nearest Earth", de: "Sort: colour lost to Roman",
     },
     // Colour exploration: a family-chip filter + a "similar to this planet" perceptual sort.
     family: null,   // selected colour-family chip (e.g. "blue"), or null for all
@@ -195,7 +200,7 @@ document.addEventListener("alpine:init", () => {
       if (k === "hz") return this.hz !== "all";
       if (k === "dist") return this.distBand !== "all";
       if (k === "disc") return this.disc !== "all";
-      if (k === "sort") return this.sort !== "name";
+      if (k === "sort") return this.sort !== this._filterDefaults.sort;
       return false;  // render + accent are display prefs, not filters: no value is "set"
     },
     toggleSec(k) {
@@ -265,7 +270,7 @@ document.addEventListener("alpine:init", () => {
     _filterKeys: ["q", "prov", "ptype", "disc", "distBand", "hz", "family", "fic", "sort", "nearId"],
     _filterDefaults: {
       q: "", prov: "all", ptype: "all", disc: "all", distBand: "all", hz: "all",
-      family: null, fic: false, sort: "name", nearId: null,
+      family: null, fic: false, sort: "curated", nearId: null,
     },
     filtersDirty() {
       return this._filterKeys.some((k) => this[k] !== this._filterDefaults[k]);
@@ -678,10 +683,19 @@ document.addEventListener("alpine:init", () => {
         const roman = this.view === "roman";
         const lumOf = (p) => (roman && p.rlum != null ? p.rlum : p.lum) || 0;
         items.sort((a, b) => {
+          // The default order. Every ordering decision was made at build time and arrives as one
+          // integer per planet (pipeline/curate.py), so this is a numeric compare and nothing
+          // more — no rule to keep in step with the build. An index written before the field
+          // existed has no "c" at all: those fall to the end and settle by name below.
+          if (s === "curated" && (a.c != null || b.c != null)) {
+            const d = (a.c ?? Infinity) - (b.c ?? Infinity);
+            if (d) return d;
+          }
           // Name sort is a plain lowercase code-unit compare, NOT localeCompare: the build
           // pre-sorts the inlined boot slice with the exact same rule (web/build.py), so the
-          // first-paint cards are guaranteed to be the head of the full sorted list.
-          if (s === "name") {
+          // first-paint cards are guaranteed to be the head of the full sorted list. It is also
+          // where the curated sort lands if an index predates the "c" field.
+          if (s === "name" || s === "curated") {
             // Compare a lowercase key cached on the row (_adopt fills it in), not
             // a.name.toLowerCase() here: a comparator runs ~73k times over this catalogue, so
             // lowercasing inside it built ~146k throwaway strings per sort. Same ordering,

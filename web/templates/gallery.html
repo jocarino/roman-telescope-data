@@ -197,7 +197,7 @@
     <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
       @click.outside="open=false">
       <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
-        :class="sort !== 'name' || prov !== 'all' || ptype !== 'all' || disc !== 'all' || distBand !== 'all' || hz !== 'all' || fic ? 'active' : ''"
+        :class="sort !== 'curated' || prov !== 'all' || ptype !== 'all' || disc !== 'all' || distBand !== 'all' || hz !== 'all' || fic ? 'active' : ''"
         aria-label="Filter, sort and display options" title="Filter, sort and display options">
         <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
           <path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" stroke-width="1.6"
@@ -268,6 +268,11 @@
           :aria-expanded="secOpen('sort')"><span>Sort by</span>
           <span class="dd-secend"><i class="dd-dot" x-show="secActive('sort')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('sort') ? '▾' : '▸'"></span></span></button>
         <div class="dd-sec-body" x-show="secOpen('sort')">
+          {# "Curated" is the one option whose meaning isn't in its own name, and it is the
+             default — so it gets said plainly here rather than left to be guessed. #}
+          <div class="dd-note"><b>Curated</b> is the order the gallery opens in: the five
+            solar-system worlds whose colours can be checked against real measurements, then one
+            planet of every colour family in turn. <b>Name</b> is A–Z, for looking one up.</div>
           <template x-for="[val, label] in Object.entries(sortLabels)" :key="val">
             <button :class="sort === val && !nearId ? 'on' : ''" @click="setSort(val)"
               x-text="label.replace('Sort: ', '')"></button>
@@ -321,6 +326,30 @@
     </span>
   </div>
 
+  {# A way in that is not the grid. {{ n_modelled }} swatches is a lot to face from a standing
+     start, and the search box only helps someone who already has a planet in mind — this offers
+     the newcomer a short walk instead. One line tall, because vertical space above the grid is
+     the most expensive on the site: each tour is its own planets' colours (the same cover art
+     the /tours cards use) plus its title, and the strip scrolls sideways rather than wrapping.
+     It shows only on the front door — the moment you search, filter or re-sort you have a
+     question of your own, and a suggestion strip is then just something in the way. #}
+  <nav class="start-here" x-show="!filtersDirty()" x-cloak aria-label="Guided tours">
+    <span class="sh-lbl">New here?</span>
+    <div class="sh-strip">
+      {% for tour in tours[:3] %}
+      <a class="sh-card" href="/tours/{{ tour.id }}" title="{{ tour.kicker }}">
+        <span class="sh-band" aria-hidden="true">
+          {% for hex in tour.swatches %}<i style="background: {{ hex }}"></i>{% endfor %}
+        </span>
+        <span class="sh-txt">{{ tour.title }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {# Outside the scrolling strip, so it is always on screen rather than clipped off the end
+       of a row the visitor has no reason to think scrolls. #}
+    <a class="sh-all" href="/tours">all {{ tours|length }} tours →</a>
+  </nav>
+
   {# Cards are rendered incrementally in JS from a fetched index (scales to thousands): the grid
      starts empty, the component fills it in batches as you scroll. #}
   <div class="grid" x-ref="grid"></div>
@@ -339,4 +368,51 @@
 {# Hold-to-peek overlay: appears while a card is long-pressed, gone on release.
    pointer-events: none throughout, so the release still lands on the card underneath. #}
 <div class="peek" id="peek" aria-hidden="true"><div class="peek-box" id="peek-body"></div></div>
+
+<style>
+  /* Page-scoped (kept out of style.css so parallel sessions don't collide there). */
+  /* The "new here?" strip. One row, sitting between the toolbar and the first cards. */
+  .start-here {
+    display: flex; align-items: center; gap: 10px; margin: -6px 0 14px; min-width: 0;
+  }
+  .sh-lbl {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .5px; color: var(--fg-faint);
+    white-space: nowrap; text-transform: uppercase;
+  }
+  /* Sideways, never wrapping: a second row here would push the grid down on every visit. */
+  .sh-strip {
+    display: flex; gap: 8px; align-items: center; min-width: 0; flex: 1; overflow-x: auto;
+    scrollbar-width: none; padding: 2px 0;
+  }
+  .sh-strip::-webkit-scrollbar { display: none; }
+  .sh-card {
+    display: flex; align-items: center; gap: 8px; flex: none; max-width: 340px;
+    border: 1px solid var(--line); background: var(--bg-3); color: var(--fg);
+    box-shadow: 2px 2px 0 var(--line); padding: 0 10px 0 0;
+    transition: border-color .14s, box-shadow .14s, transform .14s;
+  }
+  .sh-card:hover {
+    text-decoration: none; border-color: var(--accent); box-shadow: 2px 2px 0 var(--accent);
+  }
+  .sh-card:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--accent); }
+  /* The tour's own planets are its cover art, exactly as on the /tours cards — one stripe per
+     stop. Vertical here so the whole chip stays a single line tall. */
+  .sh-band { display: flex; height: 26px; width: 26px; flex: none; }
+  .sh-band i { flex: 1; display: block; }
+  .sh-txt {
+    font-size: 12.5px; line-height: 1.2; white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .sh-all {
+    flex: none; font-family: var(--mono); font-size: 10.5px; letter-spacing: .5px;
+    color: var(--accent); white-space: nowrap; padding: 0 2px;
+  }
+  @media (max-width: 560px) {
+    /* The label and the "all tours" link share the top line; the chips scroll under them,
+       bleeding past .wrap's padding so a half-cut chip advertises that they scroll. */
+    .start-here { flex-wrap: wrap; gap: 5px 10px; margin-bottom: 12px; }
+    .sh-strip { order: 3; flex-basis: 100%; margin: 0 -20px; padding: 2px 20px; }
+    .sh-all { margin-left: auto; }
+  }
+</style>
 {% endblock %}

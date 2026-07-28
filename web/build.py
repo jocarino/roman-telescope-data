@@ -33,6 +33,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from pipeline.classify import planet_type
 from pipeline.colour.family import colour_family
 from pipeline.colour.star import star_swatch
+from pipeline.curate import curated_ranks
 from pipeline.illuminant.blackbody import SUN
 from pipeline.models import PaletteStopModel, PlanetRecord, PlanetsFile
 from pipeline.palette.derive import derive_palette_from_hex
@@ -129,9 +130,7 @@ def _tour_stop_ctx(stop: TourStop) -> dict:
         "size": f"{p.radius_r_earth:.1f} × Earth's radius" if p.radius_r_earth else "unknown",
         # Solar-system anchors sit a few ten-thousandths of a parsec away; "0.0 ly" would be
         # both wrong-looking and beside the point for them.
-        "dist": (
-            f"{ly:,.1f} light-years" if ly and ly >= 0.1 else "in our own solar system"
-        ),
+        "dist": (f"{ly:,.1f} light-years" if ly and ly >= 0.1 else "in our own solar system"),
         "reflect": f"{rec.true_colour.luminance_y * 100:.1f} % of the light that reaches it",
         "roman_hex": view.colour.hex,
         "roman_de": (
@@ -306,20 +305,26 @@ def _r(value: float | None, places: int) -> float | None:
     return None if value is None else round(value, places)
 
 
-def _index_entry(rec: PlanetRecord, fiction: dict[str, dict] | None = None) -> dict:
+def _index_entry(
+    rec: PlanetRecord,
+    fiction: dict[str, dict] | None = None,
+    curated: dict[str, int] | None = None,
+) -> dict:
     view = rec.instrument_views[0]
     entry = {
         "id": rec.id,
         "name": rec.name,
+        # Position in the gallery's default order (pipeline/curate.py): solar-system anchors,
+        # then a hue-diverse deal. Computed here so there is one implementation of the rule —
+        # the browser only sorts by this integer. ~40 KB over the whole index.
+        "c": (curated or {}).get(rec.id, 10**9),
         "host": rec.host_star.name,
         "prov": rec.provenance,
         "temp": _r(rec.params.equilibrium_temp_k, 2),
         "dist": _r(rec.params.distance_pc, 8),
         "lum": _r(rec.true_colour.luminance_y, 7),
         "de": (
-            round(view.reconstruction_error.delta_e2000, 4)
-            if view.reconstruction_error
-            else 0.0
+            round(view.reconstruction_error.delta_e2000, 4) if view.reconstruction_error else 0.0
         ),
         "hex": rec.true_colour.hex,
         "family": colour_family(tuple(rec.true_colour.srgb)),
@@ -466,9 +471,23 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
         ]
         (out / "palettes" / f"{rec.id}.ase").write_bytes(ase_bytes(entries))
 
+    # Guided tours: curated walks, resolved against THIS catalog (see pipeline/tours.py).
+    # Resolved before the gallery is rendered — the front page carries a "start here" strip of
+    # them, and each tour's own planets are its cover art.
+    tours = resolve_tours(records)
+
+    # The gallery's default order. `boost` is the tie-breaker inside a colour family: the
+    # planets this site already tells a story about — one of Roman's own simulated tech-demo
+    # targets, a world that turns up in fiction, a stop on a guided tour — lead their family
+    # where the physics leaves the choice open.
+    boost = {r.id for r in records if r.provenance == "simulated-cgi"}
+    boost |= {r.id for r in records if r.name in fiction}
+    boost |= {s.planet.id for t in tours for s in t.stops}
+    curated = curated_ranks(records, boost=boost)
+
     # The gallery index is fetched at runtime (not inlined) so index.html stays tiny and the
     # grid scales to thousands of planets. Cache-busted by build_id.
-    index_entries = [_index_entry(r, fiction) for r in records]
+    index_entries = [_index_entry(r, fiction, curated) for r in records]
     (out / f"planets.index.{build_id}.json").write_text(
         json.dumps(index_entries, separators=(",", ":"))
     )
@@ -478,17 +497,20 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     (out / f"planets.extra.{build_id}.json").write_text(
         json.dumps([_extra_entry(r) for r in records], separators=(",", ":"))
     )
-    # Boot slice: the head of the default gallery view (unfiltered, name sort), inlined into
-    # index.html so the first screens of cards paint before the multi-MB index downloads.
-    # The sort rule (lowercase, then exact, plain code-point compare) is mirrored exactly by
-    # the gallery's name sort in app.js — keep the two in sync or first paint will reshuffle.
-    boot_planets = sorted(index_entries, key=lambda e: (e["name"].lower(), e["name"]))[:150]
+    # Boot slice: the head of the default gallery view (unfiltered, curated order), inlined into
+    # index.html so the first screens of cards paint before the multi-MB index downloads. The
+    # ordering rule lives entirely in pipeline/curate.py and reaches the browser as the "c"
+    # field, so — unlike the name sort, which is mirrored in two languages — this slice cannot
+    # drift out of step with what the gallery does once the full index lands.
+    boot_planets = sorted(index_entries, key=lambda e: e["c"])[:150]
     gallery_html = env.get_template("gallery.html").render(
         stats=_stats(records),
         index_url=f"/planets.index.{build_id}.json",
         boot_planets=boot_planets,
         n_modelled=len(records),
         known_total=KNOWN_TOTAL_APPROX,
+        # The "start here" strip: the first few guided tours, as a way in that is not the grid.
+        tours=tours,
         build_id=build_id,
     )
     (out / "index.html").write_text(gallery_html)
@@ -536,8 +558,7 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
             build_id=build_id,
         )
     )
-    # Guided tours: curated walks, resolved against THIS catalog (see pipeline/tours.py).
-    tours = resolve_tours(records)
+    # Tour pages themselves (the walks were resolved before the gallery, which links them).
     _tour_pages(env, tours, out, build_id, len(records))
     tour_membership: dict[str, list[dict]] = {}
     for tour in tours:
@@ -555,8 +576,10 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     sky_points = [(r.sky.ra_deg, r.sky.dec_deg) for r in records if r.sky]
     sky_field_urls = None
     if sky_points:
-        for name, compact in ((f"sky-field.{build_id}.svg", False),
-                              (f"sky-field-c.{build_id}.svg", True)):
+        for name, compact in (
+            (f"sky-field.{build_id}.svg", False),
+            (f"sky-field-c.{build_id}.svg", True),
+        ):
             (out / name).write_text(sky_field_svg(sky_points, compact=compact))
         sky_field_urls = (f"/sky-field.{build_id}.svg", f"/sky-field-c.{build_id}.svg")
     # Stream one planet at a time: each context carries two rendered SVG spectra, so
