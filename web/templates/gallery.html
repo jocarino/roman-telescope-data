@@ -404,16 +404,21 @@
     scrollbar-width: none; padding: 2px 0;
   }
   .sh-strip::-webkit-scrollbar { display: none; }
-  .sh-card {
-    display: flex; align-items: center; gap: 8px; flex: none; max-width: 340px;
+  /* One chip look for everything in the strip, the way out to /tours included: it sits in the
+     same row as the tours it leads to, so a bare text link read as a stray bit of UI. */
+  .sh-card, .sh-all {
+    display: flex; align-items: center; gap: 8px; flex: none; min-height: 28px;
     border: 1px solid var(--line); background: var(--bg-3); color: var(--fg);
-    box-shadow: 2px 2px 0 var(--line); padding: 0 10px 0 0;
+    box-shadow: 2px 2px 0 var(--line);
     transition: border-color .14s, box-shadow .14s, transform .14s;
   }
-  .sh-card:hover {
+  .sh-card { max-width: 340px; padding: 0 10px 0 0; }
+  .sh-card:hover, .sh-all:hover {
     text-decoration: none; border-color: var(--accent); box-shadow: 2px 2px 0 var(--accent);
   }
-  .sh-card:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--accent); }
+  .sh-card:active, .sh-all:active {
+    transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--accent);
+  }
   /* The tour's own planets are its cover art, exactly as on the /tours cards — one stripe per
      stop. Vertical here so the whole chip stays a single line tall. */
   .sh-band { display: flex; height: 26px; width: 26px; flex: none; }
@@ -422,9 +427,11 @@
     font-size: 12.5px; line-height: 1.2; white-space: nowrap; overflow: hidden;
     text-overflow: ellipsis;
   }
+  /* Same chip as a tour, but printed in the accent: it is the one item in the row that leaves
+     the page rather than opening a tour, and colour is how the rest of the site says so. */
   .sh-all {
-    flex: none; font-family: var(--mono); font-size: 10.5px; letter-spacing: .5px;
-    color: var(--accent); white-space: nowrap; padding: 0 2px;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .5px;
+    color: var(--accent); white-space: nowrap; padding: 0 10px;
   }
   @media (max-width: 560px) {
     /* The label and the "all tours" link share the top line; the chips scroll under them,
