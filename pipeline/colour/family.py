@@ -44,6 +44,13 @@ def colour_family(rgb: tuple[int, int, int]) -> str:
         if lightness < 0.2:
             return "dark"
         return "grey"
+    # HSL saturation over-reports colourfulness for pale colours, because its denominator
+    # collapses as lightness climbs: #d8c8c3 is a beige with 8% absolute chroma, yet scores
+    # s = 0.21 and clears the test above. That is how three near-grey worlds ended up as the
+    # entire "red" chip — a visitor clicked red and got sand. Above the pale line a colour has
+    # to carry real chroma (max-min across the channels) before it may claim a hue name.
+    if lightness > 0.72 and (max(rgb) - min(rgb)) / 255.0 < 0.09:
+        return "white"
     if h < 15 or h >= 345:
         return "red"
     if h < 45:
