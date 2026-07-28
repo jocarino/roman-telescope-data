@@ -5,6 +5,10 @@
 // does that work once. Same ordering, just not rebuilt per comparison.
 const NAME_COLLATOR = new Intl.Collator();
 
+// Everything a search query and a planet name are allowed to disagree about: spaces, hyphens,
+// dots, plus signs. Stripped from both sides so "trappist 1" finds TRAPPIST-1.
+const NON_ALNUM = /[^a-z0-9]+/g;
+
 // Random-planet jump, shared by the gallery button, the detail-page button and the R key.
 // `pool` is the list to roll over (e.g. the gallery's filtered results); falls back to the
 // full index. Never lands on the planet already on screen (unless it's the only one).
@@ -259,6 +263,17 @@ document.addEventListener("alpine:init", () => {
     // hexes per planet was ~29% of the index for something every client can recompute.
     palOf(p) { return window.PlanetRender.ramp(this.hexOf(p)); },
     famOf(p) { return this.view === "roman" && p.rfam ? p.rfam : p.family; },
+    // The words the UI itself puts on screen — the colour-family chips and the planet-type
+    // labels — found nothing, because the box only ever read names: "blue" and "hot jupiter"
+    // both came back empty while the menu right above listed 925 and 767 of them. Returns a
+    // predicate for the term, or null if the query isn't one of our own words.
+    _vocabMatch(qn) {
+      if (this.familyMeta[qn]) return (p) => this.famOf(p) === qn;
+      const type = Object.keys(this.typeLabels).find((t) => t !== "all" && (
+        t.replace(NON_ALNUM, "") === qn ||
+        this.typeLabels[t].toLowerCase().replace(NON_ALNUM, "") === qn));
+      return type ? (p) => p.ptype === type : null;
+    },
     lumOf(p) { return this.view === "roman" && p.rlum != null ? p.rlum : p.lum; },
     // Paint the inlined boot slice immediately, fetch the full index in the background, and
     // honour /?near= and /?family= deep links.
@@ -402,6 +417,11 @@ document.addEventListener("alpine:init", () => {
         this._map[p.id] = p;
         p._lc = p.name.toLowerCase();
         p._q = p._lc + " " + (p.host || "").toLowerCase();
+        // Separator-blind twin of _q. Catalogue names hyphenate ("TRAPPIST-1 b", "Kepler-186 f")
+        // and people type a space, so "trappist 1" and "kepler 186" both found nothing at all.
+        // Stripping everything but letters and digits from BOTH sides makes the separator
+        // irrelevant without loosening the match in any other way.
+        p._qn = p._q.replace(NON_ALNUM, "");
       });
       const first = !this.ready;
       this.ready = true;
@@ -657,6 +677,15 @@ document.addEventListener("alpine:init", () => {
     results() {
       const all = window.PLANETS || [];
       const q = this._qlc = this.q ? this.q.toLowerCase() : "";  // once per pass, not per row
+      const qn = q.replace(NON_ALNUM, "");
+      // A name match always wins. Only when nothing in the catalogue answers to the query as a
+      // NAME is it read as vocabulary, so searching "neptune" still lands on Neptune rather
+      // than burying it under 1,608 Neptune-class worlds.
+      let qMatch = null;
+      if (qn) {
+        qMatch = (p) => p._qn.includes(qn);
+        if (!all.some(qMatch)) qMatch = this._vocabMatch(qn) || qMatch;
+      }
       let items = all.filter((p) => {
         if (this.prov !== "all" && p.prov !== this.prov) return false;
         if (this.ptype !== "all" && p.ptype !== this.ptype) return false;
@@ -665,7 +694,7 @@ document.addEventListener("alpine:init", () => {
         if (this.hz !== "all" && this._hzOf(p) !== this.hz) return false;
         if (this.family && this.famOf(p) !== this.family) return false;
         if (this.fic && !p.fic) return false;
-        if (q && !p._q.includes(q)) return false;
+        if (qMatch && !qMatch(p)) return false;
         return true;
       });
       const ref = this.nearId && all.find((x) => x.id === this.nearId);
@@ -960,11 +989,12 @@ document.addEventListener("alpine:init", () => {
         .map((t) => [t, this.typeLabelsC[t]])];
     },
     pickerResults() {
-      const q = this.pq.toLowerCase().trim();
+      // Separator-blind, same as the gallery's box: this picker had the identical bug.
+      const q = this.pq.toLowerCase().replace(NON_ALNUM, "");
       return this.all.filter((p) => {
         if (this.pfam && p.family !== this.pfam) return false;
         if (this.ptypeF !== "all" && p.ptype !== this.ptypeF) return false;
-        if (q && !((p.name + " " + p.host).toLowerCase().includes(q))) return false;
+        if (q && !(p.name + " " + p.host).toLowerCase().replace(NON_ALNUM, "").includes(q)) return false;
         return true;
       }).sort((x, y) => NAME_COLLATOR.compare(x.name, y.name));
     },
