@@ -325,12 +325,24 @@
     <span class="count" x-show="loaded" x-cloak><span x-text="count()"></span> shown ·
       long-press for a quick peek</span>
     <span class="count" x-show="!loaded">loading…</span>
-    {# Similar-colour mode, entered from a planet page's "similar colours" link. #}
-    <span class="near-pill" x-show="nearId" x-cloak>
-      <span class="near-dot" :style="{ background: nearHex() }"></span>Nearest in colour to
-      <b x-text="nearName()"></b>
-      <button class="near-x" @click="clearNear()" aria-label="Clear similar-colour sort">×</button>
-    </span>
+    {# What is currently narrowing the catalogue, one chip per choice, each with its own ×.
+       Filters are remembered across visits, so without this a restored filter is invisible:
+       the menu rows look identical shut, and the count has nothing to be smaller *than*.
+       Everything that cuts the grid down lives here — including the similar-colour mode
+       entered from a planet page, which used to have a pill of its own. #}
+    <div class="fchips" x-show="loaded && filtersDirty()" x-cloak>
+      <span class="fchips-lbl">Filtering</span>
+      <template x-for="f in activeFilters()" :key="f.k">
+        <span class="fchip">
+          <i class="fchip-dot" x-show="f.dot" x-cloak :style="{ background: f.dot }"></i>
+          <span x-text="f.label"></span>
+          <button type="button" class="fchip-x" @click="dropFilter(f.k)"
+            :aria-label="'Remove: ' + f.label" :title="'Remove: ' + f.label">×</button>
+        </span>
+      </template>
+      <button type="button" class="fchip fchip-clear" @click="clearFilters()"
+        x-show="activeFilters().length > 1">Clear all</button>
+    </div>
   </div>
 
   {# A way in that is not the grid. {{ n_modelled }} swatches is a lot to face from a standing

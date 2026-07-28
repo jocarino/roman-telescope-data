@@ -293,9 +293,41 @@ document.addEventListener("alpine:init", () => {
     clearFilters() {
       this._filterKeys.forEach((k) => { this[k] = this._filterDefaults[k]; });
     },
+    // One chip per non-default filter, under the toolbar. Filters outlive the visit, so a
+    // returning visitor can meet a catalogue that was quietly cut down weeks ago — the menu
+    // rows read the same shut whether they hold a choice or not, and the count says "925
+    // shown" with nothing to compare it against. The chips say what is on and take it off
+    // again in one tap. Order matches the menu, so the row reads like the menu you'd open.
+    activeFilters() {
+      const out = [];
+      const add = (k, label, dot) => out.push({ k, label, dot: dot || "" });
+      if (this.q) add("q", "“" + this.q + "”");
+      if (this.family) add("family", this.familyMeta[this.family].n, this.familyMeta[this.family].c);
+      if (this.fic) add("fic", "Seen in fiction");
+      if (this.prov !== "all") add("prov", this.provLabels[this.prov]);
+      if (this.ptype !== "all") add("ptype", this.typeLabels[this.ptype]);
+      if (this.hz !== "all") add("hz", this.hzLabels[this.hz]);
+      if (this.distBand !== "all") {
+        const band = this.distBands.find(([id]) => id === this.distBand);
+        add("distBand", band ? band[1] : this.distBand);
+      }
+      if (this.disc !== "all") add("disc", this.disc);
+      if (this.nearId) add("nearId", "Nearest in colour to " + (this.nearName() || "…"), this.nearHex());
+      // Sort is not a filter — it hides nothing — but a remembered one silently replaces the
+      // curated front page, which is the whole reason this row exists. Last, and it says so.
+      if (this.sort !== this._filterDefaults.sort) add("sort", this.sortLabels[this.sort]);
+      return out;
+    },
+    dropFilter(k) { this[k] = this._filterDefaults[k]; },
+    // A search term is a question you asked once, not a setting: restored a week later it is
+    // indistinguishable from a broken site (a stale typo lands you on "No planets match these
+    // filters" as your front door). Every other filter is a choice worth keeping — this one
+    // lives and dies with the visit.
+    _sessionOnly: ["q"],
     _saveFilters() {
       const out = {};
       this._filterKeys.forEach((k) => {
+        if (this._sessionOnly.includes(k)) return;
         if (this[k] !== this._filterDefaults[k]) out[k] = this[k];
       });
       try {
@@ -326,6 +358,7 @@ document.addEventListener("alpine:init", () => {
         nearId: (v) => typeof v === "string",
       };
       this._filterKeys.forEach((k) => {
+        if (this._sessionOnly.includes(k)) return;   // and a blob from an older build may hold one
         if (k in saved && ok[k] && ok[k](saved[k])) this[k] = saved[k];
       });
     },
