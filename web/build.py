@@ -23,14 +23,17 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import statistics
 import time
+from concurrent.futures import ProcessPoolExecutor
+from dataclasses import replace
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from pipeline.classify import planet_type
+from pipeline.classify import TYPE_LABELS, planet_type
 from pipeline.colour.family import colour_family
 from pipeline.colour.star import star_swatch
 from pipeline.curate import curated_ranks
@@ -43,6 +46,17 @@ from pipeline.sky import format_dec, format_ra
 from pipeline.tours import Tour, TourStop
 from pipeline.tours import resolve as resolve_tours
 from web.hz import hz_strip_svg
+from web.meta import (
+    PageMeta,
+    Site,
+    not_found_meta,
+    planet_meta,
+    robots_txt,
+    sitemap_xml,
+    static_pages,
+    tour_meta,
+)
+from web.og import CardSpec, card_png
 from web.sky import sky_chart_svg, sky_field_svg
 from web.svg import spectrum_svg
 
@@ -155,23 +169,49 @@ def _tour_stop_ctx(stop: TourStop) -> dict:
     }
 
 
-def _tour_pages(env: Environment, tours: list[Tour], out: Path, build_id: str, n: int) -> None:
+def _tour_pages(
+    env: Environment,
+    tours: list[Tour],
+    out: Path,
+    build_id: str,
+    n: int,
+    site: Site,
+    index_meta: PageMeta,
+) -> list[PageMeta]:
     """One index page plus one page per tour, under /tours/. Written as tours/index.html so the
-    clean-URL rule (`try_files $uri $uri.html $uri/index.html`) serves /tours and /tours/<id>."""
+    clean-URL rule (`try_files $uri $uri.html $uri/index.html`) serves /tours and /tours/<id>.
+
+    Returns the per-tour metas so they reach the sitemap. A tour shares the card of its first
+    stop: it is a walk through real planets, so its most honest thumbnail is one of them."""
     (out / "tours").mkdir(parents=True, exist_ok=True)
     (out / "tours" / "index.html").write_text(
-        env.get_template("tours.html").render(tours=tours, n_planets=n, build_id=build_id)
+        env.get_template("tours.html").render(
+            meta=index_meta, site=site, tours=tours, n_planets=n, build_id=build_id
+        )
     )
     tpl = env.get_template("tour.html")
+    metas = []
     for tour in tours:
+        meta = tour_meta(tour.id, tour.title, tour.intro, len(tour.stops))
+        if tour.stops:
+            lead = tour.stops[0].planet
+            meta = replace(
+                meta,
+                image=f"/og/{lead.id}.png",
+                image_alt=f"{tour.title}: a guided tour opening on {lead.name}",
+            )
+        metas.append(meta)
         (out / "tours" / f"{tour.id}.html").write_text(
             tpl.render(
+                meta=meta,
+                site=site,
                 tour=tour,
                 stops=[_tour_stop_ctx(s) for s in tour.stops],
                 n_planets=n,
                 build_id=build_id,
             )
         )
+    return metas
 
 
 def _cockpit_instruments(records: list[PlanetRecord]) -> dict:
@@ -436,11 +476,94 @@ def _rederive_palettes(records: list[PlanetRecord]) -> None:
             ] + accents
 
 
-def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
+# ── Open Graph share cards ──────────────────────────────────────────────────────────────
+
+
+def _card_spec(rec: PlanetRecord) -> CardSpec:
+    """Assemble the share card's content from a record. Deliberately the same numbers the
+    page's own header shows, so the unfurl and the page agree."""
+    tc = rec.true_colour
+    ptype = planet_type(
+        rec.params.radius_r_earth, rec.params.mass_m_earth, rec.params.equilibrium_temp_k
+    )
+    star = rec.host_star.name
+    if rec.host_star.spectral_type:
+        star += f" · {rec.host_star.spectral_type}"
+
+    facts = [TYPE_LABELS.get(ptype, "Unknown type")]
+    if rec.params.equilibrium_temp_k:
+        facts.append(f"{rec.params.equilibrium_temp_k:,.0f} K equilibrium")
+    if rec.params.distance_pc:
+        facts.append(f"{rec.params.distance_pc * _LY_PER_PC:,.0f} light-years away")
+    elif rec.discovery.year:
+        facts.append(f"Found {rec.discovery.year} · {rec.discovery.method}")
+
+    # Microlensing planets are never observable again by anyone; say so on the card itself,
+    # not only on the page, because the card is what travels.
+    caption = (
+        "MODEL-ONLY · LIGHT NEVER ISOLABLE"
+        if not rec.is_light_isolable
+        else "MODELLED · NOT PHOTOGRAPHED"
+    )
+    return CardSpec(
+        name=rec.name,
+        palette=tuple(s.hex for s in tc.palette[:5]),
+        base_hex=tc.hex,
+        subtitle=star,
+        facts=tuple(facts),
+        radius_r_earth=rec.params.radius_r_earth,
+        cloud_state=rec.params.assumed_cloud_state,
+        luminance_y=tc.luminance_y,
+        caption=caption,
+    )
+
+
+def _write_card(job: tuple[str, CardSpec]) -> None:
+    """Pool worker: render one card and write it. Returns nothing on purpose — passing ~31 KB
+    of PNG back per planet would push 180 MB through the pipe for no reason."""
+    path, spec = job
+    Path(path).write_bytes(card_png(spec))
+
+
+def _write_og_cards(records: list[PlanetRecord], out: Path) -> None:
+    """One 1200x630 card per planet, plus the fallback for the hub pages.
+
+    ~100 ms of numpy and PNG encoding each, which is ten minutes serially at catalogue scale
+    and long enough to matter in a deploy, so it fans out across cores. Cards are pure
+    functions of the record, so the work is embarrassingly parallel and order-independent.
+    """
+    (out / "og").mkdir(parents=True, exist_ok=True)
+    jobs = [(str(out / "og" / f"{r.id}.png"), _card_spec(r)) for r in records]
+    # The site-level fallback: whichever planet is the catalogue's flagship blue. Any page
+    # without a planet of its own (gallery, how, census...) shares with this.
+    fallback = next((r for r in records if r.id == "hd-189733-b"), records[0] if records else None)
+    if fallback is not None:
+        jobs.append((str(out / "og" / "default.png"), _card_spec(fallback)))
+
+    workers = min(8, (os.cpu_count() or 2))
+    if workers > 1 and len(jobs) > 8:
+        with ProcessPoolExecutor(max_workers=workers) as pool:
+            list(pool.map(_write_card, jobs, chunksize=32))
+    else:
+        for job in jobs:
+            _write_card(job)
+
+
+def build(
+    planets_json: Path = _DEFAULT_JSON,
+    out: Path = Path("dist"),
+    base_url: str = "",
+    og_cards: bool = True,
+) -> Path:
     doc = PlanetsFile.model_validate_json(planets_json.read_text())
     records = doc.planets
     _rederive_palettes(records)
     env = _env()
+
+    # Share identity. `base_url` is the canonical origin; without it the tags still emit with
+    # root-relative paths and the sitemap is skipped rather than published pointing nowhere.
+    site = Site(base_url=base_url.rstrip("/"))
+    hub = {p.path: p for p in static_pages(len(records))}
 
     if out.exists():
         shutil.rmtree(out)
@@ -505,6 +628,7 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     # drift out of step with what the gallery does once the full index lands.
     boot_planets = sorted(index_entries, key=lambda e: e["c"])[:150]
     gallery_html = env.get_template("gallery.html").render(
+        meta=hub["/"], site=site,
         stats=_stats(records),
         index_url=f"/planets.index.{build_id}.json",
         boot_planets=boot_planets,
@@ -515,11 +639,14 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
         build_id=build_id,
     )
     (out / "index.html").write_text(gallery_html)
-    (out / "how.html").write_text(env.get_template("how.html").render(build_id=build_id))
+    (out / "how.html").write_text(
+        env.get_template("how.html").render(meta=hub["/how.html"], site=site, build_id=build_id)
+    )
     # Compare page: consumes the same fetched index plus the extras (star + orbit numbers);
     # deep-linkable via ?a=&b=.
     (out / "compare.html").write_text(
         env.get_template("compare.html").render(
+            meta=hub["/compare.html"], site=site,
             index_url=f"/planets.index.{build_id}.json",
             extra_url=extra_url,
             build_id=build_id,
@@ -529,12 +656,14 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     # the nav — it is reachable at /glossary, and by hovering any marked term anywhere.
     (out / "glossary.html").write_text(
         env.get_template("glossary.html").render(
+            meta=hub["/glossary.html"], site=site,
             categories=glossary["categories"], terms=glossary["terms"], build_id=build_id
         )
     )
     # Colour census: the whole catalog as one dataset (same fetched index).
     (out / "census.html").write_text(
         env.get_template("census.html").render(
+            meta=hub["/census.html"], site=site,
             index_url=f"/planets.index.{build_id}.json", build_id=build_id
         )
     )
@@ -544,6 +673,7 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     # and one real reflected-light spectrum for the signal trace.
     (out / "404.html").write_text(
         env.get_template("404.html").render(
+            meta=not_found_meta(), site=site,
             index_url=f"/planets.index.{build_id}.json",
             n_modelled=len(records),
             build_id=build_id,
@@ -554,6 +684,7 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     # plus the extras — the RA/Dec/magnitude it plots live there).
     (out / "sky.html").write_text(
         env.get_template("sky.html").render(
+            meta=hub["/sky.html"], site=site,
             index_url=f"/planets.index.{build_id}.json",
             extra_url=extra_url,
             build_id=build_id,
@@ -580,7 +711,8 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
         )
 
     # Tour pages themselves (the walks were resolved before the gallery, which links them).
-    _tour_pages(env, tours, out, build_id, len(records))
+    # Their metas come back so the tours reach the sitemap alongside everything else.
+    tour_metas = _tour_pages(env, tours, out, build_id, len(records), site, hub["/tours/"])
     tour_membership: dict[str, list[dict]] = {}
     for tour in tours:
         for stop in tour.stops:
@@ -609,8 +741,25 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     for rec in records:
         ctx = _planet_ctx(rec, fiction, sky_points, tour_membership, sky_field_urls)
         pid = rec.id
-        (out / "planet" / f"{pid}.html").write_text(page_tpl.render(ctx=ctx, build_id=build_id))
+        (out / "planet" / f"{pid}.html").write_text(
+            page_tpl.render(ctx=ctx, meta=planet_meta(rec), site=site, build_id=build_id)
+        )
         (out / "fragments" / "peek" / f"{pid}.html").write_text(peek_tpl.render(ctx=ctx))
+
+    # One 1200x630 share card per planet. Skippable (--no-og) for fast local iteration; the
+    # deploy always builds them, because a missing card is a grey rectangle in every Slack.
+    if og_cards:
+        _write_og_cards(records, out)
+
+    # robots.txt + sitemap.xml. Both were 404s: the site had no way to tell a crawler that
+    # ~5.8k planet pages exist, and nothing links to most of them (the gallery grid is
+    # client-rendered from a fetched index, so a crawler sees ~150 boot cards and no more).
+    site = replace(
+        site, pages=[*hub.values(), *tour_metas, *(planet_meta(r) for r in records)]
+    )
+    (out / "robots.txt").write_text(robots_txt(site))
+    if site.base_url:
+        (out / "sitemap.xml").write_text(sitemap_xml(site, lastmod=doc.generated_at[:10]))
 
     shutil.copytree(_STATIC, out / "static")
     return out
@@ -620,10 +769,30 @@ def main() -> None:
     parser = argparse.ArgumentParser(prog="site.build")
     parser.add_argument("--out", type=Path, default=Path("dist"))
     parser.add_argument("--planets", type=Path, default=_DEFAULT_JSON)
+    parser.add_argument(
+        "--base-url",
+        default=os.environ.get("SITE_BASE_URL", ""),
+        help="Canonical origin, e.g. https://example.com. Open Graph wants absolute URLs and "
+        "some unfurlers reject relative ones; sitemap.xml is only written when this is set, "
+        "since a sitemap of relative paths is invalid. Defaults to $SITE_BASE_URL.",
+    )
+    parser.add_argument(
+        "--no-og",
+        dest="og_cards",
+        action="store_false",
+        help="Skip the per-planet share cards (~30 s across cores at catalogue scale). For "
+        "local iteration only — deploys should always build them.",
+    )
     args = parser.parse_args()
-    out = build(args.planets, args.out)
+    out = build(args.planets, args.out, base_url=args.base_url, og_cards=args.og_cards)
     n = len(list((out / "planet").glob("*.html")))
-    print(f"Built site -> {out}  ({n} planet pages)")
+    cards = len(list((out / "og").glob("*.png"))) if (out / "og").exists() else 0
+    print(f"Built site -> {out}  ({n} planet pages, {cards} share cards)")
+    if not args.base_url:
+        print(
+            "  note: no --base-url / $SITE_BASE_URL, so og:image and canonical URLs are "
+            "root-relative and sitemap.xml was skipped. Set it for the production build."
+        )
 
 
 if __name__ == "__main__":
