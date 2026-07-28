@@ -1,0 +1,198 @@
+"""What a built page actually says about itself.
+
+tests/test_meta.py checks the metadata functions; this checks that the build wires them to
+every page. The gap is real and silent: a template rendered without `meta=` still produces a
+perfectly valid page, it just falls back to the shared site-wide description — which is
+exactly the bug this work exists to fix, so it has to be caught here rather than by eye.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import xml.etree.ElementTree as ET
+from functools import lru_cache
+from pathlib import Path
+
+import pytest
+
+from web.build import build
+
+PLANETS_JSON = Path("data/planets.json")
+BASE = "https://example.test"
+_SM_NS = "{http://www.sitemaps.org/schemas/sitemap/0.9}"
+
+pytestmark = pytest.mark.skipif(not PLANETS_JSON.exists(), reason="needs a fetched data release")
+
+
+@lru_cache(maxsize=1)
+def _site(tmp_root: str = "") -> Path:
+    """Build a small real site once for the whole module. Cards are skipped: they are covered
+    by tests/test_og_card.py and cost ~100 ms each."""
+    import tempfile
+
+    out = Path(tempfile.mkdtemp(prefix="sharemeta-"))
+    doc = json.loads(PLANETS_JSON.read_text())
+    # A spread that covers the interesting cases: solar-system anchors, a famous hot Jupiter,
+    # and a microlensing planet (whose light is never isolable).
+    wanted = [p for p in doc["planets"] if p["id"] in {"earth", "jupiter", "hd-189733-b"}]
+    wanted += [p for p in doc["planets"] if not p["is_light_isolable"]][:2]
+    wanted += doc["planets"][:15]
+    seen, planets = set(), []
+    for p in wanted:
+        if p["id"] not in seen:
+            seen.add(p["id"])
+            planets.append(p)
+    doc["planets"] = planets
+    src = out / "planets.json"
+    src.write_text(json.dumps(doc))
+    return build(src, out / "dist", base_url=BASE, og_cards=False)
+
+
+@lru_cache(maxsize=1)
+def _pages() -> tuple[tuple[Path, str], ...]:
+    root = _site()
+    return tuple(
+        (p, p.read_text())
+        for p in sorted(root.rglob("*.html"))
+        if "fragments" not in p.parts
+    )
+
+
+def _tag(html: str, pattern: str) -> str | None:
+    m = re.search(pattern, html)
+    return m.group(1) if m else None
+
+
+def _og(html: str, prop: str) -> str | None:
+    return _tag(html, rf'<meta property="og:{prop}" content="([^"]*)">')
+
+
+def _name_meta(html: str, name: str) -> str | None:
+    return _tag(html, rf'<meta name="{name}" content="([^"]*)">')
+
+
+# ── every page ──────────────────────────────────────────────────────────────────────────
+
+
+def test_every_page_carries_share_tags():
+    for path, html in _pages():
+        assert _og(html, "title"), f"{path.name} has no og:title"
+        assert _og(html, "image"), f"{path.name} has no og:image"
+        assert _name_meta(html, "twitter:card") == "summary_large_image", path.name
+
+
+def test_title_and_og_title_never_drift():
+    """The <title> comes from each template's own block; og:title comes from web/meta.py.
+    Two sources, one string — pin them together."""
+    for path, html in _pages():
+        title = _tag(html, r"<title>([^<]*)</title>")
+        assert title == _og(html, "title"), f"{path.name}: <title> != og:title"
+
+
+def test_every_page_has_a_canonical_and_absolute_og_urls():
+    for path, html in _pages():
+        canonical = _tag(html, r'<link rel="canonical" href="([^"]*)">')
+        assert canonical and canonical.startswith(BASE), path.name
+        assert _og(html, "url") == canonical, path.name
+        assert _og(html, "image").startswith(f"{BASE}/og/"), path.name
+
+
+def test_no_page_reuses_the_old_site_wide_description():
+    """The bug being fixed: one description on all ~5.8k pages."""
+    stale = "The colour scheme of every known exoplanet, derived from physics."
+    descs = [_name_meta(html, "description") for _, html in _pages()]
+    assert all(d and d != stale for d in descs)
+    assert len(set(descs)) == len(descs), "two pages share a description"
+
+
+# ── planet pages ────────────────────────────────────────────────────────────────────────
+
+
+def _planet_pages():
+    return [(p, h) for p, h in _pages() if p.parent.name == "planet"]
+
+
+def test_planet_pages_point_at_their_own_card():
+    for path, html in _planet_pages():
+        assert _og(html, "image") == f"{BASE}/og/{path.stem}.png", path.name
+
+
+def test_planet_descriptions_carry_the_planets_own_colour():
+    for path, html in _planet_pages():
+        desc = _name_meta(html, "description")
+        assert re.search(r"#[0-9a-f]{6}", desc), f"{path.name}: {desc}"
+        assert "Modelled reflected-light colour" in desc
+
+
+def test_planet_image_alt_is_not_the_generic_fallback():
+    for path, html in _planet_pages():
+        alt = _og(html, "image:alt")
+        assert alt and alt != "Exoplanet Palette", path.name
+
+
+# ── crawlability ────────────────────────────────────────────────────────────────────────
+
+
+def test_sitemap_lists_every_built_html_page():
+    root = _site()
+    locs = {
+        u.findtext(f"{_SM_NS}loc")
+        for u in ET.parse(root / "sitemap.xml").getroot().findall(f"{_SM_NS}url")
+    }
+    for path, html in _pages():
+        if _name_meta(html, "robots") == "noindex, follow":
+            continue
+        rel = "/" + path.relative_to(root).as_posix()
+        rel = rel.replace("/index.html", "/")  # tours/index.html is served as /tours/
+        assert BASE + rel in locs, f"{rel} is built but absent from sitemap.xml"
+
+
+def test_404_is_noindex_and_absent_from_the_sitemap():
+    root = _site()
+    html = (root / "404.html").read_text()
+    assert _name_meta(html, "robots") == "noindex, follow"
+    assert "404.html" not in (root / "sitemap.xml").read_text()
+
+
+def test_descriptions_are_unique_across_the_whole_catalogue():
+    """Not a style point: type + host + distance + colour family repeats across siblings (all
+    seven TRAPPIST-1 planets collide), and duplicate meta descriptions at this scale are
+    exactly what a search engine reads as a thin, templated site."""
+    import collections
+
+    from pipeline.models import PlanetsFile
+    from web.meta import planet_description
+
+    doc = PlanetsFile.model_validate_json(PLANETS_JSON.read_text())
+    counts = collections.Counter(planet_description(r) for r in doc.planets)
+    dupes = [d for d, n in counts.items() if n > 1]
+    assert not dupes, f"{len(dupes)} duplicated descriptions, e.g. {dupes[:1]}"
+
+
+def test_every_planet_description_fits_an_unfurl():
+    from pipeline.models import PlanetsFile
+    from web.meta import planet_description
+
+    doc = PlanetsFile.model_validate_json(PLANETS_JSON.read_text())
+    worst = max(doc.planets, key=lambda r: len(planet_description(r)))
+    assert len(planet_description(worst)) <= 300, worst.name
+
+
+def test_robots_txt_points_a_crawler_at_the_sitemap():
+    robots = (_site() / "robots.txt").read_text()
+    assert f"Sitemap: {BASE}/sitemap.xml" in robots
+    assert "Allow: /" in robots
+
+
+def test_no_sitemap_is_written_without_a_base_url(tmp_path):
+    """A sitemap of relative paths is invalid; not publishing one is the honest failure."""
+    doc = json.loads(PLANETS_JSON.read_text())
+    doc["planets"] = doc["planets"][:3]
+    src = tmp_path / "planets.json"
+    src.write_text(json.dumps(doc))
+    out = build(src, tmp_path / "dist", base_url="", og_cards=False)
+    assert not (out / "sitemap.xml").exists()
+    assert (out / "robots.txt").exists()
+    html = (out / "index.html").read_text()
+    assert _og(html, "image").startswith("/og/"), "should degrade to a root-relative path"

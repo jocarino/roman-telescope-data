@@ -4,7 +4,39 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Exoplanet Palette{% endblock %}</title>
+  {# Share identity. Every page carries its own description and its own card image; before
+     this, all ~5.8k planet pages shipped one shared description and no image at all, so a
+     link to the bluest planet in the catalogue unfurled as a grey rectangle. Built in
+     web/meta.py; the card PNGs in web/og.py. tests/test_meta.py asserts the <title> above
+     and og:title below never drift apart. #}
+  {% if meta %}
+  <meta name="description" content="{{ meta.description }}">
+  <link rel="canonical" href="{{ site.absolute(meta.path) }}">
+  {% if meta.noindex %}
+  <meta name="robots" content="noindex, follow">
+  {% endif %}
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Exoplanet Palette">
+  <meta property="og:locale" content="en_GB">
+  <meta property="og:title" content="{{ meta.title }}">
+  <meta property="og:description" content="{{ meta.description }}">
+  <meta property="og:url" content="{{ site.absolute(meta.path) }}">
+  <meta property="og:image" content="{{ site.absolute(meta.image or site.default_image) }}">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{ meta.image_alt or 'Exoplanet Palette' }}">
+  {# summary_large_image is what makes the card fill the tweet rather than sit in a 120px
+     thumbnail — the whole point when the payload is a picture of a planet. #}
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ meta.title }}">
+  <meta name="twitter:description" content="{{ meta.description }}">
+  <meta name="twitter:image" content="{{ site.absolute(meta.image or site.default_image) }}">
+  <meta name="twitter:image:alt" content="{{ meta.image_alt or 'Exoplanet Palette' }}">
+  {% else %}
   <meta name="description" content="The colour scheme of every known exoplanet, derived from physics.">
+  {% endif %}
+  <meta name="theme-color" content="#000000">
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <script>try{document.documentElement.setAttribute("data-accent",localStorage.getItem("accent")||"tron");}catch(e){}</script>
   {# The pixel face is used on every page, but it is only discovered once the stylesheet has

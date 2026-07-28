@@ -41,6 +41,7 @@ uv run ruff check pipeline web tests
 
 ```bash
 uv run python -m web.build --out dist           # render gallery + detail pages from planets.json
+uv run python -m web.build --out dist --no-og   # …skipping the share cards (faster iteration)
 python3 -m http.server 8799 --directory dist    # preview at http://localhost:8799
 ```
 
@@ -49,8 +50,35 @@ the true↔Roman toggle; palettes export as hex, CSS variables, or `.ase`. Also 
 colour census of the whole catalog (`/census`), a phase slider with an automatic full
 lunar-cycle animation in the EXOSCOPE (per-planet random phases on the gallery), a "Seen in
 fiction" overlay, and clean extensionless URLs. No backend, no build toolchain beyond Python.
-`web.build` streams one planet at a time, so rendering all 5,759 pages takes ~7 s locally
-(`dist/` ≈ 477 MB; the runtime gallery index ≈ 2.5 MB).
+`web.build` streams one planet at a time, so rendering all 5,764 pages takes ~13 s locally,
+plus ~1 min for the share cards across cores (`dist/` ≈ 0.56 GB, of which the cards are
+~165 MB; the runtime gallery index ≈ 2.5 MB).
+
+### Sharing: Open Graph cards, sitemap, robots
+
+The product is a picture, so a shared link has to unfurl as one. Every page carries its own
+title, description, `og:*` and `twitter:*` tags (`web/meta.py`), and every planet gets a
+1200×630 PNG card at `/og/<id>.png` (`web/og.py`) showing its lit disc, five-stop ramp and
+base hex — the same render the page shows, because the card's disc is a numpy port of the
+classic path of the WebGL shader in `web/static/planet-render.js`. The two are pinned against
+each other in `tests/test_og_card.py`; if you change that shader's classic path, change the
+port with it. Descriptions are generated from each record, never written by hand, and keep
+the site's honesty rule — a microlensing planet's card says its light is never isolable.
+
+`sitemap.xml` and `robots.txt` are emitted too. This matters more than usual here: the gallery
+grid is client-rendered from a fetched index, so a crawler that only follows links sees ~150
+planets out of 5,764.
+
+**The canonical origin is a build input**, since the repo can't know it:
+
+```bash
+uv run python -m web.build --out dist --base-url https://your-domain    # or $SITE_BASE_URL
+```
+
+Without it the share tags still emit with root-relative paths (which most unfurlers resolve),
+and `sitemap.xml` is skipped rather than published full of invalid relative URLs. The
+`Dockerfile` takes it as the `SITE_BASE_URL` build arg — **set it on the deploy host**, or
+production ships relative `og:image` URLs and no sitemap.
 
 ### Jargon and the glossary
 
@@ -99,7 +127,8 @@ Multi-stage `Dockerfile`: a Python stage renders the site from `data/planets.jso
 nginx stage serves it. `nginx.conf` handles clean URLs and `.ase` downloads. On Dokploy:
 Application → connect the repo → Build Type `Dockerfile` → domain + container port 80 +
 HTTPS → enable the auto-deploy webhook (if the repo is private, add build arg
-`GH_TOKEN=<read token>`).
+`GH_TOKEN=<read token>`). **Also add build arg `SITE_BASE_URL=https://<your domain>`** — see
+"Sharing" above; without it the deploy has no sitemap and relative `og:image` URLs.
 
 **The data artifact is NOT in git** (a 6k-planet build is ~90 MB): each pipeline run's
 `planets.json` is published as a GitHub Release asset, and the committed one-line
