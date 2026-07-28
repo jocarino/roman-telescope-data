@@ -51,7 +51,7 @@
       <div class="cmp-host" x-text="a()?.host"></div>
       <code class="cmp-hex" x-text="a()?.hex"></code>
       <div class="cmp-pal">
-        <template x-for="h in a()?.palette || []" :key="h"><span :style="{ background: h }"></span></template>
+        <template x-for="h in pal(a())" :key="h"><span :style="{ background: h }"></span></template>
       </div>
       <a class="cmp-open" :href="'/planet/' + a()?.id">open full page →</a>
     </div>
@@ -62,7 +62,7 @@
       <div class="cmp-host" x-text="b()?.host"></div>
       <code class="cmp-hex" x-text="b()?.hex"></code>
       <div class="cmp-pal">
-        <template x-for="h in b()?.palette || []" :key="h"><span :style="{ background: h }"></span></template>
+        <template x-for="h in pal(b())" :key="h"><span :style="{ background: h }"></span></template>
       </div>
       <a class="cmp-open" :href="'/planet/' + b()?.id">open full page →</a>
     </div>

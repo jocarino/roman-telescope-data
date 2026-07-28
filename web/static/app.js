@@ -931,6 +931,12 @@ document.addEventListener("alpine:init", () => {
     },
     a() { return this.byId[this.aId] || null; },
     b() { return this.byId[this.bId] || null; },
+    // The index stopped shipping a `palette` array once the ramps became client-derived, and
+    // this page kept reading the field — so both strips rendered as empty outlined boxes on the
+    // one page whose whole job is comparing palettes. Derive them the way the gallery does.
+    pal(p) {
+      return p && window.PlanetRender ? window.PlanetRender.ramp(p.hex) : [];
+    },
     // --- planet browser ---
     openPicker(slot) {
       this.pickerSlot = slot; this.pq = ""; this.pfam = null; this.ptypeF = "all";
