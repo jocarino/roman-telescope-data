@@ -591,7 +591,8 @@
   {# ── Planet data card: colour + planet stats; provenance & model assumptions on the ℹ ── #}
   <div class="panel dossier">
     <div class="dossier-head">
-      <h3>Planet data <span style="color:var(--fg-faint);text-transform:none;font-weight:400">(<span
+      <h3>Planet data <span class="h3-qual"
+        style="color:var(--fg-faint);text-transform:none;font-weight:400">(<span
         x-text="viewName()"></span>)</span></h3>
       <button class="info-btn" @click="help = !help" :class="help ? 'on' : ''"
         :aria-expanded="help" title="Data source & model assumptions"

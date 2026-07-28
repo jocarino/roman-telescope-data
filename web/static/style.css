@@ -310,17 +310,45 @@ a.badge:active { transform: translateY(1px); }
 
 /* ---- Colour bar: filter planets by colour family + "nearest in colour" pill ---- */
 /* "Nearest in colour to X" indicator, shown while the similar-colour sort is active. */
-.near-pill {
-  display: inline-flex; align-items: center; gap: 7px; padding: 5px 6px 5px 10px; margin-left: 4px;
-  border: 1px solid var(--accent); background: var(--bg-3); color: var(--fg-dim); font-size: 12px;
+/* Active-filter chips: what is currently cutting the catalogue down, each with its own ×.
+   Square corners, 1px border, mono caps — the same hardware language as the rest of the
+   toolbar, kept to one compact line so it costs almost nothing above the grid. Sits with the
+   count, right-aligned on desktop and left-aligned once the toolbar stacks. */
+.chips {
+  flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+  justify-content: flex-end; margin-top: 6px;
 }
-.near-pill b { color: var(--fg); font-weight: 600; }
-.near-dot { width: 12px; height: 12px; flex: none; border: 1px solid #000; }
-.near-x {
-  border: 0; background: none; color: var(--fg-dim); cursor: pointer; font-size: 15px;
-  line-height: 1; padding: 0 3px;
+.chips-lbl {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .6px; text-transform: uppercase;
+  color: var(--fg-faint); margin-right: 2px;
 }
-.near-x:hover { color: var(--fg); }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 4px 4px 8px;
+  border: 1px solid var(--line); background: var(--bg-3); color: var(--fg);
+  font-family: var(--mono); font-size: 11px; letter-spacing: .2px; line-height: 1.4;
+}
+.chip-dot { width: 10px; height: 10px; flex: none; border: 1px solid #000; }
+/* Sized as a target, not as a glyph: this is the one control in the row you actually press,
+   and on a phone it is the difference between removing a filter and opening a planet. */
+.chip-x {
+  border: 0; background: none; color: var(--fg-dim); cursor: pointer; font-size: 14px;
+  line-height: 1; font-family: inherit; min-width: 26px; min-height: 26px;
+  display: inline-flex; align-items: center; justify-content: center; padding: 0;
+}
+.chip-x:hover, .chip-x:focus-visible { color: var(--accent); }
+/* The catch-all only earns its place once there are several chips to catch. */
+.chip-clear {
+  padding: 4px 9px; cursor: pointer; color: var(--accent); border-color: var(--accent);
+  text-transform: uppercase; letter-spacing: .6px; font-size: 10px; min-height: 26px;
+}
+.chip-clear:hover { background: var(--accent); color: var(--bg); }
+@media (max-width: 640px) { .chips { justify-content: flex-start; } }
+/* Touch: nothing hovers, so the × has to be big enough to hit first time. */
+@media (pointer: coarse) {
+  .chip { padding-top: 2px; padding-bottom: 2px; }
+  .chip-x { min-width: 34px; min-height: 34px; }
+  .chip-clear { min-height: 34px; }
+}
 /* "Find similar colours" action shares the palette-action pill look, flagged in the accent. */
 .badge.similar { color: var(--accent); border-color: var(--accent); }
 
@@ -1664,7 +1692,12 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
   /* The colour table duplicates the F1 readout (hex / Y / conf / gamut): planet facts only. */
   .dossier-grid { grid-template-columns: 1fr; }
   .dossier-grid .dossier-stats:first-child { display: none; }
-  .dossier-head h3 span { display: none; }
+  /* Drop the decoration beside a panel title (the THE LAMP tag, the "(full spectrum)"
+     qualifier) — NOT the title itself. Both of the lamp panel's title variants are spans, so a
+     blanket `h3 span` rule left that panel headless on every phone: a lone ℹ above a star
+     swatch, with nothing saying what the section was. */
+  .dossier-head h3 .lamp-tag,
+  .dossier-head h3 .h3-qual { display: none; }
 }
 
 /* Phones only: two header rows that each cost a full line for very little. Kept out of the
