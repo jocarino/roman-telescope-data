@@ -100,8 +100,11 @@
          infrared, so it lights up as good as black. The ℹ is the switch's own right-hand
          segment (one box, one hairline divider), not a separate button parked beside it. #}
       <div class="view-switch" :class="view === 'roman' ? 'on' : ''">
+        {# The accessible name is spelled out here rather than left to the inner text: on phones
+           that text is hidden and the button is only the telescope glyph. #}
         <button type="button" class="view-toggle" @click="toggleView()"
           :aria-pressed="view === 'roman'"
+          aria-label="Seen from Roman — show every planet as the Coronagraph's four bands would see it"
           title="Show every planet as the Roman Coronagraph's four bands would see it">
           <svg class="tele-ic" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
             <path d="M1.6 8.9 L9.3 4.4 L10.9 7.2 L3.2 11.7 Z" fill="currentColor"/>
