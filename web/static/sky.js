@@ -199,14 +199,16 @@
         worldChips(focus);
     }
 
-    // Centre the viewport on the focused star, zoomed one step in so it is picked out of the
-    // field. Runs once per view change, never on the minute tick — the map must not yank
-    // itself back while someone is panning around.
+    // Centre the viewport on the focused star at the fit width — the crosshair does the
+    // pointing, so arriving zoomed in would trade away the context that makes the map worth
+    // showing (which constellation, how high, what else is near it). Runs once per view
+    // change, never on the minute tick — the map must not yank itself back while someone is
+    // panning around.
     function centreOnFocus() {
       if (!focus || focusCentred) return;
       var p = posOf(focus);
       if (!p) { focusCentred = true; return; }   // below the horizon in the outside view
-      var w = maxVbW() / 2;
+      var w = maxVbW();
       vb = { x: p.x - w / 2, y: 0, w: w, h: 0 };
       clampVb();                                  // derives the height from the container
       vb.y = p.y - vb.h / 2;
