@@ -1,12 +1,19 @@
-"""The "go outside and look at it" star chart: a whole-sky equatorial map as a
-self-contained inline SVG (no chart library, same approach as web/svg.py).
+"""The "go outside and look at it" star chart: a whole-sky equatorial map as an inline SVG
+(no chart library, same approach as web/svg.py).
 
 The map is an equirectangular plot of the J2000 sky with right ascension increasing to
 the LEFT (the astronomical chart convention — the sky as seen from inside the celestial
-sphere), so the tick labels run 24h → 0h and make the flip explicit. Every faint dot is
-another host star from this catalog; the target host is crosshaired in the accent colour
-with its constellation named. Like the spectrum plot, two geometries are emitted: a wide
-desktop face and a compact near-square face whose labels stay legible on a phone.
+sphere), so the tick labels run 24h → 0h and make the flip explicit. Every faint dot is a
+host star from this catalog; the target host is crosshaired in the accent colour with its
+constellation named. Like the spectrum plot, two geometries are emitted: a wide desktop
+face and a compact near-square face whose labels stay legible on a phone.
+
+The chart splits in two. The ~5.8k dots are the same on every planet page — only the
+crosshair moves — so they live in one shared file per geometry (`sky_field_svg`) that each
+chart pulls in through <image>; the per-page part is just the frame, graticule and marker.
+Inlined, those dots were 93% of a planet page and ~4.4 GB of a 4.5 GB dist. One consequence
+is deliberate: a shared field is one file for every page, so it cannot leave a different
+star out each time, and the target keeps its own dot underneath the crosshair.
 """
 
 from __future__ import annotations
@@ -54,8 +61,40 @@ def _y(g: _Geom, dec_deg: float) -> float:
     return g.pad_t + frac * (g.h - g.pad_t - g.pad_b)
 
 
+# The dot colour is baked into the shared field file rather than read from style.css: an SVG
+# pulled in through <image> is its own document and page CSS cannot reach inside it. Keep this
+# in step with `.skychart .skydot` in web/static/style.css.
+_DOT_FILL = "rgba(205,216,242,.34)"
+
+
+def sky_field_svg(catalog_points: list[tuple[float, float]], compact: bool = False) -> str:
+    """The catalogue starfield on its own, as a standalone SVG document.
+
+    This is the same set of dots on every planet page — only the crosshair moves — so it is
+    built once per geometry and referenced, instead of being inlined into all ~5.8k pages.
+    Emitted as one <rect> per star, deliberately: the dots are 34% opaque, and where many
+    overlap (the Kepler field above all) each one paints over the last and the pile-up reads
+    as a bright clump. That brightness is the map saying "an enormous number of known planets
+    are here", so it has to survive. Merging them into a single filled path would be a third
+    of the bytes and would flatten exactly that signal.
+    """
+    g = _COMPACT if compact else _WIDE
+    dots = "".join(
+        f'<rect x="{_x(g, ra) - 1:.1f}" y="{_y(g, dec) - 1:.1f}" width="2" height="2"/>'
+        for ra, dec in catalog_points
+    )
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {g.w} {g.h}" '
+        f'width="{g.w}" height="{g.h}">'
+        f"<style>rect{{fill:{_DOT_FILL}}}</style>{dots}</svg>"
+    )
+
+
 def sky_chart_svg(
-    sky: SkyPosition, catalog_points: list[tuple[float, float]], compact: bool = False
+    sky: SkyPosition,
+    catalog_points: list[tuple[float, float]],
+    compact: bool = False,
+    field_url: str | None = None,
 ) -> str:
     g = _COMPACT if compact else _WIDE
     # Frame edges directly (never through _x, whose modulo folds 24h onto 0h).
@@ -85,15 +124,20 @@ def sky_chart_svg(
                 f'text-anchor="end">{lbl}</text>'
             )
 
-    # Every other host star in the catalog: faint 2x2 pixel dots (the retro starfield is
-    # the data itself). The target is skipped here and drawn as the crosshair instead.
-    dots = ""
-    for ra, dec in catalog_points:
-        if abs(ra - sky.ra_deg) < 1e-6 and abs(dec - sky.dec_deg) < 1e-6:
-            continue
-        dots += (
+    # Every host star in the catalog: faint 2x2 pixel dots (the retro starfield is the data
+    # itself). With a field_url the dots come from the one shared file (see sky_field_svg) and
+    # the target keeps its own dot, sitting under the crosshair — a shared field is one file
+    # for every page and so cannot leave a different star out each time. At 2x2 under a 10x10
+    # hollow marker it does not read as a data point, and the marker still says "you are here".
+    # Without a field_url the dots are inlined and the target is skipped, as before.
+    if field_url:
+        dots = f'<image href="{field_url}" x="0" y="0" width="{g.w}" height="{g.h}"/>'
+    else:
+        dots = "".join(
             f'<rect x="{_x(g, ra) - 1:.1f}" y="{_y(g, dec) - 1:.1f}" '
             f'width="2" height="2" class="skydot"/>'
+            for ra, dec in catalog_points
+            if not (abs(ra - sky.ra_deg) < 1e-6 and abs(dec - sky.dec_deg) < 1e-6)
         )
 
     # Crosshair through the target host, with an open square marker (never a filled dot —

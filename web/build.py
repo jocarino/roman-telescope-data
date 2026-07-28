@@ -41,7 +41,7 @@ from pipeline.sky import format_dec, format_ra
 from pipeline.tours import Tour, TourStop
 from pipeline.tours import resolve as resolve_tours
 from web.hz import hz_strip_svg
-from web.sky import sky_chart_svg
+from web.sky import sky_chart_svg, sky_field_svg
 from web.svg import spectrum_svg
 
 _HERE = Path(__file__).parent
@@ -242,6 +242,7 @@ def _planet_ctx(
     fiction: dict[str, dict] | None = None,
     sky_points: list[tuple[float, float]] | None = None,
     tour_membership: dict[str, list[dict]] | None = None,
+    sky_field_urls: tuple[str, str] | None = None,
 ) -> dict:
     view = rec.instrument_views[0]
     args = dict(
@@ -264,9 +265,22 @@ def _planet_ctx(
         # it belongs to (empty for the great majority of planets).
         "tours": (tour_membership or {}).get(rec.id, []),
         # None (no chart) for records without a sky position, e.g. pre-sky data releases.
-        "sky_svg": sky_chart_svg(rec.sky, sky_points or []) if rec.sky else None,
+        # The ~5.8k starfield dots are the same on every page, so they are referenced from one
+        # shared file rather than inlined here; see sky_field_svg.
+        "sky_svg": (
+            sky_chart_svg(rec.sky, sky_points or [], field_url=(sky_field_urls or (None, None))[0])
+            if rec.sky
+            else None
+        ),
         "sky_svg_compact": (
-            sky_chart_svg(rec.sky, sky_points or [], compact=True) if rec.sky else None
+            sky_chart_svg(
+                rec.sky,
+                sky_points or [],
+                compact=True,
+                field_url=(sky_field_urls or (None, None))[1],
+            )
+            if rec.sky
+            else None
         ),
         "sky_ra": format_ra(rec.sky.ra_deg) if rec.sky else None,
         "sky_dec": format_dec(rec.sky.dec_deg) if rec.sky else None,
@@ -487,13 +501,22 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
 
     page_tpl = env.get_template("planet.html")
     peek_tpl = env.get_template("fragments/peek.html")
-    # Every host with a known position becomes a faint dot on every planet's sky chart.
+    # Every host with a known position becomes a faint dot on every planet's sky chart. That
+    # field is identical on all ~5.8k pages — only the crosshair moves — so it is written once
+    # per geometry and referenced. Inlined, it was 93% of a planet page and ~4.4 GB of dist.
+    # Build-stamped like the index, so it caches for a year and never goes stale.
     sky_points = [(r.sky.ra_deg, r.sky.dec_deg) for r in records if r.sky]
+    sky_field_urls = None
+    if sky_points:
+        for name, compact in ((f"sky-field.{build_id}.svg", False),
+                              (f"sky-field-c.{build_id}.svg", True)):
+            (out / name).write_text(sky_field_svg(sky_points, compact=compact))
+        sky_field_urls = (f"/sky-field.{build_id}.svg", f"/sky-field-c.{build_id}.svg")
     # Stream one planet at a time: each context carries two rendered SVG spectra, so
     # materialising all of them first is ~1 GB of strings at 6k planets — enough to push a
     # small VPS into swap during deploy. Peak memory is now one context, not N.
     for rec in records:
-        ctx = _planet_ctx(rec, fiction, sky_points, tour_membership)
+        ctx = _planet_ctx(rec, fiction, sky_points, tour_membership, sky_field_urls)
         pid = rec.id
         (out / "planet" / f"{pid}.html").write_text(page_tpl.render(ctx=ctx, build_id=build_id))
         (out / "fragments" / "peek" / f"{pid}.html").write_text(peek_tpl.render(ctx=ctx))
