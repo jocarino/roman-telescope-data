@@ -218,8 +218,13 @@
   .skr .led-btn:disabled { opacity: .45; filter: grayscale(1); cursor: progress; }
   .skr-btns { display: flex; }
   .skr-btns .led-btn + .led-btn { margin-left: -1px; }
-  /* Located lamp glows amber (the real-world/ground colour), not signal green. */
-  .skr-geo .led.on { background: #cf9a4e; box-shadow: 0 0 6px #cf9a4e; }
+  /* Located lamp glows amber (the real-world/ground colour), not signal green. It reports a
+     held state — "we have your position" — not activity, so it burns steady: the shared
+     .led.on pulse (opacity → .55 every 2.4s) left it looking half-dead at rest. */
+  .skr-geo .led.on {
+    background: #f0b45e; box-shadow: 0 0 7px #cf9a4e, 0 0 2px #ffe0ad inset;
+    animation: none; opacity: 1;
+  }
   /* Slide-rule latitude dial: tick strip + printed scale + faint city names, the old
      shortwave "where to tune for Paris" touch. */
   .skr-dial { flex: 1 1 300px; min-width: 260px; align-items: stretch; }
