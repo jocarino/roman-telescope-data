@@ -52,6 +52,7 @@ from web.meta import (
     not_found_meta,
     planet_meta,
     robots_txt,
+    roman_meta,
     sitemap_xml,
     static_pages,
     tour_meta,
@@ -694,10 +695,13 @@ def build(
     # rather than modelled, joined onto THIS catalog (see pipeline/roman_board.py). Skipped
     # entirely when the curated file is absent, exactly like tours.
     board = resolve_board(records)
+    board_metas: list[PageMeta] = []
     if board is not None:
+        board_metas.append(roman_meta())
         hole_left, hole_width = board.dark_hole_span
         (out / "roman.html").write_text(
             env.get_template("roman.html").render(
+                meta=board_metas[0], site=site,
                 board=board,
                 mission=board.mission,
                 instrument=board.instrument,
@@ -755,7 +759,8 @@ def build(
     # ~5.8k planet pages exist, and nothing links to most of them (the gallery grid is
     # client-rendered from a fetched index, so a crawler sees ~150 boot cards and no more).
     site = replace(
-        site, pages=[*hub.values(), *tour_metas, *(planet_meta(r) for r in records)]
+        site,
+        pages=[*hub.values(), *board_metas, *tour_metas, *(planet_meta(r) for r in records)],
     )
     (out / "robots.txt").write_text(robots_txt(site))
     if site.base_url:

@@ -233,6 +233,22 @@ def tour_meta(tour_id: str, title: str, blurb: str, n_stops: int) -> PageMeta:
     )
 
 
+def roman_meta() -> PageMeta:
+    """The target board. Not in static_pages() because the page is conditional — it is only
+    built when the curated board file resolves — and a sitemap must not name a 404."""
+    return PageMeta(
+        title=f"The Roman target board · {SITE_NAME}",
+        description=(
+            "The shortlist of exoplanets the Roman Coronagraph could measure in colour "
+            "rather than model: predicted colours now, empty slots waiting for real data, "
+            "and a clock counting down to launch."
+        ),
+        path="/roman.html",
+        priority="0.8",
+        changefreq="weekly",
+    )
+
+
 def not_found_meta() -> PageMeta:
     return PageMeta(
         title=f"404 · off the chart · {SITE_NAME}",
