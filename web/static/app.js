@@ -249,7 +249,10 @@ document.addEventListener("alpine:init", () => {
     // build; fall back to the full-spectrum colour if an entry predates them (a cached boot
     // slice from an older build) so a card is never blank.
     hexOf(p) { return this.view === "roman" && p.rhex ? p.rhex : p.hex; },
-    palOf(p) { return this.view === "roman" && p.rpal ? p.rpal : p.palette; },
+    // Derived from the base hex, not carried in the index: the ramp is a pure function of it
+    // (PlanetRender.ramp, matching pipeline/palette/derive.py exactly), and shipping ten more
+    // hexes per planet was ~29% of the index for something every client can recompute.
+    palOf(p) { return window.PlanetRender.ramp(this.hexOf(p)); },
     famOf(p) { return this.view === "roman" && p.rfam ? p.rfam : p.family; },
     lumOf(p) { return this.view === "roman" && p.rlum != null ? p.rlum : p.lum; },
     // Paint the inlined boot slice immediately, fetch the full index in the background, and
@@ -859,6 +862,7 @@ document.addEventListener("alpine:init", () => {
   // data (temperature, host star, atmosphere, size) plus fun facts (distance, discovery).
   Alpine.data("compare", (cfg) => ({
     indexUrl: (cfg && cfg.indexUrl) || null,
+    extraUrl: (cfg && cfg.extraUrl) || null,
     loaded: false,
     all: [],
     byId: {},
@@ -877,8 +881,16 @@ document.addEventListener("alpine:init", () => {
     familyOrderC: ["teal", "azure", "blue", "periwinkle", "green", "gold", "orange", "red", "pink", "violet", "brown", "grey", "white", "dark"],
     async init() {
       try {
-        const res = await fetch(this.indexUrl);
-        this.all = await res.json();
+        // The star and orbit numbers this table shows live in a companion file, so the pages
+        // that only need the grid don't download them. It is a parallel array in the same
+        // order as the index, so the two zip by position.
+        const [core, extra] = await Promise.all([
+          fetch(this.indexUrl).then((r) => r.json()),
+          this.extraUrl ? fetch(this.extraUrl).then((r) => r.json()).catch(() => null) : null,
+        ]);
+        this.all = extra && extra.length === core.length
+          ? core.map((p, i) => Object.assign({}, p, extra[i]))
+          : core;
         this.all.forEach((p) => { this.byId[p.id] = p; });
       } catch (e) { /* leave empty */ }
       const u = new URLSearchParams(location.search);
@@ -933,7 +945,8 @@ document.addEventListener("alpine:init", () => {
           const cv = this.$refs[ref];
           if (!cv || !p || !window.PlanetRender) return;
           window.PlanetRender.render(cv, {
-            palette: p.palette, radius: p.radius, cloudState: p.cloud, lumY: p.lum,
+            palette: window.PlanetRender.ramp(p.hex), baseHex: p.hex,
+            radius: p.radius, cloudState: p.cloud, lumY: p.lum,
             style: "retro", fidelity: localStorage.getItem("renderFidelity") || "classic",
           });
         });
@@ -1505,10 +1518,11 @@ document.addEventListener("alpine:init", () => {
       });
       if (pl) {
         var style = localStorage.getItem("planetStyle") || "retro";
-        var roman = view === "roman" && pl.rpal;
+        var roman = view === "roman" && pl.rhex;
+        var base = roman ? pl.rhex : pl.hex;
         cv.classList.toggle("pixel", style === "retro");
         window.PlanetRender.render(cv, {
-          palette: roman ? pl.rpal : pl.palette, baseHex: roman ? pl.rhex : pl.hex,
+          palette: window.PlanetRender.ramp(base), baseHex: base,
           radius: pl.radius, cloudState: pl.cloud, lumY: roman ? pl.rlum : pl.lum,
           style: style, fidelity: localStorage.getItem("renderFidelity") || "classic",
           phase: window.PlanetRender.hashPhase(pl.id),
@@ -1577,9 +1591,10 @@ document.addEventListener("alpine:init", () => {
     // Read the view every time rather than caching it: this runs outside the Alpine component,
     // so a card spun up mid-session must use whatever the switch says NOW. Getting this wrong
     // is visible — the planet would snap back to its full-spectrum colours under the cursor.
-    var roman = window.__exoView === "roman" && p.rpal;
+    var roman = window.__exoView === "roman" && p.rhex;
+    var base = roman ? p.rhex : p.hex;
     return {
-      palette: roman ? p.rpal : p.palette, baseHex: roman ? p.rhex : p.hex,
+      palette: window.PlanetRender.ramp(base), baseHex: base,
       radius: p.radius, cloudState: p.cloud, lumY: roman ? p.rlum : p.lum,
       style: localStorage.getItem("planetStyle") || "retro",
       fidelity: localStorage.getItem("renderFidelity") || "classic",

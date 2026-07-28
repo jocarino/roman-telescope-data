@@ -317,25 +317,18 @@ def _index_entry(rec: PlanetRecord, fiction: dict[str, dict] | None = None) -> d
         "rhex": view.colour.hex,
         "rfam": colour_family(tuple(view.colour.srgb)),
         "rlum": round(view.colour.luminance_y, 5),
-        "rpal": [s.hex for s in view.colour.palette],
         # Habitable-zone lens: the zone the orbit falls in, and whether the planet is small
         # enough to have a surface. The gallery derives "could hold liquid water" from both.
         "hz": rec.habitability.zone if rec.habitability else "unknown",
         "srf": rec.habitability.surface if rec.habitability else "unknown",
-        # For the card planet renders:
-        "palette": [s.hex for s in rec.true_colour.palette],
+        # For the card planet renders. The 5-stop ramps are NOT here: they are a pure function
+        # of the hexes above (pipeline/palette/derive.py), so the browser derives them with
+        # PlanetRender.ramp instead — ten hexes a planet was ~29% of this file.
         "radius": rec.params.radius_r_earth,
         "cloud": rec.params.assumed_cloud_state,
-        # Extra fields for the compare page (the colour-driving data + fun facts).
         "dist_ly": (
             round(rec.params.distance_pc * _LY_PER_PC, 1) if rec.params.distance_pc else None
         ),
-        "starTeff": rec.host_star.teff_k,
-        "starType": rec.host_star.spectral_type,
-        "metal": rec.params.assumed_metallicity,
-        "mass": rec.params.mass_m_earth,
-        "sma": rec.params.semi_major_axis_au,
-        "year": rec.discovery.year,
     }
     # Fiction flag: the system name if this planet appears in the curated overlay, else absent
     # (kept off the entry entirely so the 900+ non-fiction rows stay lean). Drives the gallery
@@ -343,13 +336,36 @@ def _index_entry(rec: PlanetRecord, fiction: dict[str, dict] | None = None) -> d
     fic = (fiction or {}).get(rec.name)
     if fic:
         entry["fic"] = fic["system"]
+    return entry
+
+
+def _extra_entry(rec: PlanetRecord) -> dict:
+    """The fields only /compare and /sky read, split out of the main index.
+
+    Every page that shows the grid — the gallery, the census, the 404 cockpit — pays for the
+    index on first load, and these fields are dead weight to all of them: the star and orbit
+    numbers are read only by the compare table, the sky coordinates only by "your sky
+    tonight". Together they were ~22% of the index.
+
+    Written in the same order as _index_entry, as a parallel array with no ids: the two files
+    are generated from one pass over the same records, and the consumers zip them by position
+    (see tests/test_index_split.py, which pins that alignment).
+    """
+    extra: dict = {
+        "starTeff": rec.host_star.teff_k,
+        "starType": rec.host_star.spectral_type,
+        "metal": rec.params.assumed_metallicity,
+        "mass": rec.params.mass_m_earth,
+        "sma": rec.params.semi_major_axis_au,
+        "year": rec.discovery.year,
+    }
     # Sky position for the "your sky tonight" page (absent for pre-sky data releases).
     if rec.sky:
-        entry["ra"] = round(rec.sky.ra_deg, 2)
-        entry["dec"] = round(rec.sky.dec_deg, 2)
+        extra["ra"] = round(rec.sky.ra_deg, 2)
+        extra["dec"] = round(rec.sky.dec_deg, 2)
         if rec.sky.v_mag is not None:
-            entry["vmag"] = round(rec.sky.v_mag, 1)
-    return entry
+            extra["vmag"] = round(rec.sky.v_mag, 1)
+    return extra
 
 
 def _stats(records: list[PlanetRecord]) -> dict:
@@ -437,6 +453,12 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     (out / f"planets.index.{build_id}.json").write_text(
         json.dumps(index_entries, separators=(",", ":"))
     )
+    # The compare/sky-only fields, as a parallel array in the same order (see _extra_entry).
+    # Only those two pages fetch it; the gallery, census and 404 never pay for it.
+    extra_url = f"/planets.extra.{build_id}.json"
+    (out / f"planets.extra.{build_id}.json").write_text(
+        json.dumps([_extra_entry(r) for r in records], separators=(",", ":"))
+    )
     # Boot slice: the head of the default gallery view (unfiltered, name sort), inlined into
     # index.html so the first screens of cards paint before the multi-MB index downloads.
     # The sort rule (lowercase, then exact, plain code-point compare) is mirrored exactly by
@@ -452,10 +474,13 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
     )
     (out / "index.html").write_text(gallery_html)
     (out / "how.html").write_text(env.get_template("how.html").render(build_id=build_id))
-    # Compare page: consumes the same fetched index; deep-linkable via ?a=&b=.
+    # Compare page: consumes the same fetched index plus the extras (star + orbit numbers);
+    # deep-linkable via ?a=&b=.
     (out / "compare.html").write_text(
         env.get_template("compare.html").render(
-            index_url=f"/planets.index.{build_id}.json", build_id=build_id
+            index_url=f"/planets.index.{build_id}.json",
+            extra_url=extra_url,
+            build_id=build_id,
         )
     )
     # Glossary: every jargon term on the site, in plain English. Deliberately unlinked from
@@ -483,10 +508,13 @@ def build(planets_json: Path = _DEFAULT_JSON, out: Path = Path("dist")) -> Path:
             **_cockpit_instruments(records),
         )
     )
-    # "Your sky tonight": every host star above the visitor's horizon (same fetched index).
+    # "Your sky tonight": every host star above the visitor's horizon (same fetched index,
+    # plus the extras — the RA/Dec/magnitude it plots live there).
     (out / "sky.html").write_text(
         env.get_template("sky.html").render(
-            index_url=f"/planets.index.{build_id}.json", build_id=build_id
+            index_url=f"/planets.index.{build_id}.json",
+            extra_url=extra_url,
+            build_id=build_id,
         )
     )
     # Guided tours: curated walks, resolved against THIS catalog (see pipeline/tours.py).
