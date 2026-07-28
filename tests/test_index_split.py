@@ -75,7 +75,8 @@ def test_extras_are_positionally_aligned_with_the_index() -> None:
         if rec.sky:
             assert merged["ra"] == round(rec.sky.ra_deg, 2)
         if rec.host_star.teff_k is not None:
-            assert merged["starTeff"] == rec.host_star.teff_k
+            # Rounded for the wire (see tests/test_index_precision.py), so compare loosely.
+            assert merged["starTeff"] == pytest.approx(rec.host_star.teff_k, abs=0.05)
 
 
 def test_both_files_are_json_serialisable() -> None:

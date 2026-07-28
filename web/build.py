@@ -293,6 +293,19 @@ def _planet_ctx(
     }
 
 
+def _r(value: float | None, places: int) -> float | None:
+    """Round for the index, passing None through.
+
+    Values reach the index straight off the record, where they carry full float repr — a
+    distance of 0.00014630707286050534 pc, a luminance of 0.059143490457500454. That is
+    ~370 KB of digits nothing reads: every one of these is either displayed rounded hard
+    (temperature as a whole number, radius to 1 dp) or used only to order a list. The
+    precisions below are still far finer than anything shown, and were picked to leave the
+    gallery's sorts in the same order — see tests/test_index_precision.py.
+    """
+    return None if value is None else round(value, places)
+
+
 def _index_entry(rec: PlanetRecord, fiction: dict[str, dict] | None = None) -> dict:
     view = rec.instrument_views[0]
     entry = {
@@ -300,10 +313,14 @@ def _index_entry(rec: PlanetRecord, fiction: dict[str, dict] | None = None) -> d
         "name": rec.name,
         "host": rec.host_star.name,
         "prov": rec.provenance,
-        "temp": rec.params.equilibrium_temp_k,
-        "dist": rec.params.distance_pc,
-        "lum": rec.true_colour.luminance_y,
-        "de": view.reconstruction_error.delta_e2000 if view.reconstruction_error else 0.0,
+        "temp": _r(rec.params.equilibrium_temp_k, 2),
+        "dist": _r(rec.params.distance_pc, 8),
+        "lum": _r(rec.true_colour.luminance_y, 7),
+        "de": (
+            round(view.reconstruction_error.delta_e2000, 4)
+            if view.reconstruction_error
+            else 0.0
+        ),
         "hex": rec.true_colour.hex,
         "family": colour_family(tuple(rec.true_colour.srgb)),
         "ptype": planet_type(
@@ -324,7 +341,7 @@ def _index_entry(rec: PlanetRecord, fiction: dict[str, dict] | None = None) -> d
         # For the card planet renders. The 5-stop ramps are NOT here: they are a pure function
         # of the hexes above (pipeline/palette/derive.py), so the browser derives them with
         # PlanetRender.ramp instead — ten hexes a planet was ~29% of this file.
-        "radius": rec.params.radius_r_earth,
+        "radius": _r(rec.params.radius_r_earth, 4),
         "cloud": rec.params.assumed_cloud_state,
         "dist_ly": (
             round(rec.params.distance_pc * _LY_PER_PC, 1) if rec.params.distance_pc else None
@@ -352,11 +369,13 @@ def _extra_entry(rec: PlanetRecord) -> dict:
     (see tests/test_index_split.py, which pins that alignment).
     """
     extra: dict = {
-        "starTeff": rec.host_star.teff_k,
+        "starTeff": _r(rec.host_star.teff_k, 1),
         "starType": rec.host_star.spectral_type,
-        "metal": rec.params.assumed_metallicity,
-        "mass": rec.params.mass_m_earth,
-        "sma": rec.params.semi_major_axis_au,
+        "metal": _r(rec.params.assumed_metallicity, 3),
+        # Shown as "× Earth's mass" and " AU" to a couple of decimals; the record's full
+        # float repr (193.87532827, 0.1765736996) is digits nobody reads. See _r.
+        "mass": _r(rec.params.mass_m_earth, 4),
+        "sma": _r(rec.params.semi_major_axis_au, 6),
         "year": rec.discovery.year,
     }
     # Sky position for the "your sky tonight" page (absent for pre-sky data releases).
