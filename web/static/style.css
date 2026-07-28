@@ -2460,11 +2460,30 @@ a.rtb-name:hover { color: var(--accent); }
 
 /* The controls get a hard maximum: on a wide panel a 1fr second column stretches the readout
    rows to ~900px, leaving each label marooned from its value at the far end of the row. */
+/* Panel-heading subtitle. Deliberately NOT .lamp-tag: that is 7px Silkscreen, which reads
+   fine for a two-word stamp like "THE LAMP" but turns a sentence into a smear. These are
+   sentences, and they are the line that tells a newcomer what the panel is for — so they
+   follow the VIEW filter and the MODELLED / RADIAL VELOCITY chips at the top of the page
+   instead: mono, 11px, sentence case. Sentence case also stops it competing with the
+   uppercase h3 it sits beside. */
+.ms-tag {
+  display: inline-block; font-family: var(--mono); font-size: 11px; letter-spacing: .2px;
+  text-transform: none; color: var(--fg-dim); background: var(--bg-3);
+  border: 1px solid var(--line); box-shadow: 2px 2px 0 var(--line);
+  padding: 3px 8px; margin-left: 9px; vertical-align: 2px;
+}
+
 .ms-grid, .wi-grid {
   display: grid; grid-template-columns: auto minmax(260px, 560px);
   gap: 18px 26px; margin-top: 14px; align-items: start; justify-content: start;
 }
-.ms-view { display: flex; flex-direction: column; gap: 9px; align-items: flex-start; }
+/* Fixed width, deliberately. This column holds the render and its caption, and the caption's
+   text changes on every step of the slider ("where it really is" -> "41x closer in"). Left to
+   size itself, the column grew and shrank with that text and dragged the entire control panel
+   left and right with it on every drag. */
+.ms-view {
+  display: flex; flex-direction: column; gap: 9px; align-items: flex-start; width: 128px;
+}
 .ms-canvas {
   width: 128px; height: 128px; display: block; background: transparent;
   border: 1px solid var(--line); box-shadow: 3px 3px 0 var(--line);
@@ -2479,7 +2498,10 @@ a.rtb-name:hover { color: var(--accent); }
   background: var(--bg-3); border: 1px solid var(--line); padding: 2px 6px; color: var(--fg);
 }
 .ms-hex:hover { border-color: var(--accent); color: var(--accent); }
+/* Own row, always: the caption is the widest thing in this column, so letting it share the
+   swatch's line makes the row height flip between one and two lines as the text changes. */
 .ms-athome {
+  flex-basis: 100%; min-height: 2.5em;
   font-family: var(--mono); font-size: 9px; letter-spacing: .04em; text-transform: uppercase;
   color: var(--fg-faint);
 }
@@ -2569,9 +2591,12 @@ a.rtb-name:hover { color: var(--accent); }
   .ms-grid, .wi-grid { grid-template-columns: 1fr; gap: 14px; }
   /* Vertical space is precious on a phone: the render shrinks and sits beside its swatch
      rather than stacking above it, so the slider stays within the first screen. */
-  .ms-view { flex-direction: row; align-items: center; gap: 12px; }
+  .ms-view { flex-direction: row; align-items: center; gap: 12px; width: auto; }
   .ms-canvas { width: 84px; height: 84px; }
   .ms-id { flex-direction: column; align-items: flex-start; gap: 5px; }
+  .ms-athome { min-height: 0; }
   .ms-regime { min-height: 0; }
   .wi-detail { min-height: 0; }
+  /* The subtitle drops under the heading rather than being squeezed beside it. */
+  .ms-tag { display: block; width: max-content; max-width: 100%; margin: 7px 0 0; }
 }

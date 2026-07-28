@@ -700,7 +700,7 @@
 
     <div class="panel movepanel">
       <div class="dossier-head">
-        <h3>Move this planet <span class="lamp-tag">WHAT IF IT ORBITED SOMEWHERE ELSE?</span></h3>
+        <h3>Move this planet <span class="ms-tag">What if it orbited somewhere else?</span></h3>
         <button class="info-btn" @click="toggleInfo('move')" :class="info === 'move' ? 'on' : ''"
           :aria-expanded="info === 'move'" title="How can we know this?"
           aria-label="How can we know what it would look like elsewhere?">i</button>
@@ -742,7 +742,11 @@
               style="background: {{ tc.hex }}"></span>
             <code class="ms-hex" @click="copy(hex())" title="Copy this hex"
               x-text="hex()">{{ tc.hex }}</code>
-            <span class="ms-athome" x-show="atHome()">its real orbit</span>
+            {# Always rendered, never x-show: this caption used to appear only at the home
+               position, and since it sits in the grid's left column its arrival and departure
+               resized that column and shunted the whole control panel sideways on every drag.
+               It now always carries text, so nothing moves. #}
+            <span class="ms-athome" x-text="moveText()">where it really is</span>
           </div>
         </div>
         <div class="ms-controls">
@@ -774,7 +778,6 @@
             <span>CLOSER · HOTTER</span><span>FURTHER · COLDER</span>
           </div>
           <div class="ms-foot">
-            <span class="ms-move" x-text="moveText()"></span>
             <button type="button" class="reset-btn ms-reset" @click="goHome()" :disabled="atHome()"
               :title="atHome() ? 'Already at its real orbit' : 'Put the planet back where it really is'">&#10226;
               Back to its real orbit</button>
@@ -834,7 +837,7 @@
     <div class="panel whatifpanel">
       <div class="dossier-head">
         <h3>How much of this colour is the model's opinion?
-          <span class="lamp-tag">CHANGE ONE ASSUMPTION</span></h3>
+          <span class="ms-tag">Change one assumption</span></h3>
         <button class="info-btn" @click="toggleInfo('whatif')" :class="info === 'whatif' ? 'on' : ''"
           :aria-expanded="info === 'whatif'" title="Why does this matter?"
           aria-label="Why do the model assumptions matter?">i</button>
