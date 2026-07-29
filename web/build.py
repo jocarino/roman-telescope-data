@@ -9,7 +9,7 @@ Pure static consumer — no colour maths here; both colours and palettes are pre
 planets.json. A regenerated planets.json (e.g. after real measured data lands) just changes
 what renders; no template edits.
 
-Two derived exceptions, both pure functions of values every record already carries, so both
+Three derived exceptions, all pure functions of values every record already carries, so all
 ship on the next deploy with no data re-release:
 
 - the host-star "lamp" swatch (pipeline.colour.star), from the star's Teff;
@@ -17,6 +17,10 @@ ship on the next deploy with no data re-release:
   in already-released planets.json files are non-monotonic (see derive.py), so they are
   re-derived here rather than trusted. Base colours are never recomputed — the physics is
   read from planets.json exactly as written.
+- model space (web.modelspace): the same planet at other orbital distances, under other
+  cloud/metallicity assumptions, and around one eccentric orbit. Every one of those is
+  anchored so it reproduces the record's own colour at the planet's real parameters, so this
+  re-derives nothing the record already states — it only extends it sideways.
 """
 
 from __future__ import annotations
@@ -57,6 +61,7 @@ from web.meta import (
     static_pages,
     tour_meta,
 )
+from web.modelspace import modelspace_ctx
 from web.og import CardSpec, card_png
 from web.sky import sky_chart_svg, sky_field_svg
 from web.svg import spectrum_svg
@@ -331,6 +336,10 @@ def _planet_ctx(
         "hz_insol": _fmt_insolation(
             rec.habitability.insolation_earth if rec.habitability else None
         ),
+        # Model space: the migration slider, the what-if knobs and the colour year. Derived
+        # here rather than stored, like the lamp above — see web.modelspace. None for records
+        # with no spectrum or no equilibrium temperature; the panel then does not render.
+        "modelspace": modelspace_ctx(rec),
     }
 
 

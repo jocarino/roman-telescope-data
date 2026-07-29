@@ -2452,3 +2452,201 @@ a.rtb-name:hover { color: var(--accent); }
   .rtb-notes { display: none; }
   .rtb-notes.open { display: block; }
 }
+
+/* ---- MODEL SPACE: move the planet, and turn the model's assumptions ----------------------
+   Two panels sharing one Alpine component (web/static/modelspace.js). Both are "what if"
+   surfaces, so both keep the real planet's swatch on screen to compare against and neither
+   ever restyles the page hero — what you are looking at is explicitly not this planet. */
+
+/* The controls get a hard maximum: on a wide panel a 1fr second column stretches the readout
+   rows to ~900px, leaving each label marooned from its value at the far end of the row. */
+/* Panel-heading subtitle. Deliberately NOT .lamp-tag: that is 7px Silkscreen, which reads
+   fine for a two-word stamp like "THE LAMP" but turns a sentence into a smear. These are
+   sentences, and they are the line that tells a newcomer what the panel is for — so they
+   follow the VIEW filter and the MODELLED / RADIAL VELOCITY chips at the top of the page
+   instead: mono, 11px, sentence case. Sentence case also stops it competing with the
+   uppercase h3 it sits beside. */
+.ms-tag {
+  display: inline-block; font-family: var(--mono); font-size: 11px; letter-spacing: .2px;
+  text-transform: none; color: var(--fg-dim); background: var(--bg-3);
+  border: 1px solid var(--line); box-shadow: 2px 2px 0 var(--line);
+  padding: 3px 8px; margin-left: 9px; vertical-align: 2px;
+}
+
+.ms-grid, .wi-grid {
+  display: grid; grid-template-columns: auto minmax(260px, 560px);
+  gap: 18px 26px; margin-top: 14px; align-items: start; justify-content: start;
+}
+/* Fixed width, deliberately. This column holds the render and its caption, and the caption's
+   text changes on every step of the slider ("where it really is" -> "41x closer in"). Left to
+   size itself, the column grew and shrank with that text and dragged the entire control panel
+   left and right with it on every drag. */
+.ms-view {
+  display: flex; flex-direction: column; gap: 9px; align-items: flex-start; width: 128px;
+}
+/* No frame. The hero at the top of the page is a bare planet on the background, and a boxed
+   one down here read as a different kind of object rather than the same planet moved. */
+.ms-canvas { width: 128px; height: 128px; display: block; background: transparent; }
+/* Follows the Shape knob, exactly as .detail-hero does. */
+.ms-canvas.pixel { image-rendering: pixelated; image-rendering: crisp-edges; }
+.ms-id { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ms-swatch {
+  width: 26px; height: 26px; flex: none; border: 1px solid var(--line);
+  box-shadow: 2px 2px 0 var(--line);
+}
+.ms-hex {
+  font-family: var(--mono); font-size: 11px; cursor: pointer;
+  background: var(--bg-3); border: 1px solid var(--line); padding: 2px 6px; color: var(--fg);
+}
+.ms-hex:hover { border-color: var(--accent); color: var(--accent); }
+/* Own row, always: the caption is the widest thing in this column, so letting it share the
+   swatch's line makes the row height flip between one and two lines as the text changes. */
+.ms-athome {
+  flex-basis: 100%; min-height: 2.5em;
+  font-family: var(--mono); font-size: 9px; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--fg-faint);
+}
+.ms-controls { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+/* The regime name is the sentence the slider is really writing, so it gets the accent and
+   enough room not to reflow the panel as it changes between short and long names. */
+.ms-regime {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--accent); margin: 7px 0 2px; min-height: 2.4em;
+}
+
+/* The slider, plus the reference marks that sit under it. The marks track is inset by half a
+   thumb width at each end so a mark lines up with where the thumb centre actually stops. */
+/* Two bands under the track, not one: the planet's real orbit often sits almost exactly on a
+   Cahoy grid distance (Jupiter's 5.2 AU against the grid's 5 AU), and stacked in one band the
+   "REAL" label lands underneath a tick and both become unreadable. */
+.ms-slider-wrap { position: relative; padding-bottom: 34px; }
+.ms-slider { margin-top: 2px; }
+.ms-marks { position: absolute; left: 7px; right: 7px; bottom: 0; height: 32px; }
+.ms-home-mark {
+  position: absolute; top: 0; width: 1px; height: 7px; background: var(--fg-dim);
+  transform: translateX(-.5px);
+}
+.ms-home-mark::after {
+  content: "REAL"; position: absolute; top: 7px; left: 50%; transform: translateX(-50%);
+  font-family: var(--pixel); font-size: 6px; letter-spacing: .3px; color: var(--fg-faint);
+}
+.ms-tick {
+  position: absolute; top: 21px; transform: translateX(-50%); padding: 0; cursor: pointer;
+  background: none; border: 0; line-height: 0;
+}
+.ms-tick-sw {
+  display: block; width: 9px; height: 9px; border: 1px solid var(--line);
+}
+.ms-tick:hover .ms-tick-sw, .ms-tick:focus-visible .ms-tick-sw { border-color: var(--accent); }
+.ms-scale { margin-top: 2px; }
+.ms-foot {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  flex-wrap: wrap; margin-top: 10px;
+}
+.ms-move {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--fg-dim);
+}
+/* .reset-btn is full-width in the scope rail, where it is the only control on its row. Here
+   it shares a row with the "3× further out" readout, so it sizes to its own label. */
+.ms-reset { width: auto; font-size: 9px; padding: 5px 9px; }
+.ms-legend {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .03em; color: var(--fg-faint);
+  display: flex; align-items: center; gap: 6px; margin-top: 8px;
+}
+/* Filled, not hollow: an empty bordered square in front of a line of text reads as an
+   unticked checkbox. This is a key for the marks above, so it looks like one of them. */
+.ms-legend-tick {
+  width: 9px; height: 9px; flex: none; border: 1px solid var(--line);
+  background: var(--fg-faint);
+}
+
+/* ---- The colour year: one orbit, on the clock ---- */
+.ms-year { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+.ms-year-head {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  flex-wrap: wrap;
+}
+.ms-play { font-size: 8.5px; padding: 4px 7px; }
+.ms-year-line { margin: 8px 0 0; font-size: 12.5px; line-height: 1.55; color: var(--fg-dim); }
+.ms-year-line strong { color: var(--fg); }
+
+/* ---- What-if chips: one assumption each ---- */
+.wi-side { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.wi-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.wi-chip {
+  display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .02em; text-align: left;
+  color: var(--fg-dim); background: var(--bg-3); border: 1px solid var(--line);
+  border-radius: 0; padding: 5px 8px; box-shadow: 2px 2px 0 var(--line);
+}
+.wi-chip:hover { border-color: var(--accent); color: var(--fg); }
+.wi-chip.on { border-color: var(--accent); color: var(--accent); box-shadow: 2px 2px 0 var(--accent); }
+.wi-chip:active { transform: translate(1px, 1px); box-shadow: none; }
+.wi-sw { width: 15px; height: 15px; flex: none; border: 1px solid var(--line); }
+.wi-de { font-size: 9px; color: var(--fg-faint); font-weight: inherit; }
+.wi-chip.on .wi-de { color: var(--accent); }
+.wi-detail { margin: 0; font-size: 12.5px; line-height: 1.55; color: var(--fg-dim); min-height: 3.1em; }
+
+@media (max-width: 720px) {
+  .ms-grid, .wi-grid { grid-template-columns: 1fr; gap: 14px; }
+  /* The planet is the thing worth looking at, so on a phone it gets the room: it takes about
+     half the width, and its readouts stack in a column beside it rather than under it — which
+     keeps the slider within the first screen despite the bigger render. */
+  .ms-view { flex-direction: row; align-items: center; gap: 14px; width: auto; }
+  .ms-canvas { width: 150px; height: 150px; }
+  .ms-id { flex-direction: column; align-items: flex-start; gap: 5px; min-width: 0; }
+  /* flex-basis follows the main axis, and .ms-id is a COLUMN here — so the desktop's
+     "flex-basis: 100%" (meaning "take your own row") would ask for 100% of the height
+     instead. The column already puts this on its own line, so reset both. */
+  .ms-athome { flex-basis: auto; min-height: 0; }
+  .ms-regime { min-height: 0; }
+  .wi-detail { min-height: 0; }
+  /* No mobile rule for .ms-tag on purpose: `.dossier-head h3 span` already hides every
+     heading tag below 760px (the same rule that drops "THE LAMP"), because a phone's vertical
+     space is worth more than a subtitle whose text is one ℹ tap away. Overriding it here
+     would make these two panels the only ones that keep theirs. */
+}
+
+/* ---- Sticky section tabs (planet page) --------------------------------------------------
+   Same idiom as the gallery's sticky .controls bar: pinned to the top with an opaque black
+   background, and a hairline that only appears once it is actually stuck, so it reads as part
+   of the page until it starts floating over it. */
+.secnav {
+  position: sticky; top: 0; z-index: 28;
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  background: #000; padding: 10px 0; margin-bottom: 18px;
+  border-bottom: 1px solid transparent;
+}
+.secnav.stuck { border-bottom-color: var(--line); }
+/* Typed like the VIEW filter at the top of the scope (.led-btn): mono, ~11px, sentence case.
+   These are things you read and press, so they follow the page's legible controls, not its
+   7px pixel stamps. */
+.sec-tab {
+  display: inline-flex; align-items: center; padding: 6px 11px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .2px; text-decoration: none;
+  color: var(--fg-dim); background: var(--bg-3);
+  border: 1px solid var(--line); box-shadow: 2px 2px 0 var(--line);
+  white-space: nowrap;
+}
+.sec-tab:hover { color: var(--fg); border-color: var(--accent); }
+.sec-tab:active { transform: translate(1px, 1px); box-shadow: none; }
+.sec-tab.on {
+  color: var(--accent); border-color: var(--accent); box-shadow: 2px 2px 0 var(--accent);
+}
+.sec-tab:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+
+/* Anchor jumps must clear the sticky bar, or every heading lands underneath it. */
+[id^="sec-"] { scroll-margin-top: 62px; }
+
+@media (max-width: 720px) {
+  /* One row that scrolls sideways rather than a block of wrapped tabs eating the screen:
+     five tabs wrap to three lines at 390px, which is most of what a phone can show at once. */
+  .secnav {
+    flex-wrap: nowrap; overflow-x: auto; gap: 6px; padding: 8px 0;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .secnav::-webkit-scrollbar { display: none; }
+  .sec-tab { font-size: 10.5px; padding: 6px 9px; }
+  [id^="sec-"] { scroll-margin-top: 54px; }
+}

@@ -17,13 +17,52 @@ Conventions (documented, consistent):
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import lru_cache
 
 import numpy as np
 from colour import MSDS_CMFS, SpectralDistribution, XYZ_to_sRGB, cctf_encoding, sd_to_XYZ
 
-from pipeline.config import BASE_SWATCH_LUMINANCE_Y, GRID_ID, GRID_NM
+from pipeline.config import BASE_SWATCH_LUMINANCE_Y, GRID_ID, GRID_N, GRID_NM
 
 _CMFS = MSDS_CMFS["CIE 1931 2 Degree Standard Observer"]
+
+
+def _sd_to_xyz(flux: np.ndarray) -> np.ndarray:
+    """colour-science's spectral integral for one SPD on GRID_NM. The reference definition —
+    everything else here is this function, cached."""
+    sd = SpectralDistribution(dict(zip(GRID_NM, np.asarray(flux, dtype=float), strict=True)))
+    # illuminant=None -> treat F as the SPD of a light source (emission), which is exactly
+    # what reflected planetary light is. method='Integration' handles our 5 nm grid.
+    return np.asarray(sd_to_XYZ(sd, cmfs=_CMFS, illuminant=None, method="Integration"))
+
+
+@lru_cache(maxsize=1)
+def _xyz_matrix() -> np.ndarray:
+    """The (GRID_N, 3) matrix M with `flux @ M == _sd_to_xyz(flux)`, to machine precision.
+
+    This is not a re-implementation of the CIE maths — it IS `_sd_to_xyz`, memoised. The
+    spectral integral XYZ = k · Σ F(λ)·x̄ȳz̄(λ)·dλ is exactly LINEAR in F (k depends only on
+    the colour-matching functions), so probing colour-science's own function with the GRID_N
+    basis vectors recovers its kernel exactly — verified to ~1e-15 in tests/test_cie_matrix.py.
+
+    Why: the model-space features (migration track, what-if knobs) need ~10^5 colours per
+    site build. Building an 81-key SpectralDistribution per colour costs 0.85 ms; a matmul
+    costs 0.1 µs. Same numbers, one codepath, ~40 ms of one-time probing.
+    """
+    return np.stack([_sd_to_xyz(basis) for basis in np.eye(GRID_N)])
+
+
+@lru_cache(maxsize=1)
+def _xyz_to_linear_srgb_matrix() -> np.ndarray:
+    """The (3, 3) matrix with `xyz @ M == XYZ_to_sRGB(xyz, apply_cctf_encoding=False)`.
+
+    Memoised for the same reason and by the same probing trick as `_xyz_matrix`: the
+    XYZ -> linear-sRGB transform (normalisation, chromatic adaptation, primaries) is a fixed
+    linear map, but colour-science rebuilds it from the colourspace definition on every call,
+    which dominated the model-space sweeps. Probing it with the three basis vectors recovers
+    it exactly — asserted in tests/test_cie_matrix.py.
+    """
+    return np.stack([np.asarray(XYZ_to_sRGB(b, apply_cctf_encoding=False)) for b in np.eye(3)])
 
 
 def _gamut_map(xyz: np.ndarray) -> tuple[tuple[int, int, int], str, bool]:
@@ -39,7 +78,7 @@ def _gamut_map(xyz: np.ndarray) -> tuple[tuple[int, int, int], str, bool]:
        both hue AND chroma, so two saturated blues of slightly different depth stay two
        different swatches — a deep-blue hot Jupiter renders as a darker, still-vivid blue
        rather than being clamped. Brightness is reported separately as `luminance_y` anyway."""
-    lin = np.asarray(XYZ_to_sRGB(xyz, apply_cctf_encoding=False))  # linear sRGB; may exit [0,1]
+    lin = np.asarray(xyz) @ _xyz_to_linear_srgb_matrix()  # linear sRGB; may exit [0,1]
     oog = bool(np.any(lin < -1e-6) or np.any(lin > 1.0 + 1e-6))
     if lin.min() < 0.0:  # chromaticity outside gamut: desaturate to the hull at this luminance
         y = float(np.clip(xyz[1], 0.0, 1.0))
@@ -70,11 +109,12 @@ class ColourResult:
 
 
 def _flux_to_xyz(flux: np.ndarray) -> np.ndarray:
-    """Absolute (arbitrary-scale) XYZ of a reflected-flux SPD on GRID_NM."""
-    sd = SpectralDistribution(dict(zip(GRID_NM, np.asarray(flux, dtype=float), strict=True)))
-    # illuminant=None -> treat F as the SPD of a light source (emission), which is exactly
-    # what reflected planetary light is. method='Integration' handles our 5 nm grid.
-    return np.asarray(sd_to_XYZ(sd, cmfs=_CMFS, illuminant=None, method="Integration"))
+    """Absolute (arbitrary-scale) XYZ of a reflected-flux SPD on GRID_NM.
+
+    Also accepts a stacked (N, GRID_N) array and returns (N, 3) — the batch form the
+    model-space sweeps use. Identical arithmetic either way (see `_xyz_matrix`).
+    """
+    return np.asarray(flux, dtype=float) @ _xyz_matrix()
 
 
 def reflectance_luminance(flux_planet: np.ndarray, flux_white: np.ndarray) -> float:

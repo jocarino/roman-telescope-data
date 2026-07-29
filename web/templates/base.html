@@ -52,6 +52,13 @@
      that guarantee while letting the parser run straight past all three. #}
   <script src="/static/planet-render.js?v={{ build_id }}" defer></script>
   <script src="/static/app.js?v={{ build_id }}" defer></script>
+  {# Model space (planet pages only, but shared like the rest so it caches once): registers
+     its own `alpine:init` component, so it must also land before Alpine. Kept out of app.js
+     deliberately — see the note at the top of the file. #}
+  <script src="/static/modelspace.js?v={{ build_id }}" defer></script>
+  {# Sticky section tabs (planet pages). Same rule: registers on alpine:init, so it lands
+     before Alpine. The tabs are plain anchors and work without this file at all. #}
+  <script src="/static/secnav.js?v={{ build_id }}" defer></script>
   <script src="/static/vendor/alpine.min.js" defer></script>
   {# Copy confirmations: one shared overlay readout, so no page shifts its own layout to
      say "copied". Deferred — nothing calls it before the first click. #}

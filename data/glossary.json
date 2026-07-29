@@ -302,7 +302,23 @@
       "category": "planets",
       "short": "The size of an orbit — a planet's average distance from its star. It sets how much starlight the planet gets, and so its temperature.",
       "long": "Orbits are ellipses, and the semi-major axis is half the longest diameter — the standard way to state an orbit's size. Quoted in astronomical units, where 1 AU is the Earth-Sun distance. Halve it and the starlight arriving roughly quadruples, so this single number drives the temperature, the cloud state and ultimately the colour.",
-      "seeAlso": ["astronomical-unit", "equilibrium-temperature"]
+      "seeAlso": ["astronomical-unit", "equilibrium-temperature", "eccentricity"]
+    },
+    {
+      "id": "eccentricity",
+      "term": "Eccentricity",
+      "category": "planets",
+      "short": "How stretched an orbit is: 0 is a perfect circle, and the closer to 1, the more elongated the ellipse.",
+      "long": "A circular orbit holds a planet at the same distance from its star all year, so the starlight it receives never changes. A stretched one does not. At eccentricity 0.93, HD 80606 b swings between 0.03 AU and 0.89 AU every orbit — from scorched to frozen and back. Because a planet moves fastest when it is closest, it spends most of its year out in the cold and only briefly flashes hot.",
+      "seeAlso": ["periastron", "semi-major-axis", "equilibrium-temperature"]
+    },
+    {
+      "id": "periastron",
+      "term": "Periastron and apoastron",
+      "category": "planets",
+      "short": "The closest and furthest points of an orbit. On a circular orbit they are the same point; on a stretched one they can be worlds apart.",
+      "long": "Periastron is where a planet passes closest to its star, apoastron where it is furthest. On a circular orbit both equal the semi-major axis; on an eccentric one they are the semi-major axis times (1 − e) and (1 + e). Starlight falls off as the square of distance, so on a very stretched orbit the two ends of the year are completely different worlds.",
+      "seeAlso": ["eccentricity", "semi-major-axis"]
     },
     {
       "id": "astronomical-unit",
