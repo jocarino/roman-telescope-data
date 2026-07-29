@@ -174,8 +174,15 @@
   .tour-key-out {
     color: var(--accent); border-color: var(--accent); box-shadow: 3px 3px 0 var(--accent);
   }
-  .tour-key-out:hover { background: var(--accent); color: var(--bg); }
-  .tour-key-out .tk-gl, .tour-key-out:hover .tk-gl { color: inherit; opacity: .7; }
+  /* :not(:disabled) is carried here purely to match the specificity of the generic
+     .tour-key:hover rule above — without it that rule wins and paints the label accent-on-
+     accent, i.e. an invisible button. An <a> is never :disabled, so it changes nothing else. */
+  .tour-key-out:hover:not(:disabled) {
+    background: var(--accent); color: #05121f;
+    border-color: var(--accent); box-shadow: 3px 3px 0 var(--accent);
+  }
+  .tour-key-out .tk-gl,
+  .tour-key-out:hover:not(:disabled) .tk-gl { color: inherit; opacity: .7; }
   .tour-key.wide { justify-content: center; }
   .tour-hint {
     margin: 8px 0 16px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .4px;
