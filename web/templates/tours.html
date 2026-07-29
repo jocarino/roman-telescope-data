@@ -31,8 +31,9 @@
         spectra were really {{ g('measured-spectrum', 'measured') }}.</p>
     </div>
   </div>
-  <p class="subhead lede">{{ tours|length }} tours · pick one and walk it.
-    <a class="lede-link" href="/">◧ Browse all {{ n_planets }} planets →</a></p>
+  {# No "browse all planets" escape hatch here: the header's own ← link already goes back to the
+     grid, and this page's job is to get you into a tour, not to offer the way out beside it. #}
+  <p class="subhead lede">{{ tours|length }} tours · pick one and walk it.</p>
 
   <div class="tour-cards">
     {% for tour in tours %}
