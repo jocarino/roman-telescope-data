@@ -1315,6 +1315,15 @@ document.addEventListener("alpine:init", () => {
       if (this.heroSource === "map") return "Real map";
       return this.obs.length > 1 ? this.curObs().telescope : "Telescope";
     },
+    // Jump straight to the real map (the hint line under the knobs). Idempotent: pressing it
+    // while the map is already showing does nothing rather than cycling on to the photo.
+    showMap() {
+      if (!this.map || this.heroSource === "map") return;
+      this.heroSource = "map";
+      this._persist("heroSource", "map");
+      this.blink();
+      this.renderAll();
+    },
     // Step the hero to the next source, wrapping back to the modelled render.
     toggleHeroSource() {
       const st = this.sourceSteps();
@@ -1475,6 +1484,10 @@ document.addEventListener("alpine:init", () => {
         // Real map only when the Source knob asks for it. baseHex above is what the map gets
         // rescaled to, so the mapped globe follows the view/illuminant/phase colour too.
         map: this.heroSource === "map" ? this.map : null,
+        // A ringed planet always renders into its wide frame, even with the rings switched
+        // off: the globe stays the size every other planet's is, and turning the Source knob
+        // fills the sides in rather than reflowing the header around a box that changed shape.
+        aspect: this.map && this.map.ring ? PlanetRender.ringAspect(this.map.ring) : 1,
       };
       // Single hero planet, rotating; its style (sphere/pixel) is a scope knob. When the
       // phase cycle is playing, the animator supplies a smoothly-advancing phase per frame.

@@ -92,3 +92,20 @@ def test_saturn_is_the_only_ringed_anchor():
     # C ring inner edge to A ring outer edge, in Saturn radii, and the axial tilt.
     assert 1.0 < rings.inner < rings.outer < 3.0
     assert 0 < rings.tilt_deg < 90
+
+
+def test_ring_frame_aspect_matches_the_renderer():
+    """The wide frame's shape is hard-coded in three places; they have to agree.
+
+    `ringAspect()` in web/static/planet-render.js decides how wide the render is, the canvas's
+    intrinsic width in the template decides how the page lays out before JS runs, and
+    `.detail-hero.ringed` in style.css pins the displayed width. Change the ring radii and all
+    three drift apart, so this pins the value the other two were written against.
+    """
+    rings = SURFACE_MAPS["saturn"].rings
+    assert rings is not None
+    assert rings.frame_aspect == 2.125
+    # 160px tall at the 340px width style.css sets, and whole pixels at both render heights.
+    assert round(340 / rings.frame_aspect) == 160
+    for res in (80, 480):
+        assert (res * rings.frame_aspect).is_integer()

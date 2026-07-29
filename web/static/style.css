@@ -208,6 +208,14 @@ a:hover { text-decoration: underline; }
 }
 .detail-hero.pixel { image-rendering: pixelated; image-rendering: crisp-edges; border-radius: 0; }
 canvas.detail-hero:not(.pixel) { border-radius: 50%; }
+/* Saturn: a ring system is ~2.3 planet radii across but barely 1 tall, so a square frame
+   would shrink the globe to 44% of it and surround it with nothing. The canvas keeps its
+   160px height and takes the width it needs — the globe renders full size, the rings use
+   space that was empty anyway. 340px is 160px at the renderer's 2.125:1 ringed frame; height
+   stays `auto` so a narrow phone scales both together instead of squashing the rings. The
+   circular mask is off: this frame is not a disc. */
+.detail-hero.ringed { width: 340px; height: auto; max-width: 100%; }
+canvas.detail-hero.ringed { border-radius: 0; }
 /* Real telescope image ("Source: Telescope" knob): a framed photo, never a circle. */
 .hero-stack { flex: none; }
 .hero-obs { margin: 0; display: flex; flex-direction: column; gap: 6px; max-width: 220px; }
@@ -1363,6 +1371,22 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 }
 /* "Source" is the special knob (model <-> real map <-> real photo): a faint accent ring marks it. */
 .knob-cell-source .knob { box-shadow: 0 3px 5px rgba(0, 0, 0, .65), inset 0 1px 1px rgba(255, 255, 255, .18), inset 0 -2px 3px rgba(0, 0, 0, .5), 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent); }
+/* One-line signpost under the knob row on the five anchors: the Source knob alone never says
+   that a real map exists. Both states are one line, so turning the knob can't jog the rail. */
+.map-hint {
+  display: flex; align-items: baseline; justify-content: center; gap: 5px;
+  width: 100%; margin-top: 9px; padding: 5px 6px;
+  font-family: var(--mono); font-size: 8.5px; letter-spacing: .3px; line-height: 1.5;
+  text-align: center; text-transform: uppercase; cursor: pointer;
+  color: var(--fg-faint); background: none;
+  border: 1px dashed var(--line);
+}
+.map-hint:hover, .map-hint:focus-visible { color: var(--fg-dim); border-color: var(--accent); }
+.map-hint.on { cursor: default; border-style: solid; }
+.map-hint.on:hover { border-color: var(--line); }
+.map-hint strong { color: var(--accent); font-weight: 600; }
+.map-hint-tag { color: var(--accent); }
+
 /* Three-position Source knob (the solar-system anchors, which have a real map AND a real
    photo): ticks at -40/0/+40 instead of the default pair at ±34, so the dot lands on a mark. */
 .knob-cell-source.three .knob::before {

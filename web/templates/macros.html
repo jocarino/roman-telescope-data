@@ -173,9 +173,18 @@
     <button type="button" class="back rand" @click="randomGo()" aria-label="Random planet"
       title="Random planet · press R">{{ dice_icon('dice') }}<span class="back-txt"> RANDOM</span></button>
     <div class="hero-stack">
-      <canvas class="detail-hero" x-show="heroSource !== 'telescope'"
+      {# A ringed planet gets a wide frame in every mode, not just when the rings are drawn:
+         the globe then stays the size every other planet's is, and turning the Source knob
+         fills the sides in instead of reflowing the header around a box that changed shape.
+         The width/height attributes are the canvas's INTRINSIC size, which is what lays the
+         page out before any JS runs — square here and a ringed hero loads as a 340x340 box
+         and visibly snaps to 340x160 the moment the first frame draws. #}
+      {% set ringed = ctx.surface_map.rings if ctx.surface_map else None %}
+      <canvas class="detail-hero{{ ' ringed' if ringed }}"
+        x-show="heroSource !== 'telescope'"
         :class="heroStyle === 'retro' ? 'pixel' : ''" x-ref="cHero"
-        width="256" height="256" aria-label="{{ rec.name }} modelled render"></canvas>
+        width="{{ (256 * ringed.frame_aspect)|round|int if ringed else 256 }}" height="256"
+        aria-label="{{ rec.name }} modelled render"></canvas>
       {% if rec.real_observations %}
       <figure class="hero-obs" x-show="heroSource === 'telescope'" x-cloak>
         <button class="obs-thumb" @click="obsZoom = true" title="Click to enlarge the real image"
@@ -496,6 +505,20 @@
              ~0 for Sun-like hosts (flipping changes nothing — that IS the point). #}
           <div class="illum-note"><span class="illum-de">&#916;E {{ '%.1f'|format(rec.sun_swap.delta_e2000_vs_true) }}</span>
             colour shift if the Sun were its star</div>
+          {% endif %}
+          {% if ctx.surface_map %}
+          {# Without this the map is invisible: the Source knob just says MODELLED, and nothing
+             hints that turning it puts real geography on the globe. Both states are one line,
+             so the row never changes height and the rail doesn't jog when you turn the knob. #}
+          <button type="button" class="map-hint" @click="showMap()"
+            :class="heroSource === 'map' ? 'on' : ''"
+            :title="heroSource === 'map' ? 'Showing the real map' : 'Put the real map on the globe'">
+            {# Both strings are near enough the same length to set the same number of lines at
+               the rail's width — a hint that grew a line when you pressed it would shove every
+               control below it down the panel. The full story is in the caption and the ℹ. #}
+            <span class="map-hint-tag">&#9638;</span><span x-show="heroSource !== 'map'">Real map available
+              &mdash; turn <strong>Source</strong></span><span x-show="heroSource === 'map'" x-cloak>Real
+              map on &mdash; colour computed</span></button>
           {% endif %}
           {% if rec.phase_colours %}
           {# Phase slider: drag the planet from fully lit (0°) to a thin crescent (170°).

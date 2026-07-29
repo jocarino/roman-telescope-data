@@ -37,7 +37,7 @@
     "uniform sampler2D bodyMap, ringMap;",
     "uniform int useMap, useRing;",
     "uniform vec3 mapGain;",
-    "uniform float mapExpo, sphereScale, ringInner, ringOuter, ringTilt, ringExpo;",
+    "uniform float mapExpo, sphereScale, aspect, ringInner, ringOuter, ringTilt, ringExpo;",
     "vec3 ramp(float t){",
     "  t = clamp(t,0.,1.)*4.;",
     "  vec3 c = pal[0];",
@@ -109,9 +109,11 @@
     "  return c * (q / y);",
     "}",
     "void main(){",
-    // The globe lives in its own coordinates: at sphereScale < 1 it shrinks inside the canvas
-    // and the ring annulus fills the space around it, so ring radii stay in planet radii.
-    "  vec2 uv = v / sphereScale;",
+    // The globe lives in its own coordinates, where 1.0 is one planet radius. `aspect` widens
+    // the box horizontally (a ring system is ~2.3 radii across but only ~1 radius tall, so in
+    // a square canvas the globe would have to shrink to 44% and sit in a sea of nothing);
+    // sphereScale then trades a little height for air above and below the rings.
+    "  vec2 uv = vec2(v.x*aspect, v.y) / sphereScale;",
     "  float r2 = dot(uv,uv);",
     "  if(r2 > 1.0 && useRing == 0){ discard; }",
     "  float z = sqrt(max(1.0 - r2, 0.0));",
@@ -249,7 +251,7 @@
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     ["pal","bandFreq","bandContrast","haze","brightness","light","dither","levels","rot",
      "turb","warmCool","bandGain","phase","pixel","outline",
-     "useMap","useRing","mapGain","mapExpo","sphereScale",
+     "useMap","useRing","mapGain","mapExpo","sphereScale","aspect",
      "ringInner","ringOuter","ringTilt","ringExpo","bodyMap","ringMap"]
       .forEach(function (n) { U[n] = gl.getUniformLocation(prog, n === "pal" ? "pal[0]" : n); });
     // Fixed texture units: the body map on 0, the ring strip on 1. Never changes.
@@ -339,10 +341,21 @@
   // constant puts a mapped globe at the same on-screen brightness as the schematic one it
   // replaces. Tuned by eye against the five anchors, side by side.
   var MAP_EXPOSURE = 1.25;
-  // Rings are far brighter than the strip's stored values (which assume a lit render), and
-  // the globe has to shrink to leave them room — a little over the outer radius, for air.
+  // Rings are far brighter than the strip's stored values, which assume a lit render.
   var RING_EXPOSURE = 2.0;
-  var RING_MARGIN = 1.05;
+  // How much vertical room the ringed render reserves, in planet radii. The rings only reach
+  // outer*sin(tilt) ~ 1.02 radii above and below the equator, so 1.10 is the globe at 91% of
+  // the frame height with a little air — nothing like the 44% a square frame would force.
+  var RING_VFIT = 1.10;
+  var RING_HMARGIN = 1.03;
+
+  // How wide a ringed planet's frame has to be, relative to its height. Snapped to eighths so
+  // both render resolutions (80 and 480 px tall) stay whole pixels wide and the pixel styles
+  // keep their integer CSS upscale.
+  function ringAspect(ring) {
+    if (!ring) return 1;
+    return Math.round(((ring.outer * RING_HMARGIN) / RING_VFIT) * 8) / 8;
+  }
 
   // Is this planet's map decoded and ready to draw? Anything not ready yet simply falls back
   // to the schematic globe — never stall a frame on a pending image.
@@ -378,7 +391,7 @@
     var ring = m.ring && texture(m.ring.file, false);
     var ringOn = !!(ring && ring.ready);
     gl.uniform1i(U.useRing, ringOn ? 1 : 0);
-    gl.uniform1f(U.sphereScale, ringOn ? 1 / (m.ring.outer * RING_MARGIN) : 1.0);
+    gl.uniform1f(U.sphereScale, ringOn ? 1 / RING_VFIT : 1.0);
     if (!ringOn) return;
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, ring.tex);
@@ -393,8 +406,13 @@
     if (!target || !opts || !opts.palette || !init()) return;
     var pixel = opts.style !== "smooth";
     var res = pixel ? 80 : 480;
-    glCanvas.width = res; glCanvas.height = res;
-    gl.viewport(0, 0, res, res);
+    // Ringed planets render into a wide frame rather than a square one; `res` is always the
+    // HEIGHT, so the globe comes out the same size as every other planet's.
+    var aspect = opts.aspect || 1;
+    var resW = Math.round(res * aspect);
+    glCanvas.width = resW; glCanvas.height = res;
+    gl.uniform1f(U.aspect, aspect);
+    gl.viewport(0, 0, resW, res);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -433,11 +451,16 @@
 
     // Blit 1:1 into the target canvas; CSS does the INTEGER upscale (80->160 = 2x) with
     // image-rendering:pixelated, so pixels stay uniform and crisp (this was the jank).
-    target.width = res; target.height = res;
+    target.width = resW; target.height = res;
     var ctx = target.getContext("2d");
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(glCanvas, 0, 0);
   }
+
+  // Radians added per ~33 ms frame — the single spin rate for every globe on the site.
+  // Deliberately unhurried: at a third slower than it first shipped, a real map's features
+  // stay readable as they cross the disc instead of streaming past.
+  var SPIN_STEP = 0.033;
 
   // Rotation: a rAF loop that re-renders with an advancing `rot`. Throttled to ~30fps.
   // Only ever run for a few canvases at once (detail page + hovered card), so it's cheap.
@@ -449,7 +472,7 @@
     var st = { rot: prev ? prev.rot : Math.random() * 6.283, last: 0 };
     function frame(t) {
       if (t - st.last > 33) {
-        st.rot += 0.05;
+        st.rot += SPIN_STEP;
         // opts.frame(t) may return per-frame overrides (e.g. an animated phase + tint).
         var extra = opts.frame ? opts.frame(t) : null;
         render(canvas, Object.assign({}, opts, extra || {}, { rot: st.rot }));
@@ -586,6 +609,6 @@
   window.PlanetRender = {
     render: render, spin: spin, stop: stop, hashPhase: hashPhase, ramp: ramp,
     phaseCycle: phaseCycle, phaseIndex: phaseIndex, PHASE_SPEED: PHASE_SPEED,
-    preload: preload, onTexture: onTexture,
+    preload: preload, onTexture: onTexture, ringAspect: ringAspect,
   };
 })();

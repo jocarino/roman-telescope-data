@@ -45,6 +45,19 @@ class Rings:
     outer: float
     tilt_deg: float
 
+    @property
+    def frame_aspect(self) -> float:
+        """How wide the render frame has to be, relative to its height.
+
+        Must stay identical to `ringAspect()` in web/static/planet-render.js — the template
+        uses it for the canvas's intrinsic size so a ringed hero lays out at the right shape
+        on first paint, before any JavaScript has run. Get it wrong and the page loads with a
+        square canvas and visibly snaps. The eighth-snapping is what keeps both render
+        resolutions (80 and 480 px tall) a whole number of pixels wide, which the pixel styles
+        need for their integer CSS upscale.
+        """
+        return round(((self.outer * 1.03) / 1.10) * 8) / 8
+
 
 @dataclass(frozen=True)
 class SurfaceMap:
