@@ -1361,8 +1361,17 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
   transform-origin: 50% 18px; transform: translateX(-50%) rotate(var(--a, 0deg));
   box-shadow: 0 0 4px var(--accent); transition: transform .18s cubic-bezier(.4, 1.4, .6, 1);
 }
-/* "Source" is the special knob (model <-> real photo): a faint accent ring marks it. */
+/* "Source" is the special knob (model <-> real map <-> real photo): a faint accent ring marks it. */
 .knob-cell-source .knob { box-shadow: 0 3px 5px rgba(0, 0, 0, .65), inset 0 1px 1px rgba(255, 255, 255, .18), inset 0 -2px 3px rgba(0, 0, 0, .5), 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent); }
+/* Three-position Source knob (the solar-system anchors, which have a real map AND a real
+   photo): ticks at -40/0/+40 instead of the default pair at ±34, so the dot lands on a mark. */
+.knob-cell-source.three .knob::before {
+  background: conic-gradient(
+    rgba(170, 185, 210, .65) 0deg 1.8deg,
+    transparent 1.8deg 38.2deg, rgba(170, 185, 210, .65) 38.2deg 41.8deg,
+    transparent 41.8deg 318.2deg, rgba(170, 185, 210, .65) 318.2deg 321.8deg,
+    transparent 321.8deg 358.2deg, rgba(170, 185, 210, .65) 358.2deg 360deg);
+}
 
 /* "Light source" knob (its own star <-> the Sun). The Roman 4-band channel has no Sun-swap,
    so on CH2 the knob + value read as inert (.na); clicking it brings back the full-spectrum

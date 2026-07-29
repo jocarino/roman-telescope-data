@@ -65,6 +65,7 @@ from web.modelspace import modelspace_ctx
 from web.og import CardSpec, card_png
 from web.sky import sky_chart_svg, sky_field_svg
 from web.svg import spectrum_svg
+from web.textures import surface_map_for
 
 _HERE = Path(__file__).parent
 _TEMPLATES = _HERE / "templates"
@@ -304,6 +305,9 @@ def _planet_ctx(
         # docstring.
         "star": star_swatch(rec.host_star.teff_k),
         "sun_lamp": star_swatch(SUN.teff_k),
+        # The real spacecraft map, for the five solar-system anchors — None everywhere else.
+        # Curated at build time (web/textures.py), so adding a map needs no data re-release.
+        "surface_map": surface_map_for(rec.id),
         "spectrum_svg": spectrum_svg(**args),
         "spectrum_svg_compact": spectrum_svg(**args, compact=True),
         "fiction": (fiction or {}).get(rec.name),

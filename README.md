@@ -103,6 +103,34 @@ the colour Roman measures**. Plus a live countdown to launch (30 Aug 2026).
   `measured-cgi` provenance, which the swap seam sets the moment a real photometry file lands.
   Drop the file, rebuild — no edit to the template, the resolver, or the curated JSON.
 
+### Real surface maps for the five anchors (`web/textures.py`)
+
+Every planet's render draws its light-and-dark pattern schematically, because for an exoplanet
+any pattern would be invention. The five solar-system anchors are the exception — we have flown
+past them and mapped them — so their pages offer a third position on the **Source** knob:
+*Modelled → Real map → Telescope*. In real-map mode the globe samples an actual equirectangular
+map, so Jupiter gets its Great Red Spot, Earth its continents, Neptune its Great Dark Spot,
+Uranus the blankness Voyager 2 really found, and Saturn its rings.
+
+**The colour claim does not change.** The shader multiplies every texel by
+(derived colour ÷ the map's own mean), so the rescaled map averages to exactly the hex computed
+from the spectrum. The morphology is real; the colour is still physics. `SurfaceMap.mean` in
+`web/textures.py` is that divisor, and `tests/test_surface_maps.py` re-measures it against the
+shipped file — regenerate a map without updating its mean and the suite fails rather than
+letting the planet quietly render in the wrong colour.
+
+To (re)fetch and prepare the maps — they are committed under `web/static/tex/`, ~230 KB total,
+so this is only needed when changing a source:
+
+```bash
+python3 tools/prep_textures.py --out web/static/tex   # downloads, resizes, prints the means
+```
+
+Paste the printed means into `web/textures.py`. Sources are NASA (Blue Marble, public domain)
+and Solar System Scope (CC BY 4.0); each map carries its own credit, licence and a plain-English
+description of what it actually is, all shown on the page in real-map mode. This is curated at
+**site-build time**, like the host-star lamp — adding a map needs no `planets.json` re-release.
+
 ### Jargon and the glossary
 
 Every technical word on the site is defined once, in `data/glossary.json`, and used in two

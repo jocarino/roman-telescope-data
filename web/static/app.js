@@ -1158,7 +1158,11 @@ document.addEventListener("alpine:init", () => {
     // Render fidelity: "classic" (physics-honest) or "stylised" (restyled for looks). Global, persisted.
     fidelity: localStorage.getItem("renderFidelity") || "classic",
     heroStyle: "retro",   // hero render: "retro" (pixel) or "smooth" (sphere)
-    heroSource: "model",  // hero shows the "model" render or the real "telescope" image
+    // What the hero shows: the schematic "model" render, the same globe wearing this
+    // planet's real "map" (solar-system anchors only), or the real "telescope" image.
+    heroSource: "model",
+    // The real spacecraft map for this planet, or null — injected by init (web/textures.py).
+    map: null,
     // Illuminant swap ("Light source" knob): "native" = the planet's own star, "sun" = the
     // same albedo re-lit by the Sun. Data injected by init when the record carries it.
     illum: "native",
@@ -1214,8 +1218,14 @@ document.addEventListener("alpine:init", () => {
       // The real photo persists only across planet-to-planet hops (same-system links);
       // arriving from the gallery or a fresh visit always opens on the modelled render.
       const src = localStorage.getItem("heroSource");
+      // The real photo persists only across planet-to-planet hops (above); the real map is
+      // an ordinary render preference like Shape, so it carries anywhere — but only onto a
+      // planet that actually has one. Anything else opens on the modelled render.
       this.heroSource =
-        src === "telescope" && fromPlanet && this.obs.length ? "telescope" : "model";
+        src === "telescope" && fromPlanet && this.obs.length ? "telescope"
+        : src === "map" && this.map ? "map" : "model";
+      // Fetch the map up front so flipping the knob is instant, not a beat of schematic globe.
+      if (this.map && window.PlanetRender) PlanetRender.preload(this.map);
       window.__randomGo = () => this.randomGo();  // wire the R shortcut to this page
       this._phaseLoop();  // start the wax/wane phase cycle (on by default)
     },
@@ -1275,7 +1285,9 @@ document.addEventListener("alpine:init", () => {
     // simply brings the model back (no value change) so the knobs never feel "locked out";
     // a further click then toggles. This is why turning to Telescope doesn't trap you there.
     toggleFidelity() {
-      if (this.heroSource === "telescope") { this.heroSource = "model"; this._persist("heroSource", "model"); this.blink(); this.renderAll(); return; }
+      // Classic/Stylised restyles the SCHEMATIC bands, so it has nothing to say about a real
+      // map either — both non-model sources bounce back to the render the knob acts on.
+      if (this.heroSource !== "model") { this.heroSource = "model"; this._persist("heroSource", "model"); this.blink(); this.renderAll(); return; }
       this.setFidelity(this.fidelity === "classic" ? "stylised" : "classic");
     },
     toggleHeroStyle() {
@@ -1286,13 +1298,31 @@ document.addEventListener("alpine:init", () => {
     },
     // The currently-selected real image (safe when none exist).
     curObs() { return this.obs[this.obsIdx] || {}; },
-    // Flip the hero between the modelled render and the real telescope photo (only present
-    // for directly-imaged planets; the knob is not rendered otherwise).
+    // What this planet's Source knob can be turned to, in knob order. Most imaged planets
+    // offer two positions; the five solar-system anchors, which have both a real map and a
+    // real photograph, offer three. The knob is not rendered at all below two.
+    sourceSteps() {
+      return ["model"].concat(this.map ? ["map"] : [], this.obs.length ? ["telescope"] : []);
+    },
+    // Spread the available positions evenly across the knob's ±40° sweep, so a two-position
+    // knob still reads as a two-position knob.
+    sourceAngle() {
+      const st = this.sourceSteps(), i = Math.max(0, st.indexOf(this.heroSource));
+      return (st.length < 2 ? 0 : -40 + (80 * i) / (st.length - 1)) + "deg";
+    },
+    sourceLabel() {
+      if (this.heroSource === "model") return "Modelled";
+      if (this.heroSource === "map") return "Real map";
+      return this.obs.length > 1 ? this.curObs().telescope : "Telescope";
+    },
+    // Step the hero to the next source, wrapping back to the modelled render.
     toggleHeroSource() {
-      if (!this.obs.length) return;
-      this.heroSource = this.heroSource === "model" ? "telescope" : "model";
+      const st = this.sourceSteps();
+      if (st.length < 2) return;
+      this.heroSource = st[(st.indexOf(this.heroSource) + 1) % st.length];
       this._persist("heroSource", this.heroSource);
       this.blink();
+      this.renderAll();
     },
     toggleInfo(k) { this.info = this.info === k ? null : k; },
     // --- Illuminant swap ("Light source" knob) ------------------------------------------
@@ -1442,6 +1472,9 @@ document.addEventListener("alpine:init", () => {
         lumY: this.curLum(),
         fidelity: this.fidelity,
         phase: (this.phase().d * Math.PI) / 180,
+        // Real map only when the Source knob asks for it. baseHex above is what the map gets
+        // rescaled to, so the mapped globe follows the view/illuminant/phase colour too.
+        map: this.heroSource === "map" ? this.map : null,
       };
       // Single hero planet, rotating; its style (sphere/pixel) is a scope knob. When the
       // phase cycle is playing, the animator supplies a smoothly-advancing phase per frame.
