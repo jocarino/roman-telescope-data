@@ -73,13 +73,13 @@ document.addEventListener("alpine:init", () => {
 
 // ── Planet renders ──────────────────────────────────────────────────────────
 // Each stop's canvas carries its own palette, attributes and phase-resolved colours, so
-// drawing needs no index fetch. The active stop runs the phase cycle from the planet page:
-// the terminator sweeps a full lunar cycle and the palette is retinted by the modelled
-// colour at each phase, so you see the planet lit, half-lit and backlit — not a spinning ball.
+// drawing needs no index fetch. The active stop runs PlanetRender.phaseCycle — literally the
+// planet page's cycle, not a copy of it — so the terminator sweeps a full lunar cycle and the
+// palette is retinted by the modelled colour at each phase: the planet lit, half-lit and
+// crescent, never the black unlit disc.
 (function () {
   "use strict";
 
-  var PHASE_SPEED = 16;   // degrees per second, matching the planet page's hero
   var START_DEG = 20;     // the page's default phase: enough terminator to read as 3D
   var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -125,10 +125,11 @@ document.addEventListener("alpine:init", () => {
     return "BACKLIT";
   }
 
-  function readout(cv, deg) {
+  // `eff` is the illumination phase the cycle reports (0-170), not the raw geometry: the
+  // readout has to name the picture on screen, and the picture never reaches 180.
+  function readout(cv, eff) {
     var el = cv.parentNode && cv.parentNode.querySelector(".ts-phase b");
     if (!el) return;
-    var eff = deg <= 180 ? deg : 360 - deg;
     var txt = Math.round(eff) + "° · " + phaseName(eff);
     if (el.textContent !== txt) el.textContent = txt;
   }
@@ -148,7 +149,7 @@ document.addEventListener("alpine:init", () => {
 
     if (reduced || phases.length < 2) {
       // No cycle: hold the default phase, still lit like the planet page rather than flat.
-      var idx0 = Math.round(START_DEG / 10);
+      var idx0 = window.PlanetRender.phaseIndex(START_DEG, phases.length);
       window.PlanetRender.render(cv, Object.assign({}, o, {
         phase: (START_DEG * Math.PI) / 180,
         palette: tint(o.palette, phases, idx0),
@@ -157,21 +158,14 @@ document.addEventListener("alpine:init", () => {
       return;
     }
 
-    var anim = { deg: START_DEG, last: null };
+    // The cycle itself lives in PlanetRender so this and the planet page's hero cannot drift.
+    var step = window.PlanetRender.phaseCycle(START_DEG, phases.length);
     window.PlanetRender.spin(cv, Object.assign({}, o, {
       frame: function (t) {
-        if (anim.last === null) anim.last = t;
-        anim.deg += PHASE_SPEED * (Math.min(t - anim.last, 100) / 1000);
-        anim.last = t;
-        if (anim.deg >= 360) anim.deg -= 360;
-        var eff = anim.deg <= 180 ? anim.deg : 360 - anim.deg;
-        var idx = Math.max(0, Math.min(phases.length - 1, Math.round(eff / 10)));
-        readout(cv, anim.deg);
+        var p = step(t);
+        readout(cv, p.eff);
         // Per-frame overrides MUST be an object — spin() merges it over the base options.
-        return {
-          phase: (anim.deg * Math.PI) / 180,
-          palette: tint(o.palette, phases, idx),
-        };
+        return { phase: p.rad, palette: tint(o.palette, phases, p.idx) };
       },
     }));
   }

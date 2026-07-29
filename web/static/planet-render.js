@@ -334,7 +334,43 @@
     return out;
   }
 
+  // ---- The wax/wane phase cycle ----------------------------------------------------------
+  // The hero on a planet page and the active stop on a tour page run the SAME cycle, and used
+  // to run it from two copies of this arithmetic. They drifted: the tour let the colour index
+  // reach the LAST phase entry — 180°, the fully backlit disc — and painted the planet black,
+  // while the planet page had always stopped one entry short. One implementation now, so the
+  // cycle can only be right or wrong everywhere at once.
+  //
+  // The light orbits 0-360°: full -> waning (shadow closes in from the left) -> a brief dark
+  // moment -> waxing (light returns on the left) -> full again. That full sweep is the
+  // GEOMETRY. The COLOUR index tracks the side-agnostic illumination at the nearest 10° stop
+  // and stops one short of the end: the last entry is the unlit disc, which has no colour to
+  // show and reads as a bug rather than a phase.
+  var PHASE_SPEED = 16;  // degrees per second
+
+  // Nearest 10° stop into a phase-colour list, never the final (unlit) entry.
+  function phaseIndex(effDeg, nPhases) {
+    return Math.max(0, Math.min((nPhases || 1) - 2, Math.round(effDeg / 10)));
+  }
+
+  // A stateful stepper: hand it the frame timestamp, get back where the cycle now stands.
+  // `deg` is the geometry (0-360), `eff` the illumination the readout should name (0-170),
+  // `idx` the phase-colour entry to tint with.
+  function phaseCycle(startDeg, nPhases) {
+    var deg = startDeg || 0, last = null;
+    return function (t) {
+      if (last === null) last = t;
+      deg += PHASE_SPEED * (Math.min(t - last, 100) / 1000);
+      last = t;
+      if (deg >= 360) deg -= 360;
+      var raw = deg <= 180 ? deg : 360 - deg;
+      var idx = phaseIndex(raw, nPhases);
+      return { deg: deg, rad: (deg * Math.PI) / 180, eff: Math.min(raw, idx * 10), idx: idx };
+    };
+  }
+
   window.PlanetRender = {
     render: render, spin: spin, stop: stop, hashPhase: hashPhase, ramp: ramp,
+    phaseCycle: phaseCycle, phaseIndex: phaseIndex, PHASE_SPEED: PHASE_SPEED,
   };
 })();

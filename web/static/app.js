@@ -1175,8 +1175,9 @@ document.addEventListener("alpine:init", () => {
     // to dark, then waxing back from the other side to full (0-360°, ~22 s around). On by
     // default; touching the slider pins the chosen phase, the ▶ button resumes the cycle.
     phasePlay: true,
-    _anim: null,          // { deg, dir, last } — continuous animation state
-    _PHASE_SPEED: 16,     // degrees per second (~10.6 s per sweep)
+    // The running phase cycle (a PlanetRender.phaseCycle stepper), or null when it should
+    // restart from wherever the slider now sits. Speed lives with the cycle, not here.
+    _anim: null,
     obsZoom: false,       // real-image lightbox open?
     // Host star ("the lamp") swatch — injected by init; sunLampHex is the Sun's own colour,
     // for the lamp panel to follow the Light-source knob.
@@ -1374,18 +1375,16 @@ document.addEventListener("alpine:init", () => {
     // the effective illumination (0-170°, side-agnostic) at the nearest 10° stop.
     _phaseFrame(t) {
       if (this.heroSource === "telescope") return null;
-      if (!this._anim) this._anim = { deg: this.phase().d, last: t };
-      const a = this._anim;
-      a.deg += this._PHASE_SPEED * (Math.min(t - a.last, 100) / 1000);
-      a.last = t;
-      if (a.deg >= 360) a.deg -= 360;
-      const eff = a.deg <= 180 ? a.deg : 360 - a.deg;  // illumination phase, side-agnostic
-      const idx = Math.max(0, Math.min(this.phases.length - 2, Math.round(eff / 10)));
-      if (idx !== this.phaseIdx) this.phaseIdx = idx;
+      // Shared with the tour page's stop render — see PlanetRender.phaseCycle. Keeping the
+      // arithmetic in one place is what stops the two from disagreeing about where the cycle
+      // ends (the tour used to run all the way to the unlit disc).
+      if (!this._anim) this._anim = PlanetRender.phaseCycle(this.phase().d, this.phases.length);
+      const p = this._anim(t);
+      if (p.idx !== this.phaseIdx) this.phaseIdx = p.idx;
       return {
-        phase: (a.deg * Math.PI) / 180,
-        palette: this._phaseTint(this.curPalette(), idx),
-        baseHex: this._phaseTint([this.curHex()], idx)[0],
+        phase: p.rad,
+        palette: this._phaseTint(this.curPalette(), p.idx),
+        baseHex: this._phaseTint([this.curHex()], p.idx)[0],
       };
     },
     // Retint a palette by the per-channel drift of the phase colour vs full phase, so the
@@ -1690,7 +1689,6 @@ document.addEventListener("alpine:init", () => {
 // from the left — picking up from the card's dealt phase. Un-hovering restores it.
 (function () {
   if (!window.matchMedia || !window.matchMedia("(hover: hover)").matches) return;
-  var PHASE_SPEED = 16;  // degrees per second, matching the planet page's cycle
   var hovered = null;
   function optsFor(cv) {
     var list = window.PLANETS || [];
@@ -1710,16 +1708,11 @@ document.addEventListener("alpine:init", () => {
       phase: window.PlanetRender.hashPhase(p.id),
     };
   }
-  // Per-hover animator: advances the phase through the full 0-360° cycle from `startRad`.
+  // Per-hover animator: the same cycle the hero and the tour stops run, from `startRad`. A
+  // card has no per-phase colours to tint with, so only the geometry is used here.
   function phaseAnimator(startRad) {
-    var deg = (startRad * 180) / Math.PI, last = null;
-    return function (t) {
-      if (last == null) last = t;
-      deg += (PHASE_SPEED * Math.min(t - last, 100)) / 1000;
-      last = t;
-      if (deg >= 360) deg -= 360;
-      return { phase: (deg * Math.PI) / 180 };
-    };
+    var step = window.PlanetRender.phaseCycle((startRad * 180) / Math.PI);
+    return function (t) { return { phase: step(t).rad }; };
   }
   document.addEventListener("mouseover", function (e) {
     var card = e.target.closest && e.target.closest("a.card");

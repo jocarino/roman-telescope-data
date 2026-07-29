@@ -116,7 +116,7 @@
     <div class="te-links">
       <button class="tour-key wide" @click="go(0)">◀ START AGAIN</button>
       <a class="tour-key wide" href="/tours">ALL TOURS</a>
-      <a class="tour-key wide" href="/">BROWSE ALL {{ n_planets }} PLANETS</a>
+      <a class="tour-key wide" href="/">BROWSE ALL PLANETS</a>
     </div>
   </section>
 </div>
@@ -146,7 +146,11 @@
   }
   .tr-tick:hover { opacity: .85; }
   .tr-tick.on { opacity: 1; border-color: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  /* Fixed-width keycaps. NEXT becomes ALL TOURS on the last stop; sized to their labels, the
+     key would jump wider at the moment you are about to click it and drag the tick strip
+     along with it. Both keys take the widest label's width and keep it at every stop. */
   .tr-keys { display: flex; gap: 8px; }
+  .tr-keys .tour-key { min-width: 118px; justify-content: center; }
   /* Transport keys in the site's own button language: square, stamped, hard offset shadow,
      mono uppercase label, accent on hover, and a real press travel. Double-triangle glyphs
      read as tape-deck transport rather than generic web arrows. */
