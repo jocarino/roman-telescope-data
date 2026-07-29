@@ -607,12 +607,16 @@
      habitable zone. Below two tabs there is nothing to navigate, so the bar does not render.
      Its own conditions must therefore mirror each panel's exactly — tests/test_secnav.py
      pins that. ── #}
+  {# Document order, so the bar reads top-to-bottom the way the page does. Only the planet
+     data card is unconditional; every other section here comes and goes with the planet. #}
   {% set secs = [] %}
   {% if rec.sky and ctx.sky_svg %}{% set _ = secs.append(('sec-sky', 'Where in the sky')) %}{% endif %}
   {% if ctx.modelspace %}
   {% set _ = secs.append(('sec-move', 'Move this planet')) %}
   {% set _ = secs.append(('sec-opinion', "Model's opinion")) %}
   {% endif %}
+  {% set _ = secs.append(('sec-data', 'Planet data')) %}
+  {% if ctx.tours %}{% set _ = secs.append(('sec-tour', 'Guided tour')) %}{% endif %}
   {% if ctx.fiction %}{% set _ = secs.append(('sec-fiction', 'Seen in fiction')) %}{% endif %}
   {% if rec.habitability and ctx.hz_svg %}{% set _ = secs.append(('sec-water', 'Liquid water')) %}{% endif %}
   {% if secs|length > 1 %}
@@ -928,7 +932,7 @@
   {% endif %}
 
   {# ── Planet data card: colour + planet stats; provenance & model assumptions on the ℹ ── #}
-  <div class="panel dossier">
+  <div class="panel dossier" id="sec-data">
     <div class="dossier-head">
       <h3>Planet data <span class="h3-qual"
         style="color:var(--fg-faint);text-transform:none;font-weight:400">(<span
@@ -1019,7 +1023,7 @@
      a single planet page into a story that gives it context. Renders for the ~50 planets that
      are on a tour; invisible for everyone else. #}
   {% if ctx.tours %}
-  <div class="panel tourlink">
+  <div class="panel tourlink" id="sec-tour">
     <span class="tourlink-lbl">ON A GUIDED TOUR</span>
     <span class="tourlink-body">This planet is a stop on
       {% for t in ctx.tours %}<a href="/tours/{{ t.id }}">{{ t.title }}</a>{% if not loop.last %},

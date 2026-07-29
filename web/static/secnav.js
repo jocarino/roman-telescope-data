@@ -17,6 +17,9 @@
         active: "",
         stuck: false,
         _ids: [],
+        // Section chosen by a tab press, held while the smooth scroll is still running.
+        _pinned: null,
+        _pinT: null,
 
         init() {
           this._ids = Array.prototype.map.call(
@@ -36,6 +39,20 @@
         onScroll() {
           var bar = this.$el.getBoundingClientRect();
           this.stuck = bar.top <= 0.5;
+
+          /* A pressed tab stays lit until its jump finishes. Without this, pressing one of
+           * the last few tabs lights the wrong one: the tail sections all sit inside the
+           * final screenful, so scrolling to any of them bottoms the page out, and the rule
+           * below immediately answers "the last section" instead. The smooth scroll fires a
+           * stream of scroll events and then stops, so a short quiet period means it has
+           * arrived and the spy can take over again. */
+          if (this._pinned) {
+            clearTimeout(this._pinT);
+            var self = this;
+            this._pinT = setTimeout(function () { self._pinned = null; }, 150);
+            return;
+          }
+
           var edge = bar.height + 12;
           var current = this._ids[0];
           for (var i = 0; i < this._ids.length; i++) {
@@ -64,6 +81,7 @@
             history.replaceState(null, "", "#" + id);
           }
           this.active = id;
+          this._pinned = id;  // held by onScroll until the jump settles
         },
       };
     });

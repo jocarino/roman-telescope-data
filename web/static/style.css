@@ -2637,7 +2637,7 @@ a.rtb-name:hover { color: var(--accent); }
 .sec-tab:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
 
 /* Anchor jumps must clear the sticky bar, or every heading lands underneath it. */
-#sec-sky, #sec-move, #sec-opinion, #sec-fiction, #sec-water { scroll-margin-top: 62px; }
+[id^="sec-"] { scroll-margin-top: 62px; }
 
 @media (max-width: 720px) {
   /* One row that scrolls sideways rather than a block of wrapped tabs eating the screen:
@@ -2648,5 +2648,5 @@ a.rtb-name:hover { color: var(--accent); }
   }
   .secnav::-webkit-scrollbar { display: none; }
   .sec-tab { font-size: 10.5px; padding: 6px 9px; }
-  #sec-sky, #sec-move, #sec-opinion, #sec-fiction, #sec-water { scroll-margin-top: 54px; }
+  [id^="sec-"] { scroll-margin-top: 54px; }
 }

@@ -26,8 +26,17 @@ PLANETS_JSON = Path("data/planets.json")
 
 pytestmark = pytest.mark.skipif(not PLANETS_JSON.exists(), reason="needs a fetched data release")
 
-# Every section the bar knows about, in the order the bar must present them.
-SECTIONS = ("sec-sky", "sec-move", "sec-opinion", "sec-fiction", "sec-water")
+# Every section the bar knows about, in the order the bar must present them — which is the
+# order they appear on the page. Only "sec-data" is unconditional.
+SECTIONS = (
+    "sec-sky",
+    "sec-move",
+    "sec-opinion",
+    "sec-data",
+    "sec-tour",
+    "sec-fiction",
+    "sec-water",
+)
 
 
 @lru_cache(maxsize=1)
@@ -80,6 +89,22 @@ def test_every_section_on_the_page_has_a_tab():
             continue  # the bar is absent entirely; covered below
         for sec in _anchors(html):
             assert sec in tabs, f"{name}: section {sec} is on the page but has no tab"
+
+
+def test_every_panel_below_the_bar_is_reachable_from_it():
+    """The check that catches what the two above cannot.
+
+    They compare tabs against sections marked with a sec- id, so a panel that simply has no
+    id at all satisfies both while being unreachable from the bar. That is not hypothetical:
+    the bar shipped without "Planet data" or "Guided tour" exactly this way. Anything that
+    renders as a panel below the bar is a destination, so it must carry an id.
+    """
+    for name, html in _pages():
+        nav = re.search(r'<nav class="secnav".*?</nav>', html, re.S)
+        if not nav:
+            continue
+        for cls, attrs in re.findall(r'<div class="panel ([a-z-]+)"([^>]*)>', html[nav.end():]):
+            assert 'id="sec-' in attrs, f"{name}: panel .{cls} sits below the bar with no tab"
 
 
 def test_tabs_keep_the_intended_order():
