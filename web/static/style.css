@@ -2594,7 +2594,10 @@ a.rtb-name:hover { color: var(--accent); }
   .ms-view { flex-direction: row; align-items: center; gap: 12px; width: auto; }
   .ms-canvas { width: 84px; height: 84px; }
   .ms-id { flex-direction: column; align-items: flex-start; gap: 5px; }
-  .ms-athome { min-height: 0; }
+  /* flex-basis follows the main axis, and .ms-id is a COLUMN here — so the desktop's
+     "flex-basis: 100%" (meaning "take your own row") would ask for 100% of the height
+     instead. The column already puts this on its own line, so reset both. */
+  .ms-athome { flex-basis: auto; min-height: 0; }
   .ms-regime { min-height: 0; }
   .wi-detail { min-height: 0; }
   /* The subtitle drops under the heading rather than being squeezed beside it. */
