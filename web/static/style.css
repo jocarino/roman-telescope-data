@@ -2484,10 +2484,11 @@ a.rtb-name:hover { color: var(--accent); }
 .ms-view {
   display: flex; flex-direction: column; gap: 9px; align-items: flex-start; width: 128px;
 }
-.ms-canvas {
-  width: 128px; height: 128px; display: block; background: transparent;
-  border: 1px solid var(--line); box-shadow: 3px 3px 0 var(--line);
-}
+/* No frame. The hero at the top of the page is a bare planet on the background, and a boxed
+   one down here read as a different kind of object rather than the same planet moved. */
+.ms-canvas { width: 128px; height: 128px; display: block; background: transparent; }
+/* Follows the Shape knob, exactly as .detail-hero does. */
+.ms-canvas.pixel { image-rendering: pixelated; image-rendering: crisp-edges; }
 .ms-id { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .ms-swatch {
   width: 26px; height: 26px; flex: none; border: 1px solid var(--line);
@@ -2589,17 +2590,20 @@ a.rtb-name:hover { color: var(--accent); }
 
 @media (max-width: 720px) {
   .ms-grid, .wi-grid { grid-template-columns: 1fr; gap: 14px; }
-  /* Vertical space is precious on a phone: the render shrinks and sits beside its swatch
-     rather than stacking above it, so the slider stays within the first screen. */
-  .ms-view { flex-direction: row; align-items: center; gap: 12px; width: auto; }
-  .ms-canvas { width: 84px; height: 84px; }
-  .ms-id { flex-direction: column; align-items: flex-start; gap: 5px; }
+  /* The planet is the thing worth looking at, so on a phone it gets the room: it takes about
+     half the width, and its readouts stack in a column beside it rather than under it — which
+     keeps the slider within the first screen despite the bigger render. */
+  .ms-view { flex-direction: row; align-items: center; gap: 14px; width: auto; }
+  .ms-canvas { width: 150px; height: 150px; }
+  .ms-id { flex-direction: column; align-items: flex-start; gap: 5px; min-width: 0; }
   /* flex-basis follows the main axis, and .ms-id is a COLUMN here — so the desktop's
      "flex-basis: 100%" (meaning "take your own row") would ask for 100% of the height
      instead. The column already puts this on its own line, so reset both. */
   .ms-athome { flex-basis: auto; min-height: 0; }
   .ms-regime { min-height: 0; }
   .wi-detail { min-height: 0; }
-  /* The subtitle drops under the heading rather than being squeezed beside it. */
-  .ms-tag { display: block; width: max-content; max-width: 100%; margin: 7px 0 0; }
+  /* No mobile rule for .ms-tag on purpose: `.dossier-head h3 span` already hides every
+     heading tag below 760px (the same rule that drops "THE LAMP"), because a phone's vertical
+     space is worth more than a subtitle whose text is one ℹ tap away. Overriding it here
+     would make these two panels the only ones that keep theirs. */
 }

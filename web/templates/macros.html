@@ -696,7 +696,10 @@
      assumptions reproduce the swatch above exactly — the sliders start on the truth and move
      away from it, never the other way round. See web/modelspace.py. ── #}
   {% if ctx.modelspace %}{% set ms = ctx.modelspace %}
-  <div x-data="modelspace({{ ms|tojson|forceescape }})">
+  {# Shape/Style are the scope's knobs, on the parent component; naming them in x-effect is
+     what subscribes these panels to them, so both renders follow the hero. #}
+  <div x-data="modelspace({{ ms|tojson|forceescape }})"
+    x-effect="heroStyle; fidelity; $nextTick(() => { paint(); paintWhatIf(); })">
 
     <div class="panel movepanel">
       <div class="dossier-head">
@@ -735,7 +738,8 @@
       </div>
       <div class="ms-grid">
         <div class="ms-view">
-          <canvas class="ms-canvas" x-ref="msCanvas" width="256" height="256"
+          <canvas class="ms-canvas" :class="renderStyle() === 'retro' ? 'pixel' : ''"
+            x-ref="msCanvas" width="256" height="256"
             aria-label="{{ rec.name }} rendered at the chosen orbital distance"></canvas>
           <div class="ms-id">
             <span class="ms-swatch" :style="{ background: hex() }"
@@ -862,7 +866,8 @@
       </div>
       <div class="wi-grid">
         <div class="ms-view">
-          <canvas class="ms-canvas" x-ref="wiCanvas" width="256" height="256"
+          <canvas class="ms-canvas" :class="renderStyle() === 'retro' ? 'pixel' : ''"
+            x-ref="wiCanvas" width="256" height="256"
             aria-label="{{ rec.name }} under the chosen model assumption"></canvas>
           <div class="ms-id">
             <span class="ms-swatch" :style="{ background: whatIfHex() }"

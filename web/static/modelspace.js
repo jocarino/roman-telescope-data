@@ -258,36 +258,44 @@
         },
 
         // --- rendering ------------------------------------------------------------------
-        /* A repaint costs ~13 ms, and both callers can fire far faster than that: a slider
-         * drag emits input events at display rate, and the colour year ticks 20 times a
-         * second. The colour itself only takes 25 distinct values across the whole track, so
-         * skipping repaints that would draw the same disc again is nearly all of the work. */
-        paint() {
-          if (!window.PlanetRender || !this.$refs.msCanvas) return;
-          var hex = this.hex();
-          if (hex === this._lastPaint) return;
-          this._lastPaint = hex;
-          window.PlanetRender.render(this.$refs.msCanvas, {
+        /* Shape and Style come from the scope's "Planet display" knobs, which live on the
+         * parent `detail` component — Alpine's scope chain resolves them for us. These panels
+         * draw the same planet as the hero, so they must obey the same two controls; hardcoding
+         * a smooth sphere here meant the page showed a pixel hero above a sphere below it.
+         * The template's x-effect repaints when either knob moves. */
+        renderStyle() { return this.heroStyle === "smooth" ? "smooth" : "retro"; },
+        renderFidelity() { return this.fidelity === "stylised" ? "stylised" : "classic"; },
+
+        _opts(hex, lum) {
+          return {
             palette: window.PlanetRender.ramp(hex),
             baseHex: hex,
             radius: this.radius,
             cloudState: this.cloudState,
-            lumY: this.lum(),
-            style: "smooth",
-          });
+            lumY: lum,
+            style: this.renderStyle(),
+            fidelity: this.renderFidelity(),
+          };
+        },
+
+        /* A repaint costs ~13 ms, and both callers can fire far faster than that: a slider
+         * drag emits input events at display rate, and the colour year ticks 20 times a
+         * second. The colour itself only takes 25 distinct values across the whole track, so
+         * skipping repaints that would draw the same disc again is nearly all of the work.
+         * The guard keys on the knobs too, or flipping Shape would redraw nothing. */
+        paint() {
+          if (!window.PlanetRender || !this.$refs.msCanvas) return;
+          var hex = this.hex();
+          var key = hex + "|" + this.renderStyle() + "|" + this.renderFidelity();
+          if (key === this._lastPaint) return;
+          this._lastPaint = key;
+          window.PlanetRender.render(this.$refs.msCanvas, this._opts(hex, this.lum()));
         },
         paintWhatIf() {
           if (!window.PlanetRender || !this.$refs.wiCanvas) return;
           var v = this.current();
           var hex = v ? v.h : this.planetHex;
-          window.PlanetRender.render(this.$refs.wiCanvas, {
-            palette: window.PlanetRender.ramp(hex),
-            baseHex: hex,
-            radius: this.radius,
-            cloudState: this.cloudState,
-            lumY: v ? v.l : null,
-            style: "smooth",
-          });
+          window.PlanetRender.render(this.$refs.wiCanvas, this._opts(hex, v ? v.l : null));
         },
         destroy() { this.stopYear(); },
       };
