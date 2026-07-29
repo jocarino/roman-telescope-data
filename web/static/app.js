@@ -85,6 +85,15 @@ window.exoCardPhase = function (id) {
   return window.exoMap(id) ? Math.min(ph, 0.96) : ph;   // 0.96 rad ~ 55 deg
 };
 
+// How wide this planet's card frame is, relative to its height. A ringed planet renders wide
+// and overflows its card (see .card-planet.ringed) rather than shrinking its globe to ~43% to
+// keep the rings inside a square: Saturn then sits the same size as every other planet in the
+// grid, with its rings reaching across the gutters. 1 for everyone else.
+window.exoCardAspect = function (id) {
+  var m = window.exoMap(id);
+  return m && m.ring ? window.PlanetRender.ringAspect(m.ring) : 1;
+};
+
 document.addEventListener("alpine:init", () => {
 
   // Gallery: search / filter / sort over a fetched index (window.PLANETS). Cards are rendered
@@ -538,7 +547,10 @@ document.addEventListener("alpine:init", () => {
       const fresh = [];
       next.forEach((p) => {
         const card = this._makeCard(p);
-        fresh.push(card.firstChild);   // the canvas, appended first in _makeCard
+        // Query for it rather than assuming a position: a ringed planet's canvas sits inside a
+        // .card-art wrapper, and taking firstChild handed the observer the wrapper — so Saturn
+        // was never drawn at all.
+        fresh.push(card.querySelector(".card-planet"));
         frag.appendChild(card);
       });
       this.$refs.grid.appendChild(frag);
@@ -569,14 +581,30 @@ document.addEventListener("alpine:init", () => {
     },
     _makeCard(p) {
       const a = document.createElement("a");
-      a.className = "card";
+      // .card-ringed is only for the phone layout, where the card takes the whole row —
+      // see the note on .card-planet.ringed.
+      a.className = "card" + (window.exoCardAspect(p.id) !== 1 ? " card-ringed" : "");
       a.href = "/planet/" + p.id;
       a.setAttribute("data-peek", "/fragments/peek/" + p.id + ".html");
       const cv = document.createElement("canvas");
-      cv.className = "card-planet" + (this.style === "retro" ? " pixel" : "");
-      cv.width = 256; cv.height = 256; cv.dataset.id = p.id;
+      const aspect = window.exoCardAspect(p.id);
+      cv.className = "card-planet" + (this.style === "retro" ? " pixel" : "")
+        + (aspect !== 1 ? " ringed" : "");
+      // Intrinsic size, i.e. what lays the card out before the first frame is drawn — square
+      // here and a ringed card would load as a tall box and snap when the render lands.
+      cv.width = Math.round(256 * aspect); cv.height = 256; cv.dataset.id = p.id;
       cv.setAttribute("aria-label", p.name + " render");
-      a.appendChild(cv);
+      // A ringed canvas is wider than its grid track, so it hangs inside a wrapper that holds
+      // exactly the space a normal card planet would — see .card-art. Put it straight in the
+      // card otherwise; there is no reason to add a box for the other 5,759 planets.
+      if (aspect !== 1) {
+        const art = document.createElement("span");
+        art.className = "card-art";
+        art.appendChild(cv);
+        a.appendChild(art);
+      } else {
+        a.appendChild(cv);
+      }
       const name = document.createElement("div");
       name.className = "card-name"; name.textContent = p.name;
       a.appendChild(name);
@@ -623,9 +651,7 @@ document.addEventListener("alpine:init", () => {
         palette: this.palOf(p), baseHex: this.hexOf(p), radius: p.radius, cloudState: p.cloud,
         lumY: this.lumOf(p), style: this.style, fidelity: this.fidelity,
         phase: window.exoCardPhase(p.id),
-        // No `aspect` here: a card is square, so a ringed Saturn pulls its globe back to ~43%
-        // to fit its rings in. Worth it — a ringless Saturn is just a cream ball.
-        map: window.exoMap(p.id),
+        map: window.exoMap(p.id), aspect: window.exoCardAspect(p.id),
       });
     },
     // Repaint only the cards that have a real map — see the onTexture hook in init().
@@ -1730,7 +1756,7 @@ document.addEventListener("alpine:init", () => {
           radius: pl.radius, cloudState: pl.cloud, lumY: roman ? pl.rlum : pl.lum,
           style: style, fidelity: localStorage.getItem("renderFidelity") || "classic",
           phase: window.exoCardPhase(pl.id),
-          map: window.exoMap(pl.id),
+          map: window.exoMap(pl.id), aspect: window.exoCardAspect(pl.id),
         });
       }
       peek.classList.add("on");
@@ -1803,7 +1829,7 @@ document.addEventListener("alpine:init", () => {
       style: localStorage.getItem("planetStyle") || "retro",
       fidelity: localStorage.getItem("renderFidelity") || "classic",
       phase: window.exoCardPhase(p.id),
-      map: window.exoMap(p.id),
+      map: window.exoMap(p.id), aspect: window.exoCardAspect(p.id),
     };
   }
   // Per-hover animator: the same cycle the hero and the tour stops run, from `startRad`. A
