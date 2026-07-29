@@ -15,9 +15,15 @@
   var canHover = false;
   try { canHover = window.matchMedia("(hover: hover)").matches; } catch (e) { /* ignore */ }
 
+  // Two sources, one popover. A glossary term looks its definition up in window.GLOSSARY; a
+  // control (the jinfo [i] beside a readout or a knob) carries its own text in data-tip,
+  // because a knob has no dictionary entry. data-tip-term is optional — without it the
+  // popover drops its header bar and is just the explanation.
   function entry(node) {
+    if (!node) return null;
+    if (node.dataset.tip) return { t: node.dataset.tipTerm || "", s: node.dataset.tip };
     var g = window.GLOSSARY;
-    return (g && node && g[node.dataset.term]) || null;
+    return (g && g[node.dataset.term]) || null;
   }
 
   function build() {
@@ -48,6 +54,7 @@
     if (!e) return;
     if (!pop) build();
     pop.querySelector(".gloss-pop-term").textContent = e.t;
+    pop.classList.toggle("no-term", !e.t);
     pop.querySelector(".gloss-pop-def").textContent = e.s;
     if (cur && cur !== node) {
       cur.classList.remove("on");
@@ -73,12 +80,13 @@
     if (pop) pop.classList.remove("open");
   }
 
-  // Anything carrying data-term is explainable. The .gloss class only supplies the visual
-  // mark, so chips with their own look (the measured/computed/assumed tags, the provenance
-  // badges) can opt into the definition without fighting their own styling.
+  // Anything carrying data-term (a glossary word) or data-tip (a control's own explanation)
+  // is explainable. The .gloss class only supplies the visual mark, so chips with their own
+  // look (the measured/computed/assumed tags, the provenance badges) can opt into the
+  // definition without fighting their own styling.
   function target(ev) {
     var t = ev.target;
-    return t && t.closest ? t.closest("[data-term]") : null;
+    return t && t.closest ? t.closest("[data-term], [data-tip]") : null;
   }
 
   // Same mark, built in JS — for copy that isn't server-rendered (the compare table's row

@@ -13,8 +13,7 @@
         aria-label="About this tour" title="About this tour">i</button></span>
   </div>
   {# Everything about the tour lives in one accent box, in the site's labelled-row style. It
-     starts OPEN (the intro is the hook for anyone arriving cold on a shared link); the ℹ
-     collapses it once read. #}
+     starts CLOSED — the ℹ beside the kicker opens it, and the × closes it again. #}
   <div class="subhead intro-box" x-show="intro" x-cloak>
     <button class="info-x" @click="intro = false" aria-label="Close">&times;</button>
     <div class="intro-row">
@@ -49,8 +48,13 @@
     <span class="tr-keys">
       <button class="tour-key" @click="prev()" :disabled="i === 0"
         aria-label="Previous stop"><span class="tk-gl">◀◀</span><span>PREV</span></button>
-      <button class="tour-key" @click="next()" :disabled="i === {{ last }}"
+      <button class="tour-key" @click="next()" x-show="i !== {{ last }}"{% if last == 0 %} style="display: none"{% endif %}
         aria-label="Next stop"><span>NEXT</span><span class="tk-gl">▶▶</span></button>
+      {# On the last stop there is nothing to advance to, and a permanently greyed-out key is a
+         dead end at exactly the moment the visitor is deciding what to do next. The key becomes
+         the way out instead — same keycap, printed in the accent so the swap is visible. #}
+      <a class="tour-key tour-key-out" href="/tours" x-show="i === {{ last }}"{% if last != 0 %} style="display: none"{% endif %}
+        aria-label="Back to all tours"><span>ALL TOURS</span><span class="tk-gl">▶▶</span></a>
     </span>
   </div>
   <p class="tour-hint">Arrow keys ← → step through the tour; on a phone, swipe sideways.</p>
@@ -89,9 +93,9 @@
           <div><dt>Temperature</dt><dd>{{ s.temp }}</dd></div>
           <div><dt>Size</dt><dd>{{ s.size }}</dd></div>
           <div><dt>Distance</dt><dd>{{ s.dist }}</dd></div>
-          <div><dt>Reflects{{ jinfo('The share of its star&#39;s light this planet sends back (CIE luminance Y). Earth reflects about 30%. Every swatch on this site is brightened to a standard display brightness, so a dark planet still shows its hue — this number is what actually comes back.') }}</dt>
+          <div><dt>Reflects{{ jinfo("The share of its star's light this planet sends back (CIE luminance Y). Earth reflects about 30%. Every swatch on this site is brightened to a standard display brightness, so a dark planet still shows its hue — this number is what actually comes back.", "Reflects") }}</dt>
             <dd>{{ s.reflect }}</dd></div>
-          <div><dt>As Roman would see it{{ jinfo('The Roman Space Telescope&#39;s coronagraph samples visible light in four narrow bands. This is the colour rebuilt from those four samples alone, and how far it lands from the full-spectrum colour in perceptual units (ΔE): under ~2 is invisible to the eye, ~10 reads as a different shade, 20+ as a different colour.') }}</dt>
+          <div><dt>As Roman would see it{{ jinfo("The Roman Space Telescope's coronagraph samples visible light in four narrow bands. This is the colour rebuilt from those four samples alone, and how far it lands from the full-spectrum colour in perceptual units (ΔE): under ~2 is invisible to the eye, ~10 reads as a different shade, 20+ as a different colour.", "As Roman would see it") }}</dt>
             <dd><span class="ts-chip" style="background: {{ s.roman_hex }}"></span>{{ s.roman_hex }}
               {% if s.roman_de %}<span class="ts-de">ΔE {{ s.roman_de }}</span>{% endif %}</dd></div>
           <div><dt>Model assumes</dt><dd>{{ s.cloud }}</dd></div>
@@ -163,6 +167,15 @@
   .tour-key .tk-gl { font-size: 9px; letter-spacing: -1px; color: var(--fg-faint); }
   .tour-key:hover:not(:disabled) .tk-gl { color: var(--accent); }
   .tour-key:disabled { opacity: .35; cursor: default; }
+  /* The end-of-tour key, in the accent: it is the only transport key that leaves the page, so
+     it should not read as the same control as the one beside it. Fills on hover, the way the
+     site's other accent-outlined actions do. Declared after the generic .tk-gl rules so the
+     glyph follows the key's colour rather than staying faint. */
+  .tour-key-out {
+    color: var(--accent); border-color: var(--accent); box-shadow: 3px 3px 0 var(--accent);
+  }
+  .tour-key-out:hover { background: var(--accent); color: var(--bg); }
+  .tour-key-out .tk-gl, .tour-key-out:hover .tk-gl { color: inherit; opacity: .7; }
   .tour-key.wide { justify-content: center; }
   .tour-hint {
     margin: 8px 0 16px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .4px;

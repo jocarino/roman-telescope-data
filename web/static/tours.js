@@ -7,10 +7,11 @@ document.addEventListener("alpine:init", () => {
   Alpine.data("tour", (cfg) => ({
     n: (cfg && cfg.n) || 1,
     i: 0,
-    // The intro box opens by default so anyone arriving cold gets the point of the tour — but
-    // not on a phone, where three paragraphs would push the first planet off the screen
-    // entirely. There the ℹ (in the accent colour, right beside the kicker) opens it.
-    intro: !(window.matchMedia && window.matchMedia("(max-width: 760px)").matches),
+    // The intro box starts closed on every viewport. Nothing here is remembered between loads,
+    // so opening by default meant it came back on every refresh however many times you shut it,
+    // and three paragraphs pushed the first planet down the page each time. The ℹ beside the
+    // kicker (in the accent colour) opens it for anyone who wants the framing.
+    intro: false,
 
     init() {
       // Deep link: /tours/darkest-worlds#stop-4 opens on that stop (shareable mid-tour).

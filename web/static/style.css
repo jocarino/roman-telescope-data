@@ -1161,6 +1161,9 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 }
 /* The channel bar every HUD label on this site starts with. */
 .gloss-pop-term::before { content: "▌"; margin-right: 5px; opacity: .8; }
+/* Control explanations (the jinfo [i]) have no term to name — an empty header bar would just
+   be a stripe with nothing in it, so the box is the explanation alone. */
+.gloss-pop.no-term .gloss-pop-term { display: none; }
 .gloss-pop-def { display: block; padding: 8px 10px 9px; }
 /* Terminal caret: the definition reads as something the instrument just printed. */
 .gloss-pop-def::after {
