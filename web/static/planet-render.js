@@ -391,7 +391,15 @@
     var ring = m.ring && texture(m.ring.file, false);
     var ringOn = !!(ring && ring.ready);
     gl.uniform1i(U.useRing, ringOn ? 1 : 0);
-    gl.uniform1f(U.sphereScale, ringOn ? 1 / RING_VFIT : 1.0);
+    // How far the globe has to shrink for its rings to fit, in planet radii. The frame holds
+    // 1/sphereScale radii vertically and aspect/sphereScale horizontally, so whichever of the
+    // two runs out first sets the scale. In the wide hero frame that is the height, and the
+    // globe barely shrinks; on a square gallery card it is the width, and Saturn pulls back to
+    // ~43% — small, but a ringless Saturn is just a cream ball, so the rings are what earn
+    // their space at card size.
+    gl.uniform1f(U.sphereScale, ringOn
+      ? 1 / Math.max(RING_VFIT, (m.ring.outer * RING_HMARGIN) / (opts.aspect || 1))
+      : 1.0);
     if (!ringOn) return;
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, ring.tex);

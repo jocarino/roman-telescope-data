@@ -65,7 +65,7 @@ from web.modelspace import modelspace_ctx
 from web.og import CardSpec, card_png
 from web.sky import sky_chart_svg, sky_field_svg
 from web.svg import spectrum_svg
-from web.textures import surface_map_for
+from web.textures import surface_map_for, surface_maps_js
 
 _HERE = Path(__file__).parent
 _TEMPLATES = _HERE / "templates"
@@ -644,6 +644,8 @@ def build(
     gallery_html = env.get_template("gallery.html").render(
         meta=hub["/"], site=site,
         stats=_stats(records),
+        # The five anchors' real maps, so their cards show geography, not schematic bands.
+        surface_maps=surface_maps_js(),
         index_url=f"/planets.index.{build_id}.json",
         boot_planets=boot_planets,
         n_modelled=len(records),

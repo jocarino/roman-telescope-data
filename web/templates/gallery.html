@@ -55,6 +55,12 @@
    component fetches the full index in the background and swaps it in (see app.js init). #}
 <script>window.PLANETS_BOOT = {{ boot_planets | tojson }};</script>
 
+{# The real spacecraft maps, for the five solar-system anchors — the only planets whose cards
+   can show actual geography rather than schematic bands. Inlined here rather than shipped as
+   a shared file: it is a few hundred bytes, and the gallery is the only page that draws cards
+   (a planet page carries its own copy, for the one planet it is about). #}
+<script>window.SURFACE_MAPS = {{ surface_maps | tojson }};</script>
+
 <div x-data="gallery({ indexUrl: '{{ index_url }}' })"
   @scroll.window.passive="scrolled = window.scrollY > 160">
   <div class="controls" :class="scrolled ? 'stuck' : ''">

@@ -112,6 +112,12 @@ past them and mapped them — so their pages offer a third position on the **Sou
 map, so Jupiter gets its Great Red Spot, Earth its continents, Neptune its Great Dark Spot,
 Uranus the blankness Voyager 2 really found, and Saturn its rings.
 
+**On by default.** The five anchors open on their real map — on the gallery cards (the table
+is inlined into `gallery.html` from `surface_maps_js()`) and on the planet page, so clicking a
+card doesn't swap the picture out from under you. Turning the knob to *Modelled* is remembered,
+so anyone who prefers the schematic globe keeps it. Cards with a map are also dealt from the
+lit end of the phase range: past ~55° the crescent has eaten the geography.
+
 **The colour claim does not change.** The shader multiplies every texel by
 (derived colour ÷ the map's own mean), so the rescaled map averages to exactly the hex computed
 from the spectrum. The morphology is real; the colour is still physics. `SurfaceMap.mean` in
