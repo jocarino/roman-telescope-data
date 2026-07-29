@@ -596,12 +596,42 @@
     </div>
   </div>
 
+  {# ── Section tabs: everything below this bar, one tap away. ────────────────────────────
+     Sticky, so a page this long stays navigable once the panels start scrolling past. Each
+     tab is a plain anchor first — the jump works with no JavaScript at all — and the Alpine
+     component only adds the "you are here" highlight and the smooth scroll on top.
+
+     A tab is emitted only when its section is, so no tab can ever point at nothing: three of
+     these five panels are conditional on the data release carrying sky positions, on the
+     planet appearing in fiction, and on the star being well enough measured to place a
+     habitable zone. Below two tabs there is nothing to navigate, so the bar does not render.
+     Its own conditions must therefore mirror each panel's exactly — tests/test_secnav.py
+     pins that. ── #}
+  {% set secs = [] %}
+  {% if rec.sky and ctx.sky_svg %}{% set _ = secs.append(('sec-sky', 'Where in the sky')) %}{% endif %}
+  {% if ctx.modelspace %}
+  {% set _ = secs.append(('sec-move', 'Move this planet')) %}
+  {% set _ = secs.append(('sec-opinion', "Model's opinion")) %}
+  {% endif %}
+  {% if ctx.fiction %}{% set _ = secs.append(('sec-fiction', 'Seen in fiction')) %}{% endif %}
+  {% if rec.habitability and ctx.hz_svg %}{% set _ = secs.append(('sec-water', 'Liquid water')) %}{% endif %}
+  {% if secs|length > 1 %}
+  <nav class="secnav" :class="stuck ? 'stuck' : ''" x-data="secnav()"
+    @scroll.window.passive="onScroll()" aria-label="Jump to a section of this page">
+    {% for id, label in secs %}
+    <a class="sec-tab" href="#{{ id }}" data-sec="{{ id }}" @click="go($event, '{{ id }}')"
+      :class="active === '{{ id }}' ? 'on' : ''"
+      :aria-current="active === '{{ id }}' ? 'true' : 'false'">{{ label }}</a>
+    {% endfor %}
+  </nav>
+  {% endif %}
+
   {# ── Where in the sky: the "go outside and look at it" chart. The crosshair is this
      planet's host star at its real J2000 position; every faint dot is another host star
      from this catalog. Only renders when the data release carries sky positions. #}
   {% if rec.sky and ctx.sky_svg %}
   {%- set sky = rec.sky -%}
-  <div class="panel skypanel" x-data="skyhorizon()">
+  <div class="panel skypanel" id="sec-sky" x-data="skyhorizon()">
     <div class="dossier-head">
       <h3>Where in the sky</h3>
       <button class="info-btn" @click="sh = !sh" :class="sh ? 'on' : ''" :aria-expanded="sh"
@@ -701,7 +731,7 @@
   <div x-data="modelspace({{ ms|tojson|forceescape }})"
     x-effect="heroStyle; fidelity; $nextTick(() => { paint(); paintWhatIf(); })">
 
-    <div class="panel movepanel">
+    <div class="panel movepanel" id="sec-move">
       <div class="dossier-head">
         <h3>Move this planet <span class="ms-tag">What if it orbited somewhere else?</span></h3>
         <button class="info-btn" @click="toggleInfo('move')" :class="info === 'move' ? 'on' : ''"
@@ -838,7 +868,7 @@
     </div>
 
     {# ── What-if: the assumptions, as knobs rather than as a disclaimer. ── #}
-    <div class="panel whatifpanel">
+    <div class="panel whatifpanel" id="sec-opinion">
       <div class="dossier-head">
         <h3>How much of this colour is the model's opinion?
           <span class="ms-tag">Change one assumption</span></h3>
@@ -1013,7 +1043,7 @@
      by design: the star/planet is real, the stories are invented — said plainly, not implied. #}
   {% if ctx.fiction %}
   {%- set media = {'book': '📖 book', 'film': '🎬 film', 'tv': '📺 TV', 'game': '🎮 game'} -%}
-  <div class="panel fiction">
+  <div class="panel fiction" id="sec-fiction">
     <div class="fiction-head">
       <h3>Seen in fiction</h3>
       <span class="fiction-tag">POP CULTURE</span>
@@ -1047,7 +1077,7 @@
      decoration: they render immediately under the verdict, never behind a disclosure. #}
   {% if rec.habitability and ctx.hz_svg %}
   {%- set hab = rec.habitability -%}
-  <div class="panel hzpanel" x-data="{ sh: false }">
+  <div class="panel hzpanel" id="sec-water" x-data="{ sh: false }">
     <div class="dossier-head">
       <h3>Could it hold liquid water?</h3>
       <button class="info-btn" @click="sh = !sh" :class="sh ? 'on' : ''" :aria-expanded="sh"
