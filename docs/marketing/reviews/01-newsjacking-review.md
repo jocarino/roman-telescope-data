@@ -104,32 +104,30 @@ All checked 2026-07-30.
   (`/public/rss/news/en/`) 404s. Exact URLs now pinned for NASA, ESA and ESO, all resolved live.
 - **arXiv's canonical host is `rss.arxiv.org`** (`export.arxiv.org` 301s, legacy). Announcements are
   20:00 ET **Sun–Thu only**; the feed regenerates at midnight ET and carries **one day** of items,
-  so a missed poll is a lost day.
-- **ESA's Space Science feed is live but slow** (latest item a week old) — keep, don't rely on.
-  **Verified good:** aasnova.org, phys.org astronomy, universetoday.com, nasa.gov.
+  so a missed poll is a lost day. **ESA's Space Science feed** is live but slow (latest item a week
+  old) — keep, don't rely on it. **Verified good:** aasnova.org, phys.org, universetoday, nasa.gov.
 - **"Nobody else on Earth can do that"** is unfalsifiable — fine internally, keep it out of posts.
 
 ## Better approaches
 
-1. **The pre-built bench (20 planets).** Obituaries are written before anyone dies. The headline set
-   is small and knowable: the TRAPPIST-1 / K2-18 / LHS 1140 / Proxima / GJ 1214 / WASP-39 / 55 Cnc
-   cluster, JWST cycle targets, `data/roman-targets.json`, and the AAS press-conference programme —
-   published ~2 weeks ahead and the only *verified* lead time in this doc. Write it in daylight with
-   the checklist done; the jack then costs five minutes.
-2. **The one-planet fast path.** `pipeline build --planet "<name>"`. The only fix for the majority
-   case. Build before the watcher.
+1. **The pre-built bench (20 planets).** Obituaries are written before anyone dies. The set is
+   knowable: the TRAPPIST-1 / K2-18 / LHS 1140 / Proxima / GJ 1214 / WASP-39 / 55 Cnc cluster, JWST
+   cycle targets, `data/roman-targets.json`, and the AAS press-conference programme — published ~2
+   weeks ahead, the only *verified* lead time here. Written in daylight, a jack costs five minutes.
+2. **The one-planet fast path.** `pipeline build --planet "<name>"` — the only fix for the majority
+   case. Build it before the watcher.
 3. **Own the standing counter-story.** "The picture on that article is an artist's guess, here's
    why" is the same argument every time. Publish it once and every jack is one link, no new claims,
    no new risk. Docs 10 and 11 already draft it; 01 should deliver it, not duplicate it.
 4. **The watcher, scoped down** — press feeds first, three-item budget, facts not copy. One evening.
-5. **The AAS meeting diary.** January is the year's densest exoplanet news day and it's on a
+5. **The AAS meeting diary.** January is the year's densest exoplanet news day, and it's on a
    calendar. A diary entry, not a tool.
 6. **Rejected: racing bots to arXiv.** `@astrophep-bot` posts that firehose to 75 followers. Speed
-   is not the moat. The colour is.
+   is not the moat; the colour is.
 
 ## The one thing I'd change
 
-Stop selling this as a speed play. Speed is the part most likely to produce the one mistake that
+Stop selling this as a speed play — speed is the part most likely to produce the one mistake that
 costs the project its only real asset. Build the twenty-planet bench and the one-planet fast path,
 and let the sixty-minute runbook shrink to the twenty minutes that genuinely have a clock on them.
 
@@ -138,14 +136,13 @@ and let the sixty-minute runbook shrink to the twenty minutes that genuinely hav
 In `01-newsjacking.md` — structure, `**Status:**` line and `## Links` preserved:
 
 - **Feed table rewritten**: live URLs for NASA/ESA/ESO, canonical arXiv host, NASA Archive marked
-  "no RSS · Thursdays · email list", press feeds above arXiv. **Added the lead-time correction**
+  "no RSS · Thursdays · email list", press feeds above arXiv; plus **the lead-time correction**
   (K2-18 b + arXiv mechanics), reframing arXiv as stock-building.
 - **Added "stock beats speed"** to The bet (the twenty-planet bench) and a new section, **"The case
   the plan has to survive"** — the 6,324 vs 5,764 gap and the one-planet fast path.
 - **Rewrote the `newswatch.py` spec**: alias table, `announce_type` filter, three-item budget,
   30-day suppression, facts-not-copy output, `planets.json` dependency.
-- **Rewrote the runbook** as three clocks, deleting the "not worth doing over an hour" rule; added
-  **`## The accuracy checklist`** (8 items) plus the 24-hour re-check.
+- **Rewrote the runbook** as three clocks, deleting the "not worth doing over an hour" rule, and
+  added **`## The accuracy checklist`** (8 items) plus the 24-hour re-check.
 - **Rewrote the judging section** as Test One / Test Two; expanded the infrared case with the
-  secondary-eclipse boundary; softened "never email a journalist" to "never pitch"; pointed the
-  "being wrong, fast" risk at the checklist.
+  secondary-eclipse boundary; softened "never email a journalist" to "never pitch".
