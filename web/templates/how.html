@@ -99,10 +99,10 @@
     <h3>How a spectrum is measured for real</h3>
     <p class="how-body">Step 1 makes a curve up — carefully, from physics, but up. It is only
       worth anything because real spectra exist to check it against, and measuring one is
-      refreshingly mechanical: light passes through a narrow slit, hits a <strong>diffraction
-      grating</strong> — a mirror ruled with thousands of fine lines, doing a prism's job more
-      precisely — and comes out fanned into a rainbow. A CCD, the same sensor as a phone camera's,
-      sits in that rainbow and counts photons at every wavelength at once: that is
+      refreshingly mechanical: light passes through a narrow slit, hits a
+      {{ g('diffraction-grating', 'diffraction grating') }} — a mirror ruled with thousands of
+      fine lines — and comes out fanned into a rainbow. A CCD, the same sensor as a phone
+      camera's, sits in that rainbow and counts photons at every wavelength at once: that is
       {{ g('spectroscopy') }}, one exposure, hundreds of wavelengths.</p>
     <svg class="dg" viewBox="0 0 560 194" role="img"
       aria-label="A spectrograph: light passes a slit, a grating fans it into a rainbow, and a
@@ -137,6 +137,22 @@
       instrument — and everything the instrument smeared onto the light divides out with it. What
       is left is {{ g('geometric-albedo', 'geometric albedo') }}: the same
       {{ g('albedo-spectrum', 'A(λ)') }} step 1 tries to predict.</p>
+    <p class="how-body">Fanning the light out is only one way to do it, and the choice comes down
+      to how many photons you have to spend:</p>
+    <dl class="how-ways">
+      <dt>SPLIT IT</dt>
+      <dd>Grating or prism, as above: every wavelength in one exposure. The richest data and the
+        greediest for light — this is where the measured spectra on this site come from.</dd>
+      <dt>FILTER IT</dt>
+      <dd>Measure the total light through one filter, then another. Each filter is a single point
+        on the spectrum: coarse, but it works on targets far too faint to fan out. Exactly what
+        Roman's four bands do — step 5.</dd>
+      <dt>INTERFERE IT</dt>
+      <dd>Interfere the beam with a delayed copy of itself and the spectrum falls out of the maths
+        instead of the optics —
+        {{ g('fourier-transform-spectroscopy', 'Fourier-transform spectroscopy') }}. Voyager and
+        Cassini read the giant planets' {{ g('infrared') }} this way, no grating at all.</dd>
+    </dl>
     <p class="how-body"><strong>Five worlds here are measured, not modelled.</strong> Jupiter,
       Saturn, Uranus and Neptune use full-disk spectra Erich Karkoschka recorded at ESO in 1995;
       Earth uses a calibrated composite of real observations. They skip step 1 and run steps 2–4
@@ -157,8 +173,19 @@
       <p>where <code>r</code> is the planet's distance from the Sun, <code>Δ</code> its distance
         from the telescope and <code>R<sub>p</sub></code> its radius. A ground-based spectrum also
         carries Earth's own atmosphere stamped on top (the O₂ and H₂O bands); those come out by
-        observing a bare standard star at the same airmass and dividing again. The two measured
-        files this site ships:</p>
+        observing a bare standard star at the same airmass and dividing again.</p>
+      <p>Getting the planet's light <em>away from its star's</em> is the other half of the problem,
+        and it has its own menu. Watch the star dim as the planet crosses it, and the size of the
+        dip at each wavelength maps the atmosphere's absorption ({{ g('transit') }}, or
+        transmission spectroscopy — the JWST and Hubble results). Let the planet slip behind the
+        star instead and subtract the two views, leaving its own emission. Block the star outright
+        with a {{ g('coronagraph') }} and disperse what survives — reflected light, and Roman's
+        route. Or lean on polarisation: scattered planet light is polarised and starlight is
+        not, so {{ g('spectropolarimetry') }} can pull one out of the other, which is a mode of
+        Roman's 575&nbsp;nm channel. Earth needs a trick of its own, since we cannot step back far
+        enough to see it whole: <em>earthshine</em> — the unlit part of the Moon, lit by a full
+        Earth — is our planet handed back to us as a single dot of reflected light.</p>
+      <p>The two measured files this site ships:</p>
       <ul>
         <li><strong>Karkoschka (1998)</strong>, <em>Icarus</em> 133, 134–146 — CCD
           spectrophotometry at ESO, July 1995, 300–1050&nbsp;nm at 1&nbsp;nm resolution

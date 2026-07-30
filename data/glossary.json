@@ -149,6 +149,30 @@
       "seeAlso": ["photometry", "bandpass", "albedo-spectrum"]
     },
     {
+      "id": "diffraction-grating",
+      "term": "Diffraction grating",
+      "category": "light",
+      "short": "A mirror ruled with thousands of fine parallel lines. It fans light out into a rainbow, doing a prism's job more precisely, and is the heart of most spectrographs.",
+      "long": "Where a prism bends each colour by a slightly different amount, a grating uses interference between the light bounced off thousands of ruled lines to spread the spectrum out — further, more evenly, and by a precisely known amount, which is what lets a pixel position on the detector be read as a wavelength. Almost every measured spectrum on which this project rests, including the solar-system albedo curves, came off a grating instrument.",
+      "seeAlso": ["spectroscopy", "measured-spectrum", "nanometre"]
+    },
+    {
+      "id": "fourier-transform-spectroscopy",
+      "term": "Fourier-transform spectroscopy",
+      "category": "light",
+      "short": "Measuring a spectrum without splitting the light: interfere the beam with a delayed copy of itself, then convert the resulting ripple pattern into wavelengths mathematically.",
+      "long": "The beam is divided in two, one half is delayed by a moving mirror, and the halves are recombined; each wavelength cancels and reinforces at a different mirror position, so the recorded brightness-versus-delay curve — the interferogram — contains the whole spectrum folded together. A Fourier transform unfolds it. Voyager's IRIS and Cassini's CIRS read the giant planets' infrared spectra this way, with no grating at all.",
+      "seeAlso": ["spectroscopy", "diffraction-grating", "infrared"]
+    },
+    {
+      "id": "spectropolarimetry",
+      "term": "Spectropolarimetry",
+      "category": "light",
+      "short": "Measuring a spectrum's polarisation as well as its brightness. Starlight is essentially unpolarised, while light scattered off a planet is not — so polarisation can pick the planet out.",
+      "long": "Light scattered by molecules or cloud droplets comes away partly polarised, with the effect strongest at the same scattering angles as quadrature. Direct starlight is not, so subtracting the unpolarised part suppresses the star and leaves the planet — a trick used on Earthshine and by ground-based imagers, and one of the modes of Roman's coronagraph at 575 nanometres.",
+      "seeAlso": ["quadrature", "coronagraph", "rayleigh-scattering"]
+    },
+    {
       "id": "picaso",
       "term": "PICASO",
       "category": "light",

@@ -59,6 +59,9 @@
   {# Sticky section tabs (planet pages). Same rule: registers on alpine:init, so it lands
      before Alpine. The tabs are plain anchors and work without this file at all. #}
   <script src="/static/secnav.js?v={{ build_id }}" defer></script>
+  {# Scope sweep for the explainer diagrams ("How we get the colours"). No Alpine involvement,
+     so order is free; it exits immediately on every other page. #}
+  <script src="/static/how.js?v={{ build_id }}" defer></script>
   <script src="/static/vendor/alpine.min.js" defer></script>
   {# Copy confirmations: one shared overlay readout, so no page shifts its own layout to
      say "copied". Deferred — nothing calls it before the first click. #}
