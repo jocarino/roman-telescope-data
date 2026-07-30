@@ -74,6 +74,14 @@ class Site:
     base_url: str = ""
     default_image: str = "/og/default.png"
     pages: list[PageMeta] = field(default_factory=list)
+    # Visitor analytics. `posthog_key` is a PostHog *project* token (the public, write-only
+    # `phc_...` one that ships in the page, not a personal API key). Empty is the default and
+    # means no analytics code is emitted at all — which is what every local preview and every
+    # worktree's `exohub serve` should be, since a browsing session on :8800 otherwise lands
+    # in the same dashboard as a real visitor. Set it only for the deploy build.
+    posthog_key: str = ""
+    posthog_api_host: str = "https://eu.i.posthog.com"
+    posthog_assets_host: str = "https://eu-assets.i.posthog.com"
 
     def absolute(self, path: str) -> str:
         if not path.startswith("/"):

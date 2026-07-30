@@ -275,6 +275,11 @@ def _env() -> Environment:
     )
 
 
+# PostHog EU cloud. `api_host` is where events go; the assets host serves the library itself
+# (PostHog splits them). Overridable for the US cloud (us.i / us-assets.i) or a reverse proxy.
+_PH_API_HOST = "https://eu.i.posthog.com"
+_PH_ASSETS_HOST = "https://eu-assets.i.posthog.com"
+
 # Approximate count of confirmed exoplanets, for the honest "modelling N of ~M" line. Rounded
 # so it doesn't go stale precisely; refresh occasionally from the Archive's pscomppars count.
 KNOWN_TOTAL_APPROX = 6300
@@ -624,6 +629,9 @@ def build(
     out: Path = Path("dist"),
     base_url: str = "",
     og_cards: bool = True,
+    posthog_key: str = "",
+    posthog_api_host: str = _PH_API_HOST,
+    posthog_assets_host: str = _PH_ASSETS_HOST,
 ) -> Path:
     doc = PlanetsFile.model_validate_json(planets_json.read_text())
     records = doc.planets
@@ -632,7 +640,13 @@ def build(
 
     # Share identity. `base_url` is the canonical origin; without it the tags still emit with
     # root-relative paths and the sitemap is skipped rather than published pointing nowhere.
-    site = Site(base_url=base_url.rstrip("/"))
+    # `posthog_key` is the analytics gate: empty (the default) emits no analytics at all.
+    site = Site(
+        base_url=base_url.rstrip("/"),
+        posthog_key=posthog_key,
+        posthog_api_host=posthog_api_host.rstrip("/"),
+        posthog_assets_host=posthog_assets_host.rstrip("/"),
+    )
     hub = {p.path: p for p in static_pages(len(records))}
 
     if out.exists():
@@ -863,8 +877,34 @@ def main() -> None:
         help="Skip the per-planet share cards (~30 s across cores at catalogue scale). For "
         "local iteration only — deploys should always build them.",
     )
+    parser.add_argument(
+        "--posthog-key",
+        default=os.environ.get("POSTHOG_KEY", ""),
+        help="PostHog project token (phc_...) to enable visitor analytics. Omitted or empty "
+        "means no analytics code is emitted at all, which is what local and preview builds "
+        "want: a browsing session on a preview port would otherwise be counted as a real "
+        "visitor. Defaults to $POSTHOG_KEY, so only the deploy environment sets it.",
+    )
+    parser.add_argument(
+        "--posthog-api-host",
+        default=os.environ.get("POSTHOG_API_HOST", _PH_API_HOST),
+        help=f"PostHog ingestion host (default {_PH_API_HOST}, the EU cloud).",
+    )
+    parser.add_argument(
+        "--posthog-assets-host",
+        default=os.environ.get("POSTHOG_ASSETS_HOST", _PH_ASSETS_HOST),
+        help=f"Host serving the PostHog library (default {_PH_ASSETS_HOST}).",
+    )
     args = parser.parse_args()
-    out = build(args.planets, args.out, base_url=args.base_url, og_cards=args.og_cards)
+    out = build(
+        args.planets,
+        args.out,
+        base_url=args.base_url,
+        og_cards=args.og_cards,
+        posthog_key=args.posthog_key,
+        posthog_api_host=args.posthog_api_host,
+        posthog_assets_host=args.posthog_assets_host,
+    )
     n = len(list((out / "planet").glob("*.html")))
     cards = len(list((out / "og").glob("*.png"))) if (out / "og").exists() else 0
     print(f"Built site -> {out}  ({n} planet pages, {cards} share cards)")
@@ -873,6 +913,11 @@ def main() -> None:
             "  note: no --base-url / $SITE_BASE_URL, so og:image and canonical URLs are "
             "root-relative and sitemap.xml was skipped. Set it for the production build."
         )
+    print(
+        f"  analytics: PostHog -> {args.posthog_api_host}"
+        if args.posthog_key
+        else "  analytics: off (no --posthog-key / $POSTHOG_KEY) — this build sends nothing."
+    )
 
 
 if __name__ == "__main__":

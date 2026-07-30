@@ -38,12 +38,17 @@ ARG GH_TOKEN=""
 # and a sitemap of relative paths is invalid, so without this the build still emits share
 # tags (root-relative) but writes no sitemap.xml. Set it as a build arg on the deploy host.
 ARG SITE_BASE_URL=""
+# Visitor analytics. The PostHog *project* token (phc_…, public and write-only — it ships in
+# the page by design). Left empty, the build emits no analytics code at all, which is what
+# every local and preview build wants. Set it as a build arg on the deploy host only.
+ARG POSTHOG_KEY=""
 # Fetch the dataset, render, then delete the dataset — all in ONE layer. Split into
 # separate RUNs, the ~90 MB planets.json would be baked into a cached layer on every
 # deploy host forever; fetched and removed inside the same step, it never persists
 # anywhere once the site is rendered.
 RUN GH_TOKEN="$GH_TOKEN" uv run python scripts/fetch_data.py \
-    && SITE_BASE_URL="$SITE_BASE_URL" uv run python -m web.build --out /dist \
+    && SITE_BASE_URL="$SITE_BASE_URL" POSTHOG_KEY="$POSTHOG_KEY" \
+       uv run python -m web.build --out /dist \
     && rm -f data/planets.json
 
 # ── stage 2: serve the static output with nginx ──
