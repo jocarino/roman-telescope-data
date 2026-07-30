@@ -23,7 +23,8 @@
     never been seen as more than a wobble in their star's light. Every swatch on this site is a
     <strong>physics prediction</strong>: we model the light each planet reflects, light it with
     its own star, and convert the result to a colour exactly the way a human eye would.
-    Four steps, from starlight to hex code.</p>
+    Four steps, from starlight to hex code — plus the one place we can check the whole thing
+    against a real measured spectrum.</p>
 
   <div class="how-chain" aria-hidden="true">
     <span class="how-chain-box">PLANET A(λ)</span><span class="how-chain-op">×</span>
@@ -89,6 +90,90 @@
       </ul>
       <p>Every page's data card states which engine produced its spectrum, and tags each input
         as <em>measured</em>, <em>computed</em> or <em>assumed</em>.</p>
+    {{ maths_close() }}
+  </section>
+
+  {# ── MEASURED INTERLUDE (deliberately not numbered: it is not a pipeline step) ────── #}
+  <section class="panel how-step how-aside">
+    <span class="how-num">NOT A STEP · HOW WE KNOW</span>
+    <h3>How a spectrum is measured for real</h3>
+    <p class="how-body">Step 1 makes a curve up — carefully, from physics, but up. It is only
+      worth anything because real spectra exist to check it against, and measuring one is
+      refreshingly mechanical: light passes through a narrow slit, hits a <strong>diffraction
+      grating</strong> — a mirror ruled with thousands of fine lines, doing a prism's job more
+      precisely — and comes out fanned into a rainbow. A CCD, the same sensor as a phone camera's,
+      sits in that rainbow and counts photons at every wavelength at once: that is
+      {{ g('spectroscopy') }}, one exposure, hundreds of wavelengths.</p>
+    <svg class="dg" viewBox="0 0 560 194" role="img"
+      aria-label="A spectrograph: light passes a slit, a grating fans it into a rainbow, and a
+        CCD counts photons at every wavelength, giving a curve">
+      <defs>
+        <linearGradient id="dg-fan" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#2a6df4"/><stop offset=".5" stop-color="#19c37d"/>
+          <stop offset="1" stop-color="#d5382c"/>
+        </linearGradient>
+      </defs>
+      <text x="8" y="54">reflected light</text><text x="8" y="66">from the planet</text>
+      <line class="ln dim" x1="8" y1="82" x2="116" y2="82"/>
+      <rect class="bx" x="116" y="56" width="8" height="54"/>
+      <text x="104" y="128">slit</text>
+      <path class="ln" d="M164 56 L 200 112 L 164 112 Z"/>
+      <text x="148" y="128">grating</text>
+      <line x1="200" y1="98" x2="322" y2="46" stroke="#2a6df4" stroke-width="2"/>
+      <line x1="200" y1="98" x2="322" y2="86" stroke="#19c37d" stroke-width="2"/>
+      <line x1="200" y1="98" x2="322" y2="126" stroke="#d5382c" stroke-width="2"/>
+      <rect class="bx" x="322" y="34" width="18" height="104"/>
+      <rect x="325" y="37" width="12" height="98" fill="url(#dg-fan)" opacity=".6"/>
+      <text x="318" y="152">CCD</text>
+      <text class="op" x="350" y="92">→</text>
+      <rect class="bx" x="376" y="34" width="172" height="104"/>
+      <path class="ln ch2" d="M384 62 C 404 60, 424 68, 442 72 C 454 74, 460 108, 472 108
+        C 484 108, 488 80, 502 80 C 522 80, 536 86, 542 90"/>
+      <text x="376" y="152">counts at each wavelength</text>
+      <text x="8" y="180">divide by the light that arrived → the fraction reflected: A(λ)</text>
+    </svg>
+    <p class="how-body">That gives <em>counts</em>, not reflectivity. Divide by the light that
+      fell on the planet in the first place — the Sun, or a Sun-like star, through the same
+      instrument — and everything the instrument smeared onto the light divides out with it. What
+      is left is {{ g('geometric-albedo', 'geometric albedo') }}: the same
+      {{ g('albedo-spectrum', 'A(λ)') }} step 1 tries to predict.</p>
+    <p class="how-body"><strong>Five worlds here are measured, not modelled.</strong> Jupiter,
+      Saturn, Uranus and Neptune use full-disk spectra Erich Karkoschka recorded at ESO in 1995;
+      Earth uses a calibrated composite of real observations. They skip step 1 and run steps 2–4
+      identically to every exoplanet — which makes them the calibration check: if real Neptune
+      data comes out Neptune blue, the machinery is worth trusting on a planet nobody has ever
+      seen. <a href="/planet/neptune">See it on Neptune's page →</a></p>
+    <p class="how-body">No exoplanet here has a measured visible spectrum. The planet is roughly
+      a billion times fainter than the star a hair's breadth beside it on the sky, so its light is
+      swamped long before it reaches any grating. The famous measured spectra from JWST and
+      Hubble are {{ g('infrared') }}, taken during {{ g('transit') }} — starlight strained
+      through the edge of an atmosphere: brilliant for chemistry, silent on visible colour. That
+      needs the star blocked first: a {{ g('coronagraph') }}, step 5.</p>
+    {{ maths_open() }}
+      <p>With the planet and a solar analogue observed through the same instrument, the
+        instrument's response and the Sun's own spectrum both cancel in the ratio, leaving the
+        geometric albedo of a fully lit disc:</p>
+      <span class="formula">p(λ) = [ F<sub>p</sub>(λ) / F<sub>⊙</sub>(λ) ] · (r / 1&nbsp;AU)² · (Δ / R<sub>p</sub>)²</span>
+      <p>where <code>r</code> is the planet's distance from the Sun, <code>Δ</code> its distance
+        from the telescope and <code>R<sub>p</sub></code> its radius. A ground-based spectrum also
+        carries Earth's own atmosphere stamped on top (the O₂ and H₂O bands); those come out by
+        observing a bare standard star at the same airmass and dividing again. The two measured
+        files this site ships:</p>
+      <ul>
+        <li><strong>Karkoschka (1998)</strong>, <em>Icarus</em> 133, 134–146 — CCD
+          spectrophotometry at ESO, July 1995, 300–1050&nbsp;nm at 1&nbsp;nm resolution
+          (0.4&nbsp;nm sampling). Uranus and Neptune are true geometric albedo (0° phase);
+          Jupiter and Saturn are full-disk albedo at 6.8° and 5.7° phase, where the
+          <em>shape</em> of the curve — the part that sets the colour — is essentially
+          unchanged. Via NASA's PDS Atmospheres Node; public domain.</li>
+        <li><strong>Payne et al. (2026)</strong>, <em>Planetary Science Journal</em> — Earth's
+          disk-integrated geometric albedo, 0.1–2.5&nbsp;µm: a calibrated composite of EPOXI
+          photometry, earthshine spectroscopy, LCROSS and satellite data, standardised to
+          geometric albedo. CC&nbsp;BY&nbsp;4.0.</li>
+      </ul>
+      <p>Both are interpolated onto the same 5&nbsp;nm grid the models use, and nothing
+        downstream is told the difference — the record simply carries the
+        {{ g('measured-spectrum', 'measured-spectrum') }} tag instead of a model engine name.</p>
     {{ maths_close() }}
   </section>
 

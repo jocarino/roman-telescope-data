@@ -1592,6 +1592,13 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
   text-transform: none; letter-spacing: 0;
 }
 .how-body { margin: 0; font-size: 13.5px; line-height: 1.7; color: var(--fg-dim); max-width: 84ch; }
+/* The measured interlude is not one of the numbered steps: a dashed frame and a dimmed chip
+   keep the 1-2-3-4 spine readable while the aside still sits in the flow. It is the only
+   how-step with several stacked paragraphs, so the gap is scoped here too. */
+.how-aside { border-style: dashed; }
+.how-aside .how-num { color: var(--fg-faint); }
+.how-aside .how-body + .how-body { margin-top: 12px; }
+.how-aside .dg + .how-body { margin-top: 14px; }
 .how-body strong, .math-body strong { color: var(--fg); }
 
 /* Diagrams: little screens in the scope's visual language (dark face, mono labels,
