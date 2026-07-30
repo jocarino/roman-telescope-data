@@ -17,7 +17,7 @@ Sixteen reviewers, cast as the people most likely to reject each plan, agreed on
 of the individual docs said: **this project has correctness debt, and the plan was scheduling
 promotion on top of it.**
 
-Four defects, each found independently, each one that promotion would amplify rather than survive:
+Five defects, each found independently, each one that promotion would amplify rather than survive:
 
 1. **The Roman band configuration in `pipeline/config.py` is wrong.** Every "as Roman would see
    it" swatch — the signature feature — is computed through the wrong filter set. Our `835 nm`
@@ -33,6 +33,10 @@ Four defects, each found independently, each one that promotion would amplify ra
    actually open and cannot be deposited — an outstanding CC BY 4.0 obligation to a source we
    redistribute, and **no email address anywhere on the site**, so no journalist can reach us
    today. [13](./13-credit-the-scientists.md), [06](./06-open-data.md), [02](./02-press-kit.md).
+5. **The catalogue is ~560 planets behind.** `pscomppars` holds 6,324; the site ships 5,764. New
+   confirmations are missing *by construction*, so the commonest newsjack story — "new planet
+   discovered" — is the one we cannot answer. A refresh cadence is a prerequisite for
+   [01](./01-newsjacking.md), not an optimisation. [reviews/01-newsjacking-review.md](./reviews/01-newsjacking-review.md).
 
 The second theme was scope. Reviewer after reviewer, independently, said the same thing about
 their own doc: *this proposes six things and one of them is worth building.* The plan as first
@@ -68,7 +72,7 @@ Three structural advantages that decide what's worth doing:
 
 | # | Channel | Status | Review verdict | Note |
 |---|---------|--------|----------------|------|
-| [01](./01-newsjacking.md) | Newsjacking exoplanet headlines | not started | revise | Stop selling it as a speed play — speed is what produces the one wrong colour. Build the pre-made bench instead. |
+| [01](./01-newsjacking.md) | Newsjacking exoplanet headlines | **blocked by defect 5** | revise | Speed isn't the moat — arXiv gives weeks, not days. Refresh the catalogue, then build the pre-made bench. |
 | [02](./02-press-kit.md) | Press kit | not started | rework | Split `/about` (human) from `/press` (assets). No email on the site today — fix that first, it's a five-minute job. |
 | [03](./03-seo-planet-pages.md) | SEO on planet pages | **blocked by defect 3** | rework | The link graph is the blocker, not the wording. Reverse colour index killed. |
 | [04](./04-wikimedia.md) | Wikimedia Commons | small version: **do it** | partly overturned | Campaign stays parked, but the small version is unblocked today — my DOI-unblocks-it reasoning was a policy misreading. |
