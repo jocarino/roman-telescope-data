@@ -297,6 +297,7 @@ document.addEventListener("alpine:init", () => {
       if (v === this.view) return;
       this.view = v;
       this._publishView();
+      window.exoTrack && window.exoTrack("roman_view_toggled", { view: v, surface: "gallery" });
       clearTimeout(this._fcT);
       if (this.family && !this.families().some((f) => f.id === this.family)) {
         this.famCleared = this.familyMeta[this.family].n;
@@ -1396,7 +1397,13 @@ document.addEventListener("alpine:init", () => {
       this._lt = setTimeout(() => (this.ledFlash = false), 320);
     },
     // Scope controls: every knob/button drives real state (and persists across hops):
-    setView(v) { this.view = v; this._persist("scopeView", v); this.blink(); this._sweep(); },
+    setView(v) {
+      this.view = v;
+      this._persist("scopeView", v);
+      window.exoTrack && window.exoTrack("roman_view_toggled", { view: v, surface: "planet" });
+      this.blink();
+      this._sweep();
+    },
     // ---- Reset the scope ----
     // Every knob carries across planet pages via localStorage, which is what makes a scope
     // set up three hops ago feel stuck: you can't tell which knob you turned. This puts the
@@ -1517,6 +1524,7 @@ document.addEventListener("alpine:init", () => {
     copyDuo() {
       navigator.clipboard?.writeText(this.lampHex() + ", " + this.duoBase());
       this.flash("copied lamp + planet");
+      this.track("duotone");
     },
     // What the palette-out / dossier headers call the current output.
     viewName() {
@@ -1531,6 +1539,7 @@ document.addEventListener("alpine:init", () => {
       if (this.view === "roman") { this.setView("full"); return; }
       this.illum = this.illum === "native" ? "sun" : "native";
       this._persist("scopeIllum", this.illum);
+      window.exoTrack && window.exoTrack("light_source_swapped", { source: this.illum });
       this.blink();
       this._sweep();
     },
@@ -1549,6 +1558,9 @@ document.addEventListener("alpine:init", () => {
       // brings the model back (photos have their own phase).
       this._pinPhase();
       if (this.heroSource === "telescope") { this.heroSource = "model"; this._persist("heroSource", "model"); }
+      // Debounced: a drag steps through every stop, and one event per drag is the signal.
+      window.exoTrack &&
+        window.exoTrack("phase_changed", { degrees: this.phase().d }, { debounce: 800 });
       this.renderAll();
     },
     _phaseLoop() { this.renderAll(); },  // (re)issue the spin with/without the animator
@@ -1602,9 +1614,16 @@ document.addEventListener("alpine:init", () => {
     // Confirmation goes to the shared overlay toast (toast.js), never into the button row —
     // inline text there re-flowed the row on every copy.
     flash(m) { if (window.exoToast) window.exoToast(m); },
+    // Which export people reach for, and which colour they were looking at when they did —
+    // "do the Roman colours get taken as often as the true ones" is the question. No-op
+    // unless the build shipped analytics (web/static/analytics.js).
+    track(format) {
+      window.exoTrack && window.exoTrack("palette_copied", { format: format, view: this.viewName() });
+    },
     copy(hex) {
       navigator.clipboard?.writeText(hex);
       this.flash("copied " + hex);
+      this.track("hex");
     },
     // All five stops of the current view's palette, comma-joined (dark -> light);
     // single stops are click-to-copy on the chips, CSS vars / .ASE cover the rest.
@@ -1612,6 +1631,7 @@ document.addEventListener("alpine:init", () => {
       const pal = this.curPalette();
       navigator.clipboard?.writeText(pal.join(", "));
       this.flash("copied all " + pal.length + " colours");
+      this.track("all-stops");
     },
     copyCssVars() {
       const pal = this.curPalette();
@@ -1622,6 +1642,7 @@ document.addEventListener("alpine:init", () => {
       const css = ":root {\n" + lines.join("\n") + "\n}";
       navigator.clipboard?.writeText(css);
       this.flash("copied CSS variables");
+      this.track("css-vars");
     },
     // Render the three planet visualisations from the CURRENT view's palette + attributes.
     renderAll() {

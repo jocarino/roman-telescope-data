@@ -81,6 +81,49 @@ and `sitemap.xml` is skipped rather than published full of invalid relative URLs
 `Dockerfile` takes it as the `SITE_BASE_URL` build arg — **set it on the deploy host**, or
 production ships relative `og:image` URLs and no sitemap.
 
+### Visitor analytics (PostHog, off by default)
+
+The questions worth asking here aren't "how many hits" — they're *does anyone flip the Roman
+switch, does the phase slider get dragged, which of the 5,764 worlds do people actually open,
+and do the Roman colours get copied as often as the true ones*. Those are events, so the site
+uses PostHog rather than a pageview counter.
+
+**Nothing is emitted unless the build is given a key.** `--posthog-key` (or `$POSTHOG_KEY`)
+gates the whole thing at render time: no key, no snippet, no `analytics.js`, no requests. That
+is deliberate and load-bearing — every worktree serves its own `dist/` on its own port and the
+mobile harness reloads pages in an iframe all day, and none of that should be indistinguishable
+from a real visitor in the dashboard. `tests/test_analytics_build.py` asserts the absence as
+hard as the presence.
+
+```bash
+uv run python -m web.build --out dist                      # analytics off — every local build
+uv run python -m web.build --out dist --posthog-key phc_…  # what the deploy does
+```
+
+The `Dockerfile` takes it as the `POSTHOG_KEY` build arg; set it on the deploy host beside
+`SITE_BASE_URL`. The token is a *project* token (`phc_…`) — public and write-only, meant to
+ship in the page. Never put a personal API key there. `--posthog-api-host` /
+`--posthog-assets-host` default to the EU cloud; override for US (`us.i` / `us-assets.i`).
+
+What the install does and doesn't do (`web/static/analytics.js`):
+
+- **Cookieless** (`cookieless_mode: "always"`), so there is no cookie to consent to and no
+  banner on a site with no accounts and nothing to personalise. The honest cost: PostHog
+  rotates its identifying salt daily, so one person visiting on two days counts as two —
+  **visitor totals read high and retention is meaningless**. Pageview and event counts, which
+  is what we ask about, are unaffected. This requires **"Cookieless server hash mode" to be ON**
+  in the PostHog project (Project settings → Web analytics); without it events are dropped.
+- **No autocapture, no session replay, no surveys, no heatmaps.** A DOM firehose answers none
+  of the questions above and costs far more events.
+- A fixed vocabulary: `$pageview`, `planet_viewed` (id + name), `roman_view_toggled`,
+  `palette_copied` (format + which colour was on screen), `palette_downloaded`,
+  `light_source_swapped`, `phase_changed` (debounced — a drag is one event, not forty).
+
+Call sites use `window.exoTrack && window.exoTrack(…)`, the same guard as `window.exoToast`,
+so an unkeyed build (or an ad blocker, which removes PostHog routinely) changes nothing about
+how the page behaves. Adding an event is one guarded line at the call site plus a line in the
+list above; keep the names readable a year out.
+
 ### The Roman target board (`/roman`)
 
 The namesake page: the shortlist of exoplanets Roman's coronagraph could plausibly catch in
@@ -185,7 +228,9 @@ nginx stage serves it. `nginx.conf` handles clean URLs and `.ase` downloads. On 
 Application → connect the repo → Build Type `Dockerfile` → domain + container port 80 +
 HTTPS → enable the auto-deploy webhook (if the repo is private, add build arg
 `GH_TOKEN=<read token>`). **Also add build arg `SITE_BASE_URL=https://<your domain>`** — see
-"Sharing" above; without it the deploy has no sitemap and relative `og:image` URLs.
+"Sharing" above; without it the deploy has no sitemap and relative `og:image` URLs. Add
+`POSTHOG_KEY=phc_…` too if you want visitor analytics — see "Visitor analytics" above; the
+deploy is the only build that should ever carry it.
 
 **The data artifact is NOT in git** (a 6k-planet build is ~90 MB): each pipeline run's
 `planets.json` is published as a GitHub Release asset, and the committed one-line

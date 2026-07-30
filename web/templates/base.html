@@ -70,6 +70,17 @@
      hover popover. Deferred and fully delegated — marked terms injected later still work. #}
   <script src="/glossary.terms.{{ build_id }}.js" defer></script>
   <script src="/static/glossary.js?v={{ build_id }}" defer></script>
+  {# Visitor analytics, emitted only when the build carried a PostHog key — so a local dist/
+     or any worktree's `exohub serve` ships none of this and reports nothing. Both files are
+     deferred and sit last: nothing on the page waits on them, and a blocked request (ad
+     blockers remove PostHog routinely) costs the visitor nothing but the numbers. Deferred
+     scripts run in document order, so the library is always initialised before analytics.js
+     reads it. See web/static/analytics.js for what is and isn't collected. #}
+  {% if site.posthog_key %}
+  <script>window.EXO_ANALYTICS = {key: {{ site.posthog_key|tojson }}, api_host: {{ site.posthog_api_host|tojson }}};</script>
+  <script src="{{ site.posthog_assets_host }}/static/array.js" defer></script>
+  <script src="/static/analytics.js?v={{ build_id }}" defer></script>
+  {% endif %}
 </head>
 <body class="{% block bodyclass %}{% endblock %}">
   <div class="wrap">
