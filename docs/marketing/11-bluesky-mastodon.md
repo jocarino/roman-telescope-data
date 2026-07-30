@@ -39,25 +39,31 @@ So:
 - **Exoplanets** — `bsky.app/profile/emily.space/feed/exoplanets` — 208 likes. Small, but *exactly* our audience, and **posts here also flow into the main Astronomy feed**.
 - Also Extragalactic (273), Stellar (167), Radio (109), Astronomy Education (86), History of Astronomy (82).
 
-**How to get in — this is the single highest-value action in this doc.** Post `@bot.astronomy.blue signup` from your account. That's it. The bot (`@bot.astronomy.blue`, 13,066 posts, active today) handles it. Eligibility per their FAQ: *"Any Bluesky user who is a scientist, science organization, or hobbyist astronomer in the fields of astronomy, astrophysics, astrobiology, planetary science, or astronomy education can sign up."* **Hobbyists are explicitly welcome** — you qualify. Over a thousand accounts and orgs are signed up, ESA among them.
+**How to get in — this is the single highest-value action in this doc.** Post `@bot.astronomy.blue signup` from your account. The bot (`@bot.astronomy.blue`, 13,066 posts, 1,805 followers, "Managed by @emily.space") replies within a couple of minutes — but **it is not one-and-done**: you then have to accept the rules, state your motivation, and **a human moderator verifies the signup**. Budget for a real (small) application, and do it *after* you have some posting history, not on day one from an empty account. One signup covers every feed in the network; there is no per-feed application. Eligibility per the rules repo: any *"professional/amateur/student in astronomy/astrophysics/astrobiology/planetary science/astronomy education—or you must represent an astronomy-related organization."* **Amateurs are explicitly welcome** — you qualify. Over a thousand accounts and orgs are signed up, ESA among them; the network self-reports ~1 million feed views per week.
 
 Once signed up, inclusion is triggered per-post by content:
 - 🔭 emoji, `#astronomy`, or `#astro` → main Astronomy feed
 - `#exoplanet` or `#exoplanets` → Exoplanets feed *and* the main feed
 
-**Read [github.com/the-astrosky-ecosystem/rules](https://github.com/the-astrosky-ecosystem/rules) before you automate anything.** I could not retrieve the posting-frequency and self-promotion clauses; assume there is a rate limit and that a 5,700-post backlog dumped into a shared feed is exactly what it exists to stop.
+**The rules, retrieved in full from [github.com/the-astrosky-ecosystem/rules](https://github.com/the-astrosky-ecosystem/rules) (2026-07-30).** Three of the five bear directly on this plan:
 
-**Starter packs.** Verified live 2026-07-30:
-- *Planetary Scientists on Bluesky!* — `bsky.app/starter-pack/asrivkin.bsky.social/3l3emzqrclr2g` (Andy Rivkin, 7,007 followers, active today)
-- *Astronomy on Bluesky Starter Pack* — `bsky.app/starter-pack/emily.space/3kvvsi4qacz2p`
-- *Astrophotographers on Bluesky* — `bsky.app/starter-pack/astronomywriter.bsky.social/3lazfdoadk32j` — ⚠️ creator last posted 2025-09-03, likely unmaintained
+- **Rule 3 — "no spam, including repetitive or overly promotional material that clutters the feeds… AI usage should be minimized, and AI fakes or low-quality generative creations should be avoided."** Read that twice. A daily stream of *computer-generated coloured discs* is, at a glance, indistinguishable from AI slop to a scrolling moderator. Our images are rendered from physics, not a diffusion model — but the burden is on us to make that legible **in the image itself** (the `MODELLED` stamp, the hex, ideally a visible spectrum trace) and in the first clause of the caption. This is the biggest un-named risk in the whole channel.
+- **Rule 4 — "Attribute content that is not your own… link to the original creator's content."** The albedo grids are Mark Marley's and Kerri Cahoy's work. Crediting them is not just good manners here, it is a *feed rule*. See [13-credit-the-scientists.md](./13-credit-the-scientists.md); that doc is a prerequisite for this one, not a companion to it.
+- **Rule 5 — "limit your promotional posts to no more than once per day on the main Astronomy feed. Promotional posts should not be the majority of your contributions to the feeds."** A daily swatch carrying a link to our own site *is* a promotional post. Once a day is exactly at the cap, and the "not the majority" clause means the plan below is out of compliance unless most of what we tag into the feeds is about **other people's work**. Concretely: tag ~2 planet posts a week into the main Astronomy feed; the rest go out untagged or with `#exoplanet` only.
+
+Moderation contact is `@moderation.astronomy.blue`; ask *before* posting anything you are unsure about — the rules explicitly invite that, and one pre-emptive question is cheaper than one strike.
+
+**Starter packs — verified live 2026-07-30, and worth far less than the guides claim:**
+- *Planetary Scientists on Bluesky!* — `bsky.app/starter-pack/asrivkin.bsky.social/3l3emzqrclr2g` (Andy Rivkin, 7,007 followers, active today). **5 all-time joins.**
+- *Astronomy on Bluesky Starter Pack* — `bsky.app/starter-pack/emily.space/3kvvsi4qacz2p`. **35 all-time joins.**
+- *Astrophotographers on Bluesky* — `bsky.app/starter-pack/astronomywriter.bsky.social/3lazfdoadk32j` — **0 all-time joins**; creator last posted 2025-09-03. Same owner also has two *Astronomers & Space Scientists on Bluesky* packs, both 0 joins.
 - An *Exoplanetary Astronomers* pack is indexed on blueskydirectory.com but I could not resolve it to a live AT-URI — treat as unverified.
 
-Getting *added* to a pack is a request to a human, so don't ask cold. Ask after 6–8 weeks of posting, once the account has an obvious body of work: one polite reply or DM to the pack owner, linking your best thread, not the homepage.
+**So: use packs as a follow list on day one, and drop "get added to a pack" as a goal.** Across the four biggest astronomy packs, the all-time total is 40 joins. Being *in* one delivers a rounding error; using one to bulk-follow 80 real astronomers on day one is the actual value, and costs nothing but a click. If you do ask anyway, ask after 6–8 weeks with one polite reply linking your best thread — but do not count it as a success metric.
 
 **Should you build your own feed?** Not in the first 90 days, and probably not ever. An "Exoplanets" feed already exists and is run by the person with the distribution — competing with it is strictly worse than being *in* it. Feeds are free to build (SkyFeed, or Graze for no-code), so revisit only if you later want something genuinely absent, e.g. a feed of *reflected-light / direct-imaging* posts as Roman approaches launch. Even then, offer it to `@emily.space` as an addition to her network first.
 
-**Alt text is not optional here.** The astro and disability communities on Bluesky overlap heavily and *will* notice. Turn on Settings → Accessibility → **Require alt text** so you cannot forget. There is an `@alt-text.bsky.social` retrieval bot and an ALT4Me convention for requesting human-written alt text — being on the receiving end of that is embarrassing and entirely avoidable. Limit is 2,000 characters; ours will use ~250. Template below.
+**Alt text is not optional here.** The astro and disability communities on Bluesky overlap heavily and *will* notice. Turn on Settings → Accessibility → **Require alt text** so you cannot forget. There is an `@alt-text.bsky.social` retrieval bot ("Get Alt Text", 7,051 followers, 53,671 posts — verified 2026-07-30, i.e. it is invoked tens of thousands of times) and an ALT4Me convention for requesting human-written alt text — being on the receiving end of that is embarrassing and entirely avoidable. Limit is 2,000 characters; ours will use ~250. Template below.
 
 **Hashtags.** Bluesky hashtags are functional (they drive the Astrosky feeds), not decorative. Use **2, maximum 3**, at the end: `#exoplanet` plus `#astronomy`. Add 🔭 as belt-and-braces. Avoid `#space` (noisy, non-scientific), `#science` (nothing), and long tag stacks (reads as spam).
 
@@ -96,6 +102,8 @@ Getting *added* to a pack is a request to a human, so don't ask cold. Ask after 
 
 **Twice a week**, post the *Roman comparison* instead: two discs side by side, "full spectrum" vs "as Roman would see it". That's the signature feature and it's the one image nobody else on either platform can produce.
 
+> ⛔ **Gate: do not post a single Roman comparison until the band-model correction in [15-roman-launch.md](./15-roman-launch.md) has shipped in the data.** The flight configuration is **three bands (575 nm/10%, 730 nm/15%, 825 nm/10%)**, not the four this doc originally assumed, and only the 575 nm band is guaranteed by the tech demo. Publishing "as Roman would see it" against a wrong band model, to an audience that contains the CGI team, is the one unrecoverable error available to this channel. Both the README and 15 say the same thing; it is repeated here because this is where the mistake would actually be published.
+
 **Character budget.** Bluesky 300 graphemes; Mastodon 500. Write to Bluesky's 300 and let Mastodon breathe. Allocation:
 
 - Planet name + hook: ~60
@@ -122,9 +130,11 @@ Voice: flat, specific, slightly dry. The physics does the work; never oversell. 
 > HD 189733 b is deep blue, and we know because Hubble measured it — not because an artist decided. Silicate cloud droplets scatter blue; sodium eats what's left past 450 nm. One of the few exoplanet colours that isn't a model.
 > `<SITE_URL>/planet/hd-189733-b` 🔭 #exoplanet #astronomy
 
-**2 — TrES-2 b** (the extreme)
-> TrES-2 b reflects less than 1% of the light that hits it. Best-fit models say 0.04%. It is darker than coal, darker than black acrylic paint, and our pipeline renders it as a disc you can barely distinguish from the background. Correctly.
-> `<SITE_URL>/planet/tres-2-b` 🔭 #exoplanet #astronomy
+**2 — TrES-2 b** (the extreme) — ⚠️ *corrected 2026-07-30; the original draft stated two things that are false.*
+> TrES-2 b is the darkest planet we know of: Kepler measured a geometric albedo of about 2.5%, and most of even that is the planet glowing, not reflecting. Our swatch looks normal because every swatch here is brightness-normalised — the real one is nearly black. The site says so.
+> `<SITE_URL>/planet/tres-2-b` 🔭 #exoplanet
+
+*Two corrections baked in.* (a) The widely-quoted "less than 1%" is the press-release figure; the published Kepler-band measurement is Ag ≈ 0.025, and the sub-1% number is the *reflected* residual after subtracting thermal emission — cite whichever you use, don't blur them, and do not state the "0.04%" figure from the original draft without a paper in hand. (b) The original claimed "our pipeline renders it as a disc you can barely distinguish from the background." **It does not.** `pipeline/config.py` sets `BASE_SWATCH_LUMINANCE_Y = 0.60`; every base swatch is normalised to the same luminance by design. Posting that sentence would have been the site being caught contradicting its own code — on the honesty account. Turn it into the confession instead, as above: the normalisation *is* the interesting caveat.
 
 **3 — Kepler-7 b** (the counter-extreme, same week as #2)
 > The opposite of yesterday: Kepler-7 b bounces back 38% of its starlight. It was the first exoplanet ever given a cloud map — the clouds sit on one side, so it's brighter on the west. Modelled here as uniform, which is a lie we label.
@@ -134,9 +144,11 @@ Voice: flat, specific, slightly dry. The physics does the work; never oversell. 
 > WASP-12 b is being eaten. It orbits in 26 hours, it's stretched into an egg, and its geometric albedo is under 0.064 — it reflects almost nothing and glows instead, at ~2,600 K. A dying planet renders as a dark ember.
 > `<SITE_URL>/planet/wasp-12-b` 🔭 #exoplanet #astronomy
 
-**5 — the Roman comparison post** (signature; use the two-disc image)
-> Left: GJ 1214 b's colour from its full modelled spectrum. Right: the same planet rebuilt from only the four bands Roman's coronagraph can see. Most of the identity survives. Sometimes it doesn't — that's the whole question this site asks.
-> `<SITE_URL>/planet/gj-1214-b` 🔭 #exoplanet #astronomy
+**5 — the Roman comparison post** (signature; use the two-disc image) — ⚠️ *corrected 2026-07-30; the original draft was wrong twice and is the post most likely to have burned this account.*
+> Left: 47 UMa b's colour from its full modelled spectrum. Right: the same planet rebuilt from only the bands Roman's coronagraph actually flies. Most of the identity survives. Sometimes it doesn't — that's the whole question this site asks. Both are models; Roman hasn't launched.
+> `<SITE_URL>/planet/47-uma-b` 🔭 #exoplanet
+
+*Two corrections.* (a) **"four bands" is wrong** — the flight configuration is three (575/10%, 730/15%, 825/10%), per the Primer table cited in [15-roman-launch.md](./15-roman-launch.md). (b) **GJ 1214 b is not a Roman target and never could be.** It is a small planet at 0.014 AU from an M dwarf 14.6 pc away — orders of magnitude inside the coronagraph's inner working angle. Using it as the exemplar of "as Roman would see it" is the kind of error that gets one screenshot-quoted by someone with 20,000 followers. Use a target the repo itself already flags: `pipeline/catalog.py` sets `_CGI_TARGETS = {"47 UMa b", "47 UMa c", "ups And d"}`, and those are the repeatedly-named CGI candidates. Take the exemplar from that set, always.
 
 **6 — 55 Cancri e** (naked-eye hook)
 > 55 Cancri e orbits a star you can see without a telescope. The planet is 2,000 K, probably part-molten, and close enough to its star that a year lasts 18 hours. The colour here is modelled — nobody has ever seen this thing in visible light.
@@ -192,9 +204,25 @@ Genuine engagement means replying with something only you could say — "your pa
 - `@eso.org` (8,780) · `@esa.int` (101,779) · `@natastron.nature.com` (Nature Astronomy, 6,016) · `@ojastro.bsky.social` (Open Journal of Astrophysics, 1,183) · `@psi.edu` (Planetary Science Institute, 1,639) · `@aanda-journal.bsky.social` (A&A, 193) — all active this week.
 - `@asclnet.bsky.social` — Astrophysics Source Code Library, 2,715. **Submit the pipeline to the ASCL.** It's a real indexed registry, it's free, and it gets the code cited. Last post 2026-06-21.
 
-**Verified dormant or fake — do not waste a mention:** `@drbecky.bsky.social` (12,259 followers but silent since 2026-03-12), `@nasawebb.bsky.social` (57 followers, 18 posts — not the real NASA account), `@aasnova.bsky.social` (parked, 0 posts), `@planetarynews.bsky.social` (37 followers), `@exoplanetmodels.bsky.social` (NASA EMAC, last posted 2025-09-05), `@a4e.org` (last 2025-04-22), `@astronomywriter.bsky.social` (last 2025-09-03).
+**The people whose work this site is literally built on — verified 2026-07-30, and the highest-value names in this doc.** These were missing from the first draft and they matter more than any of the big accounts above:
 
-**Unverified — check before engaging:** I could not confirm official Bluesky presences for NASA, NASA Exoplanets, STScI, or The Planetary Society; the obvious handles either 404 or belong to squatters. Search in-app before tagging any institution.
+- `@markmarley.bsky.social` — **Mark Marley**, 1,692 followers, 1,262 posts, bio "Substellar science since the 80s." He is a co-author of the Cahoy et al. albedo grids and of the model lineage PICASO descends from. Our pipeline interpolates his work. Telling him that, once, with a picture, is the single best outreach action available to this project — and Astrosky Rule 4 makes attribution mandatory anyway. Do it after [13-credit-the-scientists.md](./13-credit-the-scientists.md) ships, not before.
+- `@aussiastronomer.bsky.social` — **Dr. Jessie Christiansen**, 18,743 followers, 6,484 posts, active. Caltech/IPAC; **Chief Scientist of the NASA Exoplanet Science Institute** — i.e. she runs the archive every planet in `planets.json` came from. Enormously well matched, and posts constantly.
+- `@offallingstars.bsky.social` — **Sarah E Moran**, 1,471 followers. Exoplanet clouds and hazes; incoming Asst. Prof. at UMD. Clouds are the single biggest lever on albedo in our model — she is the person most able to tell us we're wrong, which is exactly who to want.
+- `@astrorickman.bsky.social` — **Dr. Emily Rickman**, ESA/STScI, direct imaging of exoplanets and brown dwarfs. Small account (1,023) but directly on the reflected-light beat.
+- `@exocast.bsky.social` — **Exocast**, the exoplanet podcast (Hannah Wakeford, Andrew Rushby, Hugh Osborn), 326 followers. Low-follower account, high-value venue: a podcast segment is a much better ask than a repost.
+- `@nancyromansci.bsky.social` — **"Roman for Scientists"**, 720 followers, run by the Roman Science Centers. The official channel for the mission we are hitching to. Follow now; do not pitch.
+
+**Institutions — the first draft's "unverified" list is now resolved:**
+
+- `@stsci.edu` — **Space Telescope Science Institute, 74,036 followers**, active, and its bio names Roman explicitly ("Science Operations Center for Webb, Hubble, and the upcoming Roman"). Real, large, and directly relevant. The first draft said this could not be confirmed; it can.
+- `@planetarysociety.bsky.social` — **The Planetary Society, 4,643 followers**. Real, if low-volume (54 posts).
+- `@aasnova.org` — **the real AAS Nova, 4,334 followers, 502 posts.** ⚠️ The first draft dismissed `@aasnova.bsky.social` as "parked, 0 posts" — true, but that account's own bio redirects to `@aasnova.org`. Nearly lost a prime venue to a placeholder handle. AAS Nova is also an RSS source in [01-newsjacking.md](./01-newsjacking.md).
+- **NASA and NASA Exoplanets still have no native Bluesky account.** The only hits are `@nasawebb.extwitter.link` / `@nasaexoplanets.extwitter.link`, which are third-party Twitter *bridges*, not NASA. Do not tag them and do not treat a bridge post as an official statement.
+
+**Verified dormant or fake — do not waste a mention:** `@drbecky.bsky.social` (12,259 followers but silent since 2026-03-12), `@nasawebb.bsky.social` (57 followers, 18 posts — not the real NASA account), `@badastronomer.bsky.social` (48 followers, display name "Ron Mexico" — a squatter, not Phil Plait), `@exoplanetmodels.bsky.social` (NASA EMAC, last posted 2025-09-05), `@a4e.org` (last 2025-04-22), `@astronomywriter.bsky.social` (last 2025-09-03).
+
+⚠️ **Correction:** `@planetarynews.bsky.social` was listed as dormant/fake. It is neither — it is the **Planetary Exploration Newsletter**, a real weekly newsletter for planetary scientists hosted by the Planetary Science Institute, and it posted on 2026-07-27. It is merely *small* (37 followers). Small is not fake, and PEN is a plausible distribution route to exactly the professional audience this doc wants.
 
 **Mastodon:** `@esoastronomy@mastodon.social` (ESO, 6,189 followers, active 2026-07-28) is the main live institutional astronomy account. ⚠️ `@astronomy@mastodon.social` is **abandoned** — 1 follower, last post 2022-05-11. `@astronews@mastodon.social` (151) is only lightly active. The fediverse astronomy scene is thin and hashtag-mediated; find people by following `#Astronomy` rather than hunting accounts.
 
@@ -202,11 +230,11 @@ Genuine engagement means replying with something only you could say — "your pa
 
 ## The 90-day ramp
 
-**Weeks 1–2 — build a history, promote nothing.** Create/clean the personal accounts, bio links `<SITE_URL>`, enable Require-alt-text on Bluesky. Post `@bot.astronomy.blue signup`. Read the Astrosky rules repo. Follow ~80 accounts from the two live starter packs. Then **post 10 times about other people's work and zero times about your own** — reply to papers, ask real questions. An account with no history that opens with a product link is indistinguishable from spam, and the astro feeds are moderated by humans who have seen it a thousand times.
+**Weeks 1–2 — build a history, promote nothing.** Create/clean the personal accounts, bio links `<SITE_URL>`, enable Require-alt-text on Bluesky. Read the Astrosky rules repo *first*, then post `@bot.astronomy.blue signup` — a human moderator reads the application, so apply in week 2 with ten real posts behind you, not on day one from an empty profile. Follow ~80 accounts from the two live starter packs. Then **post 10 times about other people's work and zero times about your own** — reply to papers, ask real questions. An account with no history that opens with a product link is indistinguishable from spam, and the astro feeds are moderated by humans who have seen it a thousand times.
 
 **Weeks 3–6 — start the daily, hand-written.** No automation yet. One planet per weekday, written by hand, using the drafted voice above. This is where you learn which sentences land — you cannot template that before you know it. Cross-post the best 2–3 a week to Mastodon. Post the calibration post (#7) around week 4 and pin it; it is the credibility artifact. Introduce the Roman two-disc comparison in week 5. Keep replying daily.
 
-**Weeks 7–12 — automate the boring half, ask for the packs.** Stand up the auto-draft/manual-send script and the labelled bot account. Around week 8, with ~40 posts of history, ask `@asrivkin.bsky.social` and `@emily.space` about starter-pack inclusion — linking your best *thread*, not the homepage. Submit the pipeline to the ASCL. Reach out to `@astrobites.bsky.social` about a write-up. Run one thread-format experiment: a 5-post thread on "why most exoplanet art is a lie" is the most shareable thing this project can say, and it's true.
+**Weeks 7–12 — automate the boring half, spend the credits.** Stand up the auto-draft/manual-send script and the labelled bot account. Around week 8, with ~40 posts of history, spend the one good ask you have on the people whose work the site runs on — `@markmarley.bsky.social` and `@aussiastronomer.bsky.social` — not on starter-pack inclusion, which is worth ~40 joins across the whole ecosystem. Submit the pipeline to the ASCL. Reach out to `@astrobites.bsky.social` about a write-up. Run one thread-format experiment: a 5-post thread on "why most exoplanet art is a lie" is the most shareable thing this project can say, and it's true.
 
 ## How we'll know it worked
 
@@ -221,7 +249,7 @@ Tag every link:
 
 Use `utm_campaign=roman` for the two-disc comparison posts specifically, so we can test whether the signature feature actually out-travels a plain swatch. PostHog picks these up cookielessly with no extra config — see [99-tracking.md](./99-tracking.md).
 
-**Secondary, checked at day 90:** followers who are identifiable astronomers (count by hand, target 25 — this is the real number); inclusion in ≥1 starter pack; ≥3 reposts by accounts with >5,000 followers; one inbound from a researcher whose work we cite.
+**Secondary, checked at day 90:** followers who are identifiable astronomers (count by hand, target 25 — this is the real number); ≥3 reposts by accounts with >5,000 followers; one inbound from a researcher whose work we cite. ~~inclusion in ≥1 starter pack~~ — **dropped as a metric**: the four biggest astronomy packs have 40 all-time joins between them, so inclusion measures nothing.
 
 **Kill criteria:** if after 6 weeks of daily hand-written posts the Bluesky account is under 100 followers *and* has produced under 30 referred sessions, the format is wrong — stop the daily and shift the effort to [10-reddit.md](./10-reddit.md) or [09-show-hn.md](./09-show-hn.md), which are burstier and cheaper.
 

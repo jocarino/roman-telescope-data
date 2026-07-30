@@ -3,8 +3,41 @@
 The tracking hub. One doc per channel; this page is the board that says what's live, what's
 next, and what we decided against. **If you only read one page, read this one.**
 
-Ground truth for status lives here, in the table below. Each channel doc repeats its own
-status line at the top — if the two disagree, this table wins.
+Every doc has been through an adversarial second pass — see [reviews/](./reviews/), which also
+documents the reviewer personas and how to re-run them. The plans were edited in place where a
+reviewer found a verified error, so **the docs are current**; the reviews hold the argument.
+
+Ground truth for status lives here, in the table below.
+
+---
+
+## The verdict of the second pass
+
+Sixteen reviewers, cast as the people most likely to reject each plan, agreed on something none
+of the individual docs said: **this project has correctness debt, and the plan was scheduling
+promotion on top of it.**
+
+Four defects, each found independently, each one that promotion would amplify rather than survive:
+
+1. **The Roman band configuration in `pipeline/config.py` is wrong.** Every "as Roman would see
+   it" swatch — the signature feature — is computed through the wrong filter set. Our `835 nm`
+   and `6%` widths trace to no primary source at all. Details and the verified flight
+   configuration in [15](./15-roman-launch.md); the astronomer's audit is in
+   [reviews/15-roman-review.md](./reviews/15-roman-review.md).
+2. **Analytics have never worked.** The PostHog project has not ingested a single event, so
+   there is currently no way to judge any of this. [reviews/99-tracking-review.md](./reviews/99-tracking-review.md).
+3. **About 97% of planet pages are orphans.** The gallery ships an empty grid built in JS with
+   scroll-loading, so only ~100–200 planets sit in the crawlable link graph — and ~5,700 peek
+   fragments are publicly indexable with no `noindex`. [reviews/03-seo-review.md](./reviews/03-seo-review.md).
+4. **Licence and contact gaps.** No `LICENSE` for our own code or data — so the dataset is not
+   actually open and cannot be deposited — an outstanding CC BY 4.0 obligation to a source we
+   redistribute, and **no email address anywhere on the site**, so no journalist can reach us
+   today. [13](./13-credit-the-scientists.md), [06](./06-open-data.md), [02](./02-press-kit.md).
+
+The second theme was scope. Reviewer after reviewer, independently, said the same thing about
+their own doc: *this proposes six things and one of them is worth building.* The plan as first
+written would consume a year of evenings. Treat every "what to build" list as a menu with one
+correct answer.
 
 ---
 
@@ -13,127 +46,106 @@ status line at the top — if the two disagree, this table wins.
 > Most "exoplanet pictures" you have ever seen are an artist's guess. These are computed from
 > physics — and the site tells you exactly where the model ends and the measurement begins.
 
-That sentence is the whole pitch, and it works on both audiences at once: the astronomy
-crowd hears *honest*, the design crowd hears *real*. Every pitch, post and title in these
-docs is a variation on it. When in doubt, lead with the honesty, not the prettiness — the
-prettiness is visible in one glance anyway.
+Two reviewers sharpened this in the same direction and it's worth adopting everywhere: **stop
+selling the swatch, start selling the audit.** A physics-derived colour is a claim; a colour
+with its provenance, its assumptions and its error bars attached is the thing nobody else has.
+The strongest single line the reviews produced, for pitches and posts alike: *"HD 189733 b is
+cobalt blue because sodium eats the yellow — and I can show my working."* Name one planet. A
+dataset of 5,700 is not something anyone can print.
 
-Three structural advantages worth remembering, because they decide what's worth doing:
+Three structural advantages that decide what's worth doing:
 
-1. **~5,700 planets = ~5,700 unique pages and ~5,700 unique images.** Bottomless content and
-   a very long SEO tail, at zero marginal cost. Almost every good idea below is a way of
-   spending that asset.
+1. **~5,700 planets = bottomless content at zero marginal cost.** But not 5,700 keyword targets —
+   nobody searches TOI-4562 c. The corpus's job is structure and citability, not head terms.
 2. **Two unrelated audiences want the same artifact** — astronomers and designers. Same site,
    different words. Never use one audience's words on the other.
-3. **There is a date on the calendar, and it is close.** Roman launches **30 August 2026** —
-   about four weeks out — and its coronagraph tech demo follows in 2027. When that happens every
-   outlet needs "what will Roman actually see", and the honest answer is our signature feature.
-   See [15-roman-launch.md](./15-roman-launch.md), which also flags a **factual correction we
-   owe to our own CGI band model** before we say anything publicly about Roman.
+3. **There is a date on the calendar.** Roman launches **30 August 2026**; the coronagraph tech
+   demo follows in 2027 and *that* is the beat to aim at. See [15](./15-roman-launch.md).
 
 ---
 
 ## The board
 
-| # | Channel | Status | Effort | Payoff | Note |
-|---|---------|--------|--------|--------|------|
-| [01](./01-newsjacking.md) | Newsjacking exoplanet headlines | not started | low, recurring | **high** | Needs the watcher tool + a place to post. Highest ratio in the plan. |
-| [02](./02-press-kit.md) | Press kit `/press` | not started | one evening | medium | Prerequisite for 12, 15, 19. Do early, it unblocks others. |
-| [03](./03-seo-planet-pages.md) | SEO on planet pages | not started | one session | **high**, slow | Own session — it's a code change. Half the plumbing already exists. |
-| [04](./04-wikimedia.md) | Wikimedia Commons uploads | **parked** | medium | low–medium | Honest verdict inside: worth less than it looks. Read before doing. |
-| [05](./05-machine-readable.md) | Machine/LLM-readable surface | not started | medium | **high**, rising | Your instinct was right — this beats human embeds. |
-| [06](./06-open-data.md) | Open dataset release | not started | low | medium | Cheap, reaches a crowd nothing else here reaches. |
-| [07](./07-wallpapers.md) | Wallpaper pack | not started | low | medium | Answer to "where does it live" is inside. |
-| [08](./08-short-video.md) | Short-form video | **deferred** | 40–70 h before any signal | worst ratio here | Verdict inside: *later, conditionally*. The one thing to do now is the clip exporter, which five other docs use. |
-| [09](./09-show-hn.md) | Show HN | not started | one day, high focus | **high**, one shot | Don't fire this until 02 and 03 are done. Weekend beats weekday — see inside. |
-| [10](./10-reddit.md) | Reddit | not started | medium, recurring | high but spiky | Several subs ban this outright; the sub-specific asset (the two-strip chart) is the real prize. |
-| [11](./11-bluesky-mastodon.md) | Bluesky + Mastodon | not started | low, daily | **high** | The daily poster lives here. Start before you need it. Personal account, not a bot. |
-| [12](./12-design-newsletters.md) | Design newsletters & curators | not started | one evening | medium | Free, email-pitchable, cascades. Several classics are dead or pay-to-play — list is verified. |
-| [13](./13-credit-the-scientists.md) | Credit the scientists | **blocking, and overdue** | 1 weekend + 1 evening | **highest** | The audit found a CC BY licence obligation we are not meeting. Fix before any outreach. |
-| [14](./14-educators.md) | Teachers, planetariums, clubs | not started | medium | medium, durable | Slowest payoff, longest half-life. |
-| [15](./15-roman-launch.md) | The Roman launch play | **clock is running** | 3 urgent evenings, then light | **highest ceiling** | Launch **30 Aug 2026**. Aim at the 2027 coronagraph tech demo, not launch week. Contains a band-config correction to make first. |
-| [99](./99-tracking.md) | Tracking & measurement | not started | one evening | — | UTM conventions + how we judge everything above. |
+| # | Channel | Status | Review verdict | Note |
+|---|---------|--------|----------------|------|
+| [01](./01-newsjacking.md) | Newsjacking exoplanet headlines | not started | revise | Stop selling it as a speed play — speed is what produces the one wrong colour. Build the pre-made bench instead. |
+| [02](./02-press-kit.md) | Press kit | not started | rework | Split `/about` (human) from `/press` (assets). No email on the site today — fix that first, it's a five-minute job. |
+| [03](./03-seo-planet-pages.md) | SEO on planet pages | **blocked by defect 3** | rework | The link graph is the blocker, not the wording. Reverse colour index killed. |
+| [04](./04-wikimedia.md) | Wikimedia Commons | small version: **do it** | partly overturned | Campaign stays parked, but the small version is unblocked today — my DOI-unblocks-it reasoning was a policy misreading. |
+| [05](./05-machine-readable.md) | Machine/LLM-readable surface | not started | revise | `llms.txt` is folklore. Stable join keys and machine-checkable honesty are the real items. |
+| [06](./06-open-data.md) | Open dataset | **blocked by defect 4** | revise | The file has no licence, so it isn't open yet. Licence → describe → deposit once, well. |
+| [07](./07-wallpapers.md) | Wallpaper pack | not started | revise | Right delivery, wrong artifact: **make the spectrum the wallpaper, not the planet.** |
+| [08](./08-short-video.md) | Short-form video | **deferred** | upheld, reshaped | ~10 h whole-clip renderer, not a frame exporter. Revisit on the tech demo, not a date. |
+| [09](./09-show-hn.md) | Show HN | **blocked by defect 1** | revise | Don't submit while the band config is wrong. Weekends beat weekdays. No plan yet for the hours after you sleep. |
+| [10](./10-reddit.md) | Reddit | not started | **substantially rework** | The six-week calendar *is* the ban risk. 90 days of commenting, then two posts. |
+| [11](./11-bluesky-mastodon.md) | Bluesky + Mastodon | not started | strongest doc, one bad post | Start the habit now. Don't publish a Roman comparison until defect 1 is fixed. |
+| [12](./12-design-newsletters.md) | Design newsletters & curators | not started | revise | Its #1 target shut down five weeks ago. Re-verify before every wave. |
+| [13](./13-credit-the-scientists.md) | Credit the scientists | **blocking** | revise | Audit was ~80% right; the reviewer found more, including the band error. |
+| [14](./14-educators.md) | Teachers, planetariums, clubs | not started | revise | Seven artifacts → two. The anchor lesson is the one worth building. |
+| [15](./15-roman-launch.md) | The Roman launch play | **clock running** | ship after two repairs | Predict band albedos, not hex codes. Band 2 hardware *is* installed — it's untested, not absent. |
+| [99](./99-tracking.md) | Tracking & measurement | **broken** | rework | Nothing is being measured. Metric changed from "depth" to "turned a knob". |
 
-**Status values:** `not started` · `in progress` · `done` · `parked` (decided against for now,
-with a reason) · `dropped` (decided against permanently).
+**Status values:** `not started` · `in progress` · `done` · `blocked` · `parked` · `dropped`.
 
 ---
 
 ## Sequencing
 
-Ordered by dependency, not by excitement. The temptation is to fire Show HN first; resist it —
-a launch spike lands on whatever the site is on that day, and you get one.
+> **Phase −1 — fix what's wrong, before any promotion.** This did not exist in the first draft
+> and is now the most important part of the plan. Being wrong on the site is worse than being
+> unknown, and every one of these is small:
+>
+> 1. **The Roman band configuration** ([15](./15-roman-launch.md)) — a data-side evening, and it
+>    unblocks 09, 11 and 02, all of which currently repeat the wrong figure.
+> 2. **Make analytics work** ([99](./99-tracking.md)) — otherwise Phase 1 teaches you nothing.
+> 3. **A `LICENSE`, the outstanding CC BY attribution, and an email address on the site**
+>    ([13](./13-credit-the-scientists.md), [02](./02-press-kit.md)) — one evening for all three.
+> 4. **The crawlable link graph** ([03](./03-seo-planet-pages.md)) — the only slow one; start it
+>    early because it pays out over months.
 
-> **The calendar overrides the phases.** Roman launches 30 Aug 2026. Two things are genuinely
-> time-critical and jump the queue: the **CGI band-config correction** (we currently model four
-> bands; the flight configuration isn't four — [15](./15-roman-launch.md)) and the
-> **credits page**, which has a licence obligation attached ([13](./13-credit-the-scientists.md)).
-> Both are wrong-on-the-site problems, and being wrong on the site is worse than being unknown.
-> Do those before anything promotional, then resume the phases below.
+**Phase 0 — before promotion.** `/about` and `/press` ([02](./02-press-kit.md)), the credits page
+([13](./13-credit-the-scientists.md)). Start the daily posting habit in
+[11](./11-bluesky-mastodon.md) now, so the account isn't a ghost town when traffic arrives.
 
-**Phase 0 — before any promotion (2–3 evenings)**
-Do [13](./13-credit-the-scientists.md) (the credits page — this is an obligation, not just
-tactics), [02](./02-press-kit.md), [03](./03-seo-planet-pages.md), and
-[99](./99-tracking.md). Start the daily posting habit in
-[11](./11-bluesky-mastodon.md) *now* so the account isn't a ghost town when traffic arrives.
+**Phase 1 — the spike.** [09](./09-show-hn.md) on a day you can be present for six hours — and
+per its review, a weekend is genuinely better than the classic weekday slot. Then the *reduced*
+Reddit plan ([10](./10-reddit.md)): commenting first, two posts, not ten. Then
+[12](./12-design-newsletters.md), re-verifying each outlet the week you pitch. Scientist emails
+([13](./13-credit-the-scientists.md)) after the band fix, never before.
 
-**Phase 1 — the spike (one focused week)**
-[09](./09-show-hn.md) on a day you can be present for six hours. Then
-[10](./10-reddit.md) staggered over the following weeks — never two subs in one day.
-Then [12](./12-design-newsletters.md) pitches. Scientist emails
-([13](./13-credit-the-scientists.md)) go out the day *after* HN, so you can honestly say it
-got some attention.
+**Phase 2 — the long tail.** [05](./05-machine-readable.md), [06](./06-open-data.md),
+[07](./07-wallpapers.md), the small Commons upload in [04](./04-wikimedia.md).
 
-**Phase 2 — the long tail (weeks 5–12)**
-[05](./05-machine-readable.md), [06](./06-open-data.md), [07](./07-wallpapers.md),
-[04](./04-wikimedia.md) if it survives its own verdict. These pay out over months.
+**Ongoing.** [01](./01-newsjacking.md), the daily post, [14](./14-educators.md) at whatever pace,
+and building toward [15](./15-roman-launch.md).
 
-**Ongoing, forever**
-[01](./01-newsjacking.md) whenever a planet makes news, the daily post from
-[11](./11-bluesky-mastodon.md), [14](./14-educators.md) at whatever pace, and building
-quietly toward [15](./15-roman-launch.md).
-
-**If you only do three things:** the daily poster, Show HN done properly, and crediting +
-emailing the scientists. Those three have the best effort-to-outcome ratio by a wide margin.
+**If you only do three things:** fix the band configuration, make analytics work, and credit the
+scientists then email them. The first two are prerequisites for judging anything else; the third
+is still the highest-value single action in the plan.
 
 ---
 
 ## Not decided yet
 
-Ideas from the original list that haven't been ruled in or out. Parked here so they don't get
-silently lost — decide on them when the phase they belong to comes up.
+- **Palette pack** (.ase, Figma Community, Procreate) — assessed in [12](./12-design-newsletters.md).
+- **Personalisation hook** — "the planet discovered the year you were born". Strongest share
+  driver available, but it's a feature, not a marketing task.
+- **Science press pitching** — gated on [02](./02-press-kit.md); the strongest version is the
+  Roman peg in [15](./15-roman-launch.md), so holding may beat spending it now.
+- **A newsletter of our own** — cheap, but a recurring obligation. Only once there's an audience.
 
-- **Reverse colour index (`/color/4a6ea9`).** A page per quantised hex → the nearest exoplanet.
-  Designers search hex codes constantly; this is enormous long-tail coverage for one
-  nearest-neighbour lookup over data we already have. Belongs with
-  [03-seo-planet-pages.md](./03-seo-planet-pages.md); worth a decision before that session runs.
-  Caveat: it's thousands of thin generated pages, which is exactly the shape search engines
-  penalise — it only works if each page is genuinely useful. See the doc for the honest take.
-- **Palette pack** (.ase + Figma Community + Procreate swatches). Assessed inside
-  [12-design-newsletters.md](./12-design-newsletters.md) — Figma Community has its own search
-  and effectively zero astronomy content.
-- **Personalisation hook** — "the planet discovered the year you were born", or paste a hex and
-  find its planet. Strongest share driver available, but it's a feature, not a marketing task.
-  Overlaps the reverse colour index above.
-- **Science press pitching** (Universe Today, Sky & Telescope, Colossal, Nautilus). Gated on
-  [02-press-kit.md](./02-press-kit.md); the strongest version of it is the Roman peg in
-  [15-roman-launch.md](./15-roman-launch.md), so it may be better to hold rather than spend
-  the pitch now.
-- **Newsletter of our own** ("colour of the week"). Cheap on Buttondown's free tier, but it's a
-  recurring obligation — only worth starting once there's an audience to send it to.
+*Dropped by review:* the reverse colour index (`/color/<hex>`) — replaced by one client-side
+lookup tool plus 14 colour-family hub pages that double as the missing link scaffolding.
 
 ---
 
 ## House rules
 
-- **One channel at a time.** A solo maintainer running five channels badly beats nothing, but
-  loses to one channel run well. The board is a queue, not a checklist to parallelise.
-- **Never the same words twice.** Each audience gets its own framing. Copy-pasting a Reddit
-  title into a design newsletter is how both bounce.
-- **Every outbound link is tagged.** No exceptions — see [99-tracking.md](./99-tracking.md).
-  An untagged link is a post you learn nothing from.
-- **Honesty is the differentiator, not a disclaimer.** Never let a post imply a colour was
-  photographed. It's the one thing that makes this project trustworthy, and trust is the only
-  reason a scientist would ever share it.
-- **Update this board when a status changes.** A tracking doc nobody edits is worse than none,
-  because it lies with authority.
+- **One channel at a time.** The board is a queue, not a checklist to parallelise.
+- **Never the same words twice.** Each audience gets its own framing.
+- **Re-verify before you act.** A doc researched in July and executed in October is a doc that
+  will send you to a newsletter that closed. Every list here has a shelf life.
+- **Honesty is the differentiator, not a disclaimer.** The reviews turned this from a principle
+  into a spec: the qualifier belongs in the noun, the caption, the image pixels, the file
+  metadata and the data type — not in a paragraph a sub-editor can cut.
+- **Update this board when a status changes.** A tracking doc nobody edits lies with authority.

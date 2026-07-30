@@ -10,14 +10,24 @@ Reddit is the only free channel where a physics-derived colour catalogue can rea
 
 Subscriber counts pulled from Reddit's own `about.json` on **2026-07-30**. Rules quoted from each sub's `about/rules.json` on the same date. Note: **no subreddit publishes its AutoModerator karma/age thresholds** — they are invisible until you trip them. Assume every large sub silently filters accounts under ~30 days old with near-zero comment karma, and plan the account hygiene below accordingly.
 
+> **Provenance warning (added on review, 2026-07-30).** Reddit now returns
+> `403 — you've been blocked by network security` to *every* unauthenticated request, including
+> `about.json` and `about/rules.json`, from any user-agent; the public mirrors (redlib/libreddit)
+> are all behind bot challenges. That means these quotes could not be independently re-verified,
+> and neither can they be refreshed by a script. **Before each post, open the sub's rules page in
+> a logged-in browser and screenshot it into `docs/marketing/evidence/`.** Until that is done,
+> treat every verbatim quote below as a paraphrase. Cross-checks that *were* possible are marked
+> ✅ inline. A rule quote you cannot produce a screenshot of is not a rule you can plan around.
+
 | Sub | Subs | Verdict | Why |
 |---|---|---|---|
-| r/dataisbeautiful | 21.8M | **GO — priority 1** | Exactly our shape, if we ship one static chart |
-| r/space | 27.9M | **GO — weekend image only** | Images allowed Sat/Sun only; link posts = blogspam |
-| r/Amoledbackgrounds | 346k | **GO — needs the wallpaper pack** | Clear mechanical rules, easy to satisfy |
+| r/dataisbeautiful | 21.8M ✅ | **GO — priority 1** | Exactly our shape, *if* the artifact is a chart and not a colour swatch (see rework note) |
+| r/space | 27.9M ✅ | **GO — weekend image only** | Images allowed Sat/Sun only; link posts = blogspam |
+| r/Amoledbackgrounds | 324k ✅ | **GO — needs the wallpaper pack** | Clear mechanical rules, but small ceiling: median top-100 post ≈380 upvotes |
 | r/exoplanets | 15.9k | **GO — start here** | Tiny but the exact audience; forgiving; free corrections |
-| r/InternetIsBeautiful | 16.6M | **GO — week 5, conditional** | 90/10 rule is enforced on post history; "no collections" is a real risk |
-| r/coolguides | 6.1M | **GO — needs the printable guide** | Mechanical title + format rules, easy to hit |
+| r/InternetIsBeautiful | 16.6M ✅ | Maybe — week 5+, conditional | See the downgrade note below: ~1 post/day survives, median top-100 ≈490 |
+| r/datasets | 204k ✅ | GO — near-zero risk | On-topic by definition once `06-open-data.md` ships. Low ceiling (median top-100 ≈17) but permanent and citable |
+| r/coolguides | 6.1M ✅ | **GO — needs the printable guide** | Best risk/reward on the list: ~3 posts/day, median top-100 ≈7,200 upvotes |
 | r/Astrobiology | 35.8k | GO — habitable-zone angle | Small, on-topic, low risk |
 | r/generative | 98k | GO — mosaic only | Explicitly allows relevant self-promo |
 | r/proceduralgeneration | 125k | GO — mosaic only | Same asset, different framing |
@@ -41,6 +51,7 @@ Subscriber counts pulled from Reddit's own `about.json` on **2026-07-30**. Rules
 Rules that bind us, verbatim: *"A post must be or contain a qualifying data visualisation."* · *"[OC] posts must state the data source(s) and tool(s) used in the first top-level comment on their submission."* · *"Directly link to the original source article of the visualization... If you made the visualization yourself, tag it as [OC]."* · *"Post titles must describe the data plainly without using sensationalized headlines. Clickbait posts will be removed."* · *"No reposts of popular posts within 1 month."*
 Two scheduling traps: *"Posts regarding Personal Data are permissible only on Mondays (ET)"* and *"Posts involving U.S. politics are allowed only on Thursday (ET)"* — neither applies to us, but both crowd the queue. Post **Tuesday or Wednesday, ~08:00 ET**.
 What performs: a *single image*, self-explanatory in three seconds, with an axis and a legend. Interactive sites and gallery links reliably underperform or get pulled. Angle: temperature-ordered colour strip, true-colour vs Roman.
+**The removal risk this section understates.** Rule 1 is *"must be or contain a qualifying data visualisation"*, and the most common removal on that sub is "this is data art, not a visualisation." Two flat bands of colour, ordered by temperature, encode exactly one variable (order) — a mod scrolling the queue can read it as decoration. **Do not submit the strips alone.** The submission must *contain* a quantitative chart: put ΔE (the colour distance between the full-spectrum colour and the four-band reconstruction) on a y-axis against equilibrium temperature on the x, and run the two strips as a band underneath, sharing the x-axis. Then the pretty thing rides along on something that qualifies. Two more mechanics the plan omits: **the post needs a flair** (unflaired submissions are auto-removed), and the source/tools comment must go up **immediately** — the OC bot removes posts missing it, it does not wait. Also: DIB posts live or die in the first 60–90 minutes, so block out four hours, don't just pick a timeslot.
 
 **r/space (27.9M) — one shot, one Saturday.**
 *"Images, gifs, and gif-like videos... are permitted only on weekends."* · *"No low-effort, meme, or AI generated images are permitted at any time."* · *"No AI generated content — This includes both AI generated images/artwork and text generated by tools such as ChatGPT."* · *"No spam/blogspam/paywalled/pirated content."* · *"If an image is not OC you must give credit to the original photographer."* · *"Please limit yourself to no more than 5 submissions per 24 hour period."*
@@ -52,13 +63,15 @@ Read that AI rule carefully: our renders are *computed from physics*, not genera
 **r/exoplanets (15.9k) — the rehearsal room.**
 *"Posts and comments should rely on peer-reviewed research, reputable sources, or established scientific knowledge."* · *"Cite Sources When Possible — When sharing research, discoveries, or scientific claims, include citations, links to journals, or credible scientific publications."* Small, but the people who will find the actual bugs. Cite Cahoy et al. 2010, PICASO, and the NASA Exoplanet Archive in the post body itself. Expect corrections; take them publicly and gratefully — that thread becomes the credibility receipt you link to elsewhere.
 
-**r/InternetIsBeautiful (16.6M) — the highest-variance one.**
+**r/InternetIsBeautiful (16.6M) — downgraded on review: high variance, low expected value.**
+The subscriber count is a mirage. ✅ The sub accepts roughly **one post per day**, its median top-100 post of the year earns **~490 upvotes**, and its best post of the year reached **16.4k** — i.e. a 16.6M-member sub that behaves like a 200k one, because almost everything is removed. Treat it as a lottery ticket with a modest prize, not as "the largest single traffic spike of the campaign." It does not deserve to be the thing weeks −3 to 0 are structured around.
 *"This sub follows the 90/10 rule for self-promotion. If almost all your recent activity on Reddit is advertising something you made, you will not be allowed to post here. 90% of your recent participation on Reddit should have nothing to do with a site you own or operate."* This is checked against your visible post history. Two other hazards: *"No Aggregations or Collections — Websites that are aggregates for other content are not allowed"* and *"No Articles, Videos or Images... this includes collections (such as galleries)"* — a 5,764-swatch gallery can be read as a collection. **Mitigation: lead with the Roman toggle, not the gallery.** Frame it as a tool that does something ("switch a telescope's filter set on and see the colour change"), not a catalogue. Also: *"submissions are not allowed if their primary content is produced by AI, or if AI is used to drive functionality"* — we're clean, but say it.
 
 **r/coolguides (6.1M) — mechanically easy, if you follow the format.**
 *"all posts must be prefixed with 'A cool guide'"* · *"Only direct links to images of type .png, .jpg, and .jpeg are allowed"* · *"Image hosts must either be Reddit or Imgur"* · *"Infographics will be removed — ...If your guide is more of a visual essay than a structured table or list, [it will be removed]."* That last one is the trap: build a **table**, not a poster.
 
-**r/Amoledbackgrounds (346k) — the most rule-shaped sub on the list.**
+**r/Amoledbackgrounds (324k ✅) — the most rule-shaped sub on the list, and the smallest prize.**
+Its public description reads *"Backgrounds for OLED phones, mainly black for screen power saving and contrast. **No AI allowed.**"* ✅ — the AI ban is in the one-line description, not buried in rule 7, which tells you how hard they enforce it. Median top-100 post ≈380 upvotes. Also: these subs expect **one wallpaper per post**, not a pack; a post whose source comment points at a download page on your own domain is the exact shape of the funnel they remove. Post a single image, and offer the rest only if someone asks.
 *"Submissions should be at least 50% true black in colour, as in #000000."* · *"Include your submission source in a top-level comment on your post (include one of the keywords `source`, `credit`, or `original` in your comment)."* · *"Reposting is not allowed."* · *"Be ready to provide an uncompressed link if asked."* A planet disc on `#000000` clears the 50% bar trivially. Requires an actual wallpaper pack at real device resolutions — see below and `07-wallpapers.md`.
 
 **r/generative (98k) / r/proceduralgeneration (125k).** r/generative: *"Self-promotion is allowed, but it must be relevant and non-excessive"* and *"do not post AI-generated work here, note that this does not apply to your own algorithms."* Our pipeline is exactly "your own algorithm". r/proceduralgeneration: *"No AI-written posts/comments"* — write the post yourself, in your own voice.
@@ -72,7 +85,8 @@ Read that AI rule carefully: our renders are *computed from physics*, not genera
 Five artifacts. Every one of them is reusable on the site — nothing here is throwaway marketing collateral.
 
 ### 1. The two-strip chart — *"Every known exoplanet, true colour vs Roman's four bands"* — **build this first**
-**What:** one static PNG, ~2400×1400. All 5,764 planets as 1px vertical lines, ordered left→right by equilibrium temperature, drawn in their computed hex. Two stacked strips in identical order: top = full-spectrum colour, bottom = the four-band Roman reconstruction. Temperature axis underneath; a handful of annotated anchors (Neptune, Jupiter, HD 189733 b, the hottest ultra-hot Jupiter). A caption band stating model assumptions.
+**What:** one static PNG. All 5,764 planets as vertical lines, ordered left→right by equilibrium temperature, drawn in their computed hex.
+**Fix the geometry before you build it:** 5,764 one-pixel columns do not fit in a 2400px-wide image. At 2400px each planet gets 0.42px and the renderer averages neighbours into mush — the divergence between the two strips, which is the entire point, is the first thing lost to aliasing. Either render **5,764 px wide** (and accept that Reddit's viewer downsamples it, so ship a cropped detail inset too) or **bin the temperature axis** into ~400 bins and draw the median colour per bin, saying so in the caption. Binning is the honest choice and it survives a phone screen. Two stacked strips in identical order: top = full-spectrum colour, bottom = the four-band Roman reconstruction. Temperature axis underneath; a handful of annotated anchors (Neptune, Jupiter, HD 189733 b, the hottest ultra-hot Jupiter). A caption band stating model assumptions.
 **Why it's novel:** nobody has published a picture of *what a filter set costs you*. The eye reads the answer instantly — where the two strips match, Roman recovers the colour; where they diverge (methane-band worlds, most likely), it doesn't. That is the project's thesis rendered as one image.
 **Work:** ~1 evening. `planets.json` already holds both colours; it's a PIL/matplotlib script in `pipeline/`.
 **Unlocks:** r/dataisbeautiful (priority 1), r/space (as the weekend image), r/visualization, r/datavisualization.
@@ -109,7 +123,15 @@ Five artifacts. Every one of them is reusable on the site — nothing here is th
 
 Never two posts on the same day. Never the same text twice — mods and users both notice cross-posted boilerplate, and it's the fastest way to get flagged as a spam account.
 
-**Weeks −3 to 0 — account hygiene, no posting at all.** Use a real account with history; a fresh one will be silently AutoMod-filtered in every large sub here. If the only account is new, spend three weeks *commenting*: answer questions in r/askastronomy and r/exoplanets, help people in r/telescopes. Target ~200+ comment karma and 30+ days of age before week 1. Keep the 9:1 ratio real for the whole campaign — nine substantive comments elsewhere for every one post about the site. r/InternetIsBeautiful checks this literally.
+**Weeks −3 to 0 — account hygiene, no posting at all.** Use a real account with history; a fresh one will be silently AutoMod-filtered in every large sub here. If the only account is new, spend three weeks *commenting*: answer questions in r/askastronomy and r/exoplanets, help people in r/telescopes. Target ~200+ comment karma and 30+ days of age before week 1.
+
+**Correction on the 9:1 rule.** ✅ Reddit **retired the site-wide 9:1 / 90-10 self-promotion guideline years ago**; there is no longer an official Reddit self-promotion page, and no admin enforces a ratio. What survives is (a) per-sub rules that write it down themselves — r/InternetIsBeautiful's 90/10 is a real, quoted, hand-enforced rule — and (b) mod instinct. So don't count to nine. What a mod actually checks, in this order: *do you have comment history **in this sub** before today* → *does every submission you've ever made point at one domain* → *are you replying to questions in your own thread*. The first is worth more than the other two combined and is not a ratio: **five real comments in the target sub beats 500 karma farmed elsewhere.** Farming generic karma to hit a number produces exactly the account shape that gets flagged.
+
+**What the plan is missing entirely: the three silent failures.** All three are invisible from a logged-in session, which is why people re-post and get banned for it.
+1. **Shadowban (account).** Open your profile in a **logged-out private window** at `reddit.com/user/<name>`. Empty or 404 = shadowbanned. Do this before week 1 and after any removal.
+2. **Silent AutoMod filter (karma/age gate).** No sub publishes its thresholds. Test cheaply: leave one ordinary comment in the sub's daily/weekly thread, then check that comment **logged out**. If it's invisible to logged-out eyes, your account is filtered there and every post you make will vanish without a modmail.
+3. **Domain ban (site-wide or per-sub).** A domain can be blocked and you will never be told; your post simply never appears. Test: comment your bare URL in **r/test**, then view that comment logged out. If it's gone, the domain is on a site-wide list and *nothing* in this plan works until it's appealed. Per-sub, just ask: a two-line modmail — *"I made X, is it in scope here, and is `<domain>` allowed?"* — gets an answer, costs nothing, and pre-registers you as someone who asked first.
+4. **Never re-upload the identical image file across subs.** Reddit's spam filter matches image hashes; the same PNG in three subs inside a week is a stronger spam signal than the same title. Re-render at different dimensions for each.
 
 | Week | Sub | Artifact | Notes |
 |---|---|---|---|
@@ -166,6 +188,8 @@ Site-wide target for the six weeks: **15,000 sessions from `utm_source=reddit`**
 - **Mod removal.** Message modmail **once**, politely, with the specific rule you believe you satisfied, and ask what would make it acceptable. Never re-post the same content to the same sub without a mod's go-ahead, and never argue in public comments — public mod-arguing is how sub bans become sitewide ones. If they say no, accept it and move on; there are ten other subs on this list.
 - **Shadowban / spam filter.** Posting the same domain to several subs in one day is the trigger. The schedule above exists mostly to avoid this.
 - **AI-content rules are tightening everywhere** (r/space, r/InternetIsBeautiful, r/generative, r/proceduralgeneration, r/somethingimade all ban it explicitly as of 2026). Write every post and comment yourself. A post that reads as LLM-generated will be removed even though the underlying work isn't.
+- **The schedule is itself the biggest risk.** Ten subreddits, one domain, one account, six weeks is the textbook pattern site-wide spam detection is built to catch — every individual post can be rule-compliant and the *aggregate* still trips it. Nothing else in this document is as dangerous as its own calendar. Halve it.
+- **The top comment that kills the thread, and it isn't "is this AI".** It's a working astronomer writing *"the albedo models are unconstrained for all but a handful of these planets, so these colours are essentially free parameters."* That is a fair hit and it will be upvoted above yours. Have the answer written before you post, and make it a concession, not a defence: which planets have observationally constrained albedos, which are grid interpolation, and where the site says so. If the site doesn't currently distinguish those two tiers per planet, **that is a product change to make before posting**, not a comment to write.
 - **Rules change.** Re-read the sidebar the morning of each post. This map is a snapshot of 2026-07-30.
 
 ## Links

@@ -7,9 +7,10 @@
 Roman launches on **30 August 2026** — about four weeks from now — and its Coronagraph
 Instrument will attempt the first direct image of a mature Jupiter in reflected visible light.
 When that happens, every outlet on Earth needs to explain "what will Roman actually see", and
-the honest answer is *a handful of photometric points in three bandpasses*, not a picture of a
-planet. This site is already the only place that shows, planet by planet, exactly how much
-colour identity survives that filter set — we built the answer before the question was asked.
+the honest answer is *at most a handful of photometric points in three bandpasses — only one of
+which is a formal requirement* — not a picture of a planet. This site is already the only place
+that shows, planet by planet, exactly how much colour identity survives that filter set — we
+built the answer before the question was asked.
 The bet is that we get in front of the **CGI technology-demonstration** beat (early-to-mid 2027),
 not launch week, and that we arrive there with a timestamped public prediction on record.
 
@@ -28,7 +29,7 @@ All dates below are sourced. Confidence stated honestly; do not treat the 2027 o
 | 29 Jul 2026 | Pre-launch virtual news conference (Domagal-Goldman, Townsend, McEnery, Perkins). | High — already happened; **watch the replay**, it sets launch-cycle talking points. | [NASA news release](https://www.nasa.gov/news-release/nasa-to-host-media-briefing-on-roman-telescope-launching-next-month/) |
 | ~Sep–Nov 2026 | Cruise to Sun–Earth L2 + **~90 days commissioning**. | Medium-high | [Planetary Society, launch preview](https://www.planetary.org/articles/the-nancy-grace-roman-space-telescope-launch-what-to-expect) |
 | **Early 2027** | Science operations begin. | Medium | Same |
-| **~2027, within the first 18 months** | **CGI technology demonstration: 90 days / 2,200 hours of observing.** Community planning documents assumed a window roughly Jan–Jul 2027 *based on an October 2026 launch*; the real launch is six weeks earlier, so this may move earlier, but nothing official restates it. | **Low-medium — this is the honest gap.** No published date for first CGI observations. | [Roman Coronagraph Primer, CPP, Jan 2025](https://roman.ipac.caltech.edu/docs/RomanCoronagraphPrimer_Current.pdf); [Wolff et al. 2024, CPP observation planning](https://arxiv.org/abs/2411.17868) |
+| **Within the first 18 months of the mission** | **CGI technology demonstration: "a 3 month observing allocation (2,200 hours) within the first 18 months of the mission"** — quoted verbatim from the Primer. That is the *only* published scheduling statement. No start date, no window, no ordering within those 18 months has been published. The Jan 2025 Primer itself still says "Launch: No later than May 2027", so every planning document predates the actual launch date by a wide margin. | **Low — and the gap is wider than a date.** Nothing official states when CGI first observes, or in what order the modes are commissioned. | [Roman Coronagraph Primer, CPP, Jan 2025](https://roman.ipac.caltech.edu/docs/RomanCoronagraphPrimer_Current.pdf); [Wolff et al. 2024, CPP observation planning](https://arxiv.org/abs/2411.17868) |
 
 **The single most important scheduling fact:** the Primer states **"No proprietary period: Roman
 data will be made immediately available."** When CGI observes a planet, we can run it through the
@@ -54,20 +55,53 @@ Our `pipeline/config.py` models CGI as **four** top-hats: 575 nm/10%, 660 nm/6%,
 | 3 | **730 nm** | **15%** | Slit + R~50 prism spectroscopy | Shaped Pupil | Best effort |
 | 4 | **825 nm** | **10%** | Wide-FoV imaging | Shaped Pupil | Best effort |
 
-Three differences that matter: **Band 2 at 660 nm is not in the flight configuration at all**;
-Band 3 is 15% wide, not 6%; Band 4 is 825 nm at 10%, not 835 nm at 15%. And the sentence
-underneath the table is the real story:
+Three differences that matter: **Band 2 at 660 nm is not a supported observing mode**; Band 3 is
+15% wide, not 6%; Band 4 is 825 nm at 10%, not 835 nm at 15%. Our 835 nm centre and our 6% widths
+trace to no primary source at all — they are simply wrong, not superseded.
+
+**Be precise about Band 2, because the CGI team will be.** The 660 nm filter and a second Amici
+prism *are physically installed on the instrument* — the colour filter wheel carries 575/10%,
+660/15%, 730/15%, 825/10%. Band 2 is absent from the Primer's mode table because it "will be
+installed, but will not be tested on the ground; hence, it is not an officially supported
+observing mode" ([Bailey et al. 2021, §Table 1](https://arxiv.org/pdf/2103.01980)). So: drop it
+from the modelled band set, but never say "it isn't there". It is there, untested, and the
+spectrometer can use it "should observation time be available."
+
+**Bandwidths are not perfectly consistent across primary sources**, and we should cite the one we
+used. The Jan 2025 Primer says Band 3 = 15% and Band 4 = 10%. Bailey et al. 2021 Table 1 gives
+FWHMs of 122 nm at 730 nm (16.7%) and 94 nm at 825 nm (11.4%); [Zellem et al.
+2022](https://arxiv.org/pdf/2202.05923) says 17% and 12%. That is nominal filter spec vs as-built
+FWHM. The spread is ~2% of bandwidth and worth well under 1 ΔE — use the Primer values, cite the
+Primer, and note the spread in a footnote rather than pretending there is one number.
+
+And the sentence above the table is the real story:
 
 > *"only observations in Band 1 with the hybrid Lyot coronagraph are formally supported; all
 > other modes listed in the table below will be supported on a 'best effort' basis."*
 
-The **only guaranteed CGI deliverable is one 10%-wide photometric point at 575 nm.** One number.
-Not four. Fixing the config is a data-side evening. But the framing this unlocks is the best
-editorial angle the project has ever had, and nobody else is saying it:
+The Level 1 requirement it refers to is worth quoting exactly, because it is *weaker* than "one
+measurement per planet":
 
-> **Roman's guaranteed output is a single brightness measurement per planet. Everything past
-> that is best-effort. Here is exactly what one number, then two, then three, buys you — and
-> what it doesn't.**
+> *"Demonstrate the capability to measure, with a signal to noise ratio (SNR) of ≥ 5, the
+> brightness of an astrophysical point source located between 6 and 9 λ/D from the central star
+> with a V_AB magnitude ≤ 5, with a flux ratio ≤ 10⁻⁷ in Band 1 (575 nm)."*
+
+Note what that does *not* say: it does not promise a measurement of any particular planet, or of a
+planet at all — an "astrophysical point source" can be a companion used as a test source. Fixing
+the config is a data-side evening. The framing this unlocks is the best editorial angle the
+project has ever had, but it has to be stated carefully or it becomes its own overclaim:
+
+> **Roman's coronagraph carries exactly one formal requirement: detect a point source at 10⁻⁷
+> contrast in a single 10%-wide band at 575 nm. One band is not a colour. Everything that makes a
+> colour — the second band, the third, the R~50 spectrum, the polarimetry — is real, built,
+> planned, and formally optional. Here is what each one buys you, and what it doesn't.**
+
+**Do not let "best effort" slide into "probably won't happen."** It is a programmatic term meaning
+*not formally required*, not a probability. The instrument completed instrument-level testing in
+Bands 1, 3 and 4, the CPP has working groups actively planning Band 3 spectroscopy and Band 4
+imaging, and the Primer explicitly anticipates "optical spectra of up to two of these exoplanets."
+Sneering at best-effort modes would be exactly the mirror-image of the hype we are correcting, and
+the people who spent a decade building those modes will notice.
 
 That is honest, it is *interesting*, it is a genuine public-understanding contribution, and it is
 the pitch. Every hype piece will show an artist's render. We show the actual information budget.
@@ -155,23 +189,49 @@ evenings, requires no permission, no budget and no relationships, and it manufac
 future news hook out of work already done. It is also just good practice — the difference between
 a model and a horoscope is whether it was written down first.
 
-**Targets.** Selection constraints are published: host star **V ≤ 5**, stellar angular diameter
-**< 2 mas** (Primer, Targets section); the CPP target database is public at
+**Targets. No tech-demo target list has been published, and none is selected** — target selection
+is an open CPP activity, which is the single biggest risk to this play. What *is* published is the
+selection constraint: host star **V ≤ 5**, "though several magnitudes fainter may be possible",
+and stellar angular diameter **< 2 mas** (Primer, Targets section). The CPP target database is at
 [plandb.sioslab.com](https://plandb.sioslab.com). Predict for roughly 10–20 planets:
 
 - Everything in the CPP database meeting the V ≤ 5 / <2 mas cuts that we already have a colour for.
-- The repeatedly named candidates: **47 UMa b/c** (used as *the* target in the Roman Exoplanet
-  Imaging Data Challenge), **ε Eridani b** (the nearest Jupiter analog; see
+  Do not treat V ≤ 5 as a hard wall — the Primer explicitly leaves room for fainter hosts.
+- The repeatedly named candidates: **47 UMa b/c**, **ε Eridani b** (the nearest Jupiter analog; see
   [Sanghi et al. 2026, *Worlds Next Door III*](https://arxiv.org/abs/2602.23423), which argues for
-  metal enrichment and/or water-ice clouds — a directly testable albedo statement), **upsilon And d**,
-  and **HIP 71618 B** ([arXiv:2512.02126](https://arxiv.org/abs/2512.02126), explicitly proposed as
-  "suitable for the Roman Coronagraph Technology Demonstration").
+  metal enrichment and/or water-ice clouds — a directly testable albedo statement), and
+  **upsilon And d**.
+- **Scope the set to reflected-light mature giants, explicitly, in writing.** Several genuinely
+  likely CGI targets are *self-luminous* — β Pic b, HR 8799 e, 51 Eri b — where visible light is
+  thermal emission plus scattered light, and our reflected-light albedo model does not apply at
+  all. **HIP 71618 B** ([arXiv:2512.02126](https://arxiv.org/abs/2512.02126)) is in this category
+  and must not be in the prediction set: it is a ~60–65 M_Jup substellar companion at ~2700 K,
+  M5–M8. Predicting a reflected-light colour for a brown dwarf is a category error, and it is the
+  kind of error that would end the project's credibility with exactly the readers we want.
 - Deliberately include a few we expect to get *wrong*. A prediction set with no risk isn't one.
 
-**What to predict, per target.** Full-spectrum hex; Band 1-only value; three-band reconstructed
-hex; ΔE2000 between full and reconstructed; predicted geometric albedo in each flight band with
-uncertainty; and the model assumptions stated inline (cloud state, metallicity, phase angle —
-quadrature, per `pipeline/config.py`). Plus one paragraph of **what would falsify this**.
+**What to predict, per target — predict the observable, not the swatch.** CGI will publish a
+**flux ratio (contrast) in a band**, at the phase angle it happened to catch. That is not a hex.
+Pre-register, in this order:
+
+1. **Geometric albedo in each flight band** (575/10%, 730/15%, 825/10%) at a stated phase angle,
+   with an explicit uncertainty interval. This is the primary prediction and the only directly
+   comparable quantity.
+2. **Predicted contrast as a function of assumed planet radius**, published as a curve, not a
+   number. For RV-discovered targets like 47 UMa b we have M·sin i and no radius — so
+   `contrast = A·Φ(α)·(Rp/a)²` cannot be inverted to an albedo without assuming Rp. State the
+   assumed radius and its provenance as a separate, labelled input.
+3. Only then the derived colours: Band 1-only value, multi-band reconstructed hex, and ΔE2000
+   between full-spectrum and reconstructed.
+
+**State plainly that the ΔE2000 headline is model-vs-model and can never be measured.** CGI cannot
+produce the full-spectrum "true colour"; only the reconstructed one is observable. The measurable
+claim is the band albedos and the reconstructed colour — not the ΔE.
+
+Include the model assumptions inline (cloud state, metallicity, phase angle — quadrature, per
+`pipeline/config.py`), one paragraph of **what would falsify this**, and a **pre-registered naive
+baseline to beat** (e.g. a grey Lambertian sphere at a fixed albedo). Without a baseline, "we were
+within 30%" means nothing, and the whole exercise is unfalsifiable in practice.
 
 **How to timestamp credibly**, cheapest-first — do all three, it's twenty minutes:
 
@@ -217,9 +277,12 @@ Contacts published in the Primer:
 - **Vanessa Bailey** (JPL, Coronagraph Technology Center) & **Maxwell Millar-Blanchaer** (UCSB) —
   CPP co-chairs — `cpp-co-chairs@jpl.nasa.gov`
 - **Alexandra Greenbaum** (IPAC / Science Support Center) — `azg@ipac.caltech.edu`
-- **Julien Girard** (STScI / Science Operations Center) — `jgirard@stsci.edu`. Runs the Roman
-  Exoplanet Imaging Data Challenge — closest thing to a natural ally for this project.
+- **Julien Girard** (STScI / Science Operations Center) — `jgirard@stsci.edu`. Ran the Roman
+  Exoplanet Imaging Data Challenge (2019–21, concluded — use the past tense) — closest thing to a
+  natural ally for this project. Note the Challenge simulated a *fictitious* planetary system
+  around 47 UMa; it does not establish the real 47 UMa b/c as a tech-demo target.
 - **Schuyler Wolff** (Arizona) — CPP Observation Planning — `sgwolff@arizona.edu`
+  (the Primer misspells it "Wolf"; the email address is correct)
 - **Aniket Sanghi** (Caltech) — lead author on the 2026 ε Eri b albedo paper; if we predict ε Eri b
   we are citing his work, and [13-credit-the-scientists.md](./13-credit-the-scientists.md) says tell him.
 
@@ -230,9 +293,11 @@ a correction disclosure, which is the only cold email scientists reliably answer
 >
 > I maintain <SITE_URL>, which computes a colour for every known exoplanet from albedo models and
 > host-star spectra, and shows each one as reconstructed from the CGI bandpasses. I had the flight
-> configuration wrong — I'd modelled a 660 nm band and 6% spectroscopy widths; I've corrected it
-> to the Jan 2025 CPP Primer table (Band 1 575/10%, Band 3 730/15%, Band 4 825/10%), and the site
-> now states plainly that only Band 1 HLC imaging is a formal requirement.
+> configuration wrong — I'd modelled a supported 660 nm band and 6% spectroscopy widths. I've
+> corrected it to the Jan 2025 CPP Primer mode table (Band 1 575/10%, Band 3 730/15%, Band 4
+> 825/10%), noting that the Band 2 660 nm filter and prism are installed but not a supported mode,
+> and the site now states plainly that only Band 1 with the hybrid Lyot coronagraph is a formal
+> requirement and everything else is best effort.
 >
 > Before launch I'm publishing timestamped predicted colours for likely tech-demo targets (Zenodo
 > DOI), so they can be checked against real data later. Two questions, if you have a minute:

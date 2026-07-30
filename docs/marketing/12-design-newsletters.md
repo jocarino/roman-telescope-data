@@ -8,18 +8,24 @@ Design curators are the only free channel where a beautiful, weird, hand-built t
 
 ## The target list
 
-Verified July 2026. "Reach" is order-of-magnitude, not audited.
+Verified July 2026; **re-verified by fetching each source 30 Jul 2026** — see
+[the review](./reviews/12-newsletters-review.md). "Reach" is order-of-magnitude, not audited.
 
 | Outlet | Reach | How to submit | Free? | Verdict |
 |---|---|---|---|---|
-| **Naive Weekly** (naiveweekly.com) — Sunday email for "the quiet, odd and poetic web" | ~5–10k, extremely high taste | Email `kristoffer@naiveweekly.com` | Free | **GO — #1 priority.** Perfect beat match; one human reads the inbox |
-| **Web Curios** (webcurios.co.uk) — Matt Muir's weekly firehose of the strange web; verified issues 10 & 17 Jul 2026 | ~10–20k, read by other curators | Email `matt@webcurios.co.uk` (contact page explicitly invites "if you've made something") | Free | **GO.** No AI-written pitches — he says so on the page |
-| **Hover States** (hoverstat.es) — curated gallery of art-directed sites; latest post 21 Jul 2026 | ~20k+ designers | Form at `hoverstat.es/submit` (URL, description, credits) | Free | **GO.** "All submissions reviewed each week" |
-| **Sidebar.io** — 5 hand-picked design links daily | ~100k+ subscribers | `sidebar.io/submit` (must create a free account first) | Free | **GO.** Note: it has taken hiatuses before; check the archive is current the day you submit |
-| **Design Spells** (designspells.com) — biweekly, micro-interactions and "details that feel like magic"; Digest #70, May 2026 | ~10–20k, very engaged | "Submit a spell" form on the site | Free | **GO.** Submit *one detail*, not the site |
+| **Web Curios** (webcurios.co.uk) — Matt Muir's weekly firehose of the strange web; verified issues 10 & 17 Jul 2026 | ~10–20k, read by other curators | Email `matt@webcurios.co.uk` (contact page explicitly invites "if you've made something you'd like me to feature, I'd love to hear from you") | Free | **GO — #1 priority.** One human, open invitation, read by the other curators. No AI-written pitches: *"please, please, please, don't email me with an AI-generated email about an AI-generated project"* |
+| **HTML Day** (html.energy) — **8 August 2026**, ~30 cities; run out of Kristoffer Tjalve's orbit | small, the exact quiet-web crowd Naive Weekly reached | Show up / join a local gathering | Free | **GO — replaces the Naive Weekly slot.** A hand-built, no-framework, 5,700-page static site is the archetypal HTML Day artifact. Nine days out at time of writing |
+| **Hover States** (hoverstat.es) — curated gallery of art-directed sites; latest post 21 Jul 2026 | ~20k+ designers | Form at `hoverstat.es/submit` (URL, description, credits) | Free | **GO.** Reviewed weekly; "subjective to us — sites experimenting with design, interactivity and content in new and interesting ways" |
+| **Sidebar.io** — 5 hand-picked design links daily; **published by UX Collective** (uxdesign.cc), not a solo project any more; links current to 30 Jul 2026 | ~100k+ subscribers | `sidebar.io/submit` (must create a free account first) | Free | **GO.** Taste is UX-industry, not indie-web — pitch it as a *tool*, not a curio |
+| **Design Spells** (designspells.com) — biweekly, micro-interactions and "details that feel like magic"; by Chester Chan & Duncan Leo | ~10–20k, very engaged | **Email `chester@designspells.com`** (the site's "Submit" is a mailto, not a form) | Free | **GO.** Submit *one detail*, not the site |
+| **Naive Weekly** (naiveweekly.com) — was "the quiet, odd and poetic web" | ~5–10k, extremely high taste | — | — | **NO-GO. Paused.** Kristoffer posted "Goodbye" on **28 Jun 2026**: *"I don't know when I'll be back in your inboxes, but I believe it will be with news."* Cadence had already slipped to monthly (29.03 · 05.04 · 26.04 · 17.05 · 28.06). Reach the same people via HTML Day instead |
 | **Bruce Lawson's Reading List** (brucelawson.co.uk) — weekly web-standards links; #360 in 2026 | ~small but standards-crowd influential | Email via contact page / @ him on Mastodon | Free | **GO** — for the no-framework/HTML angle only |
 | **Frontend Focus** (frontendfoc.us, Cooperpress) — weekly front-end | ~200k+ | "Suggest a link" in any issue footer / editor via `cooperpress.com` | Free | **GO.** Mechanism unverified in detail — read a live issue footer first |
-| **Waxy.org links** — Andy Baio | ~high-signal, feeds every other curator | Email via waxy.org/about; also nominate for **Tiny Awards** (nominations open Jun 2026) | Free | **GO.** Tiny Awards is the single best-fit award we can enter |
+| **Waxy.org links** — Andy Baio | ~high-signal, feeds every other curator | Email via waxy.org/about — but he *finds* things far more than he receives them; being posted where he already looks (MetaFilter, HN, Bluesky) beats a cold email | Free | **GO** (long shot by email) |
+| **Tiny Awards** (tinyawards.net) | small, but the best-fit award there is | — | Free | **NO-GO for 2026 — window closed.** 2026 nominations opened June and **closed end of June 2026**; shortlist voting Aug, winner Sept. It is also **nomination-only** — a third party enters you, you cannot self-enter. Next window ~Jun 2027, eligibility "launched Jul 2026–Jul 2027" |
+| **Frontend Dogma** (frontenddogma.com) — Jens Oliver Meiert; posts daily, latest 29 Jul 2026 | small, front-end/standards crowd | Contact page | Free | **GO.** Same beat as Bruce Lawson but higher volume and hungrier for links — best home for the no-framework/HTML-craft angle |
+| **Web Tools Weekly** (webtoolsweekly.com) — Louis Lazaris; **14,086 subscribers**, weekly | medium, front-end | `webtoolsweekly.com/submit` form | Free | **GO.** The one outlet where the palette export *is* the product — it's literally a web tool |
+| **Datawrapper "Data Vis Dispatch"** — weekly, Tuesdays | large dataviz/visual-journalism audience | `hello@datawrapper.de` | Free | **MAYBE.** Skews to news charts, but 5,700 planets as a colour field is their register, and no other channel in this plan reaches dataviz people |
 | **kottke.org** | large, mainstream-nerd | Email address on `kottke.org/about` | Free | **GO** (long shot, costs one email) |
 | **things magazine** (thingsmagazine.net) — "linkage" posts, latest 17 Jul 2026 | small, cult | Contact form on site | Free | **GO** (cheap long shot) |
 | **It's Nice That** | very large | `submit@itsnicethat.com`; tips `jb@itsnicethat.com`; reviewed weekly | Free | **GO**, low odds — they favour studio/commissioned work |
@@ -28,12 +34,12 @@ Verified July 2026. "Reach" is order-of-magnitude, not audited.
 | **Colossal** (thisiscolossal.com) | very large art audience | `submissions@thisiscolossal.com`, hi-res images inline or linked | Free | **MAYBE.** They cover art/craft/nature; explicitly reject AI imagery and won't reply. Frame as data-art or skip |
 | **Fonts In Use** | medium, type crowd | Free submission form; images 1400–2000px, ≤3 MB | Free | **MAYBE — only if the typeface is a real, named, licensed face.** If we're on a generic mono, skip |
 | **Creative Boom** | large UK creative | Contact/submit form on creativeboom.com | Free | **MAYBE** — status alive but exact 2026 policy unverified; check before spending an evening |
-| **Dense Discovery** — Kai Brach, 399+ issues, still weekly | ~35k, exactly our reader | No documented free submission path; the visible route is the **paid** advertise page | Ads paid | **MAYBE.** Send one polite note via the contact form as a *reader suggestion*. Do not pay |
+| **Dense Discovery** — Kai Brach; issue **399**, still weekly | **36,000+** readers, exactly our reader | No free submission path; the visible route is the **paid** advertise page. The free-ish alternative is the "Friends of DD" community, which Kai reads | Ads paid | **MAYBE.** Send one polite note via the contact form as a *reader suggestion*. Do not pay |
 | **Muzli** — still publishing "Weekly Designers Update" (#565, 2026) | large but shallow | No clean editorial submission; mostly algorithmic ingest | Free | **WEAK.** Skip; it tends to pick things up after Sidebar/HN anyway |
 | **Web Designer News** | aggregator | Submit form on site | Free | **WEAK.** Low referral value; 2026 activity unverified |
-| **Typewolf Site of the Day** | ~350k/mo | No submission mechanism found | — | **NO-GO.** Latest Site of the Day observed is **14 Dec 2025** — looks dormant. Re-check before bothering |
-| **Codrops Collective** | was large | — | — | **NO-GO. Dead:** the Collective page states "The Collective has paused". Codrops still takes project/demo submissions by email (`codrops@gmail.com`) — that's a separate, weaker slot |
-| **Designer News** (designernews.co) | — | — | — | **NO-GO. Dead** community, spam-dominated for years |
+| **Typewolf Site of the Day** | ~350k/mo | No submission mechanism found | — | **NO-GO.** Latest Site of the Day is still **14 Dec 2025** (re-checked 30 Jul 2026) — dormant |
+| **Codrops Collective** | was large | Monthly Codrops newsletter (Buttondown); project/demo submissions by email (`codrops@gmail.com`) | Free | **WEAK — paused, not dead.** The *weekly* Collective ended Jun 2025 ("moving from weekly news to occasional updates"), but Codrops itself is active and the monthly newsletter is a real slot |
+| **Designer News** (designernews.co) | — | — | — | **NO-GO.** `designernews.co` returned **HTTP 500** on 30 Jul 2026; long spam-dominated. Treat as unreachable — not formally verified dead |
 | **Awwwards** | large | Paid entry | **$65**/submission (or $165/yr for 3) | **NO-GO.** Pay-to-play, zero budget |
 | **CSS Design Awards** | medium | Paid entry | **$50**/site | **NO-GO** |
 | **Hacker Newsletter** | large | Curated *from* Hacker News only — nothing to pitch | Free | **NO-PITCH.** Automatic downstream of a good [Show HN](./09-show-hn.md) |
@@ -45,13 +51,15 @@ Verified July 2026. "Reach" is order-of-magnitude, not audited.
 
 One line each. Never lead with astronomy.
 
-- **Naive Weekly** — "A hand-built site, no framework, that computes the colour of 5,700 real planets and lets you take the palette home." Quiet-web pedigree is the whole pitch.
-- **Web Curios** — Delight and absurdity of scale: *every known planet has a hex code now, and here is the one that is cobalt blue.* Write it in his register: funny, unpolished, human.
+- **Web Curios** — Delight and absurdity of scale: *every known planet has a hex code now, and here is the one that is cobalt blue.* Write it in his register: funny, unpolished, human. **Name one planet and give its physical reason** — a dataset isn't a sentence anyone can print.
+- **HTML Day** — Quiet-web pedigree, in person: hand-written HTML, no framework, no build step, 5,700 pages. Show the thing, don't pitch it.
+- **Frontend Dogma / Web Tools Weekly** — Frontend Dogma gets the craft (static, no toolchain); Web Tools Weekly gets the *tool* only: "copy a palette as hex, CSS custom properties or .ase."
+- **Datawrapper Data Vis Dispatch** — 5,700 data points rendered as the thing they encode: colour. Lead with the full-grid image.
 - **Hover States** — Purely visual: the oscilloscope/CRT interface, the phase-angle slider changing a planet's colour in real time, the host-star lamp duotone. Send the GIF.
 - **Sidebar.io** — Framed as a designer's tool: palette export to hex/CSS variables/.ase from an unusual source. Sidebar rewards effort-heavy, non-listicle work.
 - **Design Spells** — Submit *one* interaction: the phase slider, or the true-colour/Roman-view toggle re-keying every swatch on the page at once.
 - **Bruce Lawson / Frontend Focus** — Craft: 5,700 pages, static, htmx + Alpine, no build step, no framework; the entire dataset ships as JSON. That's the headline for a front-end audience.
-- **Waxy / Tiny Awards / kottke** — Small-web sincerity: one person, evenings, physics instead of a design tool, honest about what's modelled vs measured.
+- **Waxy / kottke** — Small-web sincerity: one person, evenings, physics instead of a design tool, honest about what's modelled vs measured. Both discover more than they receive; assume the email is the weaker half of the attempt. (Tiny Awards: 2026 window closed, and it's nomination-only — you get in by being *found*.)
 - **things magazine** — "Objects, collections and discoveries" — this is a colour catalogue of every known object of a class. That's their exact register.
 - **It's Nice That / Creative Boom** — A visual system derived from data with no human colour choices: the palette was decided by physics, not taste.
 - **Recomendo** — Six-line recommendation format: "Free palette generator sourced from real planetary spectra; export to CSS or Adobe .ase."
@@ -137,12 +145,12 @@ Nothing goes out before the press kit exists at a stable URL. See [Press kit](./
 ## Sequencing
 
 1. **Press kit first.** No pitch without images.
-2. **Pitch the four core outlets before Hacker News**, not after: Naive Weekly, Web Curios, Hover States, Sidebar. Curated newsletters like discovering things; being #3 on HN first makes it stale. Small newsletters also have 1–2 week lead times, so early is free.
-3. **Wave one: 4 emails, one evening.** Wave two (Bruce Lawson, Frontend Focus, Waxy/Tiny Awards, kottke, things magazine, Design Spells) a week later, once you can say "featured in X".
+2. **Pitch the core outlets before Hacker News**, not after: Web Curios, Hover States, Sidebar, Design Spells. Curated newsletters like discovering things; being #3 on HN first makes it stale. Small newsletters also have 1–2 week lead times, so early is free. (Note: the hub's Phase 1 currently sequences this doc *after* Show HN — that contradicts this line, and this line is the right one.)
+3. **Wave one: one email — Web Curios — then wait a week.** He invites submissions in writing, reads his own inbox, and is read by the other curators; a single send also means one week of watching real traffic before you spend the rest of the list. The form-only outlets (Hover States, Sidebar, Web Tools Weekly) are not pitches and can be batched in one joyless hour whenever. Wave two (Bruce Lawson, Frontend Dogma, Frontend Focus, Waxy, kottke, things magazine) a week later, once you can say "featured in X".
 4. **Then** [Show HN](./09-show-hn.md), then let Hacker Newsletter/Muzli pick it up on their own.
-5. **Never follow up.** These are one-person inboxes with hundreds of unread pitches. One email, no chaser, no "just bumping this". Re-pitching a *different, newer* feature in six months is fine; re-pitching the same link is not.
+5. **Never follow up — but do write again when there is news.** These are one-person inboxes with hundreds of unread pitches. One email, no chaser, no "just bumping this", ever. The one legitimate second email is a *new fact*: Roman launching, a scientist citing us, a placement elsewhere. New fact, new email; same link, never. If the first wave goes quiet, the correct second contact isn't email at all — reply once, publicly, where the curator already is, when they post something the site genuinely answers.
 6. **Personalise the first line of every email** or don't send it. Reference a specific recent issue.
-7. **What one placement unlocks.** The cascade is real and reasonably predictable: **Waxy or kottke → everything** (both are read by other curators); **Sidebar → Muzli, Web Designer News, a dozen scraper newsletters** automatically; **Hover States → Awwwards/CSSDA jurors notice you without paying**; **Naive Weekly → Dense Discovery, Web Curios, Tiny Awards** (that circle reads each other closely); **Frontend Focus → conference CFP invitations**. Bank the first placement, then quote it in wave two.
+7. **What one placement unlocks.** The cascade is real but it is folk knowledge, not a forecast — treat these as directions, not arrows: **Waxy or kottke → everything** (both are read by other curators); **Sidebar → Muzli, Web Designer News, a dozen scraper newsletters** automatically; **Hover States → Awwwards/CSSDA jurors notice you without paying**; **Web Curios → Dense Discovery and the quiet-web circle**, which reads each other closely; **Frontend Focus → conference CFP invitations**. Bank the first placement, then quote it in wave two.
 8. Cross-post every placement to [Bluesky/Mastodon](./11-bluesky-mastodon.md) — that's where these curators actually hang out, and being visible there raises the next pitch's odds.
 
 ## How we'll know it worked
@@ -158,12 +166,14 @@ Nothing goes out before the press kit exists at a stable URL. See [Press kit](./
 - **Sounding like AI or like marketing.** Web Curios explicitly rejects AI-written pitches, and every curator on this list can smell a template. These emails are short on purpose; keep the seams showing.
 - **Over-claiming.** If any outlet prints "photographs of exoplanets", we've failed the project's core editorial rule. Put "modelled, not photographed" in the 150-word blurb so the copy-paste is already correct.
 - **Traffic spike costs.** The full grid is image-heavy; confirm the static host survives a Sidebar-level day before pitching Sidebar.
-- **Newsletter mortality.** Two candidates on this list (Codrops Collective, Designer News) are already dead and one (Typewolf SOTD) looks dormant. Re-verify each outlet the day you send; a bounced pitch is wasted, and a dead outlet in the tracker inflates the plan.
+- **Newsletter mortality — the biggest risk here, and it already bit us.** Between the first pass and the 30 Jul 2026 re-check, **Naive Weekly (the former #1 target) shut down** and the **Tiny Awards 2026 nomination window closed**; Codrops Collective had already gone from weekly to occasional and Typewolf SOTD is dormant. One-person newsletters die quietly and no one announces it to you. **Re-verify every outlet the day you send** — a bounced pitch is wasted, and a dead outlet in the tracker inflates the plan.
+- **Deferred dependency.** This doc treats the phase-slider clip as effectively mandatory for Design Spells and Hover States, but the clip exporter lives in [08-short-video.md](./08-short-video.md), which the hub marks **deferred**. Either build the clip or accept pitching those two without motion — decide, don't drift.
 - **Effort sink.** The long tail (Muzli, Web Designer News, Present & Correct, WITI) is where evenings go to die for near-zero referral. Cap the whole channel at two evenings.
 
 ## Links
 
 - [Marketing plan](./README.md) — hub
+- [Review of this doc](./reviews/12-newsletters-review.md) — outside critique of the list, the pitches and the strategy
 - [Press kit](./02-press-kit.md) — the images and blurbs this channel depends on; build first
 - [Show HN](./09-show-hn.md) — sequence after the first newsletter wave
 - [Bluesky & Mastodon](./11-bluesky-mastodon.md) — where these curators are reachable informally

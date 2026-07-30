@@ -1,6 +1,6 @@
 # Short-form video
 
-**Status:** not started · **Effort:** high — 5–7 h for the first video, ~2 h steady state, and ~40–70 h before the experiment means anything · **Payoff:** the worst hours-to-visitors ratio in this plan; real value is reusable assets, not clicks · **Hub:** [Marketing plan](./README.md)
+**Status:** not started · **Effort:** high *as a channel* — 8–12 h for the first video and ~40–70 h before the experiment means anything; low *as an asset* — ~10 h to build a whole-clip renderer, then ~20 min per clip · **Payoff:** the worst hours-to-visitors ratio in this plan; real value is reusable assets, not clicks · **Hub:** [Marketing plan](./README.md)
 
 ## The objection
 
@@ -25,8 +25,9 @@ Four real accounts, chosen because each isolates a different variable.
 
 **The structural mechanics, with numbers:**
 
-- **The first 1–3 seconds decide everything.** Reported analyses put ~80% of completion variance in the first three seconds. A sharp drop at second 3 means the hook failed; a *flat* retention curve is the signal that gets a video pushed. There is no recovering a bad opening with a good middle.
-- **Length that wins now (2026):** TikTok clusters at **21–34 s**; Reels has a viral pocket at 7–15 s and a "value" pocket at 30–45 s; Shorts land one idea in **20–45 s**. A 20 s video held to 80% beats a 60 s video that loses half its audience at second 12.
+- **The first 1–3 seconds decide everything.** The published funnel: of viewers who reach second 3, ~65% reach second 10 and ~45% reach second 30 — so essentially the whole audience is selected before the third second. A sharp drop at second 3 means the hook failed; a *flat* retention curve is the signal that gets a video pushed. There is no recovering a bad opening with a good middle.
+- **Show first, explain second.** @physicsfun's rule, and the one the scripts below have to be judged against: the object does the impossible thing *first*, and the caption exists only to explain what you already watched. Any opening that spends its first seconds setting up context has already lost — context is what the payoff earns, not what it requires.
+- **Length that wins now (2026):** TikTok clusters at **21–34 s** (creator-fund completion data); Reels has a viral pocket at 7–15 s and a "value" pocket at 30–45 s; Shorts land one idea in **30–45 s**. A 20 s video held to 80% beats a 60 s video that loses half its audience at second 12.
 - **Text carries the claim; voice is optional.** The default viewing state is sound-off. Text-led hooks make the payoff legible in frame one, and burned-in captions are mandatory regardless. **A faceless, voiceless account is fully viable here** — @physicsfun has proved it for a decade.
 - **The quiz/reveal structure is the highest-performing faceless format**, for a mechanical reason: the question is a hook, the pause before the answer is a retention *spike* rather than a decay, and the reveal generates comments from people defending their guess. High watch time plus high comment rate is precisely what every one of these algorithms optimises for.
 - **Loopability.** An ending that cuts cleanly back into the opening frame counts rewatches as watch time. Cheap, and worth more than most edits.
@@ -39,7 +40,7 @@ Five candidates, judged on: is it native to the medium, is it repeatable ~50 tim
 
 | # | Candidate | Native? | Repeatable | Verdict |
 |---|-----------|---------|------------|---------|
-| 1 | **Guess the colour** — planet's stats, hold, reveal the computed hex | Yes — it's a quiz | ~5,700 | **Winner** |
+| 1 | **Guess the colour** — planet's stats, hold, reveal the computed hex | Yes — it's a quiz | ~20 (see below) | **Winner** |
 | 2 | **The same planet under six suns** — the lamp swap, M dwarf → A star | Beautiful, but it asks no question | High | B-roll / filler, not a format |
 | 3 | **"It rains glass / iron / rubies"** — extreme-world hooks | Yes, as a *hook supply* | ~15 genuinely striking worlds | Feeds #1, isn't its own format |
 | 4 | **The true → Roman collapse** — what a real telescope actually gets | Strongest single video in the plan | ~3 before it's stale | One-off, not a series |
@@ -47,7 +48,9 @@ Five candidates, judged on: is it native to the medium, is it repeatable ~50 tim
 
 **The pick: #1 "Guess the colour", using #3 as the hook supply and #4 as the recurring twist.**
 
-Why it wins on the objection's own terms. It is a quiz, not a demo — the medium's own most-proven faceless structure. The reveal *is* the product: the moment of payoff is literally the thing the site computes, so the video cannot be watched without understanding what the site does. It is repeatable across ~5,700 planets, which is the project's structural advantage (see [README](./README.md)) spent in the one place volume actually matters. It needs no camera, no voice, and no performer. And the honesty caveat, which every other channel treats as a disclaimer, becomes a *second reveal* here: "and this is not a photograph — nobody has ever photographed this planet."
+Why it wins on the objection's own terms. It is a quiz, not a demo — the medium's own most-proven faceless structure. The reveal *is* the product: the moment of payoff is literally the thing the site computes, so the video cannot be watched without understanding what the site does. It needs no camera, no voice, and no performer. And the honesty caveat, which every other channel treats as a disclaimer, becomes a *second reveal* here: "and this is not a photograph — nobody has ever photographed this planet."
+
+**The ceiling, stated honestly.** The catalogue is 5,700 planets, but the format's supply is **not** 5,700 — it is the number of worlds with a fact striking enough to stop a thumb in 1.5 seconds, and that is roughly **twenty**. The reveals are bottomless; the *hooks* are not. "5,700 planets" is the project's structural advantage for SEO ([03](./03-seo-planet-pages.md)), where every page is equally cheap and equally indexable — it does not transfer to a medium where the opening line has to be independently astonishing every time. The hook bank below is the real inventory. Plan the series against ~20, not ~5,700, and know that the format runs out before the algorithm has finished deciding about it.
 
 Why not the others. #2 has no question, so it has nothing to hold on — it's a texture loop, and texture loops need an existing audience. #4 is genuinely the best *single* video available but goes stale by the third, so it's a recurring beat inside #1's format, not a series. #5 needs five reveals per video and produces one.
 
@@ -86,14 +89,16 @@ The joke is that the payoff is *almost nothing*, and the number is the punchline
 | 4.5–9.0 | Stats type on. | 2,600 °C dayside <br> being torn apart by its star <br> so hot that hydrogen molecules break |
 | 9.0–12.0 | Two reference chips slide in: lunar grey and asphalt. | HOW DARK? |
 | 12.0–13.0 | Counter. | 3 · 2 · 1 |
-| 13.0–14.0 | **Reveal:** the disc lights to `{true_hex}` — and it is near-black. Reference chips stay for contrast. | **0.064** |
-| 14.0–19.0 | The albedo number scales up, then the comparison lands. | It reflects 6% of the light that hits it. <br> The Moon reflects twice as much. <br> Darker than fresh asphalt. |
-| 19.0–22.0 | Caveat bar. | Hubble upper limit, 290–570 nm. <br> Nobody has ever photographed it. |
+| 13.0–14.0 | **Reveal:** the disc lights to `{true_hex}` — and it is near-black. Reference chips stay for contrast. | **< 0.064** |
+| 14.0–19.0 | The albedo number scales up, then the comparison lands. | It reflects **at most** 6% of the light that hits it. <br> The Moon reflects twice as much. <br> Darker than fresh asphalt. |
+| 19.0–22.0 | Caveat bar. | Hubble **upper limit** (97.5% conf.), 290–570 nm. <br> Nobody has ever photographed it. |
 | 22.0–24.0 | Cut back to the near-invisible disc, loop. | `<SITE_URL>` |
 
 ### Script 3 — the Roman collapse · the once-per-quarter twist
 
-The signature feature as a reveal. Pegged to the launch ([15-roman-launch.md](./15-roman-launch.md)) — currently scheduled for **30 August 2026** on a Falcon Heavy.
+The signature feature as a reveal. Pegged to the launch ([15-roman-launch.md](./15-roman-launch.md)) — confirmed for **30 August 2026, 07:26 EDT**, Falcon Heavy from LC-39A.
+
+> **Blocked until the band config is fixed.** The [board](./README.md) and [15](./15-roman-launch.md) record that the site currently models four CGI bands and the flight configuration is not four. This script *is* that error, rendered at 1080×1920 and pushed to the widest cold audience the project can reach. Do not produce it before the correction ships. Every `{roman_hex}` in it is wrong until then.
 
 | t (s) | Shot | On-screen text |
 |---|---|---|
@@ -116,17 +121,19 @@ The signature feature as a reveal. Pegged to the launch ([15-roman-launch.md](./
 | | First video | Videos 2–5 | Steady state (template + exporter) |
 |---|---|---|---|
 | Asset generation | 1.5 h | 45 min | **10 min** (script params) |
-| Edit / timing / text | 3–4 h | 2 h | 45 min |
+| Edit / timing / text | 3–4 h | 2 h | 45 min → **0** if the renderer does text |
 | Captions, export, upload ×3 | 1 h | 45 min | 30 min |
-| **Total** | **5–7 h** | **3.5 h** | **1.5 h** |
+| **Total** | **5–7 h** | **3.5 h** | **1.5 h** → **~20 min** |
+
+Two honest corrections to that table. **The first video is 8–12 h, not 5–7 h**, for someone with no editing background — the estimate omits installing and learning the NLE, discovering vertical-safe margins the hard way, and the first three-platform upload with three sets of metadata. That cost is paid once, but it is paid, and it is usually the evening that kills the idea. **Steady state, conversely, is over-estimated** if the renderer emits finished text: there is no timeline, so the 45 min of edit collapses to editing a JSON file. The realistic floor is ~20 minutes per clip. The whole economic case for this channel lives in that one number.
 
 **Free tooling on a Mac, current:**
 
-- **DaVinci Resolve (free tier)** — the right base. Genuinely full-featured, native 9:16 timelines, no watermark, no subscription. Steep for one evening, but the template is built once.
-- **Not CapCut.** The Mac desktop build is locked to 16:9 with no native vertical output, which is disqualifying, and its licence terms drift.
+- **DaVinci Resolve (free tier)** — the right base *if an NLE is used at all*. Genuinely full-featured, native 9:16 timelines, no watermark, no subscription. But budget an evening on the learning curve before the first usable frame; its text and caption tooling is powerful and unfriendly.
+- **CapCut, corrected.** An earlier draft of this doc claimed the Mac desktop build is locked to 16:9. **That is wrong** — CapCut for macOS has native 9:16 timelines and one-click TikTok/Reels/Shorts export presets, on Apple Silicon and Intel. The real objections are different and softer: feature paywalling that creeps, ByteDance terms that change, and a cloud-upload path for project media. It is a legitimate faster starting point than Resolve; it is just not one to build a permanent template on.
 - Fallbacks with weaker text tooling: Shotcut, Kdenlive, OpenShot — all free, all watermark-free, all 9:16 capable.
-- **The actual cost saver is code, not editing.** This project can *render* frames rather than record them. `planet-render.js` and its share-card port already draw the disc; a headless-Chrome frame dump driven by a JSON script → `ffmpeg` gives pixel-perfect 60 fps clips with correct colours and zero manual keyframing. That is a **4–6 h build once** which collapses per-video asset work from 1.5 h to ~10 minutes, and it is a code task — the maintainer's actual skill — rather than a video-editing task. **If short-form ever happens, it happens because this exists first.**
-- Music: platform in-app libraries only for TikTok/Reels/Shorts; YouTube Audio Library or CC0 for any self-hosted copy (a licensed track in a press-kit MP4 is a real problem).
+- **The actual cost saver is code, not editing — and it should go further than "assets".** This project can *render* the whole clip rather than record or edit it. `planet-render.js` and its share-card port already draw the disc; a headless-Chrome frame dump driven by a JSON script → `ffmpeg` gives pixel-perfect 60 fps clips with correct colours and zero manual keyframing. If the JSON also carries the **text beats and their timings**, the output is a finished 1080×1920 master and there is no NLE in the loop at all. That is a **8–10 h build once** (vs 4–6 h for frames only) and it collapses per-video cost from hours to **~20 minutes**. It is a code task — the maintainer's actual skill — not a video-editing task. **If short-form ever happens, it happens because this exists first.**
+- **Ship the master silent.** A silent MP4 is the maximally reusable asset: it drops into the press kit, Bluesky, Reddit and a journalist's email with no licensing question at all. Add music *in-app* on TikTok/Reels/Shorts, where the platform library is licensed for you. Never bake a track into the file you self-host. (The scripts above assume a music bed — that belongs on the platform upload, not the master.)
 
 **How many before you know:** **20–30 videos over 8–10 weeks**, at 3–5/week. Under 15 is noise — each video is independently tested, so the first several tell you nothing. That is **40–70 hours minimum to a real signal**, and that assumes the exporter exists.
 
@@ -134,21 +141,23 @@ The signature feature as a reveal. Pegged to the launch ([15-roman-launch.md](./
 
 ## Platforms
 
-- **YouTube Shorts — the one worth the effort.** Only platform where the description link is clickable for everyone with no follower gate; the only one with *search and a long tail* (a Short from 2026 still surfaces in 2028, which matters enormously for an evergreen catalogue of 5,700 planets); and the only one where the Shorts feed a channel that could later host a five-minute "how the colours are computed". Audience match for space explainers is strongest here.
-- **TikTok — biggest ceiling, worst conversion.** Best cold-start discovery for a faceless account by a distance. But: link-in-bio only, and bio-link CTR benchmarks run ~1–3% *of profile visitors*, while profile visits are themselves a low-single-digit share of views. Realistic view→site conversion is **0.01–0.1%**. 100,000 views is maybe 30–100 sessions. Plan for that number, not for the view count.
+- **YouTube Shorts — the one worth the effort, but not for the reason usually given.** Yes, the description link is clickable for everyone with no follower gate — but Shorts descriptions are collapsed behind a tap and almost nobody opens one, so the practical link CTR is no better than a TikTok bio. **The real reason is search and the long tail:** a Short from 2026 still surfaces in 2028, which matters enormously for an evergreen catalogue of 5,700 planets and matters *specifically* for the 2027 coronagraph tech demo, when "what colour will Roman actually see" becomes a query someone types. It is also the only platform where the Shorts feed a channel that could later host a five-minute "how the colours are computed". Audience match for space explainers is strongest here.
+- **TikTok — biggest ceiling, worst conversion.** Best cold-start discovery for a faceless account by a distance. But: link-in-bio only. Published benchmarks put bio-link CTR at **3–8% of profile visitors** (an earlier draft said 1–3% — too low), while profile visits are themselves a low-single-digit share of views. The two multiply out to a realistic view→site conversion of **0.02–0.1%**, which is where the original range landed anyway. 100,000 views is maybe 30–100 sessions. Plan for that number, not for the view count.
 - **Instagram Reels — worst discovery, best audience match for the design half.** Colour and palette accounts live here and the currency is *saves and shares*, not clicks. If Reels is used, measure save rate and treat traffic as a bonus.
-- **Cross-posting is not penalised across platforms** — they do not detect each other. But a **visible TikTok watermark suppresses Reels reach substantially** (reported 40–70%). The rule is absolute: export one clean master from Resolve and upload it natively to all three. Never download from TikTok to repost.
+- **Cross-posting is not penalised across platforms** — they do not detect each other. But a visible **TikTok watermark demonstrably suppresses Reels reach**: Instagram has deprioritised watermarked reposts since 2021 — they still reach your own followers, but they are excluded from Explore and from recommendations, which is where all the reach on a cold account comes from. (An earlier draft cited "40–70%"; **no published study supports a specific percentage** — the direction is documented, the number is not.) Your *own* logo is explicitly fine. The rule is absolute: export one clean master and upload it natively to all three. Never download from TikTok to repost.
 - **The honest weakness.** Short-form does not send traffic to websites, full stop. Anyone claiming otherwise is selling a link-in-bio tool. Mitigations that genuinely help: burn `<SITE_URL>` **in-frame as static text** on the last two seconds (survives re-uploads and screen-recording theft), pin a comment containing the URL, and keep the domain short enough to type from memory. Accept that a meaningful share of any traffic will arrive as *direct type-ins* and be invisible to attribution.
 
 ## The verdict
 
-**Do it later, conditionally — and never as a "content channel". Three parts:**
+**Do it later, conditionally — and never as a "content channel". Four parts.** *(Reviewed and upheld — see [reviews/08-video-review.md](./reviews/08-video-review.md) — with the shape changed: the deferral stands, but the "one thing to do now" is bigger than an exporter and the revisit trigger is a real event, not a date on a calendar.)*
 
 **1. Not now. Not close.** Every Phase 0 and Phase 1 item on the [board](./README.md) beats it on every axis. Firing 40–70 hours at an unproven channel while the credits page, the press kit, and Show HN are undone would be the single worst allocation available.
 
-**2. Do build the clip exporter, though — as a code task, not a video task.** 4–6 hours, and it is *not* spent on this doc: a silent 15-second MP4 of the true→Roman snap is the highest-value asset the project can own, and its first homes are [Bluesky/Mastodon](./11-bluesky-mastodon.md) (video massively outperforms stills there), a [Reddit](./10-reddit.md) post, the [press kit](./02-press-kit.md), and the [Roman launch](./15-roman-launch.md) push. Five docs use it. Short-form is the fifth, not the first.
+**2. Do build the renderer, though — and build the *whole clip*, not just the frames.** ~10 hours as a code task: JSON in (planet, beats, text, timings), finished silent 1080×1920 MP4 out, no NLE anywhere in the loop. This is *not* spent on this doc: a silent 15-second MP4 of the true→Roman snap is the highest-value asset the project can own, and its first homes are [Bluesky/Mastodon](./11-bluesky-mastodon.md) (video massively outperforms stills there; optimal 10–45 s, which the format spec already hits), a [Reddit](./10-reddit.md) post *in the subs that permit video* — several ban it outright, check [10](./10-reddit.md) per sub — the [press kit](./02-press-kit.md), and the [Roman launch](./15-roman-launch.md) push. Five docs use it. Short-form is the fifth, not the first.
 
-**3. Revisit as a channel at month 4**, and only if **all three** gates pass: (a) the site has a real audience and referral base, so a video has somewhere to send people; (b) the exporter exists and per-video cost is under ~90 minutes; (c) the maintainer will genuinely commit 3 posts/week for 8 weeks. **If you can't commit to 20 videos, post zero** — 5 videos is not a small experiment, it's a wasted one.
+**3. Then post the clips where there is already a reason to be — and let that be the test.** Bluesky, Mastodon, a permitted Reddit sub, and YouTube Shorts as a permanent searchable archive. No new TikTok account, no cadence commitment, no 20-video promise. Six clips, tied to real pegs. This costs ~12 hours all-in instead of 40–70, and it answers the only question that matters cheaply: **does the reveal land on strangers?** If a clip clears ~50k views on an existing surface, the cold-channel question re-opens with evidence behind it.
+
+**4. Revisit the full channel at the 2027 coronagraph tech demo, not month 4** — that is when the news peg is largest and when a 2026 Shorts back-catalogue is already indexed and working. Gates unchanged in spirit, tightened in number: (a) the renderer exists and per-clip cost is under ~30 minutes; (b) step 3 produced at least one clip that visibly outperformed the account's stills; (c) the maintainer will genuinely commit 3 posts/week for 8 weeks. **If you can't commit to 20 videos, post zero as a channel** — 5 videos is not a small experiment, it's a wasted one. Note that gate (c) collides with the ~20-hook ceiling above: 20 videos is roughly the entire supply of good openings, so the channel experiment consumes the format rather than sampling it.
 
 **On the Roman window specifically:** the launch is roughly four weeks out. That is *not* enough runway to build a cold account into it, and trying is the classic failure mode — a brand-new account's first videos get the smallest test audiences precisely when the peg is live. Make the Roman clip and post it where there is already an audience. Do not open a TikTok account in August.
 

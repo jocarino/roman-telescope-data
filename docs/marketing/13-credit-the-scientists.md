@@ -21,21 +21,24 @@ Read from the code on 2026-07-30. "On site" = a visitor can see it without readi
 |---|---|---|---|---|
 | **NASA Exoplanet Archive** (`pscomppars` via TAP) | Every planet and star number for ~5,700 planets | Partial | Named + linked in `web/templates/gallery.html:47`, `how.html:393`, glossary term `nasa-exoplanet-archive` | **No required acknowledgement sentence anywhere in the repo** (grep for "California Institute of Technology" → zero hits). No Christiansen et al. 2025 citation. |
 | **Cahoy, Marley & Fortney 2010** albedo grid | A spectrum engine (`pipeline/spectrum/cahoy_grid.py`), the phase-angle colour/dimming model (`pipeline/spectrum/phase.py`), and the reference points in Model Space (`pipeline/modelspace.py`) | Named only | `how.html:107`, glossary `cahoy-grid`, `macros.html:391` | No journal, no DOI, no link. Full ref exists **only in a Python docstring** (`pipeline/spectrum/cahoy_ingest.py:11`). The grid is redistributed in `data/cahoy_grid/` (760+ CSVs) with no licence note. |
-| **PICASO** (Batalha et al.) | Spectrum engine for selected targets; 7 precomputed spectra committed in `data/picaso_spectra/`, a `provenance` value users can see | Named only | `how.html:111`, glossary `picaso`, `pyproject.toml` extra | **PICASO asks to be cited; we don't.** No Batalha et al. 2019 ref, no Zenodo software DOI, no version recorded in the emitted data. |
+| **PICASO** (Batalha et al.) | Spectrum engine for selected targets; 7 precomputed spectra committed in `data/picaso_spectra/`, a `provenance` value users can see | Named only | `how.html:111`, glossary `picaso`, `pyproject.toml` extra | **PICASO asks to be cited; we don't.** No Batalha et al. 2019 ref, no Zenodo software DOI. Version *is* recorded, but only in prose: `docs/picaso-runbook.md:55` says **PICASO 4.0.1**, opacity DB Zenodo 14861730. Not in the emitted data. |
 | **`colour-science`** (CIE 1931 2° CMFs, XYZ→sRGB) | `pipeline/colour/cie.py` — literally every hex on the site (`MSDS_CMFS["CIE 1931 2 Degree Standard Observer"]`, `sd_to_XYZ`, `XYZ_to_sRGB`) | One passing mention | `how.html:314`, inside a collapsed block | No link, no author, no version, no BSD-3-Clause note. The underlying CIE dataset is explained in the glossary but not credited as a dataset. |
-| **Karkoschka (1998)**, *Icarus* 133, 134–146 | The measured spectra behind Jupiter, Saturn, Uranus, Neptune — the pipeline's calibration anchors | Yes, properly | `how.html:214` (journal, volume, pages, instrument, PDS provenance, public domain) | Behind the collapsed "The actual calculations" toggle. No link, no DOI. Not on the four planet pages it powers. |
-| **Payne et al. (2026)**, *PSJ* | Earth's measured composite albedo spectrum | Yes, properly | `how.html:220` (journal, what it composites, CC BY 4.0) | Same burial. DOI `10.3847/PSJ/ae2feb` and Zenodo record 17470005 exist **only** in `data/measured_albedo/README.md`. CC BY 4.0 requires attribution *with a link*; we give neither link nor DOI to the visitor. |
+| **Karkoschka (1998)**, *Icarus* 133, 134–146 | The measured spectra behind Jupiter, Saturn, Uranus, Neptune — the pipeline's calibration anchors | Yes, properly | `how.html:214` (journal, volume, pages, instrument, PDS provenance, public domain) | Behind the collapsed "The actual calculations" toggle. No link, no DOI. **Correction:** it *is* on the planet pages it powers — `macros.html:1042` renders the spectrum source as "measured full-disk spectrophotometry (Karkoschka 1998, ESO)". Author + year, no venue or link. |
+| **Payne et al. (2026)**, *PSJ* | Earth's measured composite albedo spectrum | Yes, properly | `how.html:220` (journal, what it composites, CC BY 4.0); also named on Earth's page (`macros.html:1042`) | Same burial. DOI `10.3847/PSJ/ae2feb` and Zenodo record 17470005 exist **only** in `data/measured_albedo/README.md`. CC BY 4.0 §3(a)(1) wants creator + copyright notice + licence notice + a URI to the material; we give the name and the licence label, and no link to either. |
 | **Carrión-González et al. (2021)**, *A&A* 651, A7 | The Roman target board's eligible-planet list (Table 4) | Yes, best in the repo | `roman.html:201-205` + `data/roman-targets.json` — title, authors, journal, arXiv link, quoted counts | This is the model to copy everywhere else. |
 | **Kopparapu et al. (2014)**, ApJ 787, L29 | Habitable-zone edges (`pipeline/habitable.py`, Table 1 coefficients) | Named only | `macros.html:1152,1171` | No journal/DOI on site (it's in the Python docstring). |
 | **Thorngren et al. (2016)** mass–metallicity | Sets metallicity for the parametric engine (most planets on the site) | **No** | `pipeline/spectrum/parametric.py:20` docstring only | Invisible to visitors. |
-| **Roman CGI bandpasses** (575/660/730/835 nm) | The entire signature feature | **No source cited** | Hard-coded in `pipeline/config.py:74-80` | *Unverified*: no reference for where these numbers came from. Check them against the CGI reference document (`roman.ipac.caltech.edu/docs/Coronagraph_Technical_Information.updated.pdf`) and cite it. |
+| **Roman CGI bandpasses** (575/660/730/835 nm) | The entire signature feature | **No source cited** | Hard-coded in `pipeline/config.py:74-80` | **Not an attribution gap — a factual error.** Verified 2026-07-30: the published CGI bands are 575 nm/10% (Band 1, imaging+pol), 660 nm/**17%** (Band 2, spectroscopy), 730 nm/**17%** (Band 3, spectroscopy), **825 nm/11%** (Band 4, wide-field imaging). We ship 835 nm/15% and 6% spectroscopic widths. Fix the numbers *before* citing anything. |
+| **CGI dark hole** (150–450 mas, 1e-7 raw contrast) | The `/roman` board's geometry copy | Uncited | `data/roman-targets.json` → `instrument` | Same class as the bandpasses: real instrument numbers with no reference attached. |
+| **IAU constellation boundaries** (CDS catalogue VI/42; Roman N.G. 1987, *PASP* 99, 695) | Every "Where in the sky" panel — the constellation each host star sits in | **No** | Verbatim copy in `pipeline/data/constellation_boundaries.dat`; credited in that file's header and `pipeline/sky.py:3-4` only | **Missed by the first pass.** We redistribute a CDS catalogue. CDS asks for a specific acknowledgement and that "the original authors and publication references including the publisher have to be explicitely cited". Neither the catalogue, the CDS service nor Roman (1987) appears on the site. |
+| **NASA planetary fact sheets** (NSSDC) | Orbit/size data for the five solar-system anchors | **Yes** | Linked from the anchor data card, `macros.html:1051` | None. Public domain. Listed here only so the audit is complete. |
 | **Roman @ IPAC** hosting the Cahoy grid | `roman.ipac.caltech.edu/data/sims/cahoy2010_spectra.tgz` | **No** | `pipeline/spectrum/cahoy_ingest.py:9` | The people who host the data we ship get nothing. |
 | **PICASO opacity DB** (Zenodo 14861730) | Needed to regenerate the committed PICASO spectra | **No** | `docs/picaso-runbook.md:64` | Zenodo record has its own citation. |
 | **Telescope images** (JWST/STScI, ESO/SPHERE, ESO/J. Rameau, NAOJ, NASA/JPL/SSI, Apollo 17) | Planet-page "Telescope" hero | **Yes — exemplary** | `pipeline/observations.py`; rendered with credit + licence + source link in `macros.html:275-287` | None. This is already right. |
 | **Surface maps** (NASA Earth Observatory — Reto Stöckli, Robert Simmon; Solar System Scope, CC BY 4.0) | The five anchors' real-map render | **Yes — exemplary** | `web/textures.py`; credit + licence shown in `macros.html:243` | None. |
-| **Silkscreen** font (Jason Kottke, SIL OFL 1.1) | Site typeface + OG cards | Repo only | `web/assets/fonts/README.md` | OFL doesn't strictly require it, but it belongs on the credits page. |
-| **Alpine.js** (`web/static/vendor/alpine.min.js`) | All site interactivity, vendored | **No** | — | MIT — needs a licence notice since we redistribute it. *Unverified*: version not recorded anywhere; check the file header. |
-| **Repo licensing** | — | — | — | **No `LICENSE` file, no `CITATION.cff`, no data-sources section in `README.md`.** |
+| **Silkscreen** font (Jason Kottke, SIL OFL 1.1) | Site typeface + OG cards | Repo only, and only the build-time TTFs | `web/assets/fonts/README.md` names the licence but does **not** ship the OFL text; the served `web/static/fonts/*.woff2` have no notice at all | Stronger than first stated: OFL 1.1 condition 2 permits bundling "provided that each copy contains the above copyright notice and this license". Add `OFL.txt` beside the woff2 and credit the face. |
+| **Alpine.js** (`web/static/vendor/alpine.min.js`) | All site interactivity, vendored and served | **No** | — | **Verified breach.** The minified bundle carries *no* copyright header — grep finds only the string `alpinejs`. MIT: "The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software." Notice needed: `Copyright © 2019-2025 Caleb Porzio and contributors`. Version still not recorded anywhere. |
+| **Repo licensing** | — | — | — | **No `LICENSE` file, no `CITATION.cff`, no data-sources section in `README.md`.** And **the project's own output has no stated licence anywhere** — while [02](./02-press-kit.md), [04](./04-wikimedia.md), [05](./05-machine-readable.md) and [06](./06-open-data.md) all already promise CC BY / CC BY-SA on the renders and the dataset. Nothing they describe can ship until this line exists. |
 
 **Headline:** images and maps are credited beautifully; the *science* is credited in prose. The
 two genuine citations (Karkoschka, Payne) are hidden behind a "The actual calculations" toggle
@@ -55,22 +58,36 @@ Not nice-to-haves. These are asked for by the source.
    **Christiansen, J. L., et al. (2025)**, "The NASA Exoplanet Archive and Exoplanet Follow-up
    Observing Program: Data, Tools, and Usage", *PSJ* 6, 186, doi:10.3847/PSJ/ade3c2
    ([arXiv:2506.03299](https://arxiv.org/abs/2506.03299)).
-2. **PICASO** — **Batalha, N. E., Marley, M. S., Lewis, N. K., & Fortney, J. J. (2019)**,
-   "Exoplanet Reflected-light Spectroscopy with PICASO", *ApJ* 878, 70,
-   doi:10.3847/1538-4357/ab1b51. Plus the software DOI for the version used
-   (e.g. Zenodo 10.5281/zenodo.14160128 for v3.3 — *unverified which version produced the
-   committed `.npz` files; record it in the emitted data*).
+2. **PICASO** — verified against PICASO's own
+   [What to Cite](https://natashabatalha.github.io/picaso/credit.html) page, which for
+   reflected light asks for **Batalha, N. E., et al. (2019)**, "Exoplanet reflected-light
+   spectroscopy with PICASO", *ApJ* 878, 70, doi:10.3847/1538-4357/ab1b51. The version that
+   produced the committed `.npz` files is **4.0.1** (`docs/picaso-runbook.md:55`), so the
+   PICASO 4.0 paper (Mang et al.) applies to the code and the opacity DB (Zenodo 14861730)
+   carries its own citation. Record the version in the emitted data.
 3. **Cahoy, K. L., Marley, M. S., & Fortney, J. J. (2010)**, "Exoplanet Albedo Spectra and Colors
    as a Function of Planet Phase, Separation, and Metallicity", *ApJ* 724, 189,
    doi:10.1088/0004-637X/724/1/189. We redistribute the grid; cite it and state the hosting
    source (Roman @ IPAC).
-4. **Payne et al. (2026)** — CC BY 4.0 requires attribution **with a link to the licence and the
-   source**. Currently we give neither. doi:10.3847/PSJ/ae2feb, Zenodo record 17470005.
+4. **Payne et al. (2026)** — Zenodo 17470005 is confirmed **"Creative Commons Attribution 4.0
+   International"**. §3(a)(1) asks us to retain identification of the creators, a copyright
+   notice, a notice referring to the licence and to the warranty disclaimer, and "a URI or
+   hyperlink to the Licensed Material to the extent reasonably practicable" — satisfiable
+   with one link to a page carrying all of it. Lead author is **Allison Payne** (with
+   Villanueva, Kofman, Fauchez, Faggi, Mandell, Roberge, Alei). doi:10.3847/PSJ/ae2feb.
 5. **Karkoschka (1998)** — public domain via NASA PDS, so no legal obligation, but the dataset
    is the site's whole calibration argument. Link it.
-6. **`colour-science`** — BSD-3-Clause; the licence text must accompany redistribution of the
-   *code*, which we don't do, but the library asks to be cited. Add the release + Zenodo DOI.
-7. **Alpine.js** — MIT, vendored and served. Needs the copyright notice.
+6. **`colour-science`** — BSD-3-Clause, "Copyright 2013 Colour Developers"; a NumFOCUS
+   affiliated project. We import rather than redistribute, so the licence text is a courtesy,
+   but the project asks to be cited via its Zenodo DOI: **10.5281/zenodo.17837391**.
+7. **Alpine.js** — MIT, vendored and served with the notice stripped. This is the second
+   outright breach after Payne, and the cheapest to fix.
+8. **CDS / VizieR (catalogue VI/42)** — verified requested wording: *"This research has made
+   use of the VizieR catalogue access tool, CDS, Strasbourg, France (DOI : 10.26093/cds/vizier).
+   The original description of the VizieR service was published in 2000, A&AS 143, 23"*. CDS
+   states the data are "free of usage in a scientific context" and that "the original authors
+   and publication references including the publisher have to be explicitely cited" — so
+   Roman, N. G. (1987), *PASP* 99, 695 must be named too.
 
 ## What to build
 
@@ -135,7 +152,7 @@ warm-up), then model authors, then missions.
 | **Ashley Balzer** | Roman Science Writer, NASA GSFC | Writes the mission's public stories; most likely to actually use the page. | `ashley.m.balzer@nasa.gov` | **Verified**, same page |
 | **Vanessa Bailey** | JPL, Roman Coronagraph instrument scientist/technologist | Deepest CGI technical contact; the person who'd catch a wrong bandpass number. | JPL science profile `science.jpl.nasa.gov/people/VBailey/` | Involvement verified; **exact title unverified — do not name her role in the email** |
 | **Erich Karkoschka** | U. Arizona LPL (1998 *Icarus* spectrophotometry) | His 1995 ESO data is the site's calibration proof. | LPL directory | **Current status unverified — check the LPL directory before writing** |
-| **Geronimo Villanueva / Amber Payne** | NASA GSFC (Payne et al. 2026, Earth's composite spectrum) | Earth's swatch is theirs; a 2026 paper means an active, reachable group. | GSFC pattern; corresponding author on doi:10.3847/PSJ/ae2feb | **Unverified — read the paper's author list and corresponding address** |
+| **Allison Payne / Geronimo Villanueva** | NASA GSFC (Payne et al. 2026, Earth's composite spectrum) | Earth's swatch is theirs; a 2026 paper means an active, reachable group. | GSFC pattern; corresponding author on doi:10.3847/PSJ/ae2feb | Author list verified from Zenodo 17470005 (Payne is project leader, Villanueva supervisor); **addresses unverified** |
 | **Óscar Carrión-González** | Lead author, A&A 651, A7 | Already the best-cited source on the site; `/roman` is built on his Table 4. | Institution *unverified* — check the paper and ADS for current affiliation | Unverified |
 
 ## Draft emails
@@ -206,9 +223,12 @@ Send plain text. Subject lines matter more than the body. Never ask for a share.
 
 ## Timing
 
-- **Week 1** — build `/credits`, add the Archive acknowledgement, `LICENSE`, `CITATION.cff`,
-  `README` data-sources section. Verify the CGI bandpass numbers against the CGI reference
-  document *before* emailing anyone at JPL.
+- **Week 0, before anything else** — fix the CGI band centres/widths in `pipeline/config.py`
+  and re-emit. It is a data change, not a marketing one, and every Roman claim on the site
+  is currently wrong by 10 nm and a factor of ~3 in spectroscopic width.
+- **Week 1** — build `/credits`, add the Archive acknowledgement, `LICENSE` (code *and* an
+  explicit licence for the site's own output), `CITATION.cff`, the Alpine + OFL notices, and a
+  `README` data-sources section.
 - **Week 2** — send (b) to Mansencal and Batalha. Low stakes, fast replies, and it shakes out
   whatever is wrong with the page.
 - **Week 3** — send (a) to Cahoy, Marley, Fortney. Separate emails, each naming what *their*
@@ -238,15 +258,19 @@ Send plain text. Subject lines matter more than the body. Never ask for a share.
   is an archetype blend, not a radiative-transfer solution. Never let an email imply PICASO or the
   Cahoy grid produced a colour it didn't. Every claim must survive being checked against the
   planet's own provenance tag.
-- **Getting the bandpasses wrong in an email to the people who built the instrument.** The
-  575/660/730/835 nm numbers are currently uncited in `pipeline/config.py`. Verify first.
+- **Getting the bandpasses wrong in an email to the people who built the instrument.** No longer
+  hypothetical: Band 4 is **825 nm/11%**, not 835 nm/15%, and Bands 2–3 are **17%**, not 6%.
+  Emailing JPL or the Roman SSC before fixing `pipeline/config.py` would hand the one audience
+  that checks a reason to dismiss the site's signature feature. Fix, rebuild, then write.
 - **Wrong email address / dead contact.** Half the addresses above are inferred patterns. A
   bounced email to a department head is a wasted only-chance. Verify each from an institutional
   page or a recent paper.
 - **Sounding like marketing.** No "would love if you shared this". The ask is a correction. If
   they share it, that's their choice, and it only happens if the email didn't ask.
-- **CC BY 4.0 non-compliance on Payne et al.** currently live on the site. This is the one item
-  in the audit that is a licence breach rather than a discourtesy — fix it first.
+- **Three live licence breaches, not one.** Payne et al. (CC BY 4.0 attribution incomplete),
+  Alpine.js (MIT notice stripped from the served bundle) and Silkscreen (OFL 1.1 condition 2:
+  the woff2 ship with no licence). All three are discourtesies in practice and breaches on
+  paper; all three are fixed by one page and two text files.
 
 ## Links
 
