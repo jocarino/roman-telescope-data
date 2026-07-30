@@ -188,7 +188,26 @@ a:hover { text-decoration: underline; }
   font-size: 12.5px; color: var(--fg); letter-spacing: .3px; line-height: 1.4;
 }
 .card-host { font-size: 11px; color: var(--fg-faint); margin-top: 1px; }
-.card-meta { display: flex; gap: 6px; margin-top: 9px; flex-wrap: wrap; justify-content: center; }
+/* Under the name: usually nothing. Cards carry a mark only when the planet is one of the ~80
+   exceptions (see _marks in app.js), so the grid reads as bodies floating in space rather than
+   as rows of labelled boxes. Two rules make the emptiness work:
+   - the row holds its height whether or not it has a mark, so one flagged planet cannot stand
+     taller than its neighbours and knock the row off its baseline (Earth used to do exactly
+     that, carrying three pills while Jupiter beside it carried two);
+   - marks are text, not chips — no border, no fill, no shadow. A box here competes with the
+     planet above it, which is the only thing on this page worth looking at. */
+.card-meta {
+  display: flex; gap: 12px; margin-top: 7px; min-height: 13px;
+  flex-wrap: wrap; justify-content: center; align-items: center;
+}
+.card-mark {
+  display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+  font-size: 9.5px; letter-spacing: .4px; text-transform: uppercase; color: var(--fg-faint);
+}
+/* Only the glyph carries colour — the words stay quiet, so a row of marked cards reads as a
+   scatter of small lights rather than a line of highlighted text. */
+.card-mark i { font-style: normal; color: var(--accent); }
+.card:hover .card-mark { color: var(--fg-dim); }
 
 /* Sphere/Pixel segmented toggle */
 .segmented {
@@ -472,8 +491,10 @@ button.badge:active, a.badge:active { box-shadow: none; }
   background: #000; border: 1px solid var(--line); box-shadow: 4px 4px 0 rgba(0, 0, 0, .7);
   display: flex; flex-direction: column;
 }
+/* The choices. Brighter than the .dd-head labels above them on purpose — in a menu this tall
+   the fastest way to read it is "dim = what this group is, bright = what I can pick". */
 .dd-menu button {
-  background: transparent; border: 0; color: var(--fg-dim); font: inherit; font-size: 13px;
+  background: transparent; border: 0; color: var(--fg); font: inherit; font-size: 13px;
   text-align: left; padding: 9px 12px; cursor: pointer; white-space: nowrap;
 }
 /* Exclude the colour swatches: repainting their background near-black on hover hid the colour. */
@@ -496,12 +517,23 @@ button.badge:active, a.badge:active { box-shadow: none; }
 /* The one-line explanation under each destination inherits .dd-sub, which is muted by
    default; keep it muted even while the row itself lightens on hover. */
 .nav-menu a .dd-sub { color: var(--fg-faint); white-space: normal; }
-/* Little header explaining what the dropdown filters on. */
-.dd-head {
-  padding: 9px 12px 8px; border-bottom: 1px solid var(--line); cursor: default;
-  font-family: var(--mono); font-size: 9.5px; letter-spacing: .5px; text-transform: uppercase;
-  color: var(--fg-dim); white-space: nowrap;
+/* Little header explaining what the dropdown filters on.
+   Deliberately DIMMER than the options it introduces. Header and option were both --fg-dim,
+   which read as one flat list of equally-clickable things — you could not tell the group
+   label from the choices inside it. The signposts recede; the things you can actually pick
+   are the brightest text in the menu (see .dd-menu button below). */
+/* Written as .dd-menu .dd-head, not .dd-head: the generic `.dd-menu button` above is one
+   class + one type and outranks a bare class, so a plain `.dd-head { color }` loses to it and
+   the headings render in the OPTION colour — brighter than the things they label. */
+.dd-menu .dd-head, .dd-head {
+  padding: 10px 12px 9px; border-bottom: 1px solid var(--line); cursor: default;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--fg-faint); background: rgba(255, 255, 255, .03); white-space: nowrap;
 }
+/* Three separate signals, because colour alone was not enough to tell a group's NAME from the
+   things inside it: the heading is smaller, widely tracked, and sits on its own band, while an
+   option is large, normally spaced and bright on the plain menu background. */
+.dd-menu .dd-head .dd-sub { letter-spacing: .2px; opacity: .8; }
 /* Collapsible section header in the hamburger menu: the whole bar toggles its group,
    with a chevron marking open/closed. Collapsed by default, and which sections you open is
    remembered across visits (see gallery template). */
@@ -518,13 +550,48 @@ button.badge:active, a.badge:active { box-shadow: none; }
   width: 6px; height: 6px; border-radius: 50%;
   background: var(--accent); box-shadow: 0 0 4px var(--accent);
 }
-.dd-chev { flex: none; color: var(--fg-faint); font-size: 9px; }
+/* Open/closed, said four ways instead of one.
+   A 9px ▸/▾ is a two-pixel difference in a dim colour at the far edge of the panel — you had
+   to hunt for it to know whether a section was expanded, which is the one thing a collapsible
+   header exists to tell you. So the OPEN header now announces itself as a unit: an accent bar
+   down its left edge, a brighter label, a lit accent chevron, and the band it sits on goes
+   darker to read as the lid of the group below it. Closed stays flat and quiet. */
+.dd-chev {
+  flex: none; color: var(--fg-faint); font-size: 11px; line-height: 1;
+  width: 11px; text-align: center;
+}
+.dd-menu .dd-sec { position: relative; transition: color .12s, background .12s; }
+.dd-menu .dd-sec::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--accent); opacity: 0; transition: opacity .12s;
+}
+.dd-menu .dd-sec.open::before { opacity: 1; }
+.dd-menu .dd-sec.open {
+  color: var(--fg); background: rgba(255, 255, 255, .06); border-bottom-color: var(--accent);
+}
+.dd-menu .dd-sec.open .dd-chev { color: var(--accent); }
 /* Options stack full-width (the .dd-menu flex column no longer reaches them directly). */
 .dd-sec-body { display: flex; flex-direction: column; }
 .dd-sub {
   display: block; margin-top: 2px; font-size: 10px; letter-spacing: 0;
   text-transform: none; color: var(--fg-faint);
 }
+/* Two-line menu option: the choice, then what it means in plain words. Used where the label
+   alone would be read wrong ("Photographed" implying the swatch IS the photo). The generic
+   .dd-menu button is nowrap and single-line, so this opts out of both. */
+.dd-menu button.dd-opt {
+  display: flex; flex-direction: column; gap: 2px; white-space: normal; line-height: 1.35;
+}
+.dd-opt-main { display: block; }
+/* The count is the number that stops a 5-of-5,764 tier reading as a broken filter, so it
+   stays legible rather than shrinking into the sub-line. */
+.dd-opt-n { color: var(--fg-faint); }
+.dd-opt.on .dd-opt-n { color: inherit; opacity: 0.7; }
+.dd-opt-sub {
+  display: block; font-size: 10px; letter-spacing: 0; text-transform: none;
+  color: var(--fg-faint);
+}
+.dd-opt.on .dd-opt-sub { color: inherit; opacity: 0.75; }
 
 /* ---- "Seen in fiction" filter: the deliberate odd-one-out ----
    A glitchy CRT toggle in its OWN cyan/magenta palette — not the site accent — so the fun,
@@ -562,6 +629,41 @@ button.badge:active, a.badge:active { box-shadow: none; }
 .fic-count {
   margin-left: auto; flex: none; font-family: var(--mono); font-size: 9px;
   color: #14e0e6; border: 1px solid #22384a; padding: 1px 5px; line-height: 1.5;
+}
+
+/* ---- Plain switch: the same shape as the fiction toggle, in the site accent ----
+   For filters that are a yes/no question rather than a choice between options. A two-option
+   section ("Any" / "On Roman's list") is a list pretending to be a switch — it costs a
+   collapse, a chevron and a row of chrome to ask something a single tap answers. No glitch
+   here: the fiction toggle is deliberately the odd one out, and these are the tidy ones. */
+.sw-sec { padding: 8px 8px 10px; border-bottom: 1px solid var(--line); }
+/* Written as .dd-menu button.sw-toggle so it outranks the generic `.dd-menu button` above,
+   which would otherwise strip the border and repaint the background. */
+.dd-menu button.sw-toggle {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  background: var(--bg-3); border: 1px solid var(--line); color: var(--fg-dim);
+  padding: 9px 10px; cursor: pointer; border-radius: 0; white-space: normal;
+  transition: border-color .12s, color .12s;
+}
+.dd-menu button.sw-toggle:hover { border-color: var(--accent); color: var(--fg); }
+.dd-menu button.sw-toggle.on { border-color: var(--accent); color: var(--fg); }
+.sw-glyph { font-size: 13px; line-height: 1; flex: none; color: var(--fg-faint); }
+.sw-toggle:hover .sw-glyph, .sw-toggle.on .sw-glyph { color: var(--accent); }
+.sw-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.sw-txt {
+  font-family: var(--mono); font-size: 11.5px; font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: inherit;
+}
+.sw-sub {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .03em; color: var(--fg-faint);
+  text-transform: none;
+}
+.sw-count {
+  margin-left: auto; flex: none; font-family: var(--mono); font-size: 9px;
+  color: var(--fg-faint); border: 1px solid var(--line); padding: 1px 5px; line-height: 1.5;
+}
+.sw-toggle:hover .sw-count, .sw-toggle.on .sw-count {
+  color: var(--accent); border-color: var(--accent);
 }
 /* Engaged: magenta frame, live glitch. */
 .fic-toggle.on { border-color: #ff2e97; background: #120010; color: #fff; }
@@ -1697,7 +1799,19 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 .m-menu {
   min-width: 232px; left: auto; right: 0;
   max-height: min(72vh, 640px); overflow-y: auto;
+  /* Firefox. The platform scrollbar is a light-grey pill on a white track — the one piece of
+     the OS that ignores the page and lands a bright rounded slab down the side of a black
+     CRT panel. Square, dark, and 1px-edged like everything else here. */
+  scrollbar-width: thin; scrollbar-color: var(--line) transparent;
 }
+.m-menu::-webkit-scrollbar { width: 10px; }
+.m-menu::-webkit-scrollbar-track { background: transparent; border-left: 1px solid var(--line); }
+.m-menu::-webkit-scrollbar-thumb {
+  background: #232a38; border: 1px solid var(--line); border-radius: 0;
+  /* No border-box padding trick: the thumb is meant to read as a solid block in a channel,
+     the way a hardware fader does, not as a floating pill. */
+}
+.m-menu::-webkit-scrollbar-thumb:hover { background: #313a4d; border-color: var(--accent); }
 .m-menu .dd-head { border-top: 1px solid var(--line); }
 .m-menu .dd-head:first-child { border-top: 0; }
 .m-menu-row { padding: 10px 12px; display: flex; gap: 8px; flex-wrap: wrap; }
@@ -2097,6 +2211,10 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 .badge.water {
   border-color: var(--accent); color: var(--accent); background: rgba(35, 196, 232, .07);
 }
+/* The card version is a mark, not a chip (see .card-mark) — but it keeps the accent on its
+   glyph for the same reason the badge does: it answers a question rather than labelling a
+   provenance, and it is the one thing on a card a visitor is actively hunting for. */
+.card-mark.water i { color: var(--accent); }
 .dd-note {
   padding: 6px 12px 8px; font-size: 11px; line-height: 1.5; color: var(--fg-faint);
   border-bottom: 1px solid var(--line);

@@ -31,11 +31,17 @@
 {%- endmacro %}
 
 {# The honesty badge. It is also jargon in its own right, so it carries data-term: hovering it
-   gives the same definition as the word anywhere else (see the g() macro below). #}
+   gives the same definition as the word anywhere else (see the g() macro below).
+
+   It answers ONE question: was this colour computed or measured? `simulated-cgi` therefore
+   reads "Modelled" like every other model — being on Roman's shortlist is a fact about where
+   the telescope can point, not about how the swatch was derived, and it has its own gallery
+   filter now. Saying "Roman: simulated" here put a telescope's name on a badge that exists to
+   keep model and measurement apart, which is the one place it must not appear. #}
 {% macro provenance_badge(rec) -%}
   {%- set labels = {
     'model': 'Modelled',
-    'simulated-cgi': 'Roman: simulated',
+    'simulated-cgi': 'Modelled',
     'measured-cgi': 'Roman: measured',
     'model-microlensing': 'Modelled',
     'measured-hwo': 'HWO: measured',
@@ -43,7 +49,7 @@
   } -%}
   {%- set terms = {
     'model': 'modelled',
-    'simulated-cgi': 'simulated',
+    'simulated-cgi': 'modelled',
     'measured-cgi': 'measured',
     'model-microlensing': 'modelled',
     'measured-hwo': 'measured',

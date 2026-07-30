@@ -210,7 +210,7 @@
     <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
       @click.outside="open=false">
       <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
-        :class="sort !== 'curated' || prov !== 'all' || ptype !== 'all' || disc !== 'all' || distBand !== 'all' || hz !== 'all' || fic ? 'active' : ''"
+        :class="sort !== 'curated' || obs !== 'all' || roman !== 'all' || ptype !== 'all' || disc !== 'all' || distBand !== 'all' || hz !== 'all' || fic ? 'active' : ''"
         aria-label="Filter, sort and display options" title="Filter, sort and display options">
         <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
           <path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" stroke-width="1.6"
@@ -231,15 +231,45 @@
             <span class="fic-count" x-show="loaded" x-cloak x-text="ficCount()"></span>
           </button>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="toggleSec('prov')"
-          :aria-expanded="secOpen('prov')"><span>How real<span class="dd-sub">modelled vs measured colour</span></span>
-          <span class="dd-secend"><i class="dd-dot" x-show="secActive('prov')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('prov') ? '▾' : '▸'"></span></span></button>
-        <div class="dd-sec-body" x-show="secOpen('prov')">
-          <template x-for="[val, label] in provOptions()" :key="'p' + val">
-            <button :class="prov === val ? 'on' : ''" @click="prov = val" x-text="label"></button>
+        {# Roman's shortlist is a yes/no question, so it is a switch, not a section with two
+           options in it. Same shape as the fiction toggle above — the two binary "show only
+           these" filters sit together — but in the site accent, because this one is science.
+           It only appears once the shortlist has joined onto planets in this catalogue. #}
+        <template x-if="romanCount()">
+          <div class="sw-sec">
+            <button type="button" class="sw-toggle" :class="roman === 'yes' ? 'on' : ''"
+              @click="roman = roman === 'yes' ? 'all' : 'yes'" :aria-pressed="roman === 'yes'"
+              title="Show only the nearby giants Roman's coronagraph could catch in reflected light">
+              <span class="sw-glyph" aria-hidden="true">◎</span>
+              <span class="sw-main">
+                <span class="sw-txt">Roman target</span>
+                {# Two words, so the switch stays the same height as the one above it — the
+                   heading already says whose shortlist this is. #}
+                <span class="sw-sub">coronagraph shortlist</span>
+              </span>
+              <span class="sw-count" x-text="romanCount()"></span>
+            </button>
+          </div>
+        </template>
+        {# "How real" — what light of this planet anyone has actually caught. NOT how the
+           colour was computed: that is the badge on every card, and it says "Modelled" for all
+           but five. Each tier's own second line carries its caveat, so there is no standing
+           paragraph above them: the one thing that MUST be said — those images are infrared
+           and false-coloured, so the swatch is never the photo — is said on the row it applies
+           to, where someone choosing it will actually read it. #}
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('obs')" :class="secOpen('obs') ? 'open' : ''"
+          :aria-expanded="secOpen('obs')"><span>How real<span class="dd-sub">what light we actually have</span></span>
+          <span class="dd-secend"><i class="dd-dot" x-show="secActive('obs')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('obs') ? '▾' : '▸'"></span></span></button>
+        <div class="dd-sec-body" x-show="secOpen('obs')">
+          <template x-for="[val, label, sub, n] in obsOptions()" :key="'o' + val">
+            <button class="dd-opt" :class="obs === val ? 'on' : ''" @click="obs = val">
+              <span class="dd-opt-main"><span x-text="label"></span><span class="dd-opt-n"
+                x-show="val !== 'all'" x-cloak x-text="' · ' + n.toLocaleString()"></span></span>
+              <span class="dd-opt-sub" x-show="sub" x-cloak x-text="sub"></span>
+            </button>
           </template>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="toggleSec('ptype')"
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('ptype')" :class="secOpen('ptype') ? 'open' : ''"
           :aria-expanded="secOpen('ptype')"><span>Planet type<span class="dd-sub">by size + temperature</span></span>
           <span class="dd-secend"><i class="dd-dot" x-show="secActive('ptype')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('ptype') ? '▾' : '▸'"></span></span></button>
         <div class="dd-sec-body" x-show="secOpen('ptype')">
@@ -250,18 +280,20 @@
         {# The habitable-zone lens. "Liquid water" is the question every visitor arrives with,
            so it sits high in the menu — but the label says "could", the options name the
            failure cases plainly, and the ℹ spells out that this is orbital distance only. #}
-        <button type="button" class="dd-head dd-sec" @click="toggleSec('hz')"
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('hz')" :class="secOpen('hz') ? 'open' : ''"
           :aria-expanded="secOpen('hz')"><span>Liquid water<span class="dd-sub">by habitable zone</span></span>
           <span class="dd-secend"><i class="dd-dot" x-show="secActive('hz')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('hz') ? '▾' : '▸'"></span></span></button>
         <div class="dd-sec-body" x-show="secOpen('hz')">
-          <div class="dd-note">Whether the orbit gets about as much starlight as Earth does —
-            and whether the planet is small enough to have a surface. It says nothing about
-            an atmosphere, which nobody has measured for these planets.</div>
+          {# Cut to the one clause that changes what a visitor concludes. The rest (orbital
+             distance and size only, no atmosphere measured for any of these) travels with the
+             planet page, where the claim is actually made. #}
+          <div class="dd-note">Orbital distance and size only — nobody has measured an
+            atmosphere here.</div>
           <template x-for="[val, label] in hzOptions()" :key="'h' + val">
             <button :class="hz === val ? 'on' : ''" @click="hz = val" x-text="label"></button>
           </template>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="toggleSec('dist')"
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('dist')" :class="secOpen('dist') ? 'open' : ''"
           :aria-expanded="secOpen('dist')"><span>Distance<span class="dd-sub">from Earth</span></span>
           <span class="dd-secend"><i class="dd-dot" x-show="secActive('dist')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('dist') ? '▾' : '▸'"></span></span></button>
         <div class="dd-sec-body" x-show="secOpen('dist')">
@@ -269,7 +301,7 @@
             <button :class="distBand === val ? 'on' : ''" @click="distBand = val" x-text="label"></button>
           </template>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="toggleSec('disc')"
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('disc')" :class="secOpen('disc') ? 'open' : ''"
           :aria-expanded="secOpen('disc')"><span>Discovery</span>
           <span class="dd-secend"><i class="dd-dot" x-show="secActive('disc')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('disc') ? '▾' : '▸'"></span></span></button>
         <div class="dd-sec-body" x-show="secOpen('disc')">
@@ -277,7 +309,7 @@
             <button :class="disc === val ? 'on' : ''" @click="disc = val" x-text="label"></button>
           </template>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="toggleSec('sort')"
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('sort')" :class="secOpen('sort') ? 'open' : ''"
           :aria-expanded="secOpen('sort')"><span>Sort by</span>
           <span class="dd-secend"><i class="dd-dot" x-show="secActive('sort')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('sort') ? '▾' : '▸'"></span></span></button>
         <div class="dd-sec-body" x-show="secOpen('sort')">
@@ -291,7 +323,7 @@
               x-text="label.replace('Sort: ', '')"></button>
           </template>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="toggleSec('render')"
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('render')" :class="secOpen('render') ? 'open' : ''"
           :aria-expanded="secOpen('render')"><span>Planet render</span>
           <span class="dd-chev" x-text="secOpen('render') ? '▾' : '▸'"></span></button>
         <div class="dd-sec-body" x-show="secOpen('render')">
@@ -307,7 +339,7 @@
             </div>
           </div>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="toggleSec('accent')"
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('accent')" :class="secOpen('accent') ? 'open' : ''"
           :aria-expanded="secOpen('accent')"><span>Accent colour</span>
           <span class="dd-chev" x-text="secOpen('accent') ? '▾' : '▸'"></span></button>
         <div class="dd-sec-body" x-show="secOpen('accent')">

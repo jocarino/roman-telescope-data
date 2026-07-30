@@ -113,7 +113,8 @@ document.addEventListener("alpine:init", () => {
     _drawIO: null,        // draws each card's planet as it nears the viewport
     _qT: 0,               // pending debounce timer for the search box
     q: "",
-    prov: "all",
+    obs: "all",       // "how real": what light of this planet anyone has caught — see obsLabels
+    roman: "all",     // on Roman's coronagraph shortlist — see romanLabels
     ptype: "all",
     disc: "all",
     distBand: "all",
@@ -131,11 +132,32 @@ document.addEventListener("alpine:init", () => {
     _fcT: null,
     scrolled: false,  // page scrolled past the header: toolbar is stuck, TOP button shows
     // Labels for the custom (retro) dropdowns.
-    provLabels: {
-      all: "All", model: "Modelled", "simulated-cgi": "Roman: simulated",
-      "measured-cgi": "Roman: measured", "model-microlensing": "Microlensing",
-      "measured-albedo": "Spectrum: measured",
+    // "How real" — the observation tiers computed in web/build.py (_observation_tier). Ordered
+    // most-evidence-first, which is also how the menu reads top to bottom. Each carries a
+    // plain-English second line: "Photographed" alone would let a visitor assume the swatch is
+    // the photo, and it never is — those images are infrared and false-coloured.
+    obsLabels: {
+      all: "All",
+      colour: "Its colour, measured",
+      photo: "Photographed",
+      // Kept short enough that the label and its count stay on one line in the menu's width:
+      // "Seen directly, no image · 71" wrapped, and a count orphaned on its own line reads
+      // like a second option rather than part of this one.
+      imaged: "Seen directly",
+      unseen: "Never seen",
+      lost: "Never seen again",
     },
+    obsSubs: {
+      all: "",
+      colour: "visible spectrum, solar system",
+      photo: "coronagraph image, infrared",
+      imaged: "imaging discovery, no picture here",
+      unseen: "inferred from its star's light",
+      lost: "microlensing — a one-off event",
+    },
+    // Roman's coronagraph shortlist. Its own filter, NOT a "how real" tier: being a target
+    // says where the telescope can point, nothing whatsoever about how the colour was derived.
+    romanLabels: { all: "Any", yes: "On Roman's list" },
     typeLabels: {
       all: "All types", rocky: "Rocky", "super-earth": "Super-Earth",
       neptune: "Neptune-like", "gas-giant": "Gas giant", "hot-jupiter": "Hot Jupiter",
@@ -227,7 +249,9 @@ document.addEventListener("alpine:init", () => {
     // an active filter completely, so the heading carries the same small accent dot the
     // hamburger button itself uses. Kept in step with that button's `active` condition.
     secActive(k) {
-      if (k === "prov") return this.prov !== "all";
+      if (k === "obs") return this.obs !== "all";
+      // No `roman` case: it is a switch in the menu's top block, not a collapsible section,
+      // so it is never hidden behind a shut heading that would need the dot.
       if (k === "ptype") return this.ptype !== "all";
       if (k === "hz") return this.hz !== "all";
       if (k === "dist") return this.distBand !== "all";
@@ -310,9 +334,10 @@ document.addEventListener("alpine:init", () => {
     // (browser Back, or ALL PLANETS, which is a plain link to "/") and the grid is as you
     // left it. Only non-default values are written, so clearing everything removes the entry
     // rather than leaving a fossil behind.
-    _filterKeys: ["q", "prov", "ptype", "disc", "distBand", "hz", "family", "fic", "sort", "nearId"],
+    _filterKeys: ["q", "obs", "roman", "ptype", "disc", "distBand", "hz", "family", "fic", "sort",
+      "nearId"],
     _filterDefaults: {
-      q: "", prov: "all", ptype: "all", disc: "all", distBand: "all", hz: "all",
+      q: "", obs: "all", roman: "all", ptype: "all", disc: "all", distBand: "all", hz: "all",
       family: null, fic: false, sort: "curated", nearId: null,
     },
     filtersDirty() {
@@ -332,7 +357,8 @@ document.addEventListener("alpine:init", () => {
       if (this.q) add("q", "“" + this.q + "”");
       if (this.family) add("family", this.familyMeta[this.family].n, this.familyMeta[this.family].c);
       if (this.fic) add("fic", "Seen in fiction");
-      if (this.prov !== "all") add("prov", this.provLabels[this.prov]);
+      if (this.obs !== "all") add("obs", this.obsLabels[this.obs]);
+      if (this.roman !== "all") add("roman", this.romanLabels[this.roman]);
       if (this.ptype !== "all") add("ptype", this.typeLabels[this.ptype]);
       if (this.hz !== "all") add("hz", this.hzLabels[this.hz]);
       if (this.distBand !== "all") {
@@ -371,7 +397,8 @@ document.addEventListener("alpine:init", () => {
       catch (e) { return; }
       if (!saved || typeof saved !== "object") return;
       const ok = {
-        prov: (v) => v in this.provLabels,
+        obs: (v) => v in this.obsLabels,
+        roman: (v) => v in this.romanLabels,
         ptype: (v) => v in this.typeLabels,
         hz: (v) => v in this.hzLabels,
         family: (v) => v in this.familyMeta,
@@ -610,35 +637,75 @@ document.addEventListener("alpine:init", () => {
       a.appendChild(name);
       const meta = document.createElement("div");
       meta.className = "card-meta";
-      const badge = document.createElement("span");
-      badge.className = "badge " + p.prov;
-      badge.textContent = this._provBadge(p.prov);
-      meta.appendChild(badge);
-      const hex = document.createElement("span");
-      hex.className = "badge hex";
-      const chip = document.createElement("i");
-      const ph = this.hexOf(p);
-      chip.className = "chip"; chip.style.background = ph;
-      hex.appendChild(chip);
-      hex.appendChild(document.createTextNode(ph));
-      meta.appendChild(hex);
-      // Only the strongest case earns a card badge: right distance AND a plausible surface.
-      // Everything weaker is left to the planet page, where the caveats travel with it.
-      if (this._hzOf(p) === "water") {
-        const w = document.createElement("span");
-        w.className = "badge water";
-        w.title = "Orbits in its star's habitable zone and may have a solid surface — "
-          + "a candidate for liquid water, not a detection of it";
-        w.textContent = "◉ Liquid water?";
-        meta.appendChild(w);
-      }
+      // At most ONE. Two marks wrap to a second line in a grid track this narrow, and a single
+      // card standing a line taller drags its whole row off the baseline — which is exactly
+      // the raggedness the pills caused (Earth carried three of them, Jupiter beside it two).
+      // _marks is ordered rarest-first, so the survivor is always the more remarkable claim.
+      const marks = this._marks(p);
+      if (marks.length) meta.appendChild(marks[0]);
       a.appendChild(meta);
       return a;
     },
+    // What a card says under the name — which is, for 99% of them, nothing at all.
+    //
+    // The grid used to hang two or three bordered pills under every planet, and they were
+    // pulling the page away from the one thing it is for. "Modelled" sat on 5,755 of 5,764
+    // cards: a label that appears on everything states nothing, it just draws a box. The hex
+    // was a smaller, worse copy of the swatch four times its size directly above it, and it
+    // still lives on the long-press peek and in full (with copy buttons) on the planet page.
+    // Both are gone from the face.
+    //
+    // What is left is only what is genuinely RARE — about 80 cards in the whole catalogue —
+    // so a mark now means "look at this one" instead of "this is a card". Each keeps its
+    // words: a lone ◆ would be a costume glyph nobody can read, and the site's rule is that
+    // no mark is the only signpost for what it means.
+    _marks(p) {
+      const out = [];
+      const mark = (cls, glyph, text, title) => {
+        const s = document.createElement("span");
+        s.className = "card-mark" + (cls ? " " + cls : "");
+        if (title) s.title = title;
+        const i = document.createElement("i");
+        i.textContent = glyph;
+        i.setAttribute("aria-hidden", "true");
+        s.appendChild(i);
+        s.appendChild(document.createTextNode(text));
+        out.push(s);
+      };
+      // Evidence, and only where there is any worth flagging. See _observation_tier in
+      // web/build.py — `imaged` is deliberately not marked: it is the weakest of the claims
+      // and 71 cards of quiet noise, so it stays a filter rather than becoming decoration.
+      if (p.obs === "colour") {
+        mark("", "◆", "measured spectrum",
+          "Its real reflected-light spectrum was measured — this swatch is computed from "
+          + "data, not from a model");
+      } else if (p.obs === "photo") {
+        mark("", "◉", "photographed",
+          "A real image exists, taken with the star blocked out — in infrared and false "
+          + "colour, so the picture is not this swatch");
+      } else if (p.obs === "lost") {
+        mark("", "⌁", "seen once",
+          "Found by microlensing: a one-off brightening that will never repeat. No light "
+          + "from this planet can ever be separated from its star");
+      }
+      // The one question every visitor arrives with, so it keeps its own colour. Only the
+      // strongest case earns it: right distance AND a plausible surface.
+      if (this._hzOf(p) === "water") {
+        mark("water", "◉", "liquid water?",
+          "Orbits in its star's habitable zone and may have a solid surface — a candidate "
+          + "for liquid water, not a detection of it");
+      }
+      return out;
+    },
+    // The card badge answers one question only: was this colour computed or measured?
+    // `simulated-cgi` reads "Modelled" like every other model, because that is what it is —
+    // it marks a planet Roman could point at, which is a fact about the telescope's reach and
+    // not about the swatch. That fact now has its own filter; it does not belong on a badge
+    // whose whole job is honesty about model vs measurement.
     _provBadge(prov) {
       const m = {
-        model: "Modelled", "model-microlensing": "Modelled",
-        "simulated-cgi": "Roman: simulated", "measured-cgi": "Roman: measured",
+        model: "Modelled", "model-microlensing": "Modelled", "simulated-cgi": "Modelled",
+        "measured-cgi": "Roman: measured",
         "measured-hwo": "HWO: measured", "measured-albedo": "Spectrum: measured",
       };
       return m[prov] || prov;
@@ -683,17 +750,27 @@ document.addEventListener("alpine:init", () => {
       return this.familyOrder.filter((f) => present.has(f))
         .map((f) => ({ id: f, name: this.familyMeta[f].n, colour: this.familyMeta[f].c }));
     },
-    // Provenance dropdown: "all" + only the provenances present, each with its planet count.
-    // The counts are load-bearing UX at scale: 5,755 of 5,759 planets are "Modelled", so
-    // picking it barely changes the grid — without the number the filter looks broken.
-    provOptions() {
-      if (!this.loaded) return [["all", this.provLabels.all]];
+    // "How real" dropdown: "all" + only the tiers actually present, each [value, label, sub,
+    // count]. The counts are load-bearing UX at this scale, not decoration — 5,680 of 5,764
+    // planets are "Never seen", so picking almost any other tier collapses the grid to a
+    // handful of cards, and without the number beforehand that reads as a broken filter
+    // rather than as the honest shape of the catalogue.
+    obsOptions() {
+      if (!this.loaded) return [["all", this.obsLabels.all, "", 0]];
       const counts = {};
-      window.PLANETS.forEach((x) => (counts[x.prov] = (counts[x.prov] || 0) + 1));
-      return Object.entries(this.provLabels)
+      // A missing `obs` is the common case, stored nowhere to keep the index small.
+      window.PLANETS.forEach((x) => {
+        const t = x.obs || "unseen";
+        counts[t] = (counts[t] || 0) + 1;
+      });
+      return Object.entries(this.obsLabels)
         .filter(([v]) => v === "all" || counts[v])
-        .map(([v, label]) =>
-          [v, v === "all" ? label : label + " · " + counts[v].toLocaleString()]);
+        .map(([v, label]) => [v, label, this.obsSubs[v] || "", v === "all" ? 0 : counts[v]]);
+    },
+    // Roman shortlist: one real choice, so it only earns its row once the index confirms the
+    // list joined onto planets that exist. An empty shortlist renders as "Any" alone.
+    romanCount() {
+      return this.loaded ? (window.PLANETS || []).filter((p) => p.rt).length : 0;
     },
     // Type dropdown options: always "all", then only the types actually present in the data.
     typeOptions() {
@@ -788,7 +865,8 @@ document.addEventListener("alpine:init", () => {
         if (!all.some(qMatch)) qMatch = this._vocabMatch(qn) || qMatch;
       }
       let items = all.filter((p) => {
-        if (this.prov !== "all" && p.prov !== this.prov) return false;
+        if (this.obs !== "all" && (p.obs || "unseen") !== this.obs) return false;
+        if (this.roman !== "all" && !p.rt) return false;
         if (this.ptype !== "all" && p.ptype !== this.ptype) return false;
         if (this.disc !== "all" && p.disc !== this.disc) return false;
         if (this.distBand !== "all" && this._distBandOf(p.dist_ly) !== this.distBand) return false;
