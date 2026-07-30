@@ -491,8 +491,10 @@ button.badge:active, a.badge:active { box-shadow: none; }
   background: #000; border: 1px solid var(--line); box-shadow: 4px 4px 0 rgba(0, 0, 0, .7);
   display: flex; flex-direction: column;
 }
+/* The choices. Brighter than the .dd-head labels above them on purpose — in a menu this tall
+   the fastest way to read it is "dim = what this group is, bright = what I can pick". */
 .dd-menu button {
-  background: transparent; border: 0; color: var(--fg-dim); font: inherit; font-size: 13px;
+  background: transparent; border: 0; color: var(--fg); font: inherit; font-size: 13px;
   text-align: left; padding: 9px 12px; cursor: pointer; white-space: nowrap;
 }
 /* Exclude the colour swatches: repainting their background near-black on hover hid the colour. */
@@ -515,11 +517,15 @@ button.badge:active, a.badge:active { box-shadow: none; }
 /* The one-line explanation under each destination inherits .dd-sub, which is muted by
    default; keep it muted even while the row itself lightens on hover. */
 .nav-menu a .dd-sub { color: var(--fg-faint); white-space: normal; }
-/* Little header explaining what the dropdown filters on. */
+/* Little header explaining what the dropdown filters on.
+   Deliberately DIMMER than the options it introduces. Header and option were both --fg-dim,
+   which read as one flat list of equally-clickable things — you could not tell the group
+   label from the choices inside it. The signposts recede; the things you can actually pick
+   are the brightest text in the menu (see .dd-menu button below). */
 .dd-head {
   padding: 9px 12px 8px; border-bottom: 1px solid var(--line); cursor: default;
   font-family: var(--mono); font-size: 9.5px; letter-spacing: .5px; text-transform: uppercase;
-  color: var(--fg-dim); white-space: nowrap;
+  color: var(--fg-faint); background: rgba(255, 255, 255, .022); white-space: nowrap;
 }
 /* Collapsible section header in the hamburger menu: the whole bar toggles its group,
    with a chevron marking open/closed. Collapsed by default, and which sections you open is
@@ -597,6 +603,41 @@ button.badge:active, a.badge:active { box-shadow: none; }
 .fic-count {
   margin-left: auto; flex: none; font-family: var(--mono); font-size: 9px;
   color: #14e0e6; border: 1px solid #22384a; padding: 1px 5px; line-height: 1.5;
+}
+
+/* ---- Plain switch: the same shape as the fiction toggle, in the site accent ----
+   For filters that are a yes/no question rather than a choice between options. A two-option
+   section ("Any" / "On Roman's list") is a list pretending to be a switch — it costs a
+   collapse, a chevron and a row of chrome to ask something a single tap answers. No glitch
+   here: the fiction toggle is deliberately the odd one out, and these are the tidy ones. */
+.sw-sec { padding: 8px 8px 10px; border-bottom: 1px solid var(--line); }
+/* Written as .dd-menu button.sw-toggle so it outranks the generic `.dd-menu button` above,
+   which would otherwise strip the border and repaint the background. */
+.dd-menu button.sw-toggle {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  background: var(--bg-3); border: 1px solid var(--line); color: var(--fg-dim);
+  padding: 9px 10px; cursor: pointer; border-radius: 0; white-space: normal;
+  transition: border-color .12s, color .12s;
+}
+.dd-menu button.sw-toggle:hover { border-color: var(--accent); color: var(--fg); }
+.dd-menu button.sw-toggle.on { border-color: var(--accent); color: var(--fg); }
+.sw-glyph { font-size: 13px; line-height: 1; flex: none; color: var(--fg-faint); }
+.sw-toggle:hover .sw-glyph, .sw-toggle.on .sw-glyph { color: var(--accent); }
+.sw-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.sw-txt {
+  font-family: var(--mono); font-size: 11.5px; font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: inherit;
+}
+.sw-sub {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .03em; color: var(--fg-faint);
+  text-transform: none;
+}
+.sw-count {
+  margin-left: auto; flex: none; font-family: var(--mono); font-size: 9px;
+  color: var(--fg-faint); border: 1px solid var(--line); padding: 1px 5px; line-height: 1.5;
+}
+.sw-toggle:hover .sw-count, .sw-toggle.on .sw-count {
+  color: var(--accent); border-color: var(--accent);
 }
 /* Engaged: magenta frame, live glitch. */
 .fic-toggle.on { border-color: #ff2e97; background: #120010; color: #fff; }

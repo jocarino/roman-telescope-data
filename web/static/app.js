@@ -250,7 +250,8 @@ document.addEventListener("alpine:init", () => {
     // hamburger button itself uses. Kept in step with that button's `active` condition.
     secActive(k) {
       if (k === "obs") return this.obs !== "all";
-      if (k === "roman") return this.roman !== "all";
+      // No `roman` case: it is a switch in the menu's top block, not a collapsible section,
+      // so it is never hidden behind a shut heading that would need the dot.
       if (k === "ptype") return this.ptype !== "all";
       if (k === "hz") return this.hz !== "all";
       if (k === "dist") return this.distBand !== "all";

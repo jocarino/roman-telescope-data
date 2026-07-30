@@ -231,21 +231,36 @@
             <span class="fic-count" x-show="loaded" x-cloak x-text="ficCount()"></span>
           </button>
         </div>
+        {# Roman's shortlist is a yes/no question, so it is a switch, not a section with two
+           options in it. Same shape as the fiction toggle above — the two binary "show only
+           these" filters sit together — but in the site accent, because this one is science.
+           It only appears once the shortlist has joined onto planets in this catalogue. #}
+        <template x-if="romanCount()">
+          <div class="sw-sec">
+            <button type="button" class="sw-toggle" :class="roman === 'yes' ? 'on' : ''"
+              @click="roman = roman === 'yes' ? 'all' : 'yes'" :aria-pressed="roman === 'yes'"
+              title="Show only the nearby giants Roman's coronagraph could catch in reflected light">
+              <span class="sw-glyph" aria-hidden="true">◎</span>
+              <span class="sw-main">
+                <span class="sw-txt">Roman target</span>
+                {# Two words, so the switch stays the same height as the one above it — the
+                   heading already says whose shortlist this is. #}
+                <span class="sw-sub">coronagraph shortlist</span>
+              </span>
+              <span class="sw-count" x-text="romanCount()"></span>
+            </button>
+          </div>
+        </template>
         {# "How real" — what light of this planet anyone has actually caught. NOT how the
            colour was computed: that is the badge on every card, and it says "Modelled" for all
-           but five. The tiers are ranked most-evidence-first and each carries a plain second
-           line, because "Photographed" on its own invites the one wrong conclusion this
-           project exists to prevent — those images are infrared and false-coloured, and the
-           swatch is never the photo. The note spells that out rather than hiding it in a
-           tooltip. #}
+           but five. Each tier's own second line carries its caveat, so there is no standing
+           paragraph above them: the one thing that MUST be said — those images are infrared
+           and false-coloured, so the swatch is never the photo — is said on the row it applies
+           to, where someone choosing it will actually read it. #}
         <button type="button" class="dd-head dd-sec" @click="toggleSec('obs')"
           :aria-expanded="secOpen('obs')"><span>How real<span class="dd-sub">what light we actually have</span></span>
           <span class="dd-secend"><i class="dd-dot" x-show="secActive('obs')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('obs') ? '▾' : '▸'"></span></span></button>
         <div class="dd-sec-body" x-show="secOpen('obs')">
-          <div class="dd-note">Almost every planet here has never been seen — we know it from
-            its star's light, not its own. A handful have been photographed with the star
-            blocked out, but only in infrared: those pictures are false colour, and the swatch
-            is always computed, never the photograph.</div>
           <template x-for="[val, label, sub, n] in obsOptions()" :key="'o' + val">
             <button class="dd-opt" :class="obs === val ? 'on' : ''" @click="obs = val">
               <span class="dd-opt-main"><span x-text="label"></span><span class="dd-opt-n"
@@ -254,26 +269,6 @@
             </button>
           </template>
         </div>
-        {# Roman's shortlist. Its own section, because being a target says where the telescope
-           can point and nothing at all about how honest a colour is — it spent a while inside
-           "How real" implying otherwise. Only shown once the shortlist has joined onto
-           planets that exist in this catalogue. #}
-        <template x-if="romanCount()">
-          <div>
-            <button type="button" class="dd-head dd-sec" @click="toggleSec('roman')"
-              :aria-expanded="secOpen('roman')"><span>Roman target<span class="dd-sub">on the coronagraph shortlist</span></span>
-              <span class="dd-secend"><i class="dd-dot" x-show="secActive('roman')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('roman') ? '▾' : '▸'"></span></span></button>
-            <div class="dd-sec-body" x-show="secOpen('roman')">
-              <div class="dd-note">The nearby giant planets Roman's coronagraph could plausibly
-                catch in reflected light. Their colours are modelled like everyone else's —
-                these are simply the ones a real measurement could one day replace.</div>
-              <button :class="roman === 'all' ? 'on' : ''" @click="roman = 'all'"
-                x-text="romanLabels.all"></button>
-              <button :class="roman === 'yes' ? 'on' : ''" @click="roman = 'yes'"
-                x-text="romanLabels.yes + ' · ' + romanCount().toLocaleString()"></button>
-            </div>
-          </div>
-        </template>
         <button type="button" class="dd-head dd-sec" @click="toggleSec('ptype')"
           :aria-expanded="secOpen('ptype')"><span>Planet type<span class="dd-sub">by size + temperature</span></span>
           <span class="dd-secend"><i class="dd-dot" x-show="secActive('ptype')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('ptype') ? '▾' : '▸'"></span></span></button>
@@ -289,9 +284,11 @@
           :aria-expanded="secOpen('hz')"><span>Liquid water<span class="dd-sub">by habitable zone</span></span>
           <span class="dd-secend"><i class="dd-dot" x-show="secActive('hz')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('hz') ? '▾' : '▸'"></span></span></button>
         <div class="dd-sec-body" x-show="secOpen('hz')">
-          <div class="dd-note">Whether the orbit gets about as much starlight as Earth does —
-            and whether the planet is small enough to have a surface. It says nothing about
-            an atmosphere, which nobody has measured for these planets.</div>
+          {# Cut to the one clause that changes what a visitor concludes. The rest (orbital
+             distance and size only, no atmosphere measured for any of these) travels with the
+             planet page, where the claim is actually made. #}
+          <div class="dd-note">Orbital distance and size only — nobody has measured an
+            atmosphere here.</div>
           <template x-for="[val, label] in hzOptions()" :key="'h' + val">
             <button :class="hz === val ? 'on' : ''" @click="hz = val" x-text="label"></button>
           </template>
