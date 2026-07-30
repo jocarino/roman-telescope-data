@@ -79,6 +79,20 @@ _FICTION_JSON = Path("data/fiction-references.json")
 # site-wide hover tooltips (templates mark a term with the g() macro; the short definition
 # is shipped as one cached JS file rather than inlined into 900+ pages).
 _GLOSSARY_JSON = Path("data/glossary.json")
+# The Roman coronagraph shortlist. The SAME file the /roman board renders from, read here so
+# the gallery's "Roman target" filter and the board can never disagree about who is on the
+# list — they did disagree for a while, when the shortlist was also duplicated as a four-name
+# literal in the pipeline and only three of the twenty-five ever reached the gallery.
+_ROMAN_JSON = Path("data/roman-targets.json")
+
+
+def _load_roman_ids(path: Path = _ROMAN_JSON) -> set[str]:
+    """Planet ids on Roman's coronagraph shortlist. Missing file = no Roman filter, not a
+    broken build (the same rule the fiction overlay and the glossary follow)."""
+    if not path.exists():
+        return set()
+    targets = json.loads(path.read_text()).get("targets", [])
+    return {t["catalog_id"] for t in targets if t.get("catalog_id")}
 
 
 def _load_glossary(path: Path = _GLOSSARY_JSON) -> dict:
@@ -360,10 +374,43 @@ def _r(value: float | None, places: int) -> float | None:
     return None if value is None else round(value, places)
 
 
+# The gallery's "How real" axis. This is NOT how the colour was computed — that is
+# `provenance`, and it reads "modelled" for all but the five solar-system anchors. It is the
+# other, more interesting question: what light of this planet has anyone ever actually caught?
+#
+# The two used to share one control, which put Roman's target list on an axis labelled
+# "modelled vs measured" and so implied that being on the list said something about a colour's
+# honesty. It says nothing of the kind — those planets are exactly as modelled as the rest —
+# so the shortlist moved to its own filter and this axis became the thing it was pretending
+# to be. The real prize is that the seven planets with an actual coronagraph image were
+# reachable from nowhere in the gallery at all.
+#
+# Ordered most-evidence-first; first match wins. A tier is a claim about EVIDENCE, not about
+# quality: "never seen" is the honest state of 98% of the catalogue, not a defect in it.
+def _observation_tier(rec: PlanetRecord) -> str:
+    if rec.provenance == "measured-albedo":
+        # Its visible spectrum is a measurement, so the swatch is too — the five anchors.
+        return "colour"
+    if rec.real_observations:
+        # A real image exists, star blocked. Infrared and false-coloured, every one of them:
+        # this tier means "we have seen it", NOT "we have seen this colour".
+        return "photo"
+    if not rec.is_light_isolable:
+        # Microlensing: a one-off brightening, over before anyone could follow it up. No
+        # photon from this planet will ever be separated from its star, by any instrument.
+        return "lost"
+    if rec.discovery.method == "Imaging":
+        # Resolved from its star at discovery; we just have no published image on file here.
+        return "imaged"
+    # Inferred from the star's light alone — a transit dip, a wobble, a timing shift.
+    return "unseen"
+
+
 def _index_entry(
     rec: PlanetRecord,
     fiction: dict[str, dict] | None = None,
     curated: dict[str, int] | None = None,
+    roman_ids: set[str] | None = None,
 ) -> dict:
     view = rec.instrument_views[0]
     entry = {
@@ -413,6 +460,15 @@ def _index_entry(
     fic = (fiction or {}).get(rec.name)
     if fic:
         entry["fic"] = fic["system"]
+    # "How real" (see _observation_tier) and Roman's shortlist. Both sparse, the way `fic` is:
+    # the 5,680 never-seen planets and the 5,741 non-targets carry no field at all, and the
+    # browser reads a missing value as the common case. Together they cost about 1 KB over the
+    # whole index rather than the ~90 KB two dense string columns would.
+    tier = _observation_tier(rec)
+    if tier != "unseen":
+        entry["obs"] = tier
+    if rec.id in (roman_ids or set()):
+        entry["rt"] = 1
     return entry
 
 
@@ -587,6 +643,7 @@ def build(
 
     fiction = _load_fiction()
     glossary = _load_glossary()
+    roman_ids = _load_roman_ids()
     # Cache-bust static assets on every build so browsers never serve a stale JS/CSS.
     build_id = str(int(time.time()))
 
@@ -618,14 +675,17 @@ def build(
     # planets this site already tells a story about — one of Roman's own simulated tech-demo
     # targets, a world that turns up in fiction, a stop on a guided tour — lead their family
     # where the physics leaves the choice open.
-    boost = {r.id for r in records if r.provenance == "simulated-cgi"}
+    # Reads the shortlist itself rather than the `simulated-cgi` provenance it used to: that
+    # provenance only ever covered three of the twenty-five targets, so twenty of Roman's own
+    # planets were losing their family tie-break to worlds with no story attached.
+    boost = set(roman_ids)
     boost |= {r.id for r in records if r.name in fiction}
     boost |= {s.planet.id for t in tours for s in t.stops}
     curated = curated_ranks(records, boost=boost)
 
     # The gallery index is fetched at runtime (not inlined) so index.html stays tiny and the
     # grid scales to thousands of planets. Cache-busted by build_id.
-    index_entries = [_index_entry(r, fiction, curated) for r in records]
+    index_entries = [_index_entry(r, fiction, curated, roman_ids) for r in records]
     (out / f"planets.index.{build_id}.json").write_text(
         json.dumps(index_entries, separators=(",", ":"))
     )

@@ -188,7 +188,26 @@ a:hover { text-decoration: underline; }
   font-size: 12.5px; color: var(--fg); letter-spacing: .3px; line-height: 1.4;
 }
 .card-host { font-size: 11px; color: var(--fg-faint); margin-top: 1px; }
-.card-meta { display: flex; gap: 6px; margin-top: 9px; flex-wrap: wrap; justify-content: center; }
+/* Under the name: usually nothing. Cards carry a mark only when the planet is one of the ~80
+   exceptions (see _marks in app.js), so the grid reads as bodies floating in space rather than
+   as rows of labelled boxes. Two rules make the emptiness work:
+   - the row holds its height whether or not it has a mark, so one flagged planet cannot stand
+     taller than its neighbours and knock the row off its baseline (Earth used to do exactly
+     that, carrying three pills while Jupiter beside it carried two);
+   - marks are text, not chips — no border, no fill, no shadow. A box here competes with the
+     planet above it, which is the only thing on this page worth looking at. */
+.card-meta {
+  display: flex; gap: 12px; margin-top: 7px; min-height: 13px;
+  flex-wrap: wrap; justify-content: center; align-items: center;
+}
+.card-mark {
+  display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+  font-size: 9.5px; letter-spacing: .4px; text-transform: uppercase; color: var(--fg-faint);
+}
+/* Only the glyph carries colour — the words stay quiet, so a row of marked cards reads as a
+   scatter of small lights rather than a line of highlighted text. */
+.card-mark i { font-style: normal; color: var(--accent); }
+.card:hover .card-mark { color: var(--fg-dim); }
 
 /* Sphere/Pixel segmented toggle */
 .segmented {
@@ -525,6 +544,22 @@ button.badge:active, a.badge:active { box-shadow: none; }
   display: block; margin-top: 2px; font-size: 10px; letter-spacing: 0;
   text-transform: none; color: var(--fg-faint);
 }
+/* Two-line menu option: the choice, then what it means in plain words. Used where the label
+   alone would be read wrong ("Photographed" implying the swatch IS the photo). The generic
+   .dd-menu button is nowrap and single-line, so this opts out of both. */
+.dd-menu button.dd-opt {
+  display: flex; flex-direction: column; gap: 2px; white-space: normal; line-height: 1.35;
+}
+.dd-opt-main { display: block; }
+/* The count is the number that stops a 5-of-5,764 tier reading as a broken filter, so it
+   stays legible rather than shrinking into the sub-line. */
+.dd-opt-n { color: var(--fg-faint); }
+.dd-opt.on .dd-opt-n { color: inherit; opacity: 0.7; }
+.dd-opt-sub {
+  display: block; font-size: 10px; letter-spacing: 0; text-transform: none;
+  color: var(--fg-faint);
+}
+.dd-opt.on .dd-opt-sub { color: inherit; opacity: 0.75; }
 
 /* ---- "Seen in fiction" filter: the deliberate odd-one-out ----
    A glitchy CRT toggle in its OWN cyan/magenta palette — not the site accent — so the fun,
@@ -2045,6 +2080,10 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 .badge.water {
   border-color: var(--accent); color: var(--accent); background: rgba(35, 196, 232, .07);
 }
+/* The card version is a mark, not a chip (see .card-mark) — but it keeps the accent on its
+   glyph for the same reason the badge does: it answers a question rather than labelling a
+   provenance, and it is the one thing on a card a visitor is actively hunting for. */
+.card-mark.water i { color: var(--accent); }
 .dd-note {
   padding: 6px 12px 8px; font-size: 11px; line-height: 1.5; color: var(--fg-faint);
   border-bottom: 1px solid var(--line);

@@ -210,7 +210,7 @@
     <div class="dropdown" x-data="{ open: false }" @keydown.escape="open=false"
       @click.outside="open=false">
       <button class="dd-btn dd-icon" @click="open=!open" :aria-expanded="open"
-        :class="sort !== 'curated' || prov !== 'all' || ptype !== 'all' || disc !== 'all' || distBand !== 'all' || hz !== 'all' || fic ? 'active' : ''"
+        :class="sort !== 'curated' || obs !== 'all' || roman !== 'all' || ptype !== 'all' || disc !== 'all' || distBand !== 'all' || hz !== 'all' || fic ? 'active' : ''"
         aria-label="Filter, sort and display options" title="Filter, sort and display options">
         <svg class="ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
           <path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" stroke-width="1.6"
@@ -231,14 +231,49 @@
             <span class="fic-count" x-show="loaded" x-cloak x-text="ficCount()"></span>
           </button>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="toggleSec('prov')"
-          :aria-expanded="secOpen('prov')"><span>How real<span class="dd-sub">modelled vs measured colour</span></span>
-          <span class="dd-secend"><i class="dd-dot" x-show="secActive('prov')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('prov') ? '▾' : '▸'"></span></span></button>
-        <div class="dd-sec-body" x-show="secOpen('prov')">
-          <template x-for="[val, label] in provOptions()" :key="'p' + val">
-            <button :class="prov === val ? 'on' : ''" @click="prov = val" x-text="label"></button>
+        {# "How real" — what light of this planet anyone has actually caught. NOT how the
+           colour was computed: that is the badge on every card, and it says "Modelled" for all
+           but five. The tiers are ranked most-evidence-first and each carries a plain second
+           line, because "Photographed" on its own invites the one wrong conclusion this
+           project exists to prevent — those images are infrared and false-coloured, and the
+           swatch is never the photo. The note spells that out rather than hiding it in a
+           tooltip. #}
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('obs')"
+          :aria-expanded="secOpen('obs')"><span>How real<span class="dd-sub">what light we actually have</span></span>
+          <span class="dd-secend"><i class="dd-dot" x-show="secActive('obs')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('obs') ? '▾' : '▸'"></span></span></button>
+        <div class="dd-sec-body" x-show="secOpen('obs')">
+          <div class="dd-note">Almost every planet here has never been seen — we know it from
+            its star's light, not its own. A handful have been photographed with the star
+            blocked out, but only in infrared: those pictures are false colour, and the swatch
+            is always computed, never the photograph.</div>
+          <template x-for="[val, label, sub, n] in obsOptions()" :key="'o' + val">
+            <button class="dd-opt" :class="obs === val ? 'on' : ''" @click="obs = val">
+              <span class="dd-opt-main"><span x-text="label"></span><span class="dd-opt-n"
+                x-show="val !== 'all'" x-cloak x-text="' · ' + n.toLocaleString()"></span></span>
+              <span class="dd-opt-sub" x-show="sub" x-cloak x-text="sub"></span>
+            </button>
           </template>
         </div>
+        {# Roman's shortlist. Its own section, because being a target says where the telescope
+           can point and nothing at all about how honest a colour is — it spent a while inside
+           "How real" implying otherwise. Only shown once the shortlist has joined onto
+           planets that exist in this catalogue. #}
+        <template x-if="romanCount()">
+          <div>
+            <button type="button" class="dd-head dd-sec" @click="toggleSec('roman')"
+              :aria-expanded="secOpen('roman')"><span>Roman target<span class="dd-sub">on the coronagraph shortlist</span></span>
+              <span class="dd-secend"><i class="dd-dot" x-show="secActive('roman')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('roman') ? '▾' : '▸'"></span></span></button>
+            <div class="dd-sec-body" x-show="secOpen('roman')">
+              <div class="dd-note">The nearby giant planets Roman's coronagraph could plausibly
+                catch in reflected light. Their colours are modelled like everyone else's —
+                these are simply the ones a real measurement could one day replace.</div>
+              <button :class="roman === 'all' ? 'on' : ''" @click="roman = 'all'"
+                x-text="romanLabels.all"></button>
+              <button :class="roman === 'yes' ? 'on' : ''" @click="roman = 'yes'"
+                x-text="romanLabels.yes + ' · ' + romanCount().toLocaleString()"></button>
+            </div>
+          </div>
+        </template>
         <button type="button" class="dd-head dd-sec" @click="toggleSec('ptype')"
           :aria-expanded="secOpen('ptype')"><span>Planet type<span class="dd-sub">by size + temperature</span></span>
           <span class="dd-secend"><i class="dd-dot" x-show="secActive('ptype')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('ptype') ? '▾' : '▸'"></span></span></button>
