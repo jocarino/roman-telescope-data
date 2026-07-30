@@ -522,11 +522,18 @@ button.badge:active, a.badge:active { box-shadow: none; }
    which read as one flat list of equally-clickable things — you could not tell the group
    label from the choices inside it. The signposts recede; the things you can actually pick
    are the brightest text in the menu (see .dd-menu button below). */
-.dd-head {
-  padding: 9px 12px 8px; border-bottom: 1px solid var(--line); cursor: default;
-  font-family: var(--mono); font-size: 9.5px; letter-spacing: .5px; text-transform: uppercase;
-  color: var(--fg-faint); background: rgba(255, 255, 255, .022); white-space: nowrap;
+/* Written as .dd-menu .dd-head, not .dd-head: the generic `.dd-menu button` above is one
+   class + one type and outranks a bare class, so a plain `.dd-head { color }` loses to it and
+   the headings render in the OPTION colour — brighter than the things they label. */
+.dd-menu .dd-head, .dd-head {
+  padding: 10px 12px 9px; border-bottom: 1px solid var(--line); cursor: default;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--fg-faint); background: rgba(255, 255, 255, .03); white-space: nowrap;
 }
+/* Three separate signals, because colour alone was not enough to tell a group's NAME from the
+   things inside it: the heading is smaller, widely tracked, and sits on its own band, while an
+   option is large, normally spaced and bright on the plain menu background. */
+.dd-menu .dd-head .dd-sub { letter-spacing: .2px; opacity: .8; }
 /* Collapsible section header in the hamburger menu: the whole bar toggles its group,
    with a chevron marking open/closed. Collapsed by default, and which sections you open is
    remembered across visits (see gallery template). */
