@@ -550,7 +550,26 @@ button.badge:active, a.badge:active { box-shadow: none; }
   width: 6px; height: 6px; border-radius: 50%;
   background: var(--accent); box-shadow: 0 0 4px var(--accent);
 }
-.dd-chev { flex: none; color: var(--fg-faint); font-size: 9px; }
+/* Open/closed, said four ways instead of one.
+   A 9px ▸/▾ is a two-pixel difference in a dim colour at the far edge of the panel — you had
+   to hunt for it to know whether a section was expanded, which is the one thing a collapsible
+   header exists to tell you. So the OPEN header now announces itself as a unit: an accent bar
+   down its left edge, a brighter label, a lit accent chevron, and the band it sits on goes
+   darker to read as the lid of the group below it. Closed stays flat and quiet. */
+.dd-chev {
+  flex: none; color: var(--fg-faint); font-size: 11px; line-height: 1;
+  width: 11px; text-align: center;
+}
+.dd-menu .dd-sec { position: relative; transition: color .12s, background .12s; }
+.dd-menu .dd-sec::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--accent); opacity: 0; transition: opacity .12s;
+}
+.dd-menu .dd-sec.open::before { opacity: 1; }
+.dd-menu .dd-sec.open {
+  color: var(--fg); background: rgba(255, 255, 255, .06); border-bottom-color: var(--accent);
+}
+.dd-menu .dd-sec.open .dd-chev { color: var(--accent); }
 /* Options stack full-width (the .dd-menu flex column no longer reaches them directly). */
 .dd-sec-body { display: flex; flex-direction: column; }
 .dd-sub {
@@ -1728,7 +1747,19 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 .m-menu {
   min-width: 232px; left: auto; right: 0;
   max-height: min(72vh, 640px); overflow-y: auto;
+  /* Firefox. The platform scrollbar is a light-grey pill on a white track — the one piece of
+     the OS that ignores the page and lands a bright rounded slab down the side of a black
+     CRT panel. Square, dark, and 1px-edged like everything else here. */
+  scrollbar-width: thin; scrollbar-color: var(--line) transparent;
 }
+.m-menu::-webkit-scrollbar { width: 10px; }
+.m-menu::-webkit-scrollbar-track { background: transparent; border-left: 1px solid var(--line); }
+.m-menu::-webkit-scrollbar-thumb {
+  background: #232a38; border: 1px solid var(--line); border-radius: 0;
+  /* No border-box padding trick: the thumb is meant to read as a solid block in a channel,
+     the way a hardware fader does, not as a floating pill. */
+}
+.m-menu::-webkit-scrollbar-thumb:hover { background: #313a4d; border-color: var(--accent); }
 .m-menu .dd-head { border-top: 1px solid var(--line); }
 .m-menu .dd-head:first-child { border-top: 0; }
 .m-menu-row { padding: 10px 12px; display: flex; gap: 8px; flex-wrap: wrap; }

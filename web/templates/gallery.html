@@ -257,7 +257,7 @@
            paragraph above them: the one thing that MUST be said — those images are infrared
            and false-coloured, so the swatch is never the photo — is said on the row it applies
            to, where someone choosing it will actually read it. #}
-        <button type="button" class="dd-head dd-sec" @click="toggleSec('obs')"
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('obs')" :class="secOpen('obs') ? 'open' : ''"
           :aria-expanded="secOpen('obs')"><span>How real<span class="dd-sub">what light we actually have</span></span>
           <span class="dd-secend"><i class="dd-dot" x-show="secActive('obs')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('obs') ? '▾' : '▸'"></span></span></button>
         <div class="dd-sec-body" x-show="secOpen('obs')">
@@ -269,7 +269,7 @@
             </button>
           </template>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="toggleSec('ptype')"
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('ptype')" :class="secOpen('ptype') ? 'open' : ''"
           :aria-expanded="secOpen('ptype')"><span>Planet type<span class="dd-sub">by size + temperature</span></span>
           <span class="dd-secend"><i class="dd-dot" x-show="secActive('ptype')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('ptype') ? '▾' : '▸'"></span></span></button>
         <div class="dd-sec-body" x-show="secOpen('ptype')">
@@ -280,7 +280,7 @@
         {# The habitable-zone lens. "Liquid water" is the question every visitor arrives with,
            so it sits high in the menu — but the label says "could", the options name the
            failure cases plainly, and the ℹ spells out that this is orbital distance only. #}
-        <button type="button" class="dd-head dd-sec" @click="toggleSec('hz')"
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('hz')" :class="secOpen('hz') ? 'open' : ''"
           :aria-expanded="secOpen('hz')"><span>Liquid water<span class="dd-sub">by habitable zone</span></span>
           <span class="dd-secend"><i class="dd-dot" x-show="secActive('hz')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('hz') ? '▾' : '▸'"></span></span></button>
         <div class="dd-sec-body" x-show="secOpen('hz')">
@@ -293,7 +293,7 @@
             <button :class="hz === val ? 'on' : ''" @click="hz = val" x-text="label"></button>
           </template>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="toggleSec('dist')"
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('dist')" :class="secOpen('dist') ? 'open' : ''"
           :aria-expanded="secOpen('dist')"><span>Distance<span class="dd-sub">from Earth</span></span>
           <span class="dd-secend"><i class="dd-dot" x-show="secActive('dist')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('dist') ? '▾' : '▸'"></span></span></button>
         <div class="dd-sec-body" x-show="secOpen('dist')">
@@ -301,7 +301,7 @@
             <button :class="distBand === val ? 'on' : ''" @click="distBand = val" x-text="label"></button>
           </template>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="toggleSec('disc')"
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('disc')" :class="secOpen('disc') ? 'open' : ''"
           :aria-expanded="secOpen('disc')"><span>Discovery</span>
           <span class="dd-secend"><i class="dd-dot" x-show="secActive('disc')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('disc') ? '▾' : '▸'"></span></span></button>
         <div class="dd-sec-body" x-show="secOpen('disc')">
@@ -309,7 +309,7 @@
             <button :class="disc === val ? 'on' : ''" @click="disc = val" x-text="label"></button>
           </template>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="toggleSec('sort')"
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('sort')" :class="secOpen('sort') ? 'open' : ''"
           :aria-expanded="secOpen('sort')"><span>Sort by</span>
           <span class="dd-secend"><i class="dd-dot" x-show="secActive('sort')" x-cloak aria-hidden="true"></i><span class="dd-chev" x-text="secOpen('sort') ? '▾' : '▸'"></span></span></button>
         <div class="dd-sec-body" x-show="secOpen('sort')">
@@ -323,7 +323,7 @@
               x-text="label.replace('Sort: ', '')"></button>
           </template>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="toggleSec('render')"
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('render')" :class="secOpen('render') ? 'open' : ''"
           :aria-expanded="secOpen('render')"><span>Planet render</span>
           <span class="dd-chev" x-text="secOpen('render') ? '▾' : '▸'"></span></button>
         <div class="dd-sec-body" x-show="secOpen('render')">
@@ -339,7 +339,7 @@
             </div>
           </div>
         </div>
-        <button type="button" class="dd-head dd-sec" @click="toggleSec('accent')"
+        <button type="button" class="dd-head dd-sec" @click="toggleSec('accent')" :class="secOpen('accent') ? 'open' : ''"
           :aria-expanded="secOpen('accent')"><span>Accent colour</span>
           <span class="dd-chev" x-text="secOpen('accent') ? '▾' : '▸'"></span></button>
         <div class="dd-sec-body" x-show="secOpen('accent')">
