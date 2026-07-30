@@ -1620,27 +1620,20 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 .dg .dot { stroke-dasharray: 2 3; }
 .dg .band { fill: var(--accent); opacity: .18; stroke: var(--accent); stroke-width: 1; }
 
-/* Scope sweep: each diagram paints itself the way a real trace does — line first, then the
-   label that annotates it — once, the first time it is scrolled to (web/static/how.js sets
-   .dg-anim up front and .dg-live to play). Every rule here is inert until those classes land,
-   so with JavaScript off the diagrams are exactly as static as they were before. The pre-play
-   hide sits on the SVG, not on each child: a child with `opacity: 0` of its own would make the
-   fade below run 0 -> 0, since a keyframe with only a `from` takes its end state from whatever
-   the element's own opacity computes to (.18 for a band, .55 for a dimmed curve). */
-.dg-anim:not(.dg-live) > *:not(defs) { opacity: 0; }
-.dg-anim .dg-draw { stroke-dasharray: var(--len); stroke-dashoffset: var(--len); }
-.dg-live > *:not(defs) {
-  animation: dg-fade 380ms steps(5, end) both;
-  animation-delay: calc(var(--i, 0) * 70ms);
-}
-.dg-live .dg-draw {
-  animation: dg-draw 620ms cubic-bezier(.3, .7, .4, 1) both;
-  animation-delay: calc(var(--i, 0) * 70ms);
-}
-@keyframes dg-fade { from { opacity: 0; } }
-@keyframes dg-draw { from { stroke-dashoffset: var(--len); } to { stroke-dashoffset: 0; } }
-/* Replay, injected by how.js beside each diagram. Quieter than .math-toggle on purpose: it is
-   a re-run of something already seen, not a door to new content. */
+/* Parts the animated explainers add to a diagram (web/static/how.js): the cursor that walks the
+   spectrum, the dot riding the trace, the live readouts, the running X/Y/Z totals and the colour
+   they land on. All of it is injected, so the authored SVG in the template stays the whole
+   picture when JavaScript is off. */
+.dg .dg-cur { stroke: var(--accent); stroke-width: 1; stroke-dasharray: 3 3; opacity: .8; }
+.dg .dg-dot { fill: var(--accent); }
+.dg .rd { font-family: var(--mono); font-size: 10px; fill: var(--fg); letter-spacing: .3px; }
+.dg .rd-dim { fill: var(--fg-faint); }
+.dg .dg-bar-fill { fill: var(--accent); opacity: .55; }
+.dg .dg-spec { fill: var(--accent); opacity: .13; stroke: var(--accent); stroke-width: 1; }
+.dg .dg-swatch { stroke: var(--line); }
+.dg .dg-recon { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 6 4; }
+/* Play, injected beside each diagram. Quieter than .math-toggle on purpose: it re-runs
+   something already on screen rather than opening new content. */
 .dg-bar { display: flex; justify-content: flex-end; max-width: 560px; margin: 2px 0 0; }
 .dg-replay {
   padding: 4px 8px; background: var(--bg-3); border: 1px solid var(--line); color: var(--fg-faint);
@@ -1649,7 +1642,11 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 .dg-replay:hover, .dg-replay:focus-visible { color: var(--accent); border-color: var(--accent); }
 .dg-replay:active { transform: translate(1px, 1px); }
 /* The chain at the top is the whole pipeline in one line, so it lights up in signal order. */
-.how-chain-live > * { animation: dg-fade 300ms steps(4, end) both; animation-delay: calc(var(--i, 0) * 110ms); }
+.how-chain-live > * {
+  animation: how-chain-in 300ms steps(4, end) both;
+  animation-delay: calc(var(--i, 0) * 110ms);
+}
+@keyframes how-chain-in { from { opacity: 0; } }
 
 /* Three ways to take a spectrum apart: mono label, plain-English line. */
 .how-ways {

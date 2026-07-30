@@ -33,8 +33,31 @@
     <span class="how-chain-box how-chain-hex">#91D3FF</span>
   </div>
 
+  {# Jump-to-section tabs: the same sticky bar the planet pages use (web/static/secnav.js),
+     because six sections of physics is a lot to meet in one scroll. Plain anchors, so the jump
+     works with JavaScript off; the component only adds the "you are here" highlight and eases
+     the scroll. Every section here is unconditional, so unlike the planet bar no tab can ever
+     point at a section that is not on the page. Labels say what the step DOES — a bar reading
+     "1 2 3 4 5" would be a row of numbers nobody can choose between. #}
+  {% set secs = [
+    ('sec-model', '1 · Model the spectrum'),
+    ('sec-measured', 'How it’s measured'),
+    ('sec-star', '2 · Light it with its star'),
+    ('sec-eye', '3 · Through your eye'),
+    ('sec-palette', '4 · Grow a palette'),
+    ('sec-roman', '5 · The Roman view'),
+  ] %}
+  <nav class="secnav" :class="stuck ? 'stuck' : ''" x-data="secnav()"
+    @scroll.window.passive="onScroll()" aria-label="Jump to a step on this page">
+    {% for id, label in secs %}
+    <a class="sec-tab" href="#{{ id }}" data-sec="{{ id }}" @click="go($event, '{{ id }}')"
+      :class="active === '{{ id }}' ? 'on' : ''"
+      :aria-current="active === '{{ id }}' ? 'true' : 'false'">{{ label }}</a>
+    {% endfor %}
+  </nav>
+
   {# ── STEP 1 ─────────────────────────────────────────────────────────────── #}
-  <section class="panel how-step">
+  <section class="panel how-step" id="sec-model">
     <span class="how-num">STEP 1</span>
     <h3>Model the light the planet reflects</h3>
     <p class="how-body">A planet has no light of its own — its colour is written in what it
@@ -48,6 +71,7 @@
       planet toward cream-white, and cloud-free {{ g('hot-jupiter', 'hot Jupiters') }} absorb
       almost everything and stay near-black.</p>
     <svg class="dg" viewBox="0 0 560 190" role="img"
+      data-teach="archetypes" data-plot="40,540,150,20" data-nm="380,780"
       aria-label="An albedo spectrum: high in the blue, with methane absorption dips in the red">
       <defs>
         <linearGradient id="dg-rainbow" x1="0" y1="0" x2="1" y2="0">
@@ -59,14 +83,14 @@
       <line class="ax" x1="40" y1="150" x2="540" y2="150"/>
       <line class="ax" x1="40" y1="20" x2="40" y2="150"/>
       <rect x="40" y="154" width="500" height="5" fill="url(#dg-rainbow)" opacity=".65"/>
-      <path class="ln dim dash" d="M40 48 C 150 42, 400 44, 540 50"/>
-      <text x="46" y="40">with thick clouds: flat + bright</text>
-      <path class="ln" d="M40 62 C 120 66, 200 74, 260 84
-        C 290 90, 310 116, 330 118 C 350 120, 358 96, 380 96
-        C 410 96, 430 132, 452 134 C 470 136, 480 112, 500 112 L 540 116"/>
-      <line class="ax dash" x1="330" y1="118" x2="330" y2="166"/>
-      <line class="ax dash" x1="452" y1="134" x2="452" y2="166"/>
-      <text x="300" y="180">CH₄ absorption eats the red</text>
+      <path class="ln dim dash" data-role="cloudy" d="M40 48 C 150 42, 400 44, 540 50"/>
+      <text x="46" y="40" data-role="cloudy-label">with thick clouds: flat + bright</text>
+      <path class="ln" data-role="curve" d="M40 62 C 120 66, 200 74, 262 84
+        C 296 90, 320 116, 339 118 C 358 120, 368 96, 392 96
+        C 424 96, 452 132, 474 134 C 492 136, 502 112, 518 112 L 540 114"/>
+      <line class="ax dash" data-role="dip" data-band-nm="619" x1="339" y1="118" x2="339" y2="166"/>
+      <line class="ax dash" data-role="dip" data-band-nm="727" x1="474" y1="134" x2="474" y2="166"/>
+      <text x="300" y="180" data-role="ch4">CH₄ absorption eats the red</text>
       <text x="46" y="146">380 nm</text><text x="496" y="146">780 nm</text>
       <text x="16" y="30" transform="rotate(-90 16 30)" text-anchor="end">reflectivity</text>
     </svg>
@@ -94,7 +118,7 @@
   </section>
 
   {# ── MEASURED INTERLUDE (deliberately not numbered: it is not a pipeline step) ────── #}
-  <section class="panel how-step how-aside">
+  <section class="panel how-step how-aside" id="sec-measured">
     <span class="how-num">NOT A STEP · HOW WE KNOW</span>
     <h3>How a spectrum is measured for real</h3>
     <p class="how-body">Step 1 makes a curve up — carefully, from physics, but up. It is only
@@ -104,7 +128,7 @@
       fine lines — and comes out fanned into a rainbow. A CCD, the same sensor as a phone
       camera's, sits in that rainbow and counts photons at every wavelength at once: that is
       {{ g('spectroscopy') }}, one exposure, hundreds of wavelengths.</p>
-    <svg class="dg" viewBox="0 0 560 194" role="img"
+    <svg class="dg" viewBox="0 0 560 194" role="img" data-teach="spectrograph"
       aria-label="A spectrograph: light passes a slit, a grating fans it into a rainbow, and a
         CCD counts photons at every wavelength, giving a curve">
       <defs>
@@ -114,20 +138,20 @@
         </linearGradient>
       </defs>
       <text x="8" y="54">reflected light</text><text x="8" y="66">from the planet</text>
-      <line class="ln dim" x1="8" y1="82" x2="116" y2="82"/>
-      <rect class="bx" x="116" y="56" width="8" height="54"/>
+      <line class="ln dim" data-role="beam" x1="8" y1="82" x2="116" y2="82"/>
+      <rect class="bx" data-role="slit" x="116" y="56" width="8" height="54"/>
       <text x="104" y="128">slit</text>
-      <path class="ln" d="M164 56 L 200 112 L 164 112 Z"/>
+      <path class="ln" data-role="grating" d="M164 56 L 200 112 L 164 112 Z"/>
       <text x="148" y="128">grating</text>
-      <line x1="200" y1="98" x2="322" y2="46" stroke="#2a6df4" stroke-width="2"/>
-      <line x1="200" y1="98" x2="322" y2="86" stroke="#19c37d" stroke-width="2"/>
-      <line x1="200" y1="98" x2="322" y2="126" stroke="#d5382c" stroke-width="2"/>
-      <rect class="bx" x="322" y="34" width="18" height="104"/>
+      <line data-role="ray" data-band-nm="450" x1="200" y1="98" x2="322" y2="46" stroke="#2a6df4" stroke-width="2"/>
+      <line data-role="ray" data-band-nm="550" x1="200" y1="98" x2="322" y2="86" stroke="#19c37d" stroke-width="2"/>
+      <line data-role="ray" data-band-nm="680" x1="200" y1="98" x2="322" y2="126" stroke="#d5382c" stroke-width="2"/>
+      <rect class="bx" data-role="ccd" x="322" y="34" width="18" height="104"/>
       <rect x="325" y="37" width="12" height="98" fill="url(#dg-fan)" opacity=".6"/>
       <text x="318" y="152">CCD</text>
       <text class="op" x="350" y="92">→</text>
-      <rect class="bx" x="376" y="34" width="172" height="104"/>
-      <path class="ln ch2" d="M384 62 C 404 60, 424 68, 442 72 C 454 74, 460 108, 472 108
+      <rect class="bx" data-role="box-counts" x="376" y="34" width="172" height="104"/>
+      <path class="ln ch2" data-role="counts" d="M384 62 C 404 60, 424 68, 442 72 C 454 74, 460 108, 472 108
         C 484 108, 488 80, 502 80 C 522 80, 536 86, 542 90"/>
       <text x="376" y="152">counts at each wavelength</text>
       <text x="8" y="180">divide by the light that arrived → the fraction reflected: A(λ)</text>
@@ -205,7 +229,7 @@
   </section>
 
   {# ── STEP 2 ─────────────────────────────────────────────────────────────── #}
-  <section class="panel how-step">
+  <section class="panel how-step" id="sec-star">
     <span class="how-num">STEP 2</span>
     <h3>Light it with its own star</h3>
     <p class="how-body">A mirror is only as colourful as what it reflects. The same planet looks
@@ -214,18 +238,18 @@
       {{ g('blackbody') }} at the star's measured
       {{ g('effective-temperature', 'temperature') }}. The product is the
       reflected light that would actually leave the planet and reach an observer.</p>
-    <svg class="dg" viewBox="0 0 560 150" role="img"
+    <svg class="dg" viewBox="0 0 560 172" role="img" data-teach="multiply"
       aria-label="Albedo spectrum times star spectrum equals reflected light">
-      <rect class="bx" x="20" y="20" width="140" height="90"/>
-      <path class="ln" d="M30 50 C 60 58, 90 70, 110 88 C 125 100, 140 96, 150 92"/>
+      <rect class="bx" data-role="box-a" x="20" y="20" width="140" height="90"/>
+      <path class="ln" data-role="a" d="M30 50 C 60 58, 90 70, 110 88 C 125 100, 140 96, 150 92"/>
       <text x="30" y="124">A(λ) planet</text>
       <text class="op" x="186" y="72">×</text>
-      <rect class="bx" x="216" y="20" width="140" height="90"/>
-      <path class="ln ch1" d="M226 96 C 250 40, 290 34, 320 52 C 335 62, 345 70, 346 74"/>
+      <rect class="bx" data-role="box-s" x="216" y="20" width="140" height="90"/>
+      <path class="ln ch1" data-role="s" d="M226 96 C 250 40, 290 34, 320 52 C 335 62, 345 70, 346 74"/>
       <text x="226" y="124">S(λ) star</text>
       <text class="op" x="382" y="72">=</text>
-      <rect class="bx" x="410" y="20" width="140" height="90"/>
-      <path class="ln ch2" d="M420 84 C 445 52, 470 56, 490 74 C 505 86, 520 88, 540 86"/>
+      <rect class="bx" data-role="box-f" x="410" y="20" width="140" height="90"/>
+      <path class="ln ch2" data-role="f" d="M420 84 C 445 52, 470 56, 490 74 C 505 86, 520 88, 540 86"/>
       <text x="420" y="124">F(λ) reflected light</text>
     </svg>
     {{ maths_open() }}
@@ -242,7 +266,7 @@
   </section>
 
   {# ── STEP 3 ─────────────────────────────────────────────────────────────── #}
-  <section class="panel how-step">
+  <section class="panel how-step" id="sec-eye">
     <span class="how-num">STEP 3</span>
     <h3>Convert it the way your eye would</h3>
     <p class="how-body">A spectrum is thousands of numbers; an eye reduces them to one colour.
@@ -253,15 +277,16 @@
       there to an {{ g('srgb', 'sRGB') }} hex code.
       This is the exact machinery used to design camera sensors and displays — pointed at a
       planet.</p>
-    <svg class="dg" viewBox="0 0 560 190" role="img"
+    <svg class="dg" viewBox="0 0 560 232" role="img"
+      data-teach="cie" data-plot="40,540,150,20" data-nm="380,780"
       aria-label="The three CIE colour matching curves, which turn a spectrum into X, Y, Z">
       <line class="ax" x1="40" y1="150" x2="540" y2="150"/>
       <line class="ax" x1="40" y1="20" x2="40" y2="150"/>
-      <path class="ln dot" d="M60 148 C 90 60, 130 40, 150 60 C 170 80, 190 136, 220 148"/>
+      <path class="ln dot" data-role="zbar" d="M60 148 C 90 60, 130 40, 150 60 C 170 80, 190 136, 220 148"/>
       <text x="128" y="34">z̄</text>
-      <path class="ln dash dim" d="M150 148 C 220 130, 250 50, 290 44 C 330 50, 370 130, 430 148"/>
+      <path class="ln dash dim" data-role="ybar" d="M150 148 C 220 130, 250 50, 290 44 C 330 50, 370 130, 430 148"/>
       <text x="284" y="36">ȳ</text>
-      <path class="ln" d="M60 146 C 90 118, 120 130, 140 146 C 220 150, 260 110, 310 62
+      <path class="ln" data-role="xbar" d="M60 146 C 90 118, 120 130, 140 146 C 220 150, 260 110, 310 62
         C 330 44, 360 46, 380 70 C 405 100, 440 140, 480 148"/>
       <text x="352" y="38">x̄</text>
       <text x="46" y="146">380 nm</text><text x="496" y="146">780 nm</text>
@@ -291,7 +316,7 @@
   </section>
 
   {# ── STEP 4 ─────────────────────────────────────────────────────────────── #}
-  <section class="panel how-step">
+  <section class="panel how-step" id="sec-palette">
     <span class="how-num">STEP 4</span>
     <h3>Grow a palette from the base colour</h3>
     <p class="how-body">One colour becomes a designer palette: the base hue stepped through a
@@ -314,7 +339,7 @@
   </section>
 
   {# ── STEP 5 ─────────────────────────────────────────────────────────────── #}
-  <section class="panel how-step">
+  <section class="panel how-step" id="sec-roman">
     <span class="how-num">STEP 5 · THE ROMAN VIEW</span>
     <h3>What survives four filters?</h3>
     <p class="how-body">NASA's {{ g('roman-space-telescope', 'Roman Space Telescope') }} will be
@@ -326,7 +351,8 @@
       colour rebuilt from only what {{ g('roman-4-band', "Roman's four filters") }} would
       catch. The gap between them — the {{ g('delta-e2000', 'ΔE2000') }} readout — is how much
       of the planet's colour identity Roman's filter set preserves.</p>
-    <svg class="dg" viewBox="0 0 560 170" role="img"
+    <svg class="dg" viewBox="0 0 560 188" role="img"
+      data-teach="bands" data-plot="40,540,140,30" data-nm="380,900"
       aria-label="Roman's four bandpasses cover 575 to 835 nm; below 575 nm it is blind">
       <defs>
         <pattern id="dg-hatch" width="7" height="7" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
@@ -334,15 +360,15 @@
         </pattern>
       </defs>
       <line class="ax" x1="40" y1="140" x2="540" y2="140"/>
-      <rect x="40" y="30" width="147" height="110" fill="url(#dg-hatch)"/>
+      <rect data-role="blind" x="40" y="30" width="160" height="110" fill="url(#dg-hatch)"/>
       <text x="52" y="24">Roman is blind here</text>
-      <path class="ln ch1 dash" d="M40 66 C 120 70, 200 84, 260 96 C 320 106, 420 96, 540 86" opacity=".8"/>
-      <rect class="band" x="227" y="40" width="56" height="100"/>
-      <rect class="band" x="290" y="40" width="38" height="100"/>
-      <rect class="band" x="355" y="40" width="43" height="100"/>
-      <rect class="band" x="417" y="40" width="121" height="100"/>
-      <text x="234" y="160">575</text><text x="296" y="160">660</text>
-      <text x="362" y="160">730</text><text x="462" y="160">835 nm</text>
+      <path class="ln ch1 dash" data-role="spectrum" d="M40 66 C 120 70, 200 84, 260 96 C 320 106, 420 96, 540 86" opacity=".8"/>
+      <rect class="band" data-role="band" data-band-nm="575" x="200" y="40" width="57" height="100"/>
+      <rect class="band" data-role="band" data-band-nm="660" x="290" y="40" width="38" height="100"/>
+      <rect class="band" data-role="band" data-band-nm="730" x="355" y="40" width="42" height="100"/>
+      <rect class="band" data-role="band" data-band-nm="835" x="417" y="40" width="120" height="100"/>
+      <text x="219" y="160">575</text><text x="300" y="160">660</text>
+      <text x="367" y="160">730</text><text x="459" y="160">835 nm</text>
       <text x="44" y="156">380</text>
     </svg>
     {{ maths_open() }}
