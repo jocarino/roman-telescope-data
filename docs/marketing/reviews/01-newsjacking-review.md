@@ -14,34 +14,31 @@ often: the planet in the news isn't in the catalogue.
   else's thread beats your own post by an order of magnitude and carries no self-promo risk.
 - **Tier 3, the dated note on the planet page**, is the best idea here and the most underweighted —
   the only part of a newsjack that still exists in six months.
-- **The metric is right.** Fraction who open a second page, not visits. Nearly every plan I read
-  measures the spike, the least informative number available.
+- **The metric is right:** fraction who open a second page, not visits. Nearly every plan I read
+  measures the spike, which is the least informative number available.
 
 ## Gaps
 
 **1. One hour is wrong in both directions, and the allocation was inverted.** The old runbook gave
 10 minutes to Bluesky and 30 to Reddit/HN. Backwards. The reply to the announcing researcher has a
-hard ~2-hour window and is where the relationship value is. The Reddit/HN thread usually doesn't
-*exist* at minute 40 — those form when the aggregator layer picks the story up six to eighteen
-hours later, and a comment on a four-comment thread is worth nothing. Meanwhile the page note, the
-only durable artifact, sat under "later, if it's a big one" and should never be written fast. Now
-three separate clocks. And *"if it takes longer than an hour it isn't worth doing"* is the exact
-sentence that produces a wrong colour. Missing a story is free; being wrong on the day everyone is
-reading is not. Removed.
+hard ~2-hour window and carries the relationship value; the Reddit/HN thread usually doesn't *exist*
+at minute 40 — those form six to eighteen hours later when aggregators pick the story up, and a
+comment on a four-comment thread is worth nothing. Meanwhile the page note, the only durable
+artifact, sat under "later, if it's a big one" and should never be written fast. Now three clocks.
+And *"if it takes longer than an hour it isn't worth doing"* is the exact sentence that produces a
+wrong colour: missing a story is free, being wrong on the day everyone is reading is not. Removed.
 
-**2. The three-question test measures us, not the story.** Two of three questions are about our
-catalogue and our angle — that tells you whether you *can* post, never whether anyone will read it.
-The desk test takes sixty seconds off the headline: is there a noun a civilian already owns
-("habitable", "nearest", "first", "life", "water"); is there a picture; is a big press office behind
-it; is it one named planet or a population result. Added as Test One, doc's questions demoted to
-Test Two.
+**2. The three-question test measures us, not the story.** Two of three are about our catalogue and
+our angle — that tells you whether you *can* post, never whether anyone will read it. The desk test
+takes sixty seconds off the headline: is there a noun a civilian already owns ("habitable",
+"nearest", "first", "life", "water"); is there a picture; is a big press office behind it; is it one
+named planet or a population result. Added as Test One, the doc's questions demoted to Test Two.
 
 **3. The most common case got one bullet.** `pscomppars` holds **6,324 planets today**; the site
-ships **5,764**. Some of that is deliberate filtering, but new confirmations are missing *by
+ships **5,764**. Some of that gap is deliberate filtering, but new confirmations are missing *by
 construction* — the data is a dated offline release (`data-20260727-1038`) and `planets.json` isn't
 even in the repo. On a "new planet discovered" story the default answer is "we can't". That's the
-central design problem, not bullet 6 of a tool spec. Fix: a `pipeline build --planet "<name>"` fast
-path, worth more than the watcher.
+central design problem, not bullet 6 of a tool spec.
 
 **4. The infrared case is most exoplanet headlines and got half a parenthesis.** "This tells us
 nothing about visible colour" is a standing, ownable position, not a consolation prize — write it
@@ -51,24 +48,24 @@ near 0.6–0.8 µm. "Infrared tells us nothing about colour" is defensible; "spa
 nothing about colour" is the public correction you'd have earned.
 
 **5. "Never email a journalist after publication" is one rule doing two jobs.** Never *pitch*, yes —
-but a **correction** is the most welcome email a reporter gets, and it's how you stop being a
-supplicant and become a source. Related: nothing said what happens when you're wrong. A correction
-path isn't pessimism, it's the infrastructure that lets a desk move fast at all.
+but a **correction** is the most welcome email a reporter gets and is how you stop being a
+supplicant and become a source. Related: nothing said what happens when you're wrong, and a
+correction path isn't pessimism — it's the infrastructure that lets a desk move fast at all.
 
 **6. `newswatch.py` polls fine and matches badly.** *Misses:* the name in the news isn't the name in
 the archive — press writes `TRAPPIST-1e`, `K2-18b`, `HD189733b`, `Gliese 1214 b`, and `HD \d+`
-requires a space popular coverage drops. Absent entirely: `HAT-P`, `HATS`, `KELT`, `KOI`, `NGTS`,
+demands a space popular coverage drops. Absent entirely: `HAT-P`, `HATS`, `KELT`, `KOI`, `NGTS`,
 `MASCARA`, `TIC`, `Wolf`, `Ross`, `LP`, `HR 8799`, `beta Pic`, `51 Peg`, `2M1207`, `PSR B1257+12`,
-`OGLE`/`MOA`/`KMT`, and the IAU NameExoWorlds names press loves (Dimidium, Osiris). Fix is a
-normalised alias table from `pscomppars` + `ps`, not a better regex. *False alarms — the week-three
-death:* `HD \d+` fires on every HD star in a stellar paper; `TOI-\d+` fires 200 times on one TESS
-catalogue paper; `LHS`/`LTT`/`HIP` as written aren't anchored to digits. Today's astro-ph.EP feed
-was 17 items of which **6 were `replace`** — with no `announce_type` filter every v2 re-alerts
-forever — and most of the category is asteroids, disks and DART ejecta. A 40-line digest with two
-useful lines is closed unread by day twenty. Fix: **three items a day, hard**, ranked by press-feed
-presence first, plus **30-day suppression**. It must also print facts, not ready-to-post copy — doc
-11 says a templated caption kills the account. And it needs `planets.json`, which isn't in the repo:
-call `scripts/fetch_data.py` or fail loudly, not at 23:50.
+`OGLE`/`MOA`/`KMT`, and the NameExoWorlds names press loves (Dimidium, Osiris). Fix: a normalised
+alias table from `pscomppars` + `ps`, not a better regex. *False alarms — the week-three death:*
+`HD \d+` fires on every HD star in a stellar paper; `TOI-\d+` fires 200 times on one TESS catalogue
+paper; `LHS`/`LTT`/`HIP` as written aren't anchored to digits; today's astro-ph.EP feed was 17 items
+of which **6 were `replace`**, so without an `announce_type` filter every v2 re-alerts forever — and
+most of that category is asteroids, disks and DART ejecta. A 40-line digest with two useful lines is
+closed unread by day twenty. Fix: **three items a day, hard**, ranked by press-feed presence, plus
+**30-day suppression**; print facts, not ready-to-post copy (doc 11: a templated caption kills the
+account); and call `scripts/fetch_data.py` for the missing `planets.json` rather than failing at
+23:50.
 
 ## The accuracy checklist
 
@@ -79,17 +76,16 @@ Now in the doc. Five minutes; steps 1–2 are 80% of the value.
    swatch used superseded numbers. Post the *change*, not the swatch — it's the better story.
 3. **Read the provenance flag** (`model` / `model-microlensing` / `simulated-cgi` / `measured-cgi` /
    `measured-albedo`) and put it in the post text, not just on the page.
-4. **Say the release date.** `data/RELEASE` is a snapshot. If it predates the paper, state it.
+4. **Say the release date.** `data/RELEASE` is a snapshot; if it predates the paper, state that.
 5. **Name the assumption you trust least** — cloud state, metallicity, phase angle. Can't name one?
    You don't know this planet well enough to post about it.
 6. **State the wavelength the news is about.** Beyond ~1 µm the colour claim is independent of the
    news; say so, or you imply the result confirms your number.
 7. **Sleep-on-it triggers:** contradicts the paper · says "habitable"/"not habitable" · names a
-   person. Those wait until morning. The exceptions are always the ones that end careers.
-8. **Write the correction before you post.** One pre-drafted sentence.
-
-Then a 24-hour reminder to re-check the archive; reply to your own post if the colour moved.
-Publicly correcting yourself is the cheapest credibility available.
+   person. Those wait until morning; the exceptions are the ones that end careers.
+8. **Write the correction before you post.** One pre-drafted sentence. Then set a 24-hour reminder
+   to re-check the archive, and reply to your own post if the colour moved — publicly correcting
+   yourself is the cheapest credibility available.
 
 ## Wrong or unverified
 
@@ -98,9 +94,8 @@ All checked 2026-07-30.
 - **"arXiv gives 1–3 days on the press cycle" — false in both directions.** Routine journal papers:
   preprint at acceptance, release at publication, often *weeks* apart. Embargoed or coordinated news
   (Nature/Science, NASA/ESA/ESO events, AAS press conferences): journalists are briefed *before* the
-  paper is public. Worked example — the K2-18 b DMS paper (arXiv:2504.12267) was submitted
-  16 Apr 2025 13:28 ET, inside the 14:00 ET cutoff, announced 20:00 ET that evening, press wave
-  17 Apr. Hours, and that's the *good* case. Rewritten.
+  paper is public. The K2-18 b DMS paper (arXiv:2504.12267) went in 16 Apr 2025 13:28 ET, inside the
+  14:00 cutoff, announced 20:00 ET, press wave 17 Apr — hours, and that's the *good* case.
 - **`rowupdate` is not a column in `pscomppars`** — TAP returns `ORA-00904: 'ROWUPDATE': invalid
   identifier`. It exists on `ps` only. Fixed.
 - **The NASA Exoplanet Archive has no RSS feed** — email list only. Weekly updates land
@@ -142,15 +137,15 @@ and let the sixty-minute runbook shrink to the twenty minutes that genuinely hav
 
 In `01-newsjacking.md` — structure, `**Status:**` line and `## Links` preserved:
 
-- **Feed table rewritten**: exact live URLs for NASA/ESA/ESO, canonical arXiv host, NASA Archive
-  marked "no RSS · Thursdays · email list", press feeds promoted above arXiv. **Added the lead-time
-  correction** (K2-18 b example + arXiv announcement mechanics), reframing arXiv as stock-building.
+- **Feed table rewritten**: live URLs for NASA/ESA/ESO, canonical arXiv host, NASA Archive marked
+  "no RSS · Thursdays · email list", press feeds above arXiv. **Added the lead-time correction**
+  (K2-18 b + arXiv mechanics), reframing arXiv as stock-building.
 - **Added "stock beats speed"** to The bet (the twenty-planet bench) and a new section, **"The case
   the plan has to survive"** — the 6,324 vs 5,764 gap and the one-planet fast path.
 - **Rewrote the `newswatch.py` spec**: alias table, `announce_type` filter, three-item budget,
   30-day suppression, facts-not-copy output, `planets.json` dependency.
-- **Rewrote the runbook** as three clocks, deleting the "not worth doing over an hour" rule, and
-  added **`## The accuracy checklist`** (8 items) plus the 24-hour re-check.
+- **Rewrote the runbook** as three clocks, deleting the "not worth doing over an hour" rule; added
+  **`## The accuracy checklist`** (8 items) plus the 24-hour re-check.
 - **Rewrote the judging section** as Test One / Test Two; expanded the infrared case with the
   secondary-eclipse boundary; softened "never email a journalist" to "never pitch"; pointed the
-  "being wrong, fast" risk at the new checklist.
+  "being wrong, fast" risk at the checklist.
