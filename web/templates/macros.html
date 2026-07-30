@@ -142,6 +142,16 @@
     romanCap: '{% if iview.band_samples.source == 'measured' %}Measured: real Roman photometry in four bands{% if iview.band_samples.epoch %} ({{ iview.band_samples.epoch }}){% endif %}, reconstructed to a colour. Real data.{% else %}Simulated: the model at quadrature (half-lit — the only geometry a coronagraph can catch) pushed through the four Roman filters, i.e. what Roman would measure. Not real data yet.{% endif %}',
     phases: [{% if rec.phase_colours %}{% for c in rec.phase_colours.colours %}{d:{{ c.phase_deg }},h:'{{ c.hex }}',l:{{ '%.4f'|format(c.luminance_y) }}}{{ ',' if not loop.last }}{% endfor %}{% endif %}],
     phaseSource: '{{ rec.phase_colours.source if rec.phase_colours else '' }}',
+    {# The real spacecraft map, for the five solar-system anchors (null everywhere else).
+       `mean` is what the shader divides the map by so its average is the derived hex. #}
+    map: {% if ctx.surface_map %}{% set sm = ctx.surface_map %}{
+      file: '/static/{{ sm.file }}',
+      mean: [{{ '%.2f'|format(sm.mean[0]) }}, {{ '%.2f'|format(sm.mean[1]) }}, {{ '%.2f'|format(sm.mean[2]) }}],
+      body: {{ sm.body|tojson|forceescape }}, credit: {{ sm.credit|tojson|forceescape }},
+      license: {{ sm.license|tojson|forceescape }}, source: {{ sm.source_url|tojson|forceescape }},
+      ring: {% if sm.rings %}{ file: '/static/{{ sm.rings.file }}', inner: {{ sm.rings.inner }},
+        outer: {{ sm.rings.outer }}, tilt: {{ sm.rings.tilt_deg }} }{% else %}null{% endif %}
+    }{% else %}null{% endif %},
     obs: [{% for o in rec.real_observations %}{
       telescope: {{ o.telescope|tojson|forceescape }}, file: '/static/{{ o.file }}',
       instrument: {{ o.instrument|tojson|forceescape }}, band: {{ o.band|tojson|forceescape }},
@@ -163,9 +173,18 @@
     <button type="button" class="back rand" @click="randomGo()" aria-label="Random planet"
       title="Random planet · press R">{{ dice_icon('dice') }}<span class="back-txt"> RANDOM</span></button>
     <div class="hero-stack">
-      <canvas class="detail-hero" x-show="heroSource !== 'telescope'"
+      {# A ringed planet gets a wide frame in every mode, not just when the rings are drawn:
+         the globe then stays the size every other planet's is, and turning the Source knob
+         fills the sides in instead of reflowing the header around a box that changed shape.
+         The width/height attributes are the canvas's INTRINSIC size, which is what lays the
+         page out before any JS runs — square here and a ringed hero loads as a 340x340 box
+         and visibly snaps to 340x160 the moment the first frame draws. #}
+      {% set ringed = ctx.surface_map.rings if ctx.surface_map else None %}
+      <canvas class="detail-hero{{ ' ringed' if ringed }}"
+        x-show="heroSource !== 'telescope'"
         :class="heroStyle === 'retro' ? 'pixel' : ''" x-ref="cHero"
-        width="256" height="256" aria-label="{{ rec.name }} modelled render"></canvas>
+        width="{{ (256 * ringed.frame_aspect)|round|int if ringed else 256 }}" height="256"
+        aria-label="{{ rec.name }} modelled render"></canvas>
       {% if rec.real_observations %}
       <figure class="hero-obs" x-show="heroSource === 'telescope'" x-cloak>
         <button class="obs-thumb" @click="obsZoom = true" title="Click to enlarge the real image"
@@ -206,8 +225,19 @@
           <div class="title-badges">{{ provenance_badge(rec) }}
             <span class="badge{{ ' gloss-chip' if DISC_TERMS.get(rec.discovery.method) }}"
               {%- if DISC_TERMS.get(rec.discovery.method) %} data-term="{{ DISC_TERMS[rec.discovery.method] }}"{% endif %}>{{ rec.discovery.method }}</span></div>
-          <p class="viewnote" x-show="heroSource !== 'telescope'"
+          <p class="viewnote" x-show="heroSource === 'model'"
             x-text="view === 'full' ? fullCap : romanCap"></p>
+          {% if ctx.surface_map %}
+          {# Real-map mode: say what the map is and whose it is, and be explicit that only the
+             pattern is real — the colour is still the one computed from the spectrum. #}
+          <p class="viewnote map-note" x-show="heroSource === 'map'" x-cloak>
+            <span class="obs-real">▦ REAL MAP</span>
+            <span x-text="map.body"></span>, wrapped on the globe and rescaled so its average
+            is the colour computed from the spectrum. The pattern is real; the colour is modelled.
+            <span class="obs-sub">· <span x-text="map.credit"></span> ·
+              <span x-text="map.license"></span></span>
+          </p>
+          {% endif %}
           {% if rec.real_observations %}
           <p class="viewnote obs-note" x-show="heroSource === 'telescope'" x-cloak>
             <span class="obs-real">◉ REAL IMAGE</span>
@@ -291,10 +321,26 @@
         <p><strong>Stylised</strong>: that same colour restyled into warm/cool bands and
           turbulence for looks: prettier, not more accurate.</p>
         <p>The palette below is identical either way; only the picture changes.</p>
+        {% if ctx.surface_map %}
+        <p>Neither applies while the Source knob is on <strong>Real map</strong> — there the
+          pattern comes from the map, not from us.</p>
+        {% endif %}
       </div></template>
       <template x-if="info === 'source'"><div>
         <p><strong>Modelled</strong>: the planet as our physics computes it should look: a
           smooth globe in its derived colour. Not a photograph.</p>
+        {% if ctx.surface_map %}
+        <p><strong>Real map</strong>: the same globe, same computed colour — but the pattern of
+          light and dark is a real map made from spacecraft imagery, so Jupiter has its Great
+          Red Spot where it belongs and Earth its continents. We can only do this for the five
+          planets we have flown past and mapped; for an exoplanet, any pattern would be
+          invention, which is why the modelled globe's bands are drawn schematically.</p>
+        <p>The map is <strong>rescaled</strong> so its own average is exactly the hex computed
+          from the spectrum — the picture gains real geography, the colour claim does not
+          change.{% if ctx.surface_map.rings %} Saturn's rings are drawn from a real radial
+          profile of the ring system (the gap is the Cassini Division), lit by the same lamp;
+          they keep their own icy colour, since our computed colour is the globe's.{% endif %}</p>
+        {% endif %}
         <p><strong>Telescope</strong>: the <em>actual</em> processed image astronomers took of
           this planet: a faint point of light beside its (blocked-out) star. It is almost
           always {{ g('infrared') }} and {{ g('false-colour', 'false-coloured') }}; the real
@@ -402,14 +448,19 @@
           <h4 class="rail-lbl">Planet display <span class="rail-sub">the picture up top</span></h4>
           <div class="knob-row">
             <div class="knob-cell">
+              {# Classic/Stylised restyles the SCHEMATIC bands, so it has nothing to do when a
+                 real map is on the globe: the knob reads as inert, and clicking it brings the
+                 modelled render back rather than locking you out. #}
               <div class="knob" role="button" tabindex="0"
                 title="Switch render style (shows the modelled planet)"
                 @click="toggleFidelity()" @keydown.enter.prevent="toggleFidelity()"
+                :class="heroSource === 'map' ? 'na' : ''"
                 :style="{ '--a': fidelity === 'classic' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
               <span class="knob-name">Style
                 <button class="info-btn xs" @click="toggleInfo('style')" :class="info === 'style' ? 'on' : ''"
                   aria-label="What does style change?" title="What does style change?">i</button></span>
-              <span class="knob-val" x-text="fidelity === 'classic' ? 'Classic' : 'Stylised'"></span>
+              <span class="knob-val" :class="heroSource === 'map' ? 'na' : ''"
+                x-text="heroSource === 'map' ? 'From the map' : (fidelity === 'classic' ? 'Classic' : 'Stylised')"></span>
             </div>
             <div class="knob-cell">
               <div class="knob" role="button" tabindex="0"
@@ -433,16 +484,19 @@
                 x-text="view === 'roman' ? 'Full spectrum only' : (illum === 'native' ? 'Its own star' : 'The Sun')"></span>
             </div>
             {% endif %}
-            {% if rec.real_observations %}
-            <div class="knob-cell knob-cell-source">
+            {% if rec.real_observations or ctx.surface_map %}
+            {# Two positions on an imaged exoplanet, three on a solar-system anchor, which has
+               both a real map and a real photograph. The tick ring matches (.three). #}
+            <div class="knob-cell knob-cell-source{{ ' three' if rec.real_observations and ctx.surface_map }}">
               <div class="knob knob-source" role="button" tabindex="0"
-                title="Switch between the modelled render and the real telescope photo"
+                :title="'Showing: ' + sourceLabel() + ' — click for the next picture of this planet'"
                 @click="toggleHeroSource()" @keydown.enter.prevent="toggleHeroSource()"
-                :style="{ '--a': heroSource === 'model' ? '-34deg' : '34deg' }"><span class="knob-dot"></span></div>
+                :style="{ '--a': sourceAngle() }"><span class="knob-dot"></span></div>
               <span class="knob-name">Source
                 <button class="info-btn xs" @click="toggleInfo('source')" :class="info === 'source' ? 'on' : ''"
-                  aria-label="What is modelled vs telescope?" title="Modelled vs telescope?">i</button></span>
-              <span class="knob-val" x-text="heroSource === 'model' ? 'Modelled' : (obs.length > 1 ? curObs().telescope : 'Telescope')"></span>
+                  aria-label="What is modelled vs real map vs telescope?"
+                  title="Modelled, real map or telescope?">i</button></span>
+              <span class="knob-val" x-text="sourceLabel()"></span>
             </div>
             {% endif %}
           </div>
@@ -451,6 +505,20 @@
              ~0 for Sun-like hosts (flipping changes nothing — that IS the point). #}
           <div class="illum-note"><span class="illum-de">&#916;E {{ '%.1f'|format(rec.sun_swap.delta_e2000_vs_true) }}</span>
             colour shift if the Sun were its star</div>
+          {% endif %}
+          {% if ctx.surface_map %}
+          {# Without this the map is invisible: the Source knob just says MODELLED, and nothing
+             hints that turning it puts real geography on the globe. Both states are one line,
+             so the row never changes height and the rail doesn't jog when you turn the knob. #}
+          <button type="button" class="map-hint" @click="showMap()"
+            :class="heroSource === 'map' ? 'on' : ''"
+            :title="heroSource === 'map' ? 'Showing the real map' : 'Put the real map on the globe'">
+            {# Both strings are near enough the same length to set the same number of lines at
+               the rail's width — a hint that grew a line when you pressed it would shove every
+               control below it down the panel. The full story is in the caption and the ℹ. #}
+            <span class="map-hint-tag">&#9638;</span><span x-show="heroSource !== 'map'">Real map available
+              &mdash; turn <strong>Source</strong></span><span x-show="heroSource === 'map'" x-cloak>Real
+              map on &mdash; colour computed</span></button>
           {% endif %}
           {% if rec.phase_colours %}
           {# Phase slider: drag the planet from fully lit (0°) to a thin crescent (170°).

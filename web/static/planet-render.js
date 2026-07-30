@@ -10,6 +10,12 @@
 // how this 3D render *interprets* that palette. The base hue and luminance are unchanged.
 //
 // Honest by construction: colour comes from the derived palette; texture (bands) is schematic.
+//
+// EXCEPT for the five solar-system anchors, which can also be drawn from a REAL map
+// (opts.map — see web/textures.py). There the light-and-dark pattern is a real spacecraft
+// map sampled on the same lit sphere, rescaled per channel by opts.mapGain so the map's own
+// average is the planet's physics-derived colour. Morphology real, colour still computed.
+// Saturn additionally gets its rings (opts.ring), which shrink the globe to make room.
 // No external library, no build step.
 (function () {
   "use strict";
@@ -24,6 +30,14 @@
     "uniform float turb, warmCool, bandGain;",  // stylised-mode restyling (0 in classic)
     "uniform float phase;",  // orbital phase angle in radians: 0 = fully lit, pi = backlit
     "uniform int pixel, outline;",
+    // Real-map mode (the five solar-system anchors only; useMap = 0 everywhere else).
+    // mapGain = derived colour / the map's own mean, so the rescaled map averages to the
+    // planet's computed hex. sphereScale shrinks the globe within the canvas to leave room
+    // for rings; it is 1.0 whenever there are none.
+    "uniform sampler2D bodyMap, ringMap;",
+    "uniform int useMap, useRing;",
+    "uniform vec3 mapGain;",
+    "uniform float mapExpo, sphereScale, aspect, ringInner, ringOuter, ringTilt, ringExpo;",
     "vec3 ramp(float t){",
     "  t = clamp(t,0.,1.)*4.;",
     "  vec3 c = pal[0];",
@@ -56,11 +70,53 @@
     "  for(int k=0;k<4;k++){ s += a*vnoise(p); p*=2.0; a*=0.5; }",
     "  return s;",
     "}",
+    // How much of the ring system stands between a point on the globe and the star — the
+    // dark band the rings paint across Saturn. Walk from the surface point towards the lamp,
+    // find where that line crosses the ring plane, and read the rings' opacity at that radius.
+    "float ringShadow(vec3 P, vec3 Ldir){",
+    "  vec3 n = vec3(0.0, cos(ringTilt), sin(ringTilt));",
+    "  float dn = dot(Ldir, n);",
+    "  if(abs(dn) < 0.0001){ return 1.0; }",
+    "  float s = -dot(P, n) / dn;",
+    "  if(s <= 0.0){ return 1.0; }",
+    "  float rq = length(P + s*Ldir);",
+    "  if(rq < ringInner || rq > ringOuter){ return 1.0; }",
+    "  float a = texture2D(ringMap, vec2((rq-ringInner)/(ringOuter-ringInner), 0.5)).a;",
+    "  return 1.0 - 0.72*a;",
+    "}",
+    // Roll the top end off instead of letting it clip flat. Rescaling a map to a brighter
+    // derived colour pushes its highlights past 1.0 — Jupiter's zones, Earth's ice — and a
+    // hard clamp turns them into featureless white that has lost the planet's tint entirely.
+    // Above the knee the response compresses smoothly towards 1.0 instead, which costs a
+    // couple of percent of the disc average and keeps the highlights coloured.
+    "vec3 softClip(vec3 c){",
+    "  float k = 0.78;",
+    "  vec3 hi = max(c - k, 0.0) / (1.0 - k);",
+    "  hi = hi / (1.0 + hi);",
+    "  return min(c, k + (1.0 - k)*hi);",
+    "}",
+    // Posterize for the pixel styles. The schematic path quantises its scalar `tone` and only
+    // then looks up the ramp, so its output is always five colours on the planet's own hue. A
+    // sampled map has no such tone, and quantising the three channels independently wrecks the
+    // colour — (0.72, 0.80, 0.80) snaps to a neutral (0.8, 0.8, 0.8) and pale worlds come out
+    // grey. So quantise BRIGHTNESS only and carry the chroma through untouched: same posterised
+    // steps, hue and saturation preserved. Scaling by the max channel also keeps it in gamut.
+    "vec3 posterize(vec3 c){",
+    "  c = clamp(c, 0.0, 1.0);",
+    "  float y = max(max(c.r, c.g), c.b);",
+    "  if(y < 0.002){ return c; }",
+    "  float q = clamp(floor((y + bayer(gl_FragCoord.xy)*dither)*levels + 0.5)/levels, 0.0, 1.0);",
+    "  return c * (q / y);",
+    "}",
     "void main(){",
-    "  vec2 uv = v;",
+    // The globe lives in its own coordinates, where 1.0 is one planet radius. `aspect` widens
+    // the box horizontally (a ring system is ~2.3 radii across but only ~1 radius tall, so in
+    // a square canvas the globe would have to shrink to 44% and sit in a sea of nothing);
+    // sphereScale then trades a little height for air above and below the rings.
+    "  vec2 uv = vec2(v.x*aspect, v.y) / sphereScale;",
     "  float r2 = dot(uv,uv);",
-    "  if(r2 > 1.0){ discard; }",
-    "  float z = sqrt(1.0 - r2);",
+    "  if(r2 > 1.0 && useRing == 0){ discard; }",
+    "  float z = sqrt(max(1.0 - r2, 0.0));",
     "  vec3 N = vec3(uv, z);",
     "  float lat = asin(clamp(uv.y,-1.,1.));",
     // Two lighting modes. phase < 0 (no phase control, e.g. gallery cards): the classic
@@ -70,51 +126,71 @@
     // cycle) — with a visibility boost at crescent angles, because a strictly
     // Lambert-shaded crescent reads as black at this size. `pe` is the effective
     // illumination phase (0..pi, side-agnostic) used for the night floor and the boost.
+    // L is hoisted out of the branch because the rings need the same lamp: which face of the
+    // annulus is lit, and where the globe's shadow falls across it.
     "  vec3 L = normalize(vec3(cos(light)*0.55, 0.28, 0.90));",
     "  float nightF = 0.34;",
     "  float lit;",
+    "  float pe = 0.0;",
     "  float limb = pow(z, 0.30);",
     "  if(phase >= 0.0){",
-    "    vec3 Lp = normalize(vec3(sin(phase), 0.25, cos(phase)));",
-    "    float pe = min(phase, 6.28319 - phase);",
-    "    lit = smoothstep(-0.06, 0.34, dot(N, Lp));",
+    "    L = normalize(vec3(sin(phase), 0.25, cos(phase)));",
+    "    pe = min(phase, 6.28319 - phase);",
+    "    lit = smoothstep(-0.06, 0.34, dot(N, L));",
     "    lit = min(1.0, lit * (1.0 + 2.2*clamp((pe-1.4)*0.7, 0.0, 1.0)));",
     "    nightF = mix(0.20, 0.05, clamp(pe*0.55, 0.0, 1.0));",
     "  } else {",
     "    lit = smoothstep(-0.08, 0.42, dot(N, L));",
     "  }",
     "  float shade = (nightF + (1.0-nightF)*lit) * limb;",
-    // Stylised: warp the belt phase and mottle the tone with turbulence (0 in classic).
-    "  float wphase = 0.0, mottle = 0.0;",
-    "  if(turb > 0.0){",
-    "    wphase = (fbm(vec2(uv.x*2.2 + z*1.5, lat*3.0)) - 0.5) * turb * 1.6;",
-    "    mottle = (fbm(vec2(uv.x*4.0 - z, lat*6.0 + 3.0)) - 0.5) * turb;",
-    "  }",
-    "  float band = 0.5 + 0.5*sin(lat*bandFreq + wphase + sin(lat*bandFreq*0.5)*0.6);",
-    "  band = mix(0.5, band, bandContrast);",
-    // Longitudinal swirl that scrolls with `rot` — makes rotation visible on banded worlds.
+    // Longitudinal swirl that scrolls with `rot` — makes rotation visible on banded worlds,
+    // and doubles as the real map's longitude. atan(uv.x, z) is continuous everywhere on the
+    // VISIBLE hemisphere (z >= 0), so a sampled map has no seam running down the globe: the
+    // wrap happens out in texture space, where REPEAT handles it.
     "  float lon = atan(uv.x, z) + rot;",
-    "  band += 0.12 * bandContrast * sin(lon*3.0 + lat*bandFreq*0.5);",
     "  float rim = smoothstep(0.74,1.0,r2);",
-    "  float tone = shade * (0.60 + bandGain*band) * brightness + rim*haze*0.28;",
-    "  tone *= 1.0 + mottle*0.12;",
+    "  vec3 col = vec3(0.0);",
+    "  float alpha = 0.0;",
+    "  if(r2 <= 1.0){",
+    "  if(useMap == 1){",
+    // Real map: the pattern is measured, the colour is not. mapGain rescales every texel so
+    // the map's own mean is the planet's derived hex — see web/textures.py.
+    "    vec2 tc = vec2(lon*0.15915494 + 0.5, 0.5 - lat*0.31830989);",
+    "    vec3 alb = texture2D(bodyMap, tc).rgb * mapGain;",
+    "    float sh = shade * brightness * mapExpo;",
+    "    if(useRing == 1){ sh *= ringShadow(N, L); }",
+    "    col = softClip(max(alb * sh, 0.0));",
+    "    if(pixel==1){ col = posterize(col); }",
+    "  } else {",
+    // Stylised: warp the belt phase and mottle the tone with turbulence (0 in classic).
+    "    float wphase = 0.0, mottle = 0.0;",
+    "    if(turb > 0.0){",
+    "      wphase = (fbm(vec2(uv.x*2.2 + z*1.5, lat*3.0)) - 0.5) * turb * 1.6;",
+    "      mottle = (fbm(vec2(uv.x*4.0 - z, lat*6.0 + 3.0)) - 0.5) * turb;",
+    "    }",
+    "    float band = 0.5 + 0.5*sin(lat*bandFreq + wphase + sin(lat*bandFreq*0.5)*0.6);",
+    "    band = mix(0.5, band, bandContrast);",
+    "    band += 0.12 * bandContrast * sin(lon*3.0 + lat*bandFreq*0.5);",
+    "    float tone = shade * (0.60 + bandGain*band) * brightness + rim*haze*0.28;",
+    "    tone *= 1.0 + mottle*0.12;",
     // Pixel styles: dither THEN posterize -> clean flat colour bands with dithered edges.
-    "  if(pixel==1){",
-    "    tone = clamp(tone, 0.0, 1.0);",
-    "    tone += bayer(gl_FragCoord.xy) * dither;",
-    "    tone = floor(tone*levels + 0.5) / levels;",
-    "  }",
-    "  vec3 col = ramp(tone);",
+    "    if(pixel==1){",
+    "      tone = clamp(tone, 0.0, 1.0);",
+    "      tone += bayer(gl_FragCoord.xy) * dither;",
+    "      tone = floor(tone*levels + 0.5) / levels;",
+    "    }",
+    "    col = ramp(tone);",
     // Stylised two-tone: nudge bright zones warm (tan) and dark belts cool (lavender) along
     // the blue<->orange axis. This is the belt/zone contrast the eye reads in artistic renders.
-    "  if(warmCool > 0.0){",
-    "    float belt = clamp((band - 0.5) * 2.0, -1.0, 1.0);",
-    "    col.r += belt * warmCool * 0.09;",
-    "    col.g -= belt * warmCool * 0.02;",
-    "    col.b -= belt * warmCool * 0.09;",
-    "    col = clamp(col, 0.0, 1.0);",
+    "    if(warmCool > 0.0){",
+    "      float belt = clamp((band - 0.5) * 2.0, -1.0, 1.0);",
+    "      col.r += belt * warmCool * 0.09;",
+    "      col.g -= belt * warmCool * 0.02;",
+    "      col.b -= belt * warmCool * 0.09;",
+    "      col = clamp(col, 0.0, 1.0);",
+    "    }",
+    "    if(pixel==0){ col = mix(col, pal[4], rim*haze*0.4); }",  // smooth-only haze tint
     "  }",
-    "  if(pixel==0){ col = mix(col, pal[4], rim*haze*0.4); }",  // smooth-only haze tint
     // Retro outline ring — but at crescent phases (beyond ~70°) the lit sliver lives
     // exactly on this rim, so exempt lit pixels there; nearer full phase the classic
     // outline stays intact.
@@ -122,7 +198,36 @@
     "    float keepLit = clamp(lit, 0.0, 1.0) * clamp((min(phase, 6.28319-phase)-1.2)*1.2, 0.0, 1.0);",
     "    col *= mix(0.35, 0.9, keepLit);",
     "  }",
-    "  gl_FragColor = vec4(col, 1.0);",
+    "    alpha = 1.0;",
+    "  }",
+    // Rings: the view ray at this pixel meets the tilted ring plane at exactly one point, so
+    // the annulus is one closed-form lookup — radius rr, depth zr. The half with zr < 0 runs
+    // behind the globe and is simply not drawn there.
+    "  if(useRing == 1){",
+    "    float st = max(sin(ringTilt), 0.001);",
+    "    float zr = -uv.y * cos(ringTilt) / st;",
+    "    float rr = sqrt(uv.x*uv.x + (uv.y/st)*(uv.y/st));",
+    "    bool hidden = (zr < 0.0) && (r2 <= 1.0);",
+    "    if(rr >= ringInner && rr <= ringOuter && !hidden){",
+    "      vec4 rc = texture2D(ringMap, vec2((rr-ringInner)/(ringOuter-ringInner), 0.5));",
+    "      vec3 n = vec3(0.0, cos(ringTilt), sin(ringTilt));",
+    // A flat annulus is lit by how square-on the lamp strikes its face; then the globe throws
+    // its own shadow across the far arc.
+    "      float face = 0.30 + 0.70*abs(dot(n, L));",
+    "      vec3 P = vec3(uv.x, uv.y, zr);",
+    "      float t = dot(P, L);",
+    "      float d2 = dot(P - t*L, P - t*L);",
+    "      float shadow = (t < 0.0 && d2 < 1.0) ? 0.26 : 1.0;",
+    "      vec3 rcol = clamp(rc.rgb * ringExpo * face * shadow, 0.0, 1.0);",
+    "      if(pixel==1){ rcol = posterize(rcol); }",
+    // Straight-alpha "over": rings in front of the globe, or alone against the backdrop.
+    "      float na = rc.a + alpha*(1.0 - rc.a);",
+    "      col = (rcol*rc.a + col*alpha*(1.0 - rc.a)) / max(na, 0.0001);",
+    "      alpha = na;",
+    "    }",
+    "  }",
+    "  if(alpha < 0.02){ discard; }",
+    "  gl_FragColor = vec4(col, alpha);",
     "}",
   ].join("\n");
 
@@ -145,10 +250,61 @@
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     ["pal","bandFreq","bandContrast","haze","brightness","light","dither","levels","rot",
-     "turb","warmCool","bandGain","phase","pixel","outline"]
+     "turb","warmCool","bandGain","phase","pixel","outline",
+     "useMap","useRing","mapGain","mapExpo","sphereScale","aspect",
+     "ringInner","ringOuter","ringTilt","ringExpo","bodyMap","ringMap"]
       .forEach(function (n) { U[n] = gl.getUniformLocation(prog, n === "pal" ? "pal[0]" : n); });
+    // Fixed texture units: the body map on 0, the ring strip on 1. Never changes.
+    gl.uniform1i(U.bodyMap, 0);
+    gl.uniform1i(U.ringMap, 1);
     return true;
   }
+
+  // ── Real maps ────────────────────────────────────────────────────────────────────────
+  // Images load asynchronously, so render() draws the schematic globe until one arrives and
+  // silently upgrades on a later frame. That is invisible on the hero (spin() repaints ~30
+  // times a second) and correct everywhere else: never block a render waiting on a texture.
+  var texCache = {};   // url -> { tex, ready }
+  var texWaiters = [];
+
+  function texture(url, repeatS) {
+    var e = texCache[url];
+    if (e) return e;
+    e = texCache[url] = { tex: gl.createTexture(), ready: false };
+    // A 1x1 mid-grey stands in until the image decodes, so sampling is always defined.
+    gl.bindTexture(gl.TEXTURE_2D, e.tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+      new Uint8Array([128, 128, 128, 255]));
+    var img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = function () {
+      gl.bindTexture(gl.TEXTURE_2D, e.tex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+      // Both maps are power-of-two, so mipmaps are available — and needed: the pixel styles
+      // squeeze a 1024-wide map into an 80px globe, which aliases into noise without them.
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      // Longitude wraps (the map is a cylinder); latitude must not, or the poles bleed.
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, repeatS ? gl.REPEAT : gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      e.ready = true;
+      texWaiters.forEach(function (cb) { cb(url); });
+    };
+    img.src = url;
+    return e;
+  }
+
+  // Start fetching a planet's map before anyone asks to see it, so flipping the Source knob
+  // is instant rather than a beat of schematic globe.
+  function preload(map) {
+    if (!map || !init()) return;
+    texture(map.file, true);
+    if (map.ring) texture(map.ring.file, false);
+  }
+  // Called with the url whenever a map finishes loading — for one-shot renders that would
+  // otherwise never repaint.
+  function onTexture(cb) { texWaiters.push(cb); }
   function compile(type, src) {
     var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
     if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
@@ -180,12 +336,91 @@
     return { bandFreq: bandFreq, bandContrast: bandContrast, brightness: brightness, haze: Math.min(haze, 1) };
   }
 
+  // Exposure for the real-map path. The schematic path runs its tone through the 5-stop ramp,
+  // which lifts everything into 0.18-0.88 lightness; a sampled map has no such ramp, so this
+  // constant puts a mapped globe at the same on-screen brightness as the schematic one it
+  // replaces. Tuned by eye against the five anchors, side by side.
+  var MAP_EXPOSURE = 1.25;
+  // Rings are far brighter than the strip's stored values, which assume a lit render.
+  var RING_EXPOSURE = 2.0;
+  // How much vertical room the ringed render reserves, in planet radii. The rings only reach
+  // outer*sin(tilt) ~ 1.02 radii above and below the equator, so 1.10 is the globe at 91% of
+  // the frame height with a little air — nothing like the 44% a square frame would force.
+  var RING_VFIT = 1.10;
+  var RING_HMARGIN = 1.03;
+
+  // How wide a ringed planet's frame has to be, relative to its height. Snapped to eighths so
+  // both render resolutions (80 and 480 px tall) stay whole pixels wide and the pixel styles
+  // keep their integer CSS upscale.
+  function ringAspect(ring) {
+    if (!ring) return 1;
+    return Math.round(((ring.outer * RING_HMARGIN) / RING_VFIT) * 8) / 8;
+  }
+
+  // Is this planet's map decoded and ready to draw? Anything not ready yet simply falls back
+  // to the schematic globe — never stall a frame on a pending image.
+  function mapReady(opts) {
+    return !!(opts.map && texture(opts.map.file, true).ready);
+  }
+
+  // Bind the real map (and rings) for this draw, or switch the shader back to schematic bands.
+  function setMap(opts) {
+    var m = opts.map;
+    var on = mapReady(opts);
+    gl.uniform1i(U.useMap, on ? 1 : 0);
+    if (!on) {
+      gl.uniform1i(U.useRing, 0);
+      gl.uniform1f(U.sphereScale, 1.0);
+      return;
+    }
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture(m.file, true).tex);
+    // Per-channel rescale: derived colour / the map's own mean, so the map averages to the
+    // planet's computed hex. Both sides are sRGB-encoded 0-255, the space this shader works
+    // in, so the match holds for the colour as displayed. See tools/prep_textures.py.
+    var t = hexToRgb(opts.baseHex || opts.palette[2] || opts.palette[0]);
+    var mean = m.mean || [128, 128, 128];
+    gl.uniform3f(U.mapGain,
+      t[0] / Math.max(mean[0] / 255, 0.02),
+      t[1] / Math.max(mean[1] / 255, 0.02),
+      t[2] / Math.max(mean[2] / 255, 0.02));
+    // The schematic path folds the planet's own luminance into `brightness`; keep that, since
+    // a dark world should stay dark whichever way its surface is drawn.
+    gl.uniform1f(U.mapExpo, MAP_EXPOSURE);
+
+    var ring = m.ring && texture(m.ring.file, false);
+    var ringOn = !!(ring && ring.ready);
+    gl.uniform1i(U.useRing, ringOn ? 1 : 0);
+    // How far the globe has to shrink for its rings to fit, in planet radii. The frame holds
+    // 1/sphereScale radii vertically and aspect/sphereScale horizontally, so whichever of the
+    // two runs out first sets the scale. In the wide hero frame that is the height, and the
+    // globe barely shrinks; on a square gallery card it is the width, and Saturn pulls back to
+    // ~43% — small, but a ringless Saturn is just a cream ball, so the rings are what earn
+    // their space at card size.
+    gl.uniform1f(U.sphereScale, ringOn
+      ? 1 / Math.max(RING_VFIT, (m.ring.outer * RING_HMARGIN) / (opts.aspect || 1))
+      : 1.0);
+    if (!ringOn) return;
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, ring.tex);
+    gl.uniform1f(U.ringInner, m.ring.inner);
+    gl.uniform1f(U.ringOuter, m.ring.outer);
+    gl.uniform1f(U.ringTilt, ((m.ring.tilt || 26.7) * Math.PI) / 180);
+    gl.uniform1f(U.ringExpo, RING_EXPOSURE);
+    gl.activeTexture(gl.TEXTURE0);
+  }
+
   function render(target, opts) {
     if (!target || !opts || !opts.palette || !init()) return;
     var pixel = opts.style !== "smooth";
     var res = pixel ? 80 : 480;
-    glCanvas.width = res; glCanvas.height = res;
-    gl.viewport(0, 0, res, res);
+    // Ringed planets render into a wide frame rather than a square one; `res` is always the
+    // HEIGHT, so the globe comes out the same size as every other planet's.
+    var aspect = opts.aspect || 1;
+    var resW = Math.round(res * aspect);
+    glCanvas.width = resW; glCanvas.height = res;
+    gl.uniform1f(U.aspect, aspect);
+    gl.viewport(0, 0, resW, res);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -212,18 +447,28 @@
     // amplitude is ~one posterization step so transitions read as clean pixel-art gradients.
     var levels = opts.style === "retro" ? 5.0 : 8.0;
     gl.uniform1f(U.levels, levels);
-    gl.uniform1f(U.dither, pixel ? 0.9 / levels : 0.0);
+    // A full-amplitude dither is right for the schematic globe, whose tone is a smooth
+    // gradient the dither breaks into pixel-art steps. A real map already varies pixel to
+    // pixel, so the same amplitude reads as a dot screen laid over the geography — a third
+    // of it keeps the banding smooth without burying Africa in noise.
+    gl.uniform1f(U.dither, pixel ? (mapReady(opts) ? 0.3 : 0.9) / levels : 0.0);
     gl.uniform1i(U.outline, opts.style === "retro" ? 1 : 0);
     gl.uniform1f(U.rot, opts.rot || 0);
+    setMap(opts);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     // Blit 1:1 into the target canvas; CSS does the INTEGER upscale (80->160 = 2x) with
     // image-rendering:pixelated, so pixels stay uniform and crisp (this was the jank).
-    target.width = res; target.height = res;
+    target.width = resW; target.height = res;
     var ctx = target.getContext("2d");
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(glCanvas, 0, 0);
   }
+
+  // Radians added per ~33 ms frame — the single spin rate for every globe on the site.
+  // Deliberately unhurried: at a third slower than it first shipped, a real map's features
+  // stay readable as they cross the disc instead of streaming past.
+  var SPIN_STEP = 0.033;
 
   // Rotation: a rAF loop that re-renders with an advancing `rot`. Throttled to ~30fps.
   // Only ever run for a few canvases at once (detail page + hovered card), so it's cheap.
@@ -235,7 +480,7 @@
     var st = { rot: prev ? prev.rot : Math.random() * 6.283, last: 0 };
     function frame(t) {
       if (t - st.last > 33) {
-        st.rot += 0.05;
+        st.rot += SPIN_STEP;
         // opts.frame(t) may return per-frame overrides (e.g. an animated phase + tint).
         var extra = opts.frame ? opts.frame(t) : null;
         render(canvas, Object.assign({}, opts, extra || {}, { rot: st.rot }));
@@ -372,5 +617,6 @@
   window.PlanetRender = {
     render: render, spin: spin, stop: stop, hashPhase: hashPhase, ramp: ramp,
     phaseCycle: phaseCycle, phaseIndex: phaseIndex, PHASE_SPEED: PHASE_SPEED,
+    preload: preload, onTexture: onTexture, ringAspect: ringAspect,
   };
 })();

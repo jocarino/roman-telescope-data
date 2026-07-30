@@ -66,6 +66,34 @@ document.addEventListener("keydown", (e) => {
   if (typeof window.__randomGo === "function") window.__randomGo();
 });
 
+// The five solar-system anchors' real spacecraft maps, injected by the gallery template
+// (web/textures.py). Every other planet gets null and renders schematic bands, because for
+// every other planet a map would be invention. On by default: where ground truth exists,
+// showing it is the honest thing — the colour is still the computed one either way.
+window.exoMap = function (id) {
+  var t = window.SURFACE_MAPS;
+  return (t && t[id]) || null;
+};
+
+// The phase a card is drawn at. Cards normally take the full 10-140 deg spread, which is what
+// gives the grid its variety — but a real map is the entire point of the five that have one,
+// and past ~55 deg the crescent has eaten the geography: Earth becomes a sliver of ocean with
+// no continent on it. So a mapped card is dealt from the lit end of the same range. Hovering
+// still runs the whole wax/wane cycle; this is only where it rests.
+window.exoCardPhase = function (id) {
+  var ph = window.PlanetRender.hashPhase(id);
+  return window.exoMap(id) ? Math.min(ph, 0.96) : ph;   // 0.96 rad ~ 55 deg
+};
+
+// How wide this planet's card frame is, relative to its height. A ringed planet renders wide
+// and overflows its card (see .card-planet.ringed) rather than shrinking its globe to ~43% to
+// keep the rings inside a square: Saturn then sits the same size as every other planet in the
+// grid, with its rings reaching across the gutters. 1 for everyone else.
+window.exoCardAspect = function (id) {
+  var m = window.exoMap(id);
+  return m && m.ring ? window.PlanetRender.ringAspect(m.ring) : 1;
+};
+
 document.addEventListener("alpine:init", () => {
 
   // Gallery: search / filter / sort over a fetched index (window.PLANETS). Cards are rendered
@@ -399,6 +427,17 @@ document.addEventListener("alpine:init", () => {
         entries.forEach((e) => { if (e.isIntersecting) this._draw(e.target); });
       }, { rootMargin: "100% 0px" });
 
+      // A card is painted once and then left alone, so an anchor whose map is still decoding
+      // would keep its schematic bands for the rest of the visit. Start the maps downloading
+      // now, and repaint just those five when one lands — never the whole grid, which on a
+      // 5,700-card page would be a visible hitch for the sake of five planets.
+      if (window.PlanetRender && window.SURFACE_MAPS) {
+        Object.keys(window.SURFACE_MAPS).forEach((id) => {
+          window.PlanetRender.preload(window.SURFACE_MAPS[id]);
+        });
+        window.PlanetRender.onTexture(() => this._redrawMapped());
+      }
+
       // Any filter/sort change re-renders the grid from the top, and is remembered.
       // Typing is the exception: "q" changes on every keystroke, and a rerender re-filters and
       // re-sorts the whole catalogue, then tears the grid down and rebuilds it. Coalesce a
@@ -508,7 +547,10 @@ document.addEventListener("alpine:init", () => {
       const fresh = [];
       next.forEach((p) => {
         const card = this._makeCard(p);
-        fresh.push(card.firstChild);   // the canvas, appended first in _makeCard
+        // Query for it rather than assuming a position: a ringed planet's canvas sits inside a
+        // .card-art wrapper, and taking firstChild handed the observer the wrapper — so Saturn
+        // was never drawn at all.
+        fresh.push(card.querySelector(".card-planet"));
         frag.appendChild(card);
       });
       this.$refs.grid.appendChild(frag);
@@ -539,14 +581,30 @@ document.addEventListener("alpine:init", () => {
     },
     _makeCard(p) {
       const a = document.createElement("a");
-      a.className = "card";
+      // .card-ringed is only for the phone layout, where the card takes the whole row —
+      // see the note on .card-planet.ringed.
+      a.className = "card" + (window.exoCardAspect(p.id) !== 1 ? " card-ringed" : "");
       a.href = "/planet/" + p.id;
       a.setAttribute("data-peek", "/fragments/peek/" + p.id + ".html");
       const cv = document.createElement("canvas");
-      cv.className = "card-planet" + (this.style === "retro" ? " pixel" : "");
-      cv.width = 256; cv.height = 256; cv.dataset.id = p.id;
+      const aspect = window.exoCardAspect(p.id);
+      cv.className = "card-planet" + (this.style === "retro" ? " pixel" : "")
+        + (aspect !== 1 ? " ringed" : "");
+      // Intrinsic size, i.e. what lays the card out before the first frame is drawn — square
+      // here and a ringed card would load as a tall box and snap when the render lands.
+      cv.width = Math.round(256 * aspect); cv.height = 256; cv.dataset.id = p.id;
       cv.setAttribute("aria-label", p.name + " render");
-      a.appendChild(cv);
+      // A ringed canvas is wider than its grid track, so it hangs inside a wrapper that holds
+      // exactly the space a normal card planet would — see .card-art. Put it straight in the
+      // card otherwise; there is no reason to add a box for the other 5,759 planets.
+      if (aspect !== 1) {
+        const art = document.createElement("span");
+        art.className = "card-art";
+        art.appendChild(cv);
+        a.appendChild(art);
+      } else {
+        a.appendChild(cv);
+      }
       const name = document.createElement("div");
       name.className = "card-name"; name.textContent = p.name;
       a.appendChild(name);
@@ -592,7 +650,17 @@ document.addEventListener("alpine:init", () => {
       window.PlanetRender.render(cv, {
         palette: this.palOf(p), baseHex: this.hexOf(p), radius: p.radius, cloudState: p.cloud,
         lumY: this.lumOf(p), style: this.style, fidelity: this.fidelity,
-        phase: window.PlanetRender.hashPhase(p.id),
+        phase: window.exoCardPhase(p.id),
+        map: window.exoMap(p.id), aspect: window.exoCardAspect(p.id),
+      });
+    },
+    // Repaint only the cards that have a real map — see the onTexture hook in init().
+    _redrawMapped() {
+      if (!this.$refs.grid || !window.SURFACE_MAPS) return;
+      Object.keys(window.SURFACE_MAPS).forEach((id) => {
+        const cv = this.$refs.grid.querySelector('.card-planet[data-id="' + id + '"]');
+        if (!cv || !cv.dataset.drawn) return;
+        this._drawCanvas(cv);
       });
     },
     _redrawAll() {
@@ -1158,7 +1226,11 @@ document.addEventListener("alpine:init", () => {
     // Render fidelity: "classic" (physics-honest) or "stylised" (restyled for looks). Global, persisted.
     fidelity: localStorage.getItem("renderFidelity") || "classic",
     heroStyle: "retro",   // hero render: "retro" (pixel) or "smooth" (sphere)
-    heroSource: "model",  // hero shows the "model" render or the real "telescope" image
+    // What the hero shows: the schematic "model" render, the same globe wearing this
+    // planet's real "map" (solar-system anchors only), or the real "telescope" image.
+    heroSource: "model",
+    // The real spacecraft map for this planet, or null — injected by init (web/textures.py).
+    map: null,
     // Illuminant swap ("Light source" knob): "native" = the planet's own star, "sun" = the
     // same albedo re-lit by the Sun. Data injected by init when the record carries it.
     illum: "native",
@@ -1214,8 +1286,16 @@ document.addEventListener("alpine:init", () => {
       // The real photo persists only across planet-to-planet hops (same-system links);
       // arriving from the gallery or a fresh visit always opens on the modelled render.
       const src = localStorage.getItem("heroSource");
+      // The real photo persists only across planet-to-planet hops (above). The real map needs
+      // no such carrying: it is this planet's default. What IS remembered is turning it OFF —
+      // someone who wants the modelled globe keeps it, on every anchor, until they say
+      // otherwise. A planet with no map has nothing to fall back from.
       this.heroSource =
-        src === "telescope" && fromPlanet && this.obs.length ? "telescope" : "model";
+        src === "telescope" && fromPlanet && this.obs.length ? "telescope"
+        : src === "model" ? "model"
+        : this._defaultSource();
+      // Fetch the map up front so flipping the knob is instant, not a beat of schematic globe.
+      if (this.map && window.PlanetRender) PlanetRender.preload(this.map);
       window.__randomGo = () => this.randomGo();  // wire the R shortcut to this page
       this._phaseLoop();  // start the wax/wane phase cycle (on by default)
     },
@@ -1247,13 +1327,19 @@ document.addEventListener("alpine:init", () => {
     // cleared too, or the next planet page would just restore what was reset.
     _SCOPE_DEFAULTS: {
       view: "full", fidelity: "classic", heroStyle: "retro", illum: "native",
-      heroSource: "model", obsIdx: 0, phaseIdx: 2, phasePlay: true,
+      obsIdx: 0, phaseIdx: 2, phasePlay: true,
     },
+    // The Source knob's default is the one setting that depends on the planet: the five
+    // anchors we have actually mapped open on their real map, matching the card you clicked
+    // to get here. Everything else opens on the modelled render, having nothing else to show.
+    _defaultSource() { return this.map ? "map" : "model"; },
     scopeDirty() {
-      return Object.keys(this._SCOPE_DEFAULTS).some((k) => this[k] !== this._SCOPE_DEFAULTS[k]);
+      return this.heroSource !== this._defaultSource()
+        || Object.keys(this._SCOPE_DEFAULTS).some((k) => this[k] !== this._SCOPE_DEFAULTS[k]);
     },
     resetScope() {
       Object.assign(this, this._SCOPE_DEFAULTS);
+      this.heroSource = this._defaultSource();
       this._anim = null;  // let the phase cycle restart from the default position
       ["scopeView", "scopeIllum", "planetStyle", "renderFidelity", "heroSource", "obsTelescope"]
         .forEach((k) => { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } });
@@ -1275,7 +1361,9 @@ document.addEventListener("alpine:init", () => {
     // simply brings the model back (no value change) so the knobs never feel "locked out";
     // a further click then toggles. This is why turning to Telescope doesn't trap you there.
     toggleFidelity() {
-      if (this.heroSource === "telescope") { this.heroSource = "model"; this._persist("heroSource", "model"); this.blink(); this.renderAll(); return; }
+      // Classic/Stylised restyles the SCHEMATIC bands, so it has nothing to say about a real
+      // map either — both non-model sources bounce back to the render the knob acts on.
+      if (this.heroSource !== "model") { this.heroSource = "model"; this._persist("heroSource", "model"); this.blink(); this.renderAll(); return; }
       this.setFidelity(this.fidelity === "classic" ? "stylised" : "classic");
     },
     toggleHeroStyle() {
@@ -1286,13 +1374,40 @@ document.addEventListener("alpine:init", () => {
     },
     // The currently-selected real image (safe when none exist).
     curObs() { return this.obs[this.obsIdx] || {}; },
-    // Flip the hero between the modelled render and the real telescope photo (only present
-    // for directly-imaged planets; the knob is not rendered otherwise).
+    // What this planet's Source knob can be turned to, in knob order. Most imaged planets
+    // offer two positions; the five solar-system anchors, which have both a real map and a
+    // real photograph, offer three. The knob is not rendered at all below two.
+    sourceSteps() {
+      return ["model"].concat(this.map ? ["map"] : [], this.obs.length ? ["telescope"] : []);
+    },
+    // Spread the available positions evenly across the knob's ±40° sweep, so a two-position
+    // knob still reads as a two-position knob.
+    sourceAngle() {
+      const st = this.sourceSteps(), i = Math.max(0, st.indexOf(this.heroSource));
+      return (st.length < 2 ? 0 : -40 + (80 * i) / (st.length - 1)) + "deg";
+    },
+    sourceLabel() {
+      if (this.heroSource === "model") return "Modelled";
+      if (this.heroSource === "map") return "Real map";
+      return this.obs.length > 1 ? this.curObs().telescope : "Telescope";
+    },
+    // Jump straight to the real map (the hint line under the knobs). Idempotent: pressing it
+    // while the map is already showing does nothing rather than cycling on to the photo.
+    showMap() {
+      if (!this.map || this.heroSource === "map") return;
+      this.heroSource = "map";
+      this._persist("heroSource", "map");
+      this.blink();
+      this.renderAll();
+    },
+    // Step the hero to the next source, wrapping back to the modelled render.
     toggleHeroSource() {
-      if (!this.obs.length) return;
-      this.heroSource = this.heroSource === "model" ? "telescope" : "model";
+      const st = this.sourceSteps();
+      if (st.length < 2) return;
+      this.heroSource = st[(st.indexOf(this.heroSource) + 1) % st.length];
       this._persist("heroSource", this.heroSource);
       this.blink();
+      this.renderAll();
     },
     toggleInfo(k) { this.info = this.info === k ? null : k; },
     // --- Illuminant swap ("Light source" knob) ------------------------------------------
@@ -1442,6 +1557,13 @@ document.addEventListener("alpine:init", () => {
         lumY: this.curLum(),
         fidelity: this.fidelity,
         phase: (this.phase().d * Math.PI) / 180,
+        // Real map only when the Source knob asks for it. baseHex above is what the map gets
+        // rescaled to, so the mapped globe follows the view/illuminant/phase colour too.
+        map: this.heroSource === "map" ? this.map : null,
+        // A ringed planet always renders into its wide frame, even with the rings switched
+        // off: the globe stays the size every other planet's is, and turning the Source knob
+        // fills the sides in rather than reflowing the header around a box that changed shape.
+        aspect: this.map && this.map.ring ? PlanetRender.ringAspect(this.map.ring) : 1,
       };
       // Single hero planet, rotating; its style (sphere/pixel) is a scope knob. When the
       // phase cycle is playing, the animator supplies a smoothly-advancing phase per frame.
@@ -1633,7 +1755,8 @@ document.addEventListener("alpine:init", () => {
           palette: window.PlanetRender.ramp(base), baseHex: base,
           radius: pl.radius, cloudState: pl.cloud, lumY: roman ? pl.rlum : pl.lum,
           style: style, fidelity: localStorage.getItem("renderFidelity") || "classic",
-          phase: window.PlanetRender.hashPhase(pl.id),
+          phase: window.exoCardPhase(pl.id),
+          map: window.exoMap(pl.id), aspect: window.exoCardAspect(pl.id),
         });
       }
       peek.classList.add("on");
@@ -1705,7 +1828,8 @@ document.addEventListener("alpine:init", () => {
       radius: p.radius, cloudState: p.cloud, lumY: roman ? p.rlum : p.lum,
       style: localStorage.getItem("planetStyle") || "retro",
       fidelity: localStorage.getItem("renderFidelity") || "classic",
-      phase: window.PlanetRender.hashPhase(p.id),
+      phase: window.exoCardPhase(p.id),
+      map: window.exoMap(p.id), aspect: window.exoCardAspect(p.id),
     };
   }
   // Per-hover animator: the same cycle the hero and the tour stops run, from `startRad`. A
