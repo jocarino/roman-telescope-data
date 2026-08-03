@@ -730,13 +730,13 @@ def build(
     )
     (out / "index.html").write_text(gallery_html)
     (out / "how.html").write_text(
-        env.get_template("how.html").render(meta=hub["/how.html"], site=site, build_id=build_id)
+        env.get_template("how.html").render(meta=hub["/how"], site=site, build_id=build_id)
     )
     # Compare page: consumes the same fetched index plus the extras (star + orbit numbers);
     # deep-linkable via ?a=&b=.
     (out / "compare.html").write_text(
         env.get_template("compare.html").render(
-            meta=hub["/compare.html"], site=site,
+            meta=hub["/compare"], site=site,
             index_url=f"/planets.index.{build_id}.json",
             extra_url=extra_url,
             build_id=build_id,
@@ -746,14 +746,14 @@ def build(
     # the nav — it is reachable at /glossary, and by hovering any marked term anywhere.
     (out / "glossary.html").write_text(
         env.get_template("glossary.html").render(
-            meta=hub["/glossary.html"], site=site,
+            meta=hub["/glossary"], site=site,
             categories=glossary["categories"], terms=glossary["terms"], build_id=build_id
         )
     )
     # Colour census: the whole catalog as one dataset (same fetched index).
     (out / "census.html").write_text(
         env.get_template("census.html").render(
-            meta=hub["/census.html"], site=site,
+            meta=hub["/census"], site=site,
             index_url=f"/planets.index.{build_id}.json", build_id=build_id
         )
     )
@@ -774,7 +774,7 @@ def build(
     # plus the extras — the RA/Dec/magnitude it plots live there).
     (out / "sky.html").write_text(
         env.get_template("sky.html").render(
-            meta=hub["/sky.html"], site=site,
+            meta=hub["/sky"], site=site,
             index_url=f"/planets.index.{build_id}.json",
             extra_url=extra_url,
             build_id=build_id,

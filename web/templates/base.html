@@ -3,7 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Exoplanet Palette{% endblock %}</title>
+  {# The ONE place a <title> is written. It comes from the same PageMeta as og:title, so
+     the two cannot drift; every page used to override this block with a hand-typed copy
+     of the meta title, which is a rename away from disagreeing. tests/test_meta.py has
+     asserted they match since before that was structurally guaranteed. #}
+  <title>{% block title %}{{ meta.title if meta else "Exoplanet Palette" }}{% endblock %}</title>
   {# Share identity. Every page carries its own description and its own card image; before
      this, all ~5.8k planet pages shipped one shared description and no image at all, so a
      link to the bluest planet in the catalogue unfurled as a grey rectangle. Built in

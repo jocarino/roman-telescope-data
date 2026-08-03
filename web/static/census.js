@@ -69,7 +69,7 @@
     return state;
   }
   function clear(st) { st.ctx.clearRect(0, 0, st.w, st.h); }
-  function go(p) { window.location.href = "/planet/" + p.id + ".html"; }
+  function go(p) { window.location.href = "/planet/" + p.id; }  // extensionless: the canonical form
 
   // ── 1 · Hue strip ────────────────────────────────────────────────────────
   function stripChart(canvas) {

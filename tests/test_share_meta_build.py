@@ -83,8 +83,9 @@ def test_every_page_carries_share_tags():
 
 
 def test_title_and_og_title_never_drift():
-    """The <title> comes from each template's own block; og:title comes from web/meta.py.
-    Two sources, one string — pin them together."""
+    """Both now come from the same PageMeta — base.html renders `meta.title` and no template
+    overrides the block — so this can no longer drift by a typo. Kept as the guard that says
+    so: re-adding a hand-typed `{% block title %}` to any template turns this red."""
     for path, html in _pages():
         title = _tag(html, r"<title>([^<]*)</title>")
         assert title == _og(html, "title"), f"{path.name}: <title> != og:title"
@@ -145,7 +146,24 @@ def test_sitemap_lists_every_built_html_page():
             continue
         rel = "/" + path.relative_to(root).as_posix()
         rel = rel.replace("/index.html", "/")  # tours/index.html is served as /tours/
+        # The build writes `census.html`; the site links to, and canonicalises, `/census`
+        # (nginx `try_files $uri $uri.html` serves both). Extensionless is the one form every
+        # internal link uses, so it is the canonical one -- map the artifact to it here.
+        if rel.endswith(".html"):
+            rel = rel[: -len(".html")]
         assert BASE + rel in locs, f"{rel} is built but absent from sitemap.xml"
+
+
+def test_no_sitemap_url_carries_a_html_extension():
+    """The canonical form is extensionless. A `.html` URL in the sitemap means some PageMeta
+    drifted back to the artifact filename, which puts a duplicate of every page in the index."""
+    root = _site()
+    locs = {
+        u.findtext(f"{_SM_NS}loc")
+        for u in ET.parse(root / "sitemap.xml").getroot().findall(f"{_SM_NS}url")
+    }
+    offenders = sorted(u for u in locs if u.endswith(".html"))
+    assert not offenders, f"sitemap carries non-canonical .html URLs: {offenders[:5]}"
 
 
 def test_404_is_noindex_and_absent_from_the_sitemap():

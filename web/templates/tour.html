@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% from "macros.html" import provenance_badge, jinfo, palette_full %}
-{% block title %}{{ tour.title }} · Guided tour · Exoplanet Palette{% endblock %}
 {% block content %}
 {%- set last = stops|length - 1 %}
 <div class="tour-page" x-data="tour({ n: {{ stops|length }} })"
