@@ -84,9 +84,9 @@ Three structural advantages that decide what's worth doing:
 | [06](./06-open-data.md) | Open dataset | **blocked by defect 4** | revise | The file has no licence, so it isn't open yet. Licence → describe → deposit once, well. |
 | [07](./07-wallpapers.md) | Wallpaper pack | not started | revise | Right delivery, wrong artifact: **make the spectrum the wallpaper, not the planet.** |
 | [08](./08-short-video.md) | Short-form video | **deferred** | upheld, reshaped | ~10 h whole-clip renderer, not a frame exporter. Revisit on the tech demo, not a date. |
-| [09](./09-show-hn.md) | Show HN | **blocked by defect 1** | revise | Don't submit while the band config is wrong. Weekends beat weekdays. No plan yet for the hours after you sleep. |
+| [09](./09-show-hn.md) | Show HN | **blocked: awaiting data release** | revise | Band config is fixed in code; don't submit until the re-emitted catalogue ships. Weekends beat weekdays. No plan yet for the hours after you sleep. |
 | [10](./10-reddit.md) | Reddit | not started | **substantially rework** | The six-week calendar *is* the ban risk. 90 days of commenting, then two posts. |
-| [11](./11-bluesky-mastodon.md) | Bluesky + Mastodon | not started | strongest doc, one bad post | Start the habit now. Don't publish a Roman comparison until defect 1 is fixed. |
+| [11](./11-bluesky-mastodon.md) | Bluesky + Mastodon | not started | strongest doc, one bad post | Start the habit now. Don't publish a Roman comparison until the re-emitted catalogue ships. |
 | [12](./12-design-newsletters.md) | Design newsletters & curators | not started | revise | Its #1 target shut down five weeks ago. Re-verify before every wave. |
 | [13](./13-credit-the-scientists.md) | Credit the scientists | **blocking** | revise | Audit was ~80% right; the reviewer found more, including the band error. |
 | [14](./14-educators.md) | Teachers, planetariums, clubs | not started | revise | Seven artifacts → two. The anchor lesson is the one worth building. |
@@ -106,8 +106,9 @@ fixed item keeps its number and moves to that doc's Resolved section.
 > and is now the most important part of the plan. Being wrong on the site is worse than being
 > unknown, and every one of these is small:
 >
-> 1. **The Roman band configuration** ([15](./15-roman-launch.md)) — a data-side evening, and it
->    unblocks 09, 11 and 02, all of which currently repeat the wrong figure.
+> 1. **The Roman band configuration** ([15](./15-roman-launch.md)) —
+>    **done in code** — the remaining half is re-emitting the catalogue and publishing the
+>    data release, which is what actually unblocks 09, 11 and 02.
 > 2. **A `LICENSE`, the outstanding CC BY attribution, and an email address on the site**
 >    ([13](./13-credit-the-scientists.md), [02](./02-press-kit.md)) — one evening for all three.
 > 3. **The crawlable link graph** ([03](./03-seo-planet-pages.md)) — the only slow one; start it
