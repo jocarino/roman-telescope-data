@@ -289,8 +289,35 @@ class PlanetRecord(BaseModel):
     meta: RecordMeta
 
 
+class BandpassHeader(BaseModel):
+    """One bandpass as emitted in the file header, so the file says which filter set produced
+    its `instrument_views` instead of leaving a reader to infer it from band ids."""
+
+    id: str
+    center_nm: float
+    bandwidth_frac: float
+    lo_nm: float
+    hi_nm: float
+    shape: str
+    role: str
+
+
+class InstrumentHeader(BaseModel):
+    id: str
+    name: str
+    mission: str
+    bands: list[BandpassHeader]
+
+
 class PlanetsFile(BaseModel):
     schema_version: int
     grid: str
     generated_at: str
+    # Why this is here: on 2026-08-03 the CGI band set was corrected from four bands to the
+    # flight three. The record SHAPE did not change, so schema_version stayed at 5 -- and a
+    # consumer pinned to v5 silently began receiving cgi-825 where it had been getting
+    # cgi-660 and cgi-835, with every instrument_views colour and delta_e2000 different.
+    # A version number cannot express that; the band set itself can. Emitting it makes the
+    # file self-describing, so two releases can be told apart without reading a changelog.
+    instruments: list[InstrumentHeader] = Field(default_factory=list)
     planets: list[PlanetRecord]

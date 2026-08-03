@@ -88,3 +88,21 @@ def test_measured_file_with_stale_band_ids_is_rejected(tmp_path):
 
     with pytest.raises(ValueError, match="cgi-660"):
         load_measured_samples(pin.id, ROMAN_CGI, measured_dir=tmp_path)
+
+
+def test_file_header_records_the_instrument_band_set(tmp_path):
+    """The file must say which filter set produced its instrument_views. schema_version cannot
+    express a band-set change (the record shape is identical), so a reader comparing two
+    releases has nothing else to go on."""
+    from pipeline.emit.writer import write_planets
+
+    pin = demo_planets()[0]
+    rec = build_record(pin, [ROMAN_CGI], "2026-08-03T00:00:00+00:00")
+    out = write_planets([rec], "2026-08-03T00:00:00+00:00", out=tmp_path / "planets.json")
+    doc = json.loads(out.read_text())
+
+    cgi = next(i for i in doc["instruments"] if i["id"] == ROMAN_CGI.id)
+    assert [b["id"] for b in cgi["bands"]] == [b.id for b in ROMAN_CGI.bands]
+    assert [b["center_nm"] for b in cgi["bands"]] == [b.center_nm for b in ROMAN_CGI.bands]
+    # The bounds are the point: they say outright that the top band clears the CIE range.
+    assert cgi["bands"][-1]["lo_nm"] > 780.0

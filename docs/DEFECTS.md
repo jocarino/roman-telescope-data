@@ -217,20 +217,26 @@ the reason the honesty rule exists in the first place.
 
 ---
 
-### 3. Three licence notices we are required to ship and don't
+### 3. Three licence notices we are required to ship and don't — **fixed**
 **Blocks:** [13 credits](./marketing/13-credit-the-scientists.md), and any CC-licensed release downstream.
 
 All three are binding licence terms, not courtesies. Ten minutes total.
 
-- [ ] **Alpine.js (MIT)** — notice stripped, not merely absent. Restore
-      `Copyright © 2019-2025 Caleb Porzio and contributors` + the permission notice.
-- [ ] **Silkscreen (SIL OFL 1.1 §2)** — ship `OFL.txt` beside the woff2. The condition does
-      require it.
-- [ ] **Payne et al. 2026 (CC BY 4.0, [Zenodo 17470005](https://zenodo.org/records/17470005))** —
-      we redistribute it verbatim in `data/measured_albedo/` and give the visitor a name and a
-      licence label only. §3(a)(1) also requires a copyright notice, a notice referring to the
-      licence, a notice referring to the disclaimer of warranties, and **a URI or hyperlink to
-      the licensed material**. This is the one real breach involving someone's *data*.
+- [x] **Alpine.js (MIT)** — notice restored at the top of `web/static/vendor/alpine.min.js`
+      (v3.14.8, `Copyright (c) 2019-2025 Caleb Porzio and contributors` + the full permission
+      notice). Verified the file still parses.
+- [x] **Silkscreen (SIL OFL 1.1 §2)** — canonical `OFL.txt` fetched from the upstream
+      googlefonts/silkscreen repo and shipped **twice**: `web/static/fonts/` (served, so
+      `/static/fonts/OFL.txt` goes out with the WOFF2) and `web/assets/fonts/` (the build-time
+      TrueType copy the OG card renderer uses). Upstream's copyright line is
+      *"Copyright 2001 The Silkscreen Project Authors"*, not the designer's name the README
+      previously used alone — both now recorded.
+- [x] **Payne et al. 2026 (CC BY 4.0, [Zenodo 17470005](https://zenodo.org/records/17470005))** —
+      the `/how` citation now carries all five things §3(a)(1) asks for: named creators, the
+      copyright notice, a link to the licence, a pointer to the warranty disclaimer (§5), and a
+      hyperlink to the licensed material itself, plus the DOI and a statement of what we changed
+      (interpolated to our 5 nm grid, otherwise unmodified). `data/measured_albedo/README.md`
+      matches.
 
 ### 4. The project states no licence for its own output
 **Where:** repo root — no `LICENSE`, no `CITATION.cff` (`find -iname 'LICENSE*'` → zero hits)
