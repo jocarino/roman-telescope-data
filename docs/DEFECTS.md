@@ -281,6 +281,13 @@ attract one, which is what gives your CC BY grant teeth).
       whether the archive carries terms, or stop shipping them in-repo and fetch at build time
       the way `planets.json` already does. Documented in `LICENSE-DATA` §5. The release path is
       already clear — `scripts/release-data.sh` publishes only `planets.json`.
+- [x] **Attribution half done** (rights ≠ attribution, but the files were silent on both). The
+      repo *did* record the source — in `pipeline/spectrum/cahoy_ingest.py` and
+      `docs/spectrum-engines.md` — but `data/cahoy_grid/` itself held 305 header-less CSVs and a
+      manifest that was a pure filename lookup. Copy that folder anywhere and it became
+      unattributable. Now: a `README.md` in the directory (citation, DOI, source tarball, column
+      units, licence status) and a `source` block inside `manifest.json`, which
+      `cahoy_ingest.py` stamps on every future write so it can't drift back out.
 
 ### 5. The catalogue is ~560 planets behind
 **Where:** release `data-20260727-1038`
