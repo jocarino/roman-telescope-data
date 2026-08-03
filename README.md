@@ -127,7 +127,7 @@ list above; keep the names readable a year out.
 ### The Roman target board (`/roman`)
 
 The namesake page: the shortlist of exoplanets Roman's coronagraph could plausibly catch in
-reflected light, each with the four-band colour we predict **and an empty slot beside it for
+reflected light, each with the three-band colour we predict **and an empty slot beside it for
 the colour Roman measures**. Plus a live countdown to launch (30 Aug 2026).
 
 - **Words** are curated in `data/roman-targets.json`; **planet data** is re-joined against the

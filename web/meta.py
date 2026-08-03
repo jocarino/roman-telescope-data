@@ -168,7 +168,7 @@ def static_pages(n_planets: int) -> list[PageMeta]:
             description=(
                 f"The colour of {n} real exoplanets, computed from their reflected-light "
                 "spectra. Search, filter and sort the whole catalogue by colour, size and "
-                "temperature — and see how much of each colour survives Roman's four filters."
+                "temperature — and see how much of each colour survives Roman's three filters."
             ),
             path="/",
             priority="1.0",

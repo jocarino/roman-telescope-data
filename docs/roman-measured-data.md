@@ -9,10 +9,10 @@ colours on the site, next to our predictions. Designed to take minutes, not days
 
 `pipeline/emit/build.py :: obtain_band_samples` is the seam: for every planet × instrument
 it first looks for a real-measurement file on disk; only if none exists does it simulate
-the four band values from the model. Everything downstream — reconstruction → CIE colour →
+the band values from the model. Everything downstream — reconstruction → CIE colour →
 palette → page — is byte-identical either way. A measured file flips the record's
 provenance to `measured-cgi`, and the UI already renders the "Roman: measured" badge and
-caption ("Measured: real Roman photometry in four bands…").
+caption ("Measured: real Roman photometry in three bands…").
 
 ## The procedure
 
@@ -23,9 +23,8 @@ caption ("Measured: real Roman photometry in four bands…").
      "epoch": "2027-03-14",
      "samples": [
        {"band_id": "cgi-575", "center_nm": 575.0, "value": 0.31, "uncertainty": 0.04},
-       {"band_id": "cgi-660", "center_nm": 660.0, "value": 0.27, "uncertainty": 0.05},
        {"band_id": "cgi-730", "center_nm": 730.0, "value": 0.25, "uncertainty": 0.05},
-       {"band_id": "cgi-835", "center_nm": 835.0, "value": 0.22, "uncertainty": 0.06}
+       {"band_id": "cgi-825", "center_nm": 825.0, "value": 0.22, "uncertainty": 0.06}
      ]
    }
    ```
@@ -61,7 +60,7 @@ caption ("Measured: real Roman photometry in four bands…").
 4. **Check the page locally** (`uv run python -m web.build`, serve `dist/`): the planet
    should show the **"Roman: measured"** badge, the measured caption with the epoch, and
    the CH2 ROMAN channel now reconstructed from the real numbers. The ΔE readout becomes
-   the real "how much colour Roman's four bands preserved" — the project's headline
+   the real "how much colour Roman's bands preserved" — the project's headline
    number, now with actual data in it.
 
    **Also check `/roman`, the target board.** That planet's empty "Measured" slot should now

@@ -22,11 +22,14 @@ rather than survive. **The full fix list — with file paths, evidence, a corona
 suggested order — is [`docs/DEFECTS.md`](../DEFECTS.md).** (A fifth, dead analytics, was fixed and
 verified on 2026-08-03.)
 
-1. **The Roman band configuration in `pipeline/config.py` is wrong.** Every "as Roman would see
-   it" swatch — the signature feature — is computed through the wrong filter set. Our `835 nm`
-   and `6%` widths trace to no primary source at all. Details and the verified flight
-   configuration in [15](./15-roman-launch.md); the astronomer's audit is in
-   [reviews/15-roman-review.md](./reviews/15-roman-review.md).
+1. **The Roman band configuration was wrong — code now fixed, data release pending.**
+   `pipeline/config.py` now carries the flight configuration (575/10%, 730/15%, 825/10%); our
+   old `835 nm` and `6%` widths traced to no primary source at all. The corrected set measurably
+   *improves* colour fidelity — ΔE2000 fell for 221 of 247 sampled planets — which is the
+   opposite of what the first draft of these docs predicted, so **do not reuse the "a real
+   filter set costs you more than you'd guess" framing.** Until the catalogue is re-emitted and
+   released, the site shows three-band copy over four-band numbers. See
+   [`docs/DEFECTS.md`](../DEFECTS.md) item 1 and [reviews/15-roman-review.md](./reviews/15-roman-review.md).
 2. **About 97% of planet pages are orphans.** The gallery ships an empty grid built in JS with
    scroll-loading, so only ~100–200 planets sit in the crawlable link graph — and ~5,700 peek
    fragments are publicly indexable with no `noindex`. [reviews/03-seo-review.md](./reviews/03-seo-review.md).

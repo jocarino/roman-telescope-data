@@ -27,13 +27,27 @@ We ship four bands: `575/10%`, `660/6%`, `730/6%`, `835/15%`. The flight configu
 supported bands. Every "as Roman would see it" swatch — the signature feature — is computed
 through the wrong filter set.
 
-- [ ] Drop `cgi-660` from the supported set
-- [ ] `cgi-730`: 6% → **15%**
-- [ ] `cgi-835` @ 15% → **`cgi-825` @ 10%**
-- [ ] Re-emit the catalogue
-- [ ] **Fix the spec everywhere it's written down, or it regresses.** The wrong numbers are also
-      in `CLAUDE.md:39–40` (so the project instructions themselves encode the error) and in the
-      example payload in `docs/roman-measured-data.md:25–26`.
+- [x] Drop `cgi-660` from the supported set
+- [x] `cgi-730`: 6% → **15%**
+- [x] `cgi-835` @ 15% → **`cgi-825` @ 10%**
+- [x] **Fix the spec everywhere it's written down, or it regresses.** Done across 28 files —
+      `CLAUDE.md` (the project instructions encoded the error, so a future session would have
+      restored it), `README.md`, `docs/roman-measured-data.md`, the pipeline docstrings, the
+      `tests/` fixtures, and the user-visible copy: `gallery.html` (including the band chips,
+      which were four coloured squares and are now three), `how.html`'s bandpass diagram
+      (rectangles re-derived from the plot's own nm→x mapping), `macros.html`, `census.html`,
+      `roman.html`, `peek.html`, `data/glossary.json` and `data/tours.json`.
+- [x] `tests/test_solar_system.py` asserted `len(samples) == 4` — the one place genuinely
+      hard-coded to a band count, despite `config.py` claiming nothing was. Now asserts against
+      `len(ROMAN_CGI.bands)` so it cannot go stale again.
+- [ ] **Re-emit the catalogue and publish a data release.** The remaining step, and it is
+      *yours*: `data/planets.json` is gitignored and ships via GitHub release, so publishing is
+      an outward-facing action. **Until it runs, the site renders three-band copy over
+      four-band numbers.** Roughly: `pipeline build --bulk 10000`, `scripts/release-data.sh`,
+      then update `data/RELEASE`. Order 20–30 min of compute at measured build throughput.
+
+The glossary term keeps its id `roman-4-band` deliberately — it is a URL anchor and appears in
+three `seeAlso` lists; only the display text changed. Rename it only if you'll update the anchors.
 
 **Verified against** the [Roman Coronagraph Primer, CPP, 8 Jan 2025](https://roman.ipac.caltech.edu/docs/RomanCoronagraphPrimer_Current.pdf), p.5, quoted verbatim in [reviews/15-roman-review.md](./marketing/reviews/15-roman-review.md).
 
@@ -150,16 +164,37 @@ ready for:
 
 1. **We lose a mid-visible sample.** Dropping 660 nm removes a band sitting where the eye still
    responds strongly. That's real colour information gone.
-2. **Band 4 was never doing much and now does nothing.** At 825 nm the CIE colour-matching
-   functions are effectively zero — human vision stops around 780 nm. A near-infrared photometric
-   point contributes essentially nothing to a perceived colour. Our old 835/15% band overlapped
-   the visible by a sliver; 825/10% doesn't overlap at all.
-3. **So the corrected Roman view should be *worse* than what we currently publish.** Expect the
-   ΔE2000 values — our "how much colour identity survives Roman" number, where roughly 1 unit is a
-   just-noticeable difference to the eye — to get **larger** after the fix. We have been
-   overstating how much colour Roman recovers. That is unwelcome, and it is also the most
-   interesting and most defensible version of the project's whole thesis: a real instrument's
-   filter set costs you more than you'd guess, and here is exactly how much.
+2. **Band 4 was never doing much and now does nothing directly.** At 825 nm the CIE
+   colour-matching functions are effectively zero — human vision stops around 780 nm — so a
+   near-infrared photometric point contributes almost nothing to a perceived colour. It still
+   shapes the interpolated curve; it just doesn't colour it. Our old 835/15% band overlapped the
+   visible by a sliver; 825/10% doesn't overlap at all.
+3. **The colours get *better*, not worse — measured, and the opposite of what this doc first
+   predicted.** An earlier version of this section reasoned from the band count that ΔE2000
+   (our "how much colour identity survives Roman" number, where ~1 unit is a just-noticeable
+   difference) would rise. It falls. Over a 247-planet sample, old set vs corrected set:
+
+   | | ΔE mean | ΔE median |
+   |---|---|---|
+   | old 4-band (wrong) | 18.48 | 9.75 |
+   | corrected 3-band | 17.31 | 8.78 |
+
+   **221 of 247 planets improved** (mean −1.17, median −0.84); the worst regression was +0.41,
+   the best improvement −4.40. Reproduce with `pipeline.emit.build.build_record` over both
+   instrument definitions.
+
+   The likely mechanism — offered as a hypothesis, not a result — is that the win isn't the band
+   count, it's **Band 3 widening from 6% to 15%**. The old 730/6% anchor was a 44 nm slit, and
+   the old top anchor at 835/15% integrated 772–898 nm — mostly near-infrared, where albedo can
+   diverge sharply from the visible red, yet it still dragged the interpolated curve across
+   730–780 nm, which *is* visible. The corrected 730/15% band spans 675–785 nm, so the red end
+   of human vision is now anchored by a value that actually represents it. That gain outweighs
+   losing Band 2's anchor.
+
+   **So the honest headline is not "a real filter set costs you more than you'd guess."** It's
+   better than that, and more useful: *we had the instrument wrong, we fixed it, and the answer
+   moved — here is the number, in both directions.* Do not reuse the "costs you more" framing
+   that earlier drafts of the marketing docs were built on; it is not what the data says.
 
 **One term used throughout, in case it's unfamiliar.** **Geometric albedo** is the fraction of
 incident light a planet reflects straight back toward the observer, wavelength by wavelength.

@@ -15,7 +15,7 @@
  *
  * Two consequences of "the diagram computes the answer" worth knowing:
  *   - The picture is enriched even when nothing moves. Building a scene leaves it at its FINAL
- *     frame, so the product curve, the X/Y/Z totals, the swatch and the four-band reconstruction
+ *     frame, so the product curve, the X/Y/Z totals, the swatch and the band reconstruction
  *     are all present for a reader who never triggers an animation — including one who has asked
  *     for prefers-reduced-motion, who gets the extra information and none of the movement.
  *   - Nothing is ever hidden waiting for a trigger that might not come. With JavaScript off, the
@@ -369,7 +369,7 @@
       };
     },
 
-    /* ---- STEP 5: what four filters keep, and what they never see --------------------- */
+    /* ---- STEP 5: what three filters keep, and what they never see -------------------- */
     bands: function (svg) {
       var P = plotOf(svg);
       var spectrum = q(svg, "spectrum"), pts = sampler(spectrum, 120);

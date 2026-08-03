@@ -39,7 +39,7 @@ def _covered(points: str) -> set[tuple[float, float]]:
     return cov
 
 
-# A flat trace (the worst case for the old emitter, and what the four-band Roman
+# A flat trace (the worst case for the old emitter, and what the band-limited Roman
 # reconstruction looks like), a monotonic ramp, a sawtooth, and pure noise.
 _N = len(GRID_NM)
 _CASES = {

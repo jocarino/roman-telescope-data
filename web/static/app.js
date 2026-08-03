@@ -122,7 +122,7 @@ document.addEventListener("alpine:init", () => {
     fic: false,       // "seen in fiction" toggle: show only planets in the pop-culture overlay
     sort: "curated",  // the gallery's default order — see sortLabels and _filterDefaults
     // Which colour the whole gallery is keyed to: "full" (the modelled full spectrum) or
-    // "roman" (what the Coronagraph's four bands would recover). Every colour-derived control
+    // "roman" (what the Coronagraph's three supported bands recover). Every colour-derived control
     // re-keys to it: the swatch, the colour-family chips, the brightness sort, the
     // similar-colour sort. Defaults OFF and is session-only — never restored from storage and
     // deliberately NOT wired to the planet pages' `scopeView`, so the catalogue you come back

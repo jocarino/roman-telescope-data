@@ -170,7 +170,7 @@
       <dt>FILTER IT</dt>
       <dd>Measure the total light through one filter, then another. Each filter is a single point
         on the spectrum: coarse, but it works on targets far too faint to fan out. Exactly what
-        Roman's four bands do — step 5.</dd>
+        Roman's three bands do — step 5.</dd>
       <dt>INTERFERE IT</dt>
       <dd>Interfere the beam with a delayed copy of itself and the spectrum falls out of the maths
         instead of the optics —
@@ -341,19 +341,19 @@
   {# ── STEP 5 ─────────────────────────────────────────────────────────────── #}
   <section class="panel how-step" id="sec-roman">
     <span class="how-num">STEP 5 · THE ROMAN VIEW</span>
-    <h3>What survives four filters?</h3>
+    <h3>What survives three filters?</h3>
     <p class="how-body">NASA's {{ g('roman-space-telescope', 'Roman Space Telescope') }} will be
       the first to measure reflected <em>visible</em> light from planets like these — but its
       {{ g('coronagraph') }} sees through just
       <strong>four</strong> {{ g('bandpass', 'bandpasses') }}, all in the
       orange-to-{{ g('infrared') }} half of the spectrum. Every planet page shows the same
       colour twice: the {{ g('full-spectrum-view', 'full-spectrum') }} prediction, and the
-      colour rebuilt from only what {{ g('roman-4-band', "Roman's four filters") }} would
+      colour rebuilt from only what {{ g('roman-4-band', "Roman's three filters") }} would
       catch. The gap between them — the {{ g('delta-e2000', 'ΔE2000') }} readout — is how much
       of the planet's colour identity Roman's filter set preserves.</p>
     <svg class="dg" viewBox="0 0 560 188" role="img"
       data-teach="bands" data-plot="40,540,140,30" data-nm="380,900"
-      aria-label="Roman's four bandpasses cover 575 to 835 nm; below 575 nm it is blind">
+      aria-label="Roman's three supported bandpasses cover 575 to 825 nm; below 575 nm it is blind">
       <defs>
         <pattern id="dg-hatch" width="7" height="7" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
           <line x1="0" y1="0" x2="0" y2="7" stroke="#2a3140" stroke-width="2"/>
@@ -363,12 +363,11 @@
       <rect data-role="blind" x="40" y="30" width="160" height="110" fill="url(#dg-hatch)"/>
       <text x="52" y="24">Roman is blind here</text>
       <path class="ln ch1 dash" data-role="spectrum" d="M40 66 C 120 70, 200 84, 260 96 C 320 106, 420 96, 540 86" opacity=".8"/>
-      <rect class="band" data-role="band" data-band-nm="575" x="200" y="40" width="57" height="100"/>
-      <rect class="band" data-role="band" data-band-nm="660" x="290" y="40" width="38" height="100"/>
-      <rect class="band" data-role="band" data-band-nm="730" x="355" y="40" width="42" height="100"/>
-      <rect class="band" data-role="band" data-band-nm="835" x="417" y="40" width="120" height="100"/>
-      <text x="219" y="160">575</text><text x="300" y="160">660</text>
-      <text x="367" y="160">730</text><text x="459" y="160">835 nm</text>
+      <rect class="band" data-role="band" data-band-nm="575" x="200" y="40" width="56" height="100"/>
+      <rect class="band" data-role="band" data-band-nm="730" x="324" y="40" width="106" height="100"/>
+      <rect class="band" data-role="band" data-band-nm="825" x="428" y="40" width="79" height="100"/>
+      <text x="219" y="160">575</text>
+      <text x="368" y="160">730</text><text x="450" y="160">825 nm</text>
       <text x="44" y="156">380</text>
     </svg>
     {{ maths_open() }}

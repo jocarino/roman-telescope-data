@@ -25,9 +25,8 @@ def test_measured_file_flips_provenance(tmp_path, monkeypatch):
         "epoch": "2027-03-14",
         "samples": [
             {"band_id": "cgi-575", "center_nm": 575.0, "value": 0.31, "uncertainty": 0.04},
-            {"band_id": "cgi-660", "center_nm": 660.0, "value": 0.28, "uncertainty": 0.05},
             {"band_id": "cgi-730", "center_nm": 730.0, "value": 0.19, "uncertainty": 0.05},
-            {"band_id": "cgi-835", "center_nm": 835.0, "value": 0.15, "uncertainty": 0.06},
+            {"band_id": "cgi-825", "center_nm": 825.0, "value": 0.15, "uncertainty": 0.06},
         ],
     }
     (tmp_path / f"{pin.id}.{ROMAN_CGI.id}.json").write_text(json.dumps(measured))

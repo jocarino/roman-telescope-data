@@ -113,7 +113,7 @@
 {# The detail body, rendered into the full planet page.
    Alpine holds the full-spectrum <-> Roman view; both colours/palettes are precomputed.
    NB: neither view is "true colour"; both are MODELLED. They differ by spectral coverage
-   (full model spectrum vs Roman's four bands); provenance (modelled/measured) is separate. #}
+   (full model spectrum vs Roman's three bands); provenance (modelled/measured) is separate. #}
 {% macro detail_body(ctx, index_url=None) -%}
 {%- set rec = ctx.record -%}
 {%- set tc = rec.true_colour -%}
@@ -145,7 +145,7 @@
     radius: {{ rec.params.radius_r_earth if rec.params.radius_r_earth else 8 }},
     cloudState: '{{ rec.params.assumed_cloud_state }}',
     fullCap: '{% if rec.provenance == 'measured-albedo' %}Computed from the planet’s real, measured reflected-light spectrum (380–780 nm) — the same maths as every exoplanet on this site, run on real data.{% else %}Modelled from the complete reflected-light spectrum (380–780 nm): a physics prediction, not a photograph.{% endif %}',
-    romanCap: '{% if iview.band_samples.source == 'measured' %}Measured: real Roman photometry in four bands{% if iview.band_samples.epoch %} ({{ iview.band_samples.epoch }}){% endif %}, reconstructed to a colour. Real data.{% else %}Simulated: the model at quadrature (half-lit — the only geometry a coronagraph can catch) pushed through the four Roman filters, i.e. what Roman would measure. Not real data yet.{% endif %}',
+    romanCap: '{% if iview.band_samples.source == 'measured' %}Measured: real Roman photometry in three bands{% if iview.band_samples.epoch %} ({{ iview.band_samples.epoch }}){% endif %}, reconstructed to a colour. Real data.{% else %}Simulated: the model at quadrature (half-lit — the only geometry a coronagraph can catch) pushed through Roman&#39;s three supported filters, i.e. what Roman would measure. Not real data yet.{% endif %}',
     phases: [{% if rec.phase_colours %}{% for c in rec.phase_colours.colours %}{d:{{ c.phase_deg }},h:'{{ c.hex }}',l:{{ '%.4f'|format(c.luminance_y) }}}{{ ',' if not loop.last }}{% endfor %}{% endif %}],
     phaseSource: '{{ rec.phase_colours.source if rec.phase_colours else '' }}',
     {# The real spacecraft map, for the five solar-system anchors (null everywhere else).
@@ -420,7 +420,7 @@
             <span class="sw"></span>CH1 FULL <code
               x-text="sunSet() ? sunHex : '{{ tc.hex }}'">{{ tc.hex }}</code></button>
           <button class="hud-ch ch2" :class="view === 'roman' ? 'live' : ''"
-            @click="setView('roman')" title="Show the Roman four-band colour">
+            @click="setView('roman')" title="Show the Roman three-band colour">
             <span class="sw"></span>CH2 ROMAN <code>{{ rv.hex }}</code></button>
           <span class="hud-run"><i class="led on" :class="{ flash: ledFlash }"></i>RUN</span>
         </div>
@@ -441,7 +441,7 @@
             <span>{{ g('delta-e2000', 'ΔE2000') }}</span>
             <b>{{ '%.1f'|format(iview.reconstruction_error.delta_e2000) }}</b>
           </div>
-          <span class="meas-sub">colour lost to Roman's 4 bands ·
+          <span class="meas-sub">colour lost to Roman's 3 bands ·
             blind below {{ iview.reconstruction.extrapolated_below_nm|round|int }} nm</span>
           <div class="ro-row"><span>{{ g('luminance', 'Y BRIGHT') }}</span>
             <b x-text="curLum().toFixed(3)"></b></div>
@@ -1024,7 +1024,7 @@
         The spectrum behind this swatch is a <strong>real measurement</strong> of the actual
         planet, not a model, and the page carries a real photograph to compare against.
         {% elif rec.provenance in ['simulated-cgi', 'measured-cgi'] %}
-        A Roman {{ g('tech-demo-target', 'tech-demo target') }}: the four-band view will be
+        A Roman {{ g('tech-demo-target', 'tech-demo target') }}: the three-band view will be
         replaced by <strong>real measured data</strong> once Roman observes it, the only real
         colour this planet will ever have.
         {% elif not rec.is_light_isolable %}
@@ -1064,7 +1064,7 @@
     <div class="dossier-grid">
       <div class="dossier-stats">
         <div class="dossier-sub">Colour · <span
-          x-text="view === 'roman' ? 'Roman four-band' : (sunlit() ? 'full-spectrum model, lit by the Sun' : 'full-spectrum model')"></span></div>
+          x-text="view === 'roman' ? 'Roman three-band' : (sunlit() ? 'full-spectrum model, lit by the Sun' : 'full-spectrum model')"></span></div>
         <table class="params">
           <tr><td>Base hex</td><td><code x-text="curHex()">{{ tc.hex }}</code></td></tr>
           {# Sun-lit, the base hex above is NOT the colour the gallery card shows for this

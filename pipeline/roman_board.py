@@ -1,7 +1,7 @@
 """The Roman target board — the project's namesake, and the one page that is waiting.
 
 Roman's coronagraph is a technology demonstration: a shortlist of nearby giant planets it
-could plausibly catch in reflected light. For those planets, and only those, the four-band
+could plausibly catch in reflected light. For those planets, and only those, the three-band
 colour this site shows today can one day be replaced by a real measurement. This module turns
 the curated shortlist in `data/roman-targets.json` into a board of slots, each holding what we
 predict and — pointedly empty until the day it isn't — what Roman measured.
@@ -92,7 +92,7 @@ class TargetSlot:
 
     @property
     def predicted_hex(self) -> str | None:
-        """Our four-band prediction — what this site says Roman should report."""
+        """Our three-band prediction — what this site says Roman should report."""
         if self.record is None or not self.record.instrument_views:
             return None
         return self.record.instrument_views[0].colour.hex
