@@ -49,10 +49,12 @@ from pipeline.roman_board import resolve as resolve_board
 from pipeline.sky import format_dec, format_ra
 from pipeline.tours import Tour, TourStop
 from pipeline.tours import resolve as resolve_tours
+from web.hubs import FAMILY_LABEL, build_colour_hubs
 from web.hz import hz_strip_svg
 from web.meta import (
     PageMeta,
     Site,
+    colour_hub_meta,
     not_found_meta,
     planet_meta,
     robots_txt,
@@ -317,8 +319,13 @@ def _planet_ctx(
         extrap_below_nm=view.reconstruction.extrapolated_below_nm,
     )
     # Two scope faces: wide for desktop, near-square for phones (CSS picks one).
+    fam = colour_family(tuple(rec.true_colour.srgb))
     return {
         "record": rec,
+        # Which colour hub this planet belongs to. The link back out to it is what turns the
+        # hubs from a one-way index into a connected graph -- see web/hubs.py.
+        "colour_family": fam,
+        "colour_family_label": FAMILY_LABEL.get(fam, fam.title()),
         # The lamp: the host star's own blackbody colour (and the Sun's, for the sun-swap
         # knob to switch the lamp display to). Derived from Teff at build time — see module
         # docstring.
@@ -714,10 +721,31 @@ def build(
     # ordering rule lives entirely in pipeline/curate.py and reaches the browser as the "c"
     # field, so — unlike the name sort, which is mirrored in two languages — this slice cannot
     # drift out of step with what the gallery does once the full index lands.
+    # Colour-family hubs. These are the site's crawlable spine: the gallery grid is built in
+    # JS and scroll-loaded, so without them ~97% of planet pages have no static link into them
+    # and exist only in sitemap.xml -- which is skipped entirely when the build has no base URL.
+    # Every planet appears on exactly one hub, so the whole catalogue is two clicks from "/".
+    colour_hubs = build_colour_hubs(records)
+    hub_labels = {h.family: h.label for h in colour_hubs}
+    hub_metas = [
+        colour_hub_meta(h.family, h.label, h.count, len(records)) for h in colour_hubs
+    ]
+    (out / "colour").mkdir(parents=True, exist_ok=True)
+    colour_tpl = env.get_template("colour.html")
+    for h, h_meta in zip(colour_hubs, hub_metas, strict=True):
+        (out / "colour" / f"{h.family}.html").write_text(
+            colour_tpl.render(
+                meta=h_meta, site=site, hub=h, n_planets=len(records), build_id=build_id,
+                prev_label=hub_labels.get(h.prev_family, ""),
+                next_label=hub_labels.get(h.next_family, ""),
+            )
+        )
+
     boot_planets = sorted(index_entries, key=lambda e: e["c"])[:150]
     gallery_html = env.get_template("gallery.html").render(
         meta=hub["/"], site=site,
         stats=_stats(records),
+        colour_hubs=colour_hubs,
         # The five anchors' real maps, so their cards show geography, not schematic bands.
         surface_maps=surface_maps_js(),
         index_url=f"/planets.index.{build_id}.json",
@@ -849,7 +877,10 @@ def build(
     # client-rendered from a fetched index, so a crawler sees ~150 boot cards and no more).
     site = replace(
         site,
-        pages=[*hub.values(), *board_metas, *tour_metas, *(planet_meta(r) for r in records)],
+        pages=[
+            *hub.values(), *board_metas, *tour_metas, *hub_metas,
+            *(planet_meta(r) for r in records),
+        ],
     )
     (out / "robots.txt").write_text(robots_txt(site))
     if site.base_url:

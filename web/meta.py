@@ -232,6 +232,23 @@ def static_pages(n_planets: int) -> list[PageMeta]:
     ]
 
 
+def colour_hub_meta(family: str, label: str, n: int, n_total: int) -> PageMeta:
+    """A colour family's hub page. These carry real weight in the link graph -- they are the
+    only static route into most of the catalogue -- so they sit above planet pages in priority
+    and below the gallery."""
+    return PageMeta(
+        title=f"{label} exoplanets · {SITE_NAME}",
+        description=(
+            f"{n:,} of {n_total:,} modelled exoplanets are {label.lower()}, with the physics of "
+            f"why — and every one of them linked. Colours computed from reflected-light spectra, "
+            f"not photographed."
+        )[:300],
+        path=f"/colour/{family}",
+        priority="0.7",
+        changefreq="weekly",
+    )
+
+
 def tour_meta(tour_id: str, title: str, blurb: str, n_stops: int) -> PageMeta:
     return PageMeta(
         title=f"{title} · Guided tour · {SITE_NAME}",

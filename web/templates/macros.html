@@ -268,6 +268,18 @@
         </span>
       </nav>
       {% endif %}
+      {# The way back out to this planet's colour family. Small, but it is the edge that turns
+         the colour hubs from a one-way index into a connected graph: hub -> planet -> hub ->
+         5,000 more planets, all in served HTML rather than JS. See web/hubs.py. #}
+      <nav class="system-strip" aria-label="More planets of this colour">
+        <span class="system-lbl">SAME COLOUR</span>
+        <span class="system-links">
+          <a class="system-planet" href="/colour/{{ ctx.colour_family }}"
+            title="Every planet in the {{ ctx.colour_family_label|lower }} family, and why they are that colour">
+            <span class="system-dot" style="background:{{ rec.true_colour.hex }}"></span>{{
+            ctx.colour_family_label }} planets</a>
+        </span>
+      </nav>
     </div>
   </div>
 

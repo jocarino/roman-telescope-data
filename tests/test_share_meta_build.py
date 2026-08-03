@@ -37,7 +37,10 @@ def _site(tmp_root: str = "") -> Path:
     # and a microlensing planet (whose light is never isolable).
     wanted = [p for p in doc["planets"] if p["id"] in {"earth", "jupiter", "hd-189733-b"}]
     wanted += [p for p in doc["planets"] if not p["is_light_isolable"]][:2]
-    wanted += doc["planets"][:15]
+    # Enough planets that at least one colour family overflows web.hubs.FEATURED, so the
+    # hub pages' "the other N" tail is actually exercised. At 15 every family fitted in
+    # the featured cards and the crawlability test below passed without testing anything.
+    wanted += doc["planets"][:90]
     seen, planets = set(), []
     for p in wanted:
         if p["id"] not in seen:
@@ -164,6 +167,33 @@ def test_no_sitemap_url_carries_a_html_extension():
     }
     offenders = sorted(u for u in locs if u.endswith(".html"))
     assert not offenders, f"sitemap carries non-canonical .html URLs: {offenders[:5]}"
+
+
+def test_every_planet_page_is_reachable_by_a_static_link():
+    """The one that matters: a planet page nothing links to is invisible to anything that does
+    not execute JS and scroll. The gallery grid is built client-side and scroll-loaded, so for
+    most of this site's life ~97% of planet pages existed only in sitemap.xml -- which is itself
+    skipped when the build has no base URL. The colour hubs are what fix that, and this is the
+    assertion that stops it silently regressing (truncate a hub's tail list and it goes red)."""
+    root = _site()
+    built = {p.stem for p in (root / "planet").glob("*.html")}
+    linked = set()
+    for path, html in _pages():
+        if "fragments" in path.parts:
+            continue
+        linked |= set(re.findall(r'href="/planet/([a-z0-9-]+)"', html))
+    orphans = sorted(built - linked)
+    assert not orphans, f"{len(orphans)} planet pages have no static link in: {orphans[:5]}"
+
+
+def test_every_colour_hub_is_itself_linked_from_the_gallery():
+    """Hubs that nothing links to are orphans in turn, and take the catalogue down with them."""
+    root = _site()
+    hubs = {p.stem for p in (root / "colour").glob("*.html")}
+    assert hubs, "no colour hubs were built"
+    index = (root / "index.html").read_text()
+    linked = set(re.findall(r'href="/colour/([a-z]+)"', index))
+    assert hubs <= linked, f"hubs missing from the gallery: {sorted(hubs - linked)}"
 
 
 def test_404_is_noindex_and_absent_from_the_sitemap():
