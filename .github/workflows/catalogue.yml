@@ -1,0 +1,216 @@
+name: Catalogue refresh
+
+# Ask the Exoplanet Archive whether anything changed; rebuild and open a PR when it has.
+#
+# Two jobs, deliberately: the probe is one HTTP request and runs often, the rebuild takes minutes
+# and runs only when there is something to rebuild for. Nothing here publishes anything — the
+# release is created as a DRAFT and the data/RELEASE bump arrives as a pull request, so merging
+# stays a human act. That is the only gate, and it is not duplicated by also gating the trigger.
+#
+# NOTE: GitHub disables scheduled workflows after 60 days with no repository activity. It emails
+# the owner when it does, but re-enabling is manual — so a long quiet spell is the one way this
+# stops running without saying so.
+
+on:
+  schedule:
+    # The Archive publishes new confirmations on Thursdays, at no announced hour: probe through
+    # the day, then once on Friday morning to catch a late publish. Cheap enough not to matter,
+    # and because the comparison is a fingerprint rather than a schedule, the exact timing is
+    # never load-bearing — a missed run just means the next one finds the same drift.
+    - cron: "0 4,8,12,16,20 * * 4"
+    - cron: "0 8 * * 5"
+  workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: "Rebuild even if the probe reports no drift"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: catalogue-refresh
+  cancel-in-progress: false
+
+env:
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  probe:
+    name: Has the Archive changed?
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      drift: ${{ steps.drift.outputs.drift }}
+      headline: ${{ steps.drift.outputs.headline }}
+      added: ${{ steps.drift.outputs.added }}
+      removed: ${{ steps.drift.outputs.removed }}
+      pr_open: ${{ steps.existing.outputs.pr_open }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Sync deps
+        run: uv sync --frozen --no-dev
+
+      - name: Fetch the baseline manifest from the latest data release
+        # Absent from any release published before manifests existed. A missing baseline is
+        # reported as drift rather than as "in sync", so the first run rebuilds and re-baselines.
+        run: |
+          gh release download --pattern manifest.json --dir baseline \
+            || echo "::notice::no manifest on the latest release — will rebuild to establish one"
+
+      - name: Probe
+        id: drift
+        run: |
+          uv run python -m pipeline drift \
+            --baseline "${{ github.workspace }}/baseline/manifest.json" \
+            --github-output
+
+      - name: Is a data PR already open?
+        id: existing
+        # The real reason to back off. Five probe runs on a Thursday would otherwise rebuild five
+        # times against the same drift and open five pull requests.
+        run: |
+          n=$(gh pr list --state open --search "head:data/refresh-" --json number --jq 'length')
+          if [ "$n" -gt 0 ]; then
+            echo "pr_open=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::A data refresh PR is already open; skipping the rebuild."
+          else
+            echo "pr_open=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Summary
+        run: |
+          {
+            echo "### ${{ steps.drift.outputs.headline }}"
+            echo
+            echo "- drift: \`${{ steps.drift.outputs.drift }}\`"
+            echo "- added: ${{ steps.drift.outputs.added }} · removed: ${{ steps.drift.outputs.removed }}"
+            echo "- data PR already open: \`${{ steps.existing.outputs.pr_open }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  rebuild:
+    name: Rebuild and open a PR
+    needs: probe
+    if: >-
+      needs.probe.outputs.pr_open == 'false' &&
+      (needs.probe.outputs.drift == 'true' || inputs.force_rebuild)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Sync deps
+        run: uv sync --frozen
+
+      - name: Fetch the previous release (baseline for the gate and the diff)
+        run: |
+          gh release download --pattern manifest.json --dir prev || true
+          gh release download --pattern planets.json --dir prev || true
+
+      - name: Build the catalogue
+        # --no-cache is not optional here. `_run_query` caches TAP responses to disk keyed by the
+        # query text, so without it a scheduled rebuild would re-emit the same stale rows forever
+        # and report success. The runner starts cold anyway; passing it states the intent and
+        # keeps this identical to the command you would run by hand.
+        run: |
+          uv run python -m pipeline build --bulk 10000 --no-cache > build.log 2>&1 \
+            || { tail -60 build.log; exit 1; }
+          tail -3 build.log
+
+      - name: Sanity gate
+        # A bad day upstream must fail loudly, not quietly publish a thinner catalogue. More than
+        # a 1% drop is not a normal week at the Archive.
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, sys
+          new = len(json.load(open("data/planets.json"))["planets"])
+          print(f"built {new} planets")
+          if new == 0:
+              sys.exit("::error::built an empty catalogue")
+          prev = pathlib.Path("prev/manifest.json")
+          if not prev.exists():
+              print("no baseline manifest; skipping the drop check")
+          else:
+              old = json.load(prev.open())["catalogue"]["planets"]
+              if new < old * 0.99:
+                  sys.exit(f"::error::planet count fell {old} -> {new} (>1%); refusing to release")
+              print(f"count {old} -> {new}: within tolerance")
+          with open(os.environ["GITHUB_ENV"], "a") as fh:
+              fh.write(f"PLANET_COUNT={new}\n")
+          PY
+
+      - name: Tests
+        # After the build, not before: nine test modules read data/planets.json at import time,
+        # and it is not in the repo — so on a cold checkout the suite is only runnable once the
+        # artifact exists. Running them here also makes them a gate on the *new* data.
+        run: uv run pytest -q
+
+      - name: What actually moved
+        id: diff
+        # The number worth putting in front of a reviewer. Not "records rebuilt" — with --no-cache
+        # that is always all of them — but how many colours changed, measured by comparing the two
+        # artifacts. If there is no previous release to compare against, say so instead of guessing.
+        run: |
+          if [ -f prev/planets.json ]; then
+            uv run python -m pipeline drift \
+              --diff-against prev/planets.json --github-output > diff.json
+            tail -3 diff.json
+          else
+            echo "summary=no previous release to diff against" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Write the manifest
+        run: uv run python -m pipeline drift --emit-manifest data/manifest.json
+
+      - name: Publish a DRAFT release
+        id: release
+        run: |
+          tag="data-$(date -u +%Y%m%d-%H%M)"
+          schema=$(python3 -c "import json;print(json.load(open('data/planets.json'))['schema_version'])")
+          size=$(python3 -c "import os;print(f'{os.path.getsize(\"data/planets.json\")/1e6:.1f}')")
+          gh release create "$tag" data/planets.json data/manifest.json \
+            --draft \
+            --title "Planet data $tag" \
+            --notes "planets.json: ${PLANET_COUNT} planets, schema v${schema}, ${size} MB. Built by the catalogue-refresh workflow; consumed by the deploy build via scripts/fetch_data.py. manifest.json is the drift probe's next baseline. **Draft — publish it when you merge the data/RELEASE PR, or the deploy cannot fetch the data.**"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Open the data/RELEASE PR
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+          HEADLINE: ${{ needs.probe.outputs.headline }}
+          MOVED: ${{ steps.diff.outputs.summary }}
+        run: |
+          branch="data/refresh-${TAG}"
+          echo "${TAG}" > data/RELEASE
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add data/RELEASE
+          git commit -m "Data release ${TAG}" -m "${HEADLINE}. ${MOVED}"
+          git push -u origin "$branch"
+          {
+            echo "Opened by the \`catalogue-refresh\` workflow because the Archive moved."
+            echo
+            echo "- **${HEADLINE}**"
+            echo "- Planets built: **${PLANET_COUNT}**"
+            echo "- What moved: **${MOVED}**"
+            echo "- Release: \`${TAG}\` — **draft**"
+            echo
+            echo "The probe names planets that joined or left, and proves whether ones already"
+            echo "present were *also* revised. It deliberately does not guess how many were,"
+            echo "because it cannot; the colour counts above are measured by diffing this build"
+            echo "against the previous release."
+            echo
+            echo "**Publish the draft release before merging**, or the deploy build has nothing"
+            echo "to fetch."
+          } > pr-body.md
+          gh pr create --title "${HEADLINE} (${TAG})" --body-file pr-body.md

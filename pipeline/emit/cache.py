@@ -14,13 +14,34 @@ from __future__ import annotations
 
 import hashlib
 import json
+from dataclasses import asdict
 from pathlib import Path
 
-from pipeline.config import PIPELINE_VERSION, SCHEMA_VERSION, Instrument
+from pipeline.config import (
+    CGI_OBSERVATION_PHASE_DEG,
+    PIPELINE_VERSION,
+    SCHEMA_VERSION,
+    Instrument,
+)
 from pipeline.emit.build import PlanetInput, build_record
 from pipeline.models import PlanetRecord
 
 _CACHE_DIR = Path("data/cache/records")
+
+
+def _instrument_fingerprint(inst: Instrument) -> dict:
+    """An instrument's full definition, not just its name.
+
+    Keying on `id` alone was a latent trap. `build_record` computes `instrument_views` — the band
+    samples, the reconstructed colour, the delta-E — so changing a band's centre or width changes
+    every cached record's *contents* while leaving `roman-cgi` spelled exactly the same. A rebuild
+    would then serve the old filter set out of cache with no error and no warning: precisely what
+    a bandpass correction looks like the day after you ship it.
+
+    Uses `asdict` rather than naming the fields, so a field added to `Bandpass` later is covered
+    without anyone having to remember this function exists.
+    """
+    return {"id": inst.id, "bands": [asdict(b) for b in inst.bands]}
 
 
 def _key(pin: PlanetInput, instruments: list[Instrument]) -> str:
@@ -34,7 +55,10 @@ def _key(pin: PlanetInput, instruments: list[Instrument]) -> str:
         "is_cgi_target": pin.is_cgi_target,
         "sky": pin.sky.model_dump() if pin.sky else None,
         "has_measured_albedo": pin.has_measured_albedo,
-        "instruments": [i.id for i in instruments],
+        "instruments": [_instrument_fingerprint(i) for i in instruments],
+        # The geometry the Roman view is computed at is an input to the record too, and moving it
+        # would otherwise be as invisible as moving a band.
+        "observation_phase_deg": CGI_OBSERVATION_PHASE_DEG,
         "pipeline_version": PIPELINE_VERSION,
         "schema_version": SCHEMA_VERSION,
     }

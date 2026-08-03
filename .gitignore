@@ -12,6 +12,9 @@ data/cache/
 # The data artifact lives in GitHub Releases, not git (a 6k build is ~90 MB).
 # data/RELEASE (committed) names the release tag; scripts/fetch_data.py downloads it.
 data/planets.json
+# Ships as a release asset beside it: what the build was made from, and the drift probe's
+# baseline (pipeline/drift.py). Regenerated per release, so committing it would be pure churn.
+data/manifest.json
 
 # Built static site (regenerable via `python -m web.build`; the Dockerfile builds it)
 dist/
