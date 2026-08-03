@@ -238,18 +238,31 @@ All three are binding licence terms, not courtesies. Ten minutes total.
       (interpolated to our 5 nm grid, otherwise unmodified). `data/measured_albedo/README.md`
       matches.
 
-### 4. The project states no licence for its own output
+### 4. The project states no licence for its own output — **fixed**
 **Where:** repo root — no `LICENSE`, no `CITATION.cff` (`find -iname 'LICENSE*'` → zero hits)
 **Blocks:** [06 open data](./marketing/06-open-data.md) (can't deposit), [04 Wikimedia](./marketing/04-wikimedia.md), [02 press kit](./marketing/02-press-kit.md), [05 machine-readable](./marketing/05-machine-readable.md).
 
 Default is all-rights-reserved, so `planets.json` **is not open today** and nobody may legally
 reuse it — while four marketing docs already promise CC BY 4.0.
 
-- [ ] `LICENSE` for the code (pick one) **and** a separate explicit line for the data and renders.
-      A mixed repo needs both.
-- [ ] `CITATION.cff` — scientists check for this file; it signals you know the norms.
-- [ ] A `rights` + `sources` block in the `planets.json` header (currently only `schema_version`,
-      `grid`, `generated_at`, `planets`).
+- [x] **`LICENSE` — MIT for the code**, with an explicit pointer saying it covers code only.
+      MIT is a real choice, not a default: it's the most permissive option, it matches the
+      ecosystem already vendored here (Alpine is MIT), and it imposes nothing on reusers.
+      Swap to Apache-2.0 if you want the patent grant, or to a copyleft licence if you'd
+      rather derivatives stayed open — it's a one-file change and nobody has relied on it yet.
+- [x] **`LICENSE-DATA` — CC BY 4.0 for what we derive**, plus the two-layer explanation, a
+      per-source terms table, the verbatim Archive acknowledgement, and the Cahoy open
+      question. The attribution we ask for is *"Exoplanet Palette (jocarino), CC BY 4.0"* —
+      and the word **"modelled"**, which matters more to this project than the credit does.
+- [x] **`CITATION.cff`** — CFF 1.2.0, with the five upstream papers as `references` so a
+      citing tool surfaces them too. ⚠️ The author is the git handle `jocarino`, not a real
+      name: I wasn't going to guess your surname into a public citation file. Replace it when
+      you're ready to be cited by it — the file has a comment saying so.
+- [x] **`rights` + `sources` in the `planets.json` header**, generated from the new
+      `pipeline/rights.py` (7 sources, the two field layers, the acknowledgement, the warranty
+      disclaimer, and the honesty statement). A licence in a README is one nobody who
+      downloaded the JSON ever sees. `pipeline/rights.py` is also the single source of truth a
+      credits page can render from — see item 11.
 
 **Licence ruling** from [reviews/06-open-data-review.md](./marketing/reviews/06-open-data-review.md):
 the file is **two rights layers**. Your derived output (`true_colour`, `spectrum`, `palette`,
@@ -260,10 +273,14 @@ license** — state terms per source rather than blanket-claiming. Republishing 
 attaches since the maker is US and you're in the EEA — while *your* EEA-made database does
 attract one, which is what gives your CC BY grant teeth).
 
-- [ ] **check** — the Cahoy 2010 grid. `data/cahoy_grid/` redistributes 305 CSVs from
-      `roman.ipac.caltech.edu` with no licence note and no locatable terms page. Deriving colours
-      from it is safe either way; *redistributing* it is a different act. Either ask
-      `roman-help@ipac.caltech.edu`, or keep the CSVs out of any deposit and ship a pointer.
+- [ ] **check — the Cahoy 2010 grid, and this is more live than it first looked.** The 305
+      CSVs from `roman.ipac.caltech.edu` are **committed to the public repo** (`git ls-files
+      data/cahoy_grid | wc -l` → 305), so we are redistributing them *now*, not only at deposit
+      time. Deriving colours from published model output is uncontroversial; redistributing the
+      files is the separate act we haven't cleared. Either ask `roman-help@ipac.caltech.edu`
+      whether the archive carries terms, or stop shipping them in-repo and fetch at build time
+      the way `planets.json` already does. Documented in `LICENSE-DATA` §5. The release path is
+      already clear — `scripts/release-data.sh` publishes only `planets.json`.
 
 ### 5. The catalogue is ~560 planets behind
 **Where:** release `data-20260727-1038`

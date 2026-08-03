@@ -320,4 +320,8 @@ class PlanetsFile(BaseModel):
     # A version number cannot express that; the band set itself can. Emitting it makes the
     # file self-describing, so two releases can be told apart without reading a changelog.
     instruments: list[InstrumentHeader] = Field(default_factory=list)
+    # Rights and sources travel INSIDE the file. A licence stated only in a repo README is a
+    # licence nobody who downloaded the JSON ever sees, and the Archive acknowledgement we owe
+    # is inherited by anything built on this data. See pipeline/rights.py.
+    rights: dict = Field(default_factory=dict)
     planets: list[PlanetRecord]
