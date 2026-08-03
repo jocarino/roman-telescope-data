@@ -245,7 +245,7 @@ def _rule_dimmest(records: list[PlanetRecord], *, limit: int = 10) -> list[TourS
 
 
 def _rule_roman_gap(records: list[PlanetRecord], *, limit: int = 10) -> list[TourStop]:
-    """Where Roman's four bands land furthest from the full-spectrum colour."""
+    """Where Roman's three bands land furthest from the full-spectrum colour."""
     with_de = [(r, _roman_de(r)) for r in records]
     ranked = _one_per_host(
         [r for r, de in sorted(with_de, key=lambda p: -(p[1] or 0.0)) if de is not None]
@@ -259,10 +259,10 @@ def _rule_roman_gap(records: list[PlanetRecord], *, limit: int = 10) -> list[Tou
                 planet=rec,
                 metric=f"ΔE {de:.0f} lost",
                 caption=(
-                    f"Full spectrum says {rec.true_colour.hex}; Roman's four bands reconstruct "
+                    f"Full spectrum says {rec.true_colour.hex}; Roman's three bands reconstruct "
                     f"{roman_hex} — ΔE {de:.0f} apart, which the eye reads as a different colour "
                     "altogether. The features that carry its colour fall mostly between Roman's "
-                    f"four filters, because {colour_reason(rec, brief=True)}."
+                    f"three filters, because {colour_reason(rec, brief=True)}."
                 ),
                 caveat=_gamut_caveat(rec),
             )

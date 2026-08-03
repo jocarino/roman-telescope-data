@@ -35,10 +35,17 @@ of every known exoplanet, derived from physics."
    the first-order effect (the star's tint, which dominates for cool hosts); model spectra
    would only refine M-dwarf band structure, and swapping illuminants means regenerating
    every colour. The per-planet `sun_swap` field makes the illuminant's role explicit instead.
-5. **Roman Coronagraph (CGI) bandpasses** — the Roman hook. CGI observes in four
-   visible bands: imaging/polarimetry at 575 nm (10% bandwidth) and 835 nm (15%),
-   slit spectroscopy at 660 nm and 730 nm (6% each, R~50). Model these as top-hat
-   filters for v1. The CGI team's published simulated observation products
+5. **Roman Coronagraph (CGI) bandpasses** — the Roman hook. Per the CGI Primer (CPP,
+   8 Jan 2025), the FLIGHT configuration supports three visible bands: Band 1 imaging /
+   polarimetry at 575 nm (10%), Band 3 slit + R~50 prism spectroscopy at 730 nm (15%),
+   and Band 4 wide-field imaging at 825 nm (10%). **Only Band 1 with the hybrid Lyot
+   coronagraph is a formal requirement; the rest are "best effort"** — a contractual term
+   meaning not formally required, NOT a forecast that they won't happen. Band 2 (660 nm,
+   15%) is physically installed on the CFAM filter wheel but was never characterised on
+   the ground, so it is not a supported observing mode — installed but untested, not
+   absent. Model these as top-hat filters for v1; widths above are the Primer's nominal
+   spec, and as-built FWHMs run ~1–2 points wider. Do NOT reintroduce the old 660/6%,
+   730/6%, 835/15% numbers: they appear in no primary source and were our own error. The CGI team's published simulated observation products
    (predicted exoplanet spectra with realistic noise) can be run through the same
    pipeline; post-launch, real CGI measurements of the tech-demo targets slot in.
 
@@ -75,7 +82,7 @@ project as for an astronomy nerd**. This is a hard requirement, not a nicety. In
 
 - **Labels are self-explanatory.** No cryptic, insider, or costume term is ever the *only*
   signpost for a control. A real oscilloscope's "RUN / SINGLE" means nothing to a newcomer;
-  "Full spectrum / Roman 4-band" does. The retro/oscilloscope styling is a costume — it must
+  "Full spectrum / Roman 3-band" does. The retro/oscilloscope styling is a costume — it must
   never make a control harder to understand than a plain button would be.
 - **Info buttons where it matters.** Complex or easily-misread ideas (full spectrum vs Roman,
   modelled vs measured, classic vs stylised render) get an ℹ button **in the accent colour**
@@ -158,11 +165,10 @@ Milestones 1–5 are DONE; the catalog is the full archive pull (5,759 planets l
 3. Gallery + planet detail page. (DONE — built as the Jinja2/htmx static site, not Next.js.)
 4. **Roman view.** (DONE — computed at quadrature, schema v4.) For each planet, integrate
    the reflected-light spectrum through
-   the four CGI bandpasses only, then reconstruct a colour from those four samples
+   the supported CGI bandpasses only, then reconstruct a colour from those samples
    (interpolate between band centres before the CIE step). Show side by side:
-   "true colour" (full spectrum) vs "as Roman would see it" (four bands). This is
-   the project's signature feature — how much colour identity survives Roman's
-   filter set. Flag microlensing-discovered planets honestly: no light is ever
+   "true colour" (full spectrum) vs "as Roman would see it". This is the project's
+   signature feature — how much colour identity survives Roman's filter set. Flag microlensing-discovered planets honestly: no light is ever
    received from them, so their swatches are model-only, marked as such.
 5. Palette export (copy hex, CSS variables, maybe .ase file). (DONE — .ase + CSS vars.)
 6. Stretch: phase-angle slider (DONE — colour vs. orbital phase), host-star illuminant

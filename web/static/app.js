@@ -122,7 +122,7 @@ document.addEventListener("alpine:init", () => {
     fic: false,       // "seen in fiction" toggle: show only planets in the pop-culture overlay
     sort: "curated",  // the gallery's default order — see sortLabels and _filterDefaults
     // Which colour the whole gallery is keyed to: "full" (the modelled full spectrum) or
-    // "roman" (what the Coronagraph's four bands would recover). Every colour-derived control
+    // "roman" (what the Coronagraph's three supported bands recover). Every colour-derived control
     // re-keys to it: the swatch, the colour-family chips, the brightness sort, the
     // similar-colour sort. Defaults OFF and is session-only — never restored from storage and
     // deliberately NOT wired to the planet pages' `scopeView`, so the catalogue you come back
@@ -434,7 +434,7 @@ document.addEventListener("alpine:init", () => {
       const hz = params.get("hz");
       if (hz && this.hzLabels[hz]) this.hz = hz;
       // The Roman view always starts OFF. It is deliberately not restored from anywhere: not
-      // from the planet pages' scope (flipping one planet to 4-band must not silently repaint
+      // from the planet pages' scope (flipping one planet to the Roman view must not silently repaint
       // the whole catalogue on the way back) and not from a previous session. The one way in
       // is an explicit ?view=roman link, which is somebody asking for it by name.
       const qview = params.get("view");
@@ -1497,7 +1497,7 @@ document.addEventListener("alpine:init", () => {
     toggleInfo(k) { this.info = this.info === k ? null : k; },
     // --- Illuminant swap ("Light source" knob) ------------------------------------------
     // True when the Sun-lit variant is what's on screen (full-spectrum channel only: the
-    // Roman 4-band channel has no Sun-swap, so on CH2 the native data always shows).
+    // Roman band channel has no Sun-swap, so on CH2 the native data always shows).
     sunSet() { return this.hasSun && this.illum === "sun"; },      // the knob's position
     sunlit() { return this.sunSet() && this.view === "full"; },    // ...and it's on screen
     // The active channel's palette/colour/etc — one source of truth for the hero render,
@@ -1528,7 +1528,7 @@ document.addEventListener("alpine:init", () => {
     },
     // What the palette-out / dossier headers call the current output.
     viewName() {
-      if (this.view === "roman") return "Roman 4-band";
+      if (this.view === "roman") return "Roman 3-band";
       return this.sunlit() ? "full spectrum · Sun-lit" : "full spectrum";
     },
     // Flip the lamp. On the Roman channel the knob isn't locked out: the first click brings

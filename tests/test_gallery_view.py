@@ -1,7 +1,7 @@
 """The gallery's "seen from Roman" view: the index fields it filters and sorts on.
 
 The whole point of the view is that every colour-derived control (the colour-family chips, the
-brightness sort, the similar-colour sort) re-keys onto Roman's four-band colour. That only holds
+brightness sort, the similar-colour sort) re-keys onto Roman's band-view colour. That only holds
 if the index carries the Roman colour *as its own* family/brightness/palette — deriving either
 of them from the full-spectrum colour by accident would leave the filters quietly lying.
 """

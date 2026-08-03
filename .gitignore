@@ -27,3 +27,11 @@ mprocs.yaml
 
 # OS
 .DS_Store
+
+# Private working notes live in a separate repo, not here. `docs/notes` is a symlink to that
+# checkout so both are readable in one session while staying two repositories. Never tracked:
+# a committed symlink is just its target path, which would publish where the notes live.
+# Recreate in a fresh worktree with:  ln -sfn ~/Documents/Dev/<notes-checkout> docs/notes
+docs/notes
+docs/marketing/
+docs/DEFECTS.md

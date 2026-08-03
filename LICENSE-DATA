@@ -1,0 +1,96 @@
+# Licence for the data and images
+
+The code is MIT (see `LICENSE`). This file covers everything the code *produces* and
+everything third-party this repository *carries*. They are not the same thing, and the
+distinction is the whole point of this file.
+
+---
+
+## 1. What we made — CC BY 4.0
+
+Everything this pipeline derives is licensed
+**[Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/)**.
+
+In `planets.json` that means the fields we computed:
+
+`true_colour` · `spectrum` · `palette` · `instrument_views` · `phase_colours` ·
+`sun_swap` · `habitability` · `meta`
+
+and, on the site: the planet renders, the palette exports (hex / CSS variables / `.ase`),
+the Open Graph share cards, the spectrum plots and the sky charts.
+
+**Attribution we ask for:** *"Exoplanet Palette (jocarino), CC BY 4.0"* with a link back,
+plus — and this one matters more to us than the credit — **the word "modelled"**. These
+colours are computed from physics, not photographed. Reproducing them as observations
+misrepresents the work.
+
+**Copyright © 2026 jocarino.** Provided without warranties of any kind; see
+[§5 of the licence](https://creativecommons.org/licenses/by/4.0/legalcode.en#s5).
+
+## 2. What we did NOT make, and cannot license to you
+
+`planets.json` is **two layers with different rights**, and licensing the whole file CC BY
+would claim rights we do not hold.
+
+These fields are **republished upstream facts**, passed through essentially unchanged from
+the NASA Exoplanet Archive:
+
+`params.*` · `host_star.*` · `sky.*` · `discovery.*`
+
+We are not the rightsholder for them. In practice they are freely reusable — the Archive
+publishes no explicit data licence, factual values carry no copyright in US law
+(*Feist v. Rural*), and no EU database right attaches, since the maker is a US body — but
+"freely reusable" is not the same as "ours to license", so we state terms per source rather
+than making a blanket grant. Use them under the Archive's own terms, and carry its
+acknowledgement (below).
+
+## 3. Third-party material redistributed in this repository
+
+| What | Where | Terms | What we owe |
+|---|---|---|---|
+| **NASA Exoplanet Archive** (`pscomppars`) | `data/cache/`, and the parameter fields above | No explicit data licence; acknowledgement requested | The acknowledgement in §4, and citing Christiansen et al. (2025), [doi:10.3847/PSJ/ade3c2](https://doi.org/10.3847/PSJ/ade3c2) |
+| **Payne et al. (2026)** Earth albedo | `data/measured_albedo/earth_payne2026.csv` (verbatim) | **CC BY 4.0** — binding | Creators, copyright notice, licence link, warranty disclaimer, and a link to [Zenodo 17470005](https://zenodo.org/records/17470005). Rendered on `/how`. [doi:10.3847/PSJ/ae2feb](https://doi.org/10.3847/PSJ/ae2feb) |
+| **Karkoschka (1998)** giant-planet albedo | `data/measured_albedo/karkoschka1998_low.*` | Public domain, via NASA PDS Atmospheres Node | Citation as courtesy — *Icarus* 133, 134–146 |
+| **Cahoy et al. (2010)** albedo grid | `data/cahoy_grid/` (305 CSVs, committed) | ⚠️ **Unresolved — see §5** | Citation; redistribution terms not yet established |
+| **Silkscreen** (Jason Kottke) | `web/static/fonts/`, `web/assets/fonts/` | SIL OFL 1.1 | `OFL.txt` shipped beside both copies, per §2 of that licence |
+| **Alpine.js** v3.14.8 | `web/static/vendor/alpine.min.js` | MIT | Copyright + permission notice retained in the file |
+| **Solar System Scope** surface maps | referenced by `web/textures.py` | CC BY 4.0 | Credited in the lightbox; **downstream reusers of our renders must carry that credit forward** |
+
+Software we *import* rather than redistribute — PICASO, `colour-science`, htmx, Jinja2 —
+imposes no notice obligation here. We cite them anyway because it is the right thing to do:
+PICASO (Batalha et al. 2019, *ApJ* 878, 70) and `colour-science`
+([doi:10.5281/zenodo.17837391](https://doi.org/10.5281/zenodo.17837391), BSD-3-Clause).
+
+## 4. Required acknowledgement, verbatim
+
+Anything built on this data inherits this, because we inherit it:
+
+> This research has made use of the NASA Exoplanet Archive, which is operated by the
+> California Institute of Technology, under contract with the National Aeronautics and Space
+> Administration under the Exoplanet Exploration Program.
+
+The sky panels additionally use VizieR (CDS, Strasbourg,
+[doi:10.26093/cds/vizier](https://doi.org/10.26093/cds/vizier)); the original catalogue
+authors and publication references must be cited explicitly alongside it.
+
+## 5. Open question — the Cahoy grid
+
+`data/cahoy_grid/` holds 305 CSV files obtained from `roman.ipac.caltech.edu`, **committed to
+this repository**, and we have not located a terms-of-use page for them.
+
+*Deriving* colours from published model output is uncontroversial — model results are facts.
+*Redistributing the grid files themselves* is a separate act, and it is the one we have not
+cleared. Two ways to close it, in order of preference:
+
+1. Ask the Roman SSC (`roman-help@ipac.caltech.edu`) whether the archive carries terms.
+2. Failing that, stop redistributing them: keep the CSVs out of the repository and fetch them
+   at build time from the source, the way `planets.json` already works.
+
+Until one of those happens, **do not include `data/cahoy_grid/` in any dataset deposit**
+(Zenodo or otherwise). `scripts/release-data.sh` publishes only `planets.json`, so the
+current release path is already clear of it.
+
+---
+
+*If any rightsholder listed here would like something changed or removed, open an issue —
+it will be actioned rather than argued.*

@@ -1,0 +1,89 @@
+cff-version: 1.2.0
+title: "Exoplanet Palette"
+message: >-
+  If you use this software or the colours it produces, please cite it as below — and please
+  also cite the upstream sources it is built on, which are listed in LICENSE-DATA. In
+  particular, the NASA Exoplanet Archive asks for a specific acknowledgement, reproduced
+  verbatim in that file.
+type: software
+# NOTE: this is the public git identity, not a full name. Replace `name` with your real
+# name (or swap to given-names / family-names) when you are ready to be cited by it —
+# a citation file is a poor place to be pseudonymous, but a worse place to be wrong.
+authors:
+  - name: "jocarino"
+    alias: jocarino
+repository-code: "https://github.com/jocarino/roman-telescope-data"
+abstract: >-
+  The modelled visible colour of every known exoplanet, derived from physics. For each planet
+  a geometric albedo spectrum is multiplied by its host star's spectrum and convolved with the
+  CIE 1931 2-degree colour-matching functions to give a colour a human eye would see. Every
+  planet is also shown as the Nancy Grace Roman Space Telescope's coronagraph would record it,
+  reconstructed from that instrument's three supported visible bandpasses, so the perceptual
+  distance between the two states how much colour identity survives a real filter set. Five
+  solar-system planets are computed from measured albedo spectra as a calibration check.
+  All colours are modelled, never photographed.
+keywords:
+  - exoplanets
+  - astronomy
+  - colour science
+  - CIE 1931
+  - geometric albedo
+  - reflected light
+  - Nancy Grace Roman Space Telescope
+  - coronagraph
+license: MIT
+license-url: "https://github.com/jocarino/roman-telescope-data/blob/main/LICENSE"
+references:
+  - type: article
+    title: "The NASA Exoplanet Archive and Exoplanet Follow-up Observing Program: Data, Tools, and Usage"
+    authors:
+      - family-names: Christiansen
+        given-names: Jessie L.
+    year: 2025
+    journal: "The Planetary Science Journal"
+    doi: 10.3847/PSJ/ade3c2
+    notes: "Source of all planet and host-star parameters."
+  - type: article
+    title: "Exoplanet Albedo Spectra and Colors as a Function of Planet Phase, Separation, and Metallicity"
+    authors:
+      - family-names: Cahoy
+        given-names: Kerri M.
+      - family-names: Marley
+        given-names: Mark S.
+      - family-names: Fortney
+        given-names: Jonathan J.
+    year: 2010
+    journal: "The Astrophysical Journal"
+    doi: 10.1088/0004-637X/724/1/189
+    notes: "Albedo model grid used by one of the spectrum engines."
+  - type: article
+    title: "Exoplanet Reflected-light Spectroscopy with PICASO"
+    authors:
+      - family-names: Batalha
+        given-names: Natasha E.
+    year: 2019
+    journal: "The Astrophysical Journal"
+    doi: 10.3847/1538-4357/ab1b51
+    notes: "Radiative-transfer engine used for selected targets."
+  - type: article
+    title: "Methane, Ammonia, and Their Isotopologues in the Atmospheres of Uranus and Neptune"
+    authors:
+      - family-names: Karkoschka
+        given-names: Erich
+    year: 1998
+    journal: "Icarus"
+    doi: 10.1006/icar.1998.5913
+    notes: "Measured giant-planet albedo spectra, via the NASA PDS Atmospheres Node."
+  - type: article
+    title: "A Comprehensive Spectroscopic Reference of the Solar System and Its Application to Exoplanet Direct Imaging"
+    authors:
+      - family-names: Payne
+        given-names: A.
+      - family-names: Villanueva
+        given-names: G. L.
+      - family-names: Kofman
+        given-names: V.
+    year: 2026
+    journal: "The Planetary Science Journal"
+    doi: 10.3847/PSJ/ae2feb
+    notes: "Measured Earth albedo spectrum. Redistributed here under CC BY 4.0."

@@ -37,7 +37,8 @@ BASE_SWATCH_LUMINANCE_Y = 0.60
 
 # --- Instrument / bandpass registry ------------------------------------------------------
 # An instrument is DATA. Adding HWO later = appending an Instrument here; nothing in the
-# band-integration or reconstruction code is hard-coded to four bands.
+# band-integration or reconstruction code is hard-coded to a band COUNT -- which is what let
+# the CGI set drop from four bands to three without touching either.
 
 
 @dataclass(frozen=True)
@@ -73,17 +74,33 @@ class Instrument:
         return np.array([b.center_nm for b in self.bands])
 
 
-# Roman Coronagraph (CGI): imaging/polarimetry at 575 nm (10%) and 835 nm (15%);
-# slit spectroscopy at 660 nm and 730 nm (6% each). Modelled as top-hats for v1.
+# Roman Coronagraph (CGI), FLIGHT configuration per the CGI Primer (CPP, 8 Jan 2025), p.5:
+#   Band 1  575 nm, 10%  imaging/polarimetry, hybrid Lyot  -- the ONLY formally supported mode
+#   Band 3  730 nm, 15%  slit + R~50 prism spectroscopy, shaped pupil   } best effort
+#   Band 4  825 nm, 10%  wide-FoV imaging, shaped pupil                 } best effort
+#
+# Band 2 (660 nm, 15%) is NOT here, and the reason matters if you ever write this up: the
+# filter IS physically on the CFAM wheel and the spectrometer carries a second Amici prism
+# for it. It was never characterised on the ground, so it is not an officially supported
+# observing mode (Bailey et al. 2021, Table 1 note). Installed but untested -- not absent.
+#
+# Earlier versions of this file carried 660/6%, 730/6% and 835/15%. The "835 nm" centre and
+# the "6%" widths appear in NO primary CGI source; they were our own errors, not a
+# superseded spec. Widths here are the Primer's nominal filter spec; the as-built FWHMs
+# measured by Bailey et al. 2021 and Zellem et al. 2022 run ~1-2 points wider (730 nm:
+# 16.7-17%, 825 nm: 11.4-12%). The difference is worth well under 1 dE2000 -- but say which
+# convention you used when publishing, because a referee-minded reader will check.
+#
+# Modelled as top-hats for v1: real filter profiles have sloped shoulders, so "15%" is a
+# design width, not a measured FWHM.
 ROMAN_CGI = Instrument(
     id="roman-cgi",
     name="Roman Coronagraph",
     mission="Roman",
     bands=(
         Bandpass("cgi-575", 575.0, 0.10, "tophat", "imaging"),
-        Bandpass("cgi-660", 660.0, 0.06, "tophat", "spectroscopy"),
-        Bandpass("cgi-730", 730.0, 0.06, "tophat", "spectroscopy"),
-        Bandpass("cgi-835", 835.0, 0.15, "tophat", "imaging"),
+        Bandpass("cgi-730", 730.0, 0.15, "tophat", "spectroscopy"),
+        Bandpass("cgi-825", 825.0, 0.10, "tophat", "imaging"),
     ),
 )
 
@@ -98,4 +115,11 @@ CGI_OBSERVATION_PHASE_DEG = 90.0
 
 PIPELINE_VERSION = "0.1.0"
 # v4: Roman view at quadrature + observed_phase_deg; v3: phase_colours; v2: sun_swap
+# NOT a schema bump, but a semantic break worth recording: on 2026-08-03 the CGI band set was
+# corrected from four bands (575/10, 660/6, 730/6, 835/15) to the flight three (575/10, 730/15,
+# 825/10). The record SHAPE is identical, so v5 still validates -- but a consumer pinned to v5
+# now receives cgi-825 where it used to get cgi-660 and cgi-835, and every instrument_views
+# colour and delta_e2000 changed. The real fix is that the emitted file header now carries the
+# instrument band set itself (see pipeline/rights.py and pipeline/emit/writer.py), so a reader
+# can tell two releases apart without trusting a version number.
 SCHEMA_VERSION = 5

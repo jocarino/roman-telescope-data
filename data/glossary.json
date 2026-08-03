@@ -137,7 +137,7 @@
       "term": "Photometry",
       "category": "light",
       "short": "Measuring how much light arrives in a given filter — a brightness number rather than a full spectrum.",
-      "long": "Where spectroscopy spreads light out into its wavelengths, photometry just totals how much gets through a filter. Roman's coronagraph will do photometry in four visible bands, giving four numbers per planet instead of a curve. Reconstructing a colour from four numbers, and asking how much of the true colour survives that, is this project's signature question.",
+      "long": "Where spectroscopy spreads light out into its wavelengths, photometry just totals how much gets through a filter. Roman's coronagraph will do photometry in three supported visible bands, giving three numbers per planet instead of a curve. Reconstructing a colour from three numbers, and asking how much of the true colour survives that, is this project's signature question.",
       "seeAlso": ["bandpass", "roman-4-band", "spectroscopy"]
     },
     {
@@ -252,7 +252,7 @@
       "term": "ΔE2000",
       "category": "colour",
       "short": "The standard measure of how different two colours look to a human: 0 identical, about 2 just noticeable, 10 or more clearly a different colour.",
-      "long": "Simple arithmetic on RGB values does not match perception — a small numeric change can be invisible in one part of colour space and glaring in another. ΔE2000 (CIEDE2000) is the current international formula for perceptual colour difference. This site uses it for the headline question: how far does the colour Roman would reconstruct from four bands land from the full-spectrum colour? Below about 2 the eye cannot tell; past 10 it is a visibly different shade. It also measures the shift when a planet is re-lit by the Sun.",
+      "long": "Simple arithmetic on RGB values does not match perception — a small numeric change can be invisible in one part of colour space and glaring in another. ΔE2000 (CIEDE2000) is the current international formula for perceptual colour difference. This site uses it for the headline question: how far does the colour Roman would reconstruct from its bands land from the full-spectrum colour? Below about 2 the eye cannot tell; past 10 it is a visibly different shade. It also measures the shift when a planet is re-lit by the Sun.",
       "aliases": ["ΔE", "delta-E"],
       "seeAlso": ["roman-4-band", "light-source-knob", "gamut"]
     },
@@ -393,7 +393,7 @@
       "term": "Quadrature",
       "category": "planets",
       "short": "The half-lit geometry, at a phase angle of 90° — the position where a planet is furthest from its star on the sky, and the only geometry a coronagraph can realistically catch.",
-      "long": "At quadrature the planet appears at its greatest separation from the star, which is what a coronagraph needs: the planet has to be far enough out to fall outside the blocked-out glare. It is also half lit, so you lose brightness in exchange for being able to see it at all. Every Roman four-band view on this site is computed at quadrature for exactly that reason.",
+      "long": "At quadrature the planet appears at its greatest separation from the star, which is what a coronagraph needs: the planet has to be far enough out to fall outside the blocked-out glare. It is also half lit, so you lose brightness in exchange for being able to see it at all. Every Roman band view on this site is computed at quadrature for exactly that reason.",
       "seeAlso": ["phase-angle", "coronagraph", "roman-4-band"]
     },
     {
@@ -566,8 +566,8 @@
       "id": "bandpass",
       "term": "Bandpass",
       "category": "roman",
-      "short": "A filter that lets through only the wavelengths inside its window and blocks the rest. Roman's coronagraph carries four, centred at 575, 660, 730 and 835 nm.",
-      "long": "Rather than recording a full spectrum, a filter returns one number: how much light got through its window. Roman's four sit at 575 nm (10% wide), 660 and 730 nm (6% each, feeding the spectrograph) and 835 nm (15%). This site models each as a simple top-hat window. Note where they are: all of them sit from orange to near-infrared, so below 575 nm Roman receives nothing at all.",
+      "short": "A filter that lets through only the wavelengths inside its window and blocks the rest. Roman's coronagraph carries four on its filter wheel, but only three are supported observing modes: 575, 730 and 825 nm.",
+      "long": "Rather than recording a full spectrum, a filter returns one number: how much light got through its window. Roman's supported three sit at 575 nm (10% wide), 730 nm (15%, feeding the spectrograph) and 825 nm (10%). A fourth at 660 nm is installed but was never tested on the ground, so it is not an official observing mode. This site models each as a simple top-hat window. Note where they are: all of them sit from orange to near-infrared, so below 575 nm Roman receives nothing at all.",
       "aliases": ["band", "filter"],
       "seeAlso": ["roman-4-band", "photometry", "nanometre", "top-hat-filter"]
     },
@@ -576,15 +576,15 @@
       "term": "Top-hat filter",
       "category": "roman",
       "short": "A simplified filter model: perfectly transparent inside its wavelength window, perfectly opaque outside — a flat-topped rectangle.",
-      "long": "Real filters have sloped edges and imperfect transmission. Modelling them as clean rectangles is a deliberate first-pass simplification here, accurate enough for the question being asked (how much colour survives four bands) and easy to replace later with the measured throughput curves the Roman team publishes.",
+      "long": "Real filters have sloped edges and imperfect transmission. Modelling them as clean rectangles is a deliberate first-pass simplification here, accurate enough for the question being asked (how much colour survives Roman's bands) and easy to replace later with the measured throughput curves the Roman team publishes.",
       "seeAlso": ["bandpass", "roman-4-band"]
     },
     {
       "id": "roman-4-band",
-      "term": "Roman 4-band view",
+      "term": "Roman band view",
       "category": "roman",
-      "short": "The same planet as Roman's coronagraph would see it: half-lit, and sampled through only four filters instead of the whole spectrum.",
-      "long": "This site's signature comparison. The modelled spectrum is integrated through each of Roman's four bandpasses, giving four numbers; those are interpolated back across the visible range and pushed through the same colour conversion as the full spectrum. Below 575 nm, where Roman is blind, the reconstruction holds the spectrum flat rather than inventing data — which is why blue planets lose the most. The ΔE2000 readout is exactly how much colour identity was lost.",
+      "short": "The same planet as Roman's coronagraph would see it: half-lit, and sampled through only three supported filters instead of the whole spectrum.",
+      "long": "This site's signature comparison. The modelled spectrum is integrated through each of Roman's supported bandpasses \u2014 575 nm, 730 nm and 825 nm \u2014 giving three numbers; those are interpolated back across the visible range and pushed through the same colour conversion as the full spectrum. A fourth filter at 660 nm is physically installed on the instrument but was never tested on the ground, so it is not a supported observing mode and this site does not use it. Below 575 nm, where Roman is blind, the reconstruction holds the spectrum flat rather than inventing data — which is why blue planets lose the most. The ΔE2000 readout is exactly how much colour identity was lost.",
       "seeAlso": ["full-spectrum-view", "bandpass", "delta-e2000", "quadrature"]
     },
     {
@@ -600,7 +600,7 @@
       "term": "Tech-demo target",
       "category": "roman",
       "short": "One of the roughly dozen planets Roman's coronagraph is expected to observe during its technology demonstration — the ones whose colours may become real measurements.",
-      "long": "The Roman coronagraph flies as a demonstration instrument rather than a full survey, with a shortlist of nearby, well-separated giant planets it can realistically detect. For those planets this site shows a simulated four-band view today, clearly labelled; once Roman observes them, the simulation is replaced by real photometry. Those will be the only real, measured colours any exoplanet on this site ever has.",
+      "long": "The Roman coronagraph flies as a demonstration instrument rather than a full survey, with a shortlist of nearby, well-separated giant planets it can realistically detect. For those planets this site shows a simulated Roman band view today, clearly labelled; once Roman observes them, the simulation is replaced by real photometry. Those will be the only real, measured colours any exoplanet on this site ever has.",
       "seeAlso": ["roman-space-telescope", "photometry", "measured", "simulated"]
     },
     {
@@ -648,7 +648,7 @@
       "term": "Simulated",
       "category": "site",
       "short": "A modelled prediction of what a specific instrument would measure — the model pushed through Roman's filters, rather than data Roman has taken.",
-      "long": "Used on this site for the Roman four-band view of tech-demo targets before Roman has flown. It is one step more specific than 'modelled': it answers not just 'what colour is this planet' but 'what would this instrument report'. When real observations arrive, the label on those pages changes from simulated to measured, and the numbers change with it.",
+      "long": "Used on this site for the Roman band view of tech-demo targets before Roman has flown. It is one step more specific than 'modelled': it answers not just 'what colour is this planet' but 'what would this instrument report'. When real observations arrive, the label on those pages changes from simulated to measured, and the numbers change with it.",
       "seeAlso": ["modelled", "measured", "tech-demo-target", "roman-4-band"]
     },
     {

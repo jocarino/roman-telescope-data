@@ -28,7 +28,7 @@ import os
 import numpy as np
 
 # Resample the albedo onto this grid before caching (nm). Covers the CIE grid (380–780) plus
-# the Roman 835 nm band's red edge (~898 nm). Small + sufficient.
+# the Roman 825 nm band's red edge (~866 nm). Small + sufficient.
 _OUT_LO_NM, _OUT_HI_NM, _OUT_STEP_NM = 350.0, 1000.0, 1.0
 
 _H, _C, _KB = 6.62607015e-34, 2.99792458e8, 1.380649e-23

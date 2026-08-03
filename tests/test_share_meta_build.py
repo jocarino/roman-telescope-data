@@ -37,7 +37,10 @@ def _site(tmp_root: str = "") -> Path:
     # and a microlensing planet (whose light is never isolable).
     wanted = [p for p in doc["planets"] if p["id"] in {"earth", "jupiter", "hd-189733-b"}]
     wanted += [p for p in doc["planets"] if not p["is_light_isolable"]][:2]
-    wanted += doc["planets"][:15]
+    # Enough planets that at least one colour family overflows web.hubs.FEATURED, so the
+    # hub pages' "the other N" tail is actually exercised. At 15 every family fitted in
+    # the featured cards and the crawlability test below passed without testing anything.
+    wanted += doc["planets"][:90]
     seen, planets = set(), []
     for p in wanted:
         if p["id"] not in seen:
@@ -83,8 +86,9 @@ def test_every_page_carries_share_tags():
 
 
 def test_title_and_og_title_never_drift():
-    """The <title> comes from each template's own block; og:title comes from web/meta.py.
-    Two sources, one string — pin them together."""
+    """Both now come from the same PageMeta — base.html renders `meta.title` and no template
+    overrides the block — so this can no longer drift by a typo. Kept as the guard that says
+    so: re-adding a hand-typed `{% block title %}` to any template turns this red."""
     for path, html in _pages():
         title = _tag(html, r"<title>([^<]*)</title>")
         assert title == _og(html, "title"), f"{path.name}: <title> != og:title"
@@ -145,7 +149,51 @@ def test_sitemap_lists_every_built_html_page():
             continue
         rel = "/" + path.relative_to(root).as_posix()
         rel = rel.replace("/index.html", "/")  # tours/index.html is served as /tours/
+        # The build writes `census.html`; the site links to, and canonicalises, `/census`
+        # (nginx `try_files $uri $uri.html` serves both). Extensionless is the one form every
+        # internal link uses, so it is the canonical one -- map the artifact to it here.
+        if rel.endswith(".html"):
+            rel = rel[: -len(".html")]
         assert BASE + rel in locs, f"{rel} is built but absent from sitemap.xml"
+
+
+def test_no_sitemap_url_carries_a_html_extension():
+    """The canonical form is extensionless. A `.html` URL in the sitemap means some PageMeta
+    drifted back to the artifact filename, which puts a duplicate of every page in the index."""
+    root = _site()
+    locs = {
+        u.findtext(f"{_SM_NS}loc")
+        for u in ET.parse(root / "sitemap.xml").getroot().findall(f"{_SM_NS}url")
+    }
+    offenders = sorted(u for u in locs if u.endswith(".html"))
+    assert not offenders, f"sitemap carries non-canonical .html URLs: {offenders[:5]}"
+
+
+def test_every_planet_page_is_reachable_by_a_static_link():
+    """The one that matters: a planet page nothing links to is invisible to anything that does
+    not execute JS and scroll. The gallery grid is built client-side and scroll-loaded, so for
+    most of this site's life ~97% of planet pages existed only in sitemap.xml -- which is itself
+    skipped when the build has no base URL. The colour hubs are what fix that, and this is the
+    assertion that stops it silently regressing (truncate a hub's tail list and it goes red)."""
+    root = _site()
+    built = {p.stem for p in (root / "planet").glob("*.html")}
+    linked = set()
+    for path, html in _pages():
+        if "fragments" in path.parts:
+            continue
+        linked |= set(re.findall(r'href="/planet/([a-z0-9-]+)"', html))
+    orphans = sorted(built - linked)
+    assert not orphans, f"{len(orphans)} planet pages have no static link in: {orphans[:5]}"
+
+
+def test_every_colour_hub_is_itself_linked_from_the_gallery():
+    """Hubs that nothing links to are orphans in turn, and take the catalogue down with them."""
+    root = _site()
+    hubs = {p.stem for p in (root / "colour").glob("*.html")}
+    assert hubs, "no colour hubs were built"
+    index = (root / "index.html").read_text()
+    linked = set(re.findall(r'href="/colour/([a-z]+)"', index))
+    assert hubs <= linked, f"hubs missing from the gallery: {sorted(hubs - linked)}"
 
 
 def test_404_is_noindex_and_absent_from_the_sitemap():

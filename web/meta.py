@@ -149,7 +149,7 @@ def planet_meta(rec: PlanetRecord) -> PageMeta:
     return PageMeta(
         title=f"{rec.name} · {SITE_NAME}",
         description=planet_description(rec),
-        path=f"/planet/{rec.id}.html",
+        path=f"/planet/{rec.id}",
         image=f"/og/{rec.id}.png",
         image_alt=(
             f"{rec.name} rendered in its modelled colour {rec.true_colour.hex}, "
@@ -168,7 +168,7 @@ def static_pages(n_planets: int) -> list[PageMeta]:
             description=(
                 f"The colour of {n} real exoplanets, computed from their reflected-light "
                 "spectra. Search, filter and sort the whole catalogue by colour, size and "
-                "temperature — and see how much of each colour survives Roman's four filters."
+                "temperature — and see how much of each colour survives Roman's three filters."
             ),
             path="/",
             priority="1.0",
@@ -181,7 +181,7 @@ def static_pages(n_planets: int) -> list[PageMeta]:
                 "colour-matching functions, converted to sRGB. Every assumption stated: "
                 "cloud state, metallicity, phase angle."
             ),
-            path="/how.html",
+            path="/how",
             priority="0.8",
         ),
         PageMeta(
@@ -190,7 +190,7 @@ def static_pages(n_planets: int) -> list[PageMeta]:
                 "Put any two exoplanets side by side: colour, palette, spectrum, host star "
                 "and the orbital numbers that drive them."
             ),
-            path="/compare.html",
+            path="/compare",
             priority="0.7",
         ),
         PageMeta(
@@ -199,7 +199,7 @@ def static_pages(n_planets: int) -> list[PageMeta]:
                 f"What colour is the galaxy? The whole modelled catalogue of {n} planets as "
                 "one dataset — which colours are common, which are rare, and why."
             ),
-            path="/census.html",
+            path="/census",
             priority="0.7",
         ),
         PageMeta(
@@ -208,7 +208,7 @@ def static_pages(n_planets: int) -> list[PageMeta]:
                 "Which exoplanet host stars are above your horizon right now, where to look, "
                 "and what equipment you would need to see each one."
             ),
-            path="/sky.html",
+            path="/sky",
             priority="0.7",
         ),
         PageMeta(
@@ -226,17 +226,34 @@ def static_pages(n_planets: int) -> list[PageMeta]:
                 "Every piece of jargon on this site in plain English — albedo, equilibrium "
                 "temperature, metallicity, phase angle, coronagraph."
             ),
-            path="/glossary.html",
+            path="/glossary",
             priority="0.4",
         ),
     ]
+
+
+def colour_hub_meta(family: str, label: str, n: int, n_total: int) -> PageMeta:
+    """A colour family's hub page. These carry real weight in the link graph -- they are the
+    only static route into most of the catalogue -- so they sit above planet pages in priority
+    and below the gallery."""
+    return PageMeta(
+        title=f"{label} exoplanets · {SITE_NAME}",
+        description=(
+            f"{n:,} of {n_total:,} modelled exoplanets are {label.lower()}, with the physics of "
+            f"why — and every one of them linked. Colours computed from reflected-light spectra, "
+            f"not photographed."
+        )[:300],
+        path=f"/colour/{family}",
+        priority="0.7",
+        changefreq="weekly",
+    )
 
 
 def tour_meta(tour_id: str, title: str, blurb: str, n_stops: int) -> PageMeta:
     return PageMeta(
         title=f"{title} · Guided tour · {SITE_NAME}",
         description=f"{blurb} A guided tour of {n_stops} planets, ordered and explained."[:300],
-        path=f"/tours/{tour_id}.html",
+        path=f"/tours/{tour_id}",
         priority="0.6",
     )
 
@@ -251,7 +268,7 @@ def roman_meta() -> PageMeta:
             "rather than model: predicted colours now, empty slots waiting for real data, "
             "and a clock counting down to launch."
         ),
-        path="/roman.html",
+        path="/roman",
         priority="0.8",
         changefreq="weekly",
     )
@@ -292,7 +309,13 @@ def sitemap_xml(site: Site, lastmod: str | None = None) -> str:
 
 
 def robots_txt(site: Site) -> str:
-    lines = ["User-agent: *", "Allow: /", ""]
+    # /fragments/ holds ~5.8k headless peek partials -- no <head>, no canonical, no title, and
+    # a near-duplicate of the planet page they belong to. They are fetched by the hold-to-peek
+    # gesture, never navigated to, so they have no business in an index: left crawlable they
+    # are thin duplicate content at catalogue scale, which is exactly the shape a scaled-content
+    # assessment lands on. Disallowed here rather than noindex'd because they are fragments
+    # with nowhere to put a meta tag.
+    lines = ["User-agent: *", "Allow: /", "Disallow: /fragments/", ""]
     if site.base_url:
         lines.append(f"Sitemap: {site.absolute('/sitemap.xml')}")
         lines.append("")

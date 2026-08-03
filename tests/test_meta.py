@@ -146,7 +146,7 @@ def _sitemap_locs(site: Site) -> list[str]:
 def test_sitemap_is_wellformed_and_absolute():
     site = Site(base_url="https://example.test", pages=[planet_meta(_record())])
     locs = _sitemap_locs(site)
-    assert locs == ["https://example.test/planet/test-b.html"]
+    assert locs == ["https://example.test/planet/test-b"]
 
 
 def test_sitemap_lists_every_planet_page():
@@ -190,6 +190,6 @@ def test_hub_paths_are_unique_so_the_build_can_key_on_them():
     assert len(set(paths)) == len(paths)
 
 
-@pytest.mark.parametrize("path", ["/", "/how.html", "/compare.html", "/sky.html", "/tours/"])
+@pytest.mark.parametrize("path", ["/", "/how", "/compare", "/sky", "/tours/"])
 def test_build_can_look_up_every_hub_page_it_renders(path):
     assert path in {p.path for p in static_pages(10)}

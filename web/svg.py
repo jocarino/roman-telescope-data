@@ -1,6 +1,6 @@
 """Build the spectrum plot as a self-contained inline SVG (no chart library, per the spec).
 
-Shows the full-spectrum albedo A(lambda) and the four-band Roman reconstruction, and
+Shows the full-spectrum albedo A(lambda) and the three-band Roman reconstruction, and
 hatches the region below the lowest Roman band centre — the blue half Roman is blind to and
 can only guess. A spectral gradient bar under the x-axis grounds wavelength in colour.
 
@@ -83,7 +83,7 @@ def _stepped(g: _Geom, values: np.ndarray, vmax: float) -> str:
     exact repeats (a step whose value didn't change lands on the point already there), and the
     interior points of a horizontal run, which a polyline draws straight through anyway. x is
     strictly increasing, so a run of equal y always advances and can never double back — the
-    collapse is safe. The Roman trace is a four-band reconstruction and therefore piecewise
+    collapse is safe. The Roman trace is a three-band reconstruction and therefore piecewise
     constant, which is where most of this comes from.
     """
     xs = [_x(g, nm) for nm in GRID_NM]
@@ -145,7 +145,7 @@ def _render(
 
     half_lbl = g.label_w / 2
     return f"""<svg viewBox="0 0 {g.w} {g.h}" class="spectrum{g.extra_class}" role="img"
-  aria-label="Albedo spectrum: full model vs Roman four-band reconstruction">
+  aria-label="Albedo spectrum: full model vs Roman three-band reconstruction">
   <defs>
     <linearGradient id="specbar{g.idsuf}" x1="0" y1="0" x2="1" y2="0">{grad}</linearGradient>
     <pattern id="hatch{g.idsuf}" width="6" height="6" patternTransform="rotate(45)"

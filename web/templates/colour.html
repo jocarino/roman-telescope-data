@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% from "macros.html" import back_link, g %}
+{# One page per colour family. Its job is two-fold and both halves are load-bearing: for a
+   reader it answers "why is anything this colour", and for a crawler it is the only place in
+   the site where every planet exists as a static <a href>. The gallery's grid is built in JS
+   and scroll-loaded, so before these pages ~97% of the catalogue had no link into it at all.
+   That is why the tail list below is complete rather than truncated — see web/hubs.py. #}
+{% block content %}
+<div class="hub" x-data="{ why: false }">
+  <div class="site-head">
+    {{ back_link() }}
+    <h1>{{ hub.label }} planets</h1>
+    <span class="tagline">{{ '{:,}'.format(hub.count) }} of {{ '{:,}'.format(n_planets) }}
+      modelled worlds land in this {{ g('colour-family', 'colour family') }}
+      <button class="info-btn sm" @click="why = !why" :class="why ? 'on' : ''"
+        aria-label="Why are planets this colour?" title="Why are planets this colour?">i</button></span>
+  </div>
+
+  <div class="hub-band" aria-hidden="true">
+    {% for hex in hub.swatches %}<i style="background: {{ hex }}"></i>{% endfor %}
+  </div>
+
+  <div class="subhead intro-box" x-show="why" x-cloak>
+    <button class="info-x" @click="why = false" aria-label="Close">&times;</button>
+    <div class="intro-row">
+      <span class="intro-lbl">The physics</span>
+      <p>{{ hub.why }}</p>
+    </div>
+    <div class="intro-row">
+      <span class="intro-lbl">How the bucket is drawn</span>
+      <p>The family is computed from each planet's modelled colour — hue and lightness, the same
+        buckets the gallery's colour filter uses. It is a coarse label on a continuum, so the
+        edges are arbitrary in the way any naming of colour is arbitrary.</p>
+    </div>
+    <div class="intro-row">
+      <span class="intro-lbl">Honesty</span>
+      <p>Every colour here is {{ g('modelled', 'computed from physics') }}, not photographed —
+        except the solar-system worlds, whose {{ g('albedo-spectrum', 'albedo spectra') }} were
+        really {{ g('measured-spectrum', 'measured') }}.</p>
+    </div>
+  </div>
+
+  <ul class="hub-cards">
+    {% for p in hub.featured %}
+    <li><a class="hub-card panel" href="/planet/{{ p.id }}">
+      <span class="hc-sw" style="background: {{ p.hex }}" aria-hidden="true"></span>
+      <span class="hc-body">
+        <span class="hc-name">{{ p.name }}</span>
+        <span class="hc-meta">{{ p.type_label }} ·
+          {% if p.ly is none %}distance unknown
+          {% elif p.ly == 0 %}in our own system
+          {% else %}{{ '{:,}'.format(p.ly) }} ly{% endif %}</span>
+        <span class="hc-hex">{{ p.hex }}</span>
+      </span>
+    </a></li>
+    {% endfor %}
+  </ul>
+
+  {% if hub.rest %}
+  <h2 class="hub-rest-h">The other {{ '{:,}'.format(hub.rest|length) }}</h2>
+  <p class="subhead">Same family, listed nearest first. Every one has its own page.</p>
+  <ul class="hub-rest">
+    {% for p in hub.rest %}
+    <li><a href="/planet/{{ p.id }}"><i style="background: {{ p.hex }}"
+      aria-hidden="true"></i>{{ p.name }}</a></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <nav class="hub-nav" aria-label="Other colour families">
+    {% if hub.prev_family %}<a href="/colour/{{ hub.prev_family }}">← {{ prev_label }}</a>{% endif %}
+    <a href="/">all planets</a>
+    {% if hub.next_family %}<a href="/colour/{{ hub.next_family }}">{{ next_label }} →</a>{% endif %}
+  </nav>
+</div>
+{% endblock %}

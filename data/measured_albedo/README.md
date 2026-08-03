@@ -32,7 +32,9 @@ standardised to geometric albedo by Payne et al. Columns: wavelength (µm), geom
 - Citation: Payne, A., Villanueva, G. L., Kofman, V., et al. (2026), "A Comprehensive
   Spectroscopic Reference of the Solar System and Its Application to Exoplanet Direct
   Imaging", Planetary Science Journal, doi:10.3847/PSJ/ae2feb.
-- License: CC BY 4.0.
+- License: CC BY 4.0 (<https://creativecommons.org/licenses/by/4.0/>), © the authors.
+  Redistributed verbatim; §3(a)(1) attribution is rendered to visitors on `/how`.
+  Provided without warranties of any kind — see §5 of the licence.
 
 ## Honesty notes
 

@@ -1,7 +1,7 @@
 """The one codepath: reflected flux F(lambda) on GRID_NM -> perceptual colour.
 
 Both the "true colour" (dense model spectrum) and the "Roman view" (reconstructed from
-four bands) funnel through `reflected_flux_to_colour`. Nothing here branches on data
+three bands) funnel through `reflected_flux_to_colour`. Nothing here branches on data
 source — that is the whole architectural point.
 
 Conventions (documented, consistent):

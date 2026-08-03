@@ -5,7 +5,7 @@ the pipeline never cares *how* — synthetic (v1), Cahoy 2010 grid interpolation
 all satisfy this one Protocol and are interchangeable.
 
 Providers evaluate albedo at ARBITRARY wavelengths (not a fixed grid) so band integration
-can reach into the near-IR (e.g. Roman's 835 nm band extends past the 780 nm CIE cutoff).
+can reach into the near-IR (e.g. Roman's 825 nm band lies entirely past the 780 nm CIE cutoff).
 """
 
 from __future__ import annotations

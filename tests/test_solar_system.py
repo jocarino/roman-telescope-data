@@ -99,5 +99,7 @@ def test_roman_view_present(records):
     for rec in records.values():
         view = rec.instrument_views[0]
         assert view.instrument_id == "roman-cgi"
-        assert len(view.band_samples.samples) == 4
+        # Assert against the instrument definition, never a literal: this test hard-coded 4
+        # and went red when the CGI set was corrected to its flight configuration of 3.
+        assert len(view.band_samples.samples) == len(ROMAN_CGI.bands)
         assert view.reconstruction_error.delta_e2000 >= 0.0

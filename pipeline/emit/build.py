@@ -1,6 +1,6 @@
 """Convergence: assemble one PlanetRecord. The swap seam (`obtain_band_samples`) lives
 here — everything after it (reconstruct -> cie -> palette) is byte-identical whether the
-four band values were simulated from the model or measured by Roman.
+the band values were simulated from the model or measured by Roman.
 """
 
 from __future__ import annotations
