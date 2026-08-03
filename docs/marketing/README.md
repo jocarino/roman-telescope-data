@@ -17,7 +17,9 @@ Sixteen reviewers, cast as the people most likely to reject each plan, agreed on
 of the individual docs said: **this project has correctness debt, and the plan was scheduling
 promotion on top of it.**
 
-Five defects, each found independently, each one that promotion would amplify rather than survive:
+Five headline defects, each found independently, each one that promotion would amplify rather
+than survive. **The full fix list — 17 items with file paths, evidence and a suggested order —
+is [`docs/DEFECTS.md`](../DEFECTS.md).**
 
 1. **The Roman band configuration in `pipeline/config.py` is wrong.** Every "as Roman would see
    it" swatch — the signature feature — is computed through the wrong filter set. Our `835 nm`
