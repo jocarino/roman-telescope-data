@@ -11,9 +11,10 @@ human vision*. Policy:
   - Flat hold (clamped >= 0) outside the anchor span. Never linear-extrapolate.
   - Record where extrapolation begins so the UI can hatch the 'guessed' zone.
 
-Three anchors, not four -- and, measured, that is BETTER than the four we had wrong. Over a
-247-planet sample, correcting the band set to the flight configuration moved dE2000 against
-the full spectrum DOWN for 221 of 247 planets (mean -1.17, median -0.84; worst case +0.41).
+Three anchors, not four -- and, measured, that is BETTER than the four we had wrong. Over the
+whole catalogue, correcting the band set to the flight configuration moved dE2000 against the
+full spectrum DOWN for 5,363 of 5,764 planets (mean 17.96 -> 16.76); 401 got worse, the worst
+by +1.0. 4,424 swatches changed colour.
 
 Which is counter-intuitive, so the likely mechanism, stated as a hypothesis rather than a
 result: the win is not the band count, it is Band 3 widening from 6% to 15%. The old 730/6%

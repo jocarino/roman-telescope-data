@@ -41,6 +41,18 @@ def load_measured_samples(
     if not path.exists():
         return None
     payload = json.loads(path.read_text())
+    # Reject band ids this instrument does not define. Without this the seam silently
+    # reconstructs from whatever anchors the file happens to carry: a file written against the
+    # pre-2026-08 CGI set (cgi-660 / cgi-835, which our own docs advertised) would rebuild the
+    # colour from four anchors while ROMAN_CGI defines three, and nothing would say so. Real
+    # CGI photometry lands here, so a wrong-instrument file must fail loudly, not quietly.
+    known = {b.id for b in instrument.bands}
+    unknown = sorted({s["band_id"] for s in payload["samples"]} - known)
+    if unknown:
+        raise ValueError(
+            f"{path}: band id(s) {unknown} are not in {instrument.id} "
+            f"({sorted(known)}). Measured data must match the instrument definition."
+        )
     samples = tuple(
         BandSample(
             band_id=s["band_id"],

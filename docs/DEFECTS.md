@@ -19,13 +19,14 @@ anything public about Roman.
 
 ## P0 — we are currently saying something untrue
 
-### 1. The Roman CGI band configuration is wrong
-**Where:** `pipeline/config.py:83–86` (and the stale comment above it at `:76–77`)
-**Blocks:** [09 Show HN](./marketing/09-show-hn.md), [11 Bluesky](./marketing/11-bluesky-mastodon.md), [02 press kit](./marketing/02-press-kit.md), [15 Roman](./marketing/15-roman-launch.md), [13 credits](./marketing/13-credit-the-scientists.md) — all of them repeat the figure.
+### 1. The Roman CGI band configuration was wrong — code fixed, release pending
+**Where:** `pipeline/config.py` (the `ROMAN_CGI` band tuple and the comment block above it)
+**Blocks:** [09 Show HN](./marketing/09-show-hn.md), [11 Bluesky](./marketing/11-bluesky-mastodon.md), [02 press kit](./marketing/02-press-kit.md), [15 Roman](./marketing/15-roman-launch.md), [13 credits](./marketing/13-credit-the-scientists.md) — all of them repeated the figure.
 
-We ship four bands: `575/10%`, `660/6%`, `730/6%`, `835/15%`. The flight configuration is three
-supported bands. Every "as Roman would see it" swatch — the signature feature — is computed
-through the wrong filter set.
+We shipped four bands: `575/10%`, `660/6%`, `730/6%`, `835/15%`. The flight configuration is
+three supported bands, so every "as Roman would see it" swatch — the signature feature — was
+computed through the wrong filter set. The code is now correct; only the data release is
+outstanding (last checkbox below).
 
 - [x] Drop `cgi-660` from the supported set
 - [x] `cgi-730`: 6% → **15%**
@@ -44,7 +45,15 @@ through the wrong filter set.
       *yours*: `data/planets.json` is gitignored and ships via GitHub release, so publishing is
       an outward-facing action. **Until it runs, the site renders three-band copy over
       four-band numbers.** Roughly: `pipeline build --bulk 10000`, `scripts/release-data.sh`,
-      then update `data/RELEASE`. Order 20–30 min of compute at measured build throughput.
+      then update `data/RELEASE`. Compute is quick — a full rebuild took a few minutes, not the
+      20–30 min first estimated here.
+
+      ⚠️ **Trap for the next session in this worktree.** `data/planets.json` on disk is already
+      the re-emitted three-band build (5,773 planets), but `data/RELEASE` still pins
+      `data-20260727-1038` — the four-band release of 5,764. **Running `scripts/fetch_data.py`
+      silently reverts you to four-band data**, and the site will then render three-band copy
+      over four-band numbers again with nothing to warn you. Either publish the release or
+      re-run the build after any fetch.
 
 The glossary term keeps its id `roman-4-band` deliberately — it is a URL anchor and appears in
 three `seeAlso` lists; only the display text changed. Rename it only if you'll update the anchors.
@@ -172,16 +181,20 @@ ready for:
 3. **The colours get *better*, not worse — measured, and the opposite of what this doc first
    predicted.** An earlier version of this section reasoned from the band count that ΔE2000
    (our "how much colour identity survives Roman" number, where ~1 unit is a just-noticeable
-   difference) would rise. It falls. Over a 247-planet sample, old set vs corrected set:
+   difference) would rise. It falls. Measured over the **whole catalogue** — the released
+   four-band build against the re-emitted three-band one, joined by planet id:
 
-   | | ΔE mean | ΔE median |
-   |---|---|---|
-   | old 4-band (wrong) | 18.48 | 9.75 |
-   | corrected 3-band | 17.31 | 8.78 |
+   | | ΔE mean |
+   |---|---|
+   | old 4-band (wrong) | 17.96 |
+   | corrected 3-band | **16.76** |
 
-   **221 of 247 planets improved** (mean −1.17, median −0.84); the worst regression was +0.41,
-   the best improvement −4.40. Reproduce with `pipeline.emit.build.build_record` over both
-   instrument definitions.
+   **5,363 of 5,764 planets improved**, 401 got worse, and **4,424 swatches changed colour**.
+   The best improvement was −6.3 (Kepler-632 b, ΔE 11.1 → 4.8); the worst regression in the
+   entire catalogue was **+1.0** (HD 3167 d), so the fix is close to strictly better.
+
+   *(An earlier revision of this section quoted a 247-planet sample — 221/247, mean 18.48 →
+   17.31. Same conclusion, weaker evidence; the full-catalogue numbers supersede it.)*
 
    The likely mechanism — offered as a hypothesis, not a result — is that the win isn't the band
    count, it's **Band 3 widening from 6% to 15%**. The old 730/6% anchor was a 44 nm slit, and
@@ -330,6 +343,12 @@ ship uncredited. Attribution files rot otherwise.
 
 ### 12. `planets.json` doesn't describe itself
 - [ ] Header carries no rights, citation or source list (`pipeline/emit/writer.py`)
+- [ ] **Emit the instrument band set into the header too.** The 2026-08-03 band correction
+      changed every `instrument_views` colour and ΔE without changing the record *shape*, so
+      `SCHEMA_VERSION` stayed at 5 and a consumer pinned to v5 silently received `cgi-825`
+      where it used to get `cgi-660` and `cgi-835`. A `bands` block in the header makes that
+      self-describing instead of invisible. Recorded as a comment in `pipeline/config.py` for
+      now, which is not the same thing.
 - [ ] Three unrelated version numbers — `SCHEMA_VERSION = 5`, `PIPELINE_VERSION = "0.1.0"`
       (hard-coded in `pipeline/config.py`, never bumped), and the release tag — and **none
       identifies the upstream snapshot.** `pscomppars` is a living table, so two releases a month

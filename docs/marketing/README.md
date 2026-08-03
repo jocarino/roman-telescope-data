@@ -25,7 +25,7 @@ verified on 2026-08-03.)
 1. **The Roman band configuration was wrong — code now fixed, data release pending.**
    `pipeline/config.py` now carries the flight configuration (575/10%, 730/15%, 825/10%); our
    old `835 nm` and `6%` widths traced to no primary source at all. The corrected set measurably
-   *improves* colour fidelity — ΔE2000 fell for 221 of 247 sampled planets — which is the
+   *improves* colour fidelity — ΔE2000 fell for 5,363 of 5,764 planets — which is the
    opposite of what the first draft of these docs predicted, so **do not reuse the "a real
    filter set costs you more than you'd guess" framing.** Until the catalogue is re-emitted and
    released, the site shows three-band copy over four-band numbers. See

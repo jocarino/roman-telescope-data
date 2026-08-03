@@ -115,4 +115,10 @@ CGI_OBSERVATION_PHASE_DEG = 90.0
 
 PIPELINE_VERSION = "0.1.0"
 # v4: Roman view at quadrature + observed_phase_deg; v3: phase_colours; v2: sun_swap
+# NOT a schema bump, but a semantic break worth recording: on 2026-08-03 the CGI band set was
+# corrected from four bands (575/10, 660/6, 730/6, 835/15) to the flight three (575/10, 730/15,
+# 825/10). The record SHAPE is identical, so v5 still validates -- but a consumer pinned to v5
+# now receives cgi-825 where it used to get cgi-660 and cgi-835, and every instrument_views
+# colour and delta_e2000 changed. Emitting the band set into the file header (see
+# docs/DEFECTS.md item 12) is the real fix; until then, this comment is the record.
 SCHEMA_VERSION = 5

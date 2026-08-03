@@ -64,3 +64,27 @@ def test_simulated_view_is_at_quadrature():
     quad_values = [s.value for s in view.band_samples.samples]
     full_values = [s.value for s in full.samples]
     assert all(q < f for q, f in zip(quad_values, full_values, strict=True))
+
+
+def test_measured_file_with_stale_band_ids_is_rejected(tmp_path):
+    """A measured file must match the instrument definition. The pre-2026-08 CGI set
+    (cgi-660 / cgi-835) is exactly the shape our own docs used to advertise, so a file
+    written against it is the likely mistake — it must fail loudly rather than quietly
+    reconstruct the colour from anchors the instrument does not have."""
+    import pytest
+
+    from pipeline.fetch.targets import load_measured_samples
+
+    pin = demo_planets()[0]
+    stale = {
+        "epoch": "2027-03-14",
+        "samples": [
+            {"band_id": "cgi-575", "center_nm": 575.0, "value": 0.31},
+            {"band_id": "cgi-660", "center_nm": 660.0, "value": 0.28},
+            {"band_id": "cgi-835", "center_nm": 835.0, "value": 0.15},
+        ],
+    }
+    (tmp_path / f"{pin.id}.{ROMAN_CGI.id}.json").write_text(json.dumps(stale))
+
+    with pytest.raises(ValueError, match="cgi-660"):
+        load_measured_samples(pin.id, ROMAN_CGI, measured_dir=tmp_path)
