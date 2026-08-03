@@ -51,4 +51,4 @@ Two ways to close it, in order of preference:
 Until one of those happens, **do not include this directory in any dataset deposit**.
 `scripts/release-data.sh` publishes only `planets.json`, so the release path is already clear.
 
-See `LICENSE-DATA` §5 and `docs/DEFECTS.md` item 4.
+See `LICENSE-DATA` §5.
