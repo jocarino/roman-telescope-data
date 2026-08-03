@@ -145,7 +145,7 @@
     radius: {{ rec.params.radius_r_earth if rec.params.radius_r_earth else 8 }},
     cloudState: '{{ rec.params.assumed_cloud_state }}',
     fullCap: '{% if rec.provenance == 'measured-albedo' %}Computed from the planet’s real, measured reflected-light spectrum (380–780 nm) — the same maths as every exoplanet on this site, run on real data.{% else %}Modelled from the complete reflected-light spectrum (380–780 nm): a physics prediction, not a photograph.{% endif %}',
-    romanCap: '{% if iview.band_samples.source == 'measured' %}Measured: real Roman photometry in three bands{% if iview.band_samples.epoch %} ({{ iview.band_samples.epoch }}){% endif %}, reconstructed to a colour. Real data.{% else %}Simulated: the model at quadrature (half-lit — the only geometry a coronagraph can catch) pushed through Roman&#39;s three supported filters, i.e. what Roman would measure. Not real data yet.{% endif %}',
+    romanCap: '{% if iview.band_samples.source == 'measured' %}Measured: real Roman photometry in three bands{% if iview.band_samples.epoch %} ({{ iview.band_samples.epoch }}){% endif %}, reconstructed to a colour. Real data.{% else %}Simulated: the model at quadrature (half-lit — the only geometry a coronagraph can catch) pushed through the three supported Roman filters, i.e. what Roman would measure. Not real data yet.{% endif %}',
     phases: [{% if rec.phase_colours %}{% for c in rec.phase_colours.colours %}{d:{{ c.phase_deg }},h:'{{ c.hex }}',l:{{ '%.4f'|format(c.luminance_y) }}}{{ ',' if not loop.last }}{% endfor %}{% endif %}],
     phaseSource: '{{ rec.phase_colours.source if rec.phase_colours else '' }}',
     {# The real spacecraft map, for the five solar-system anchors (null everywhere else).
@@ -302,7 +302,7 @@
         <button class="led-btn ch1" @click="setView('full')" :class="view === 'full' ? 'on' : ''">
           <i class="led" :class="{ on: view === 'full', flash: view === 'full' && ledFlash }"></i>Full spectrum</button>
         <button class="led-btn ch2" @click="setView('roman')" :class="view === 'roman' ? 'on' : ''">
-          <i class="led" :class="{ on: view === 'roman', flash: view === 'roman' && ledFlash }"></i>Roman 4-band</button>
+          <i class="led" :class="{ on: view === 'roman', flash: view === 'roman' && ledFlash }"></i>Roman 3-band</button>
         <button class="info-btn sm" @click="toggleInfo('view')" :class="info === 'view' ? 'on' : ''"
           aria-label="What's the difference between the two views?"
           title="What's the difference?">i</button>
@@ -313,7 +313,7 @@
       <template x-if="info === 'view'"><div>
         <p><strong>Full spectrum</strong>: the colour computed from the complete 380–780&nbsp;nm
           reflected-light model.</p>
-        <p><strong>Roman 4-band</strong>: the same planet as the
+        <p><strong>Roman 3-band</strong>: the same planet as the
           {{ g('roman-space-telescope', 'Roman Space Telescope') }}'s
           {{ g('coronagraph', 'Coronagraph') }} would see it — half-lit
           ({{ g('quadrature') }}, the only geometry a coronagraph can catch; fully lit would
@@ -377,7 +377,7 @@
           A big change: most of this planet's native colour is really its
           <strong>star's light</strong>, not the planet — cool red stars tint everything they shine on.
           {% endif %}</p>
-        <p>Both are <strong>modelled, not photographed</strong>. The Roman 4-band channel has no
+        <p>Both are <strong>modelled, not photographed</strong>. The Roman 3-band channel has no
           Sun-lit version, so this knob acts on the full-spectrum view only.</p>
       </div></template>
       {% endif %}

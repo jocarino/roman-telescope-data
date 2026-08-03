@@ -82,7 +82,7 @@ project as for an astronomy nerd**. This is a hard requirement, not a nicety. In
 
 - **Labels are self-explanatory.** No cryptic, insider, or costume term is ever the *only*
   signpost for a control. A real oscilloscope's "RUN / SINGLE" means nothing to a newcomer;
-  "Full spectrum / Roman 4-band" does. The retro/oscilloscope styling is a costume — it must
+  "Full spectrum / Roman 3-band" does. The retro/oscilloscope styling is a costume — it must
   never make a control harder to understand than a plain button would be.
 - **Info buttons where it matters.** Complex or easily-misread ideas (full spectrum vs Roman,
   modelled vs measured, classic vs stylised render) get an ℹ button **in the accent colour**

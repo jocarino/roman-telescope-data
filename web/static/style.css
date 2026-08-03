@@ -1534,7 +1534,7 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
     transparent 321.8deg 358.2deg, rgba(170, 185, 210, .65) 358.2deg 360deg);
 }
 
-/* "Light source" knob (its own star <-> the Sun). The Roman 4-band channel has no Sun-swap,
+/* "Light source" knob (its own star <-> the Sun). The Roman band channel has no Sun-swap,
    so on CH2 the knob + value read as inert (.na); clicking it brings back the full-spectrum
    channel instead of being locked out (same forgiveness as Style under the telescope photo). */
 .knob.na { opacity: .45; }
@@ -1589,7 +1589,7 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 
 /* The Roman switch. Sits in the toolbar next to the colour filter because it decides what
    every swatch in the grid IS, and the filter reads whatever it selects. One button, not two
-   sides: off is the gallery's normal full-spectrum state, on is the four-band view. Like the
+   sides: off is the gallery's normal full-spectrum state, on is the Roman band view. Like the
    fiction filter, it wears its own palette (Roman's warm, red-weighted bands) instead of the
    site accent — this changes what the colours ARE, it isn't another filter chip. */
 .view-bar { display: inline-flex; align-items: center; position: relative; }
@@ -1623,8 +1623,8 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 .tele-ic { flex: none; opacity: .75; }
 .view-toggle:hover .tele-ic, .view-switch.on .tele-ic { opacity: 1; }
 .view-switch.on .tele-ic { color: #ff9a4a; }
-/* The four CGI bands, each drawn in the colour of its centre wavelength (575, 660, 730 and
-   835 nm — the last is infrared, so it lights up as good as black). Dead grey until the
+/* The three supported CGI bands, each drawn in the colour of its centre wavelength (575, 730
+   and 825 nm — the last is infrared, so it lights up as good as black). Dead grey until the
    switch is on, so the button reads as an instrument powering up. */
 .view-bands { display: inline-flex; gap: 2px; }
 .view-bands i {
@@ -1831,7 +1831,7 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
   /* The Roman switch collapses to its telescope glyph. Spelled out, it was as wide as the
      other four controls put together and pushed the toolbar onto a second row — on a phone
      this is a row of icon buttons, and it now sizes like one (.dd-icon's 10px padding). The
-     four band chips go with the label: they are decoration here, and the switch still reads
+     band chips go with the label: they are decoration here, and the switch still reads
      as on or off from its own amber frame. The ℹ segment deliberately STAYS — an icon-only
      control needs its plain-English explanation within reach, and that is now the only
      signpost left on the control itself. */
@@ -1958,7 +1958,7 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
 
    1. The scope header wrapped to two rows (brand above, VIEW switch below) at 80px tall. It
       fits one 51px row once the "VIEW" word goes: the two buttons say "Full spectrum" and
-      "Roman 4-band" in plain words and the ℹ sits right beside them, so the label was only
+      "Roman 3-band" in plain words and the ℹ sits right beside them, so the label was only
       naming what the controls already say. Below ~385px it still wraps as before — a clean
       fallback rather than a squeeze that breaks the labels.
    2. "Same system" spent up to 142px (TRAPPIST-1's six siblings wrapped over four rows) on
