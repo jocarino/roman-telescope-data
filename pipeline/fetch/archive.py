@@ -97,6 +97,14 @@ def _adql_in_clause(names: list[str]) -> str:
     return f"select {cols} from pscomppars where pl_name in ({quoted})"
 
 
+# The coarse server-side filter the bulk pull applies before the completeness gate runs: a
+# distance (needed to order by proximity) and some size measurement. Exported because the drift
+# probe must count exactly the rows a bulk build would ingest — see `pipeline.drift`.
+BULK_PREFILTER_ADQL = "sy_dist is not null and (pl_rade is not null or pl_bmasse is not null)"
+
+TABLE = "pscomppars"
+
+
 def _adql_bulk(limit: int) -> str:
     """The `limit` nearest planets (by distance) with the bare minimum to be worth considering:
     a size measurement (radius or mass) and a known distance to order by. Everything else — a
@@ -104,8 +112,8 @@ def _adql_bulk(limit: int) -> str:
     downstream, so the gate does the real filtering and its keep/exclude ratio is meaningful."""
     cols = ",".join(_COLUMNS)
     return (
-        f"select top {int(limit)} {cols} from pscomppars "
-        "where sy_dist is not null and (pl_rade is not null or pl_bmasse is not null) "
+        f"select top {int(limit)} {cols} from {TABLE} "
+        f"where {BULK_PREFILTER_ADQL} "
         "order by sy_dist asc"
     )
 
@@ -150,6 +158,16 @@ def _run_query(query: str, *, use_cache: bool = True) -> list[dict]:
     _CACHE_DIR.mkdir(parents=True, exist_ok=True)
     cache.write_text(json.dumps(payload, indent=2))
     return payload
+
+
+def run_adql(query: str, *, use_cache: bool = False) -> list[dict]:
+    """Run an arbitrary ADQL query against the Archive's TAP service and return its rows.
+
+    Defaults to `use_cache=False`, the opposite of the record fetchers: callers of this are
+    asking "what does the Archive say *right now*", and a cache hit would answer with whatever
+    it said last time — silently, and forever.
+    """
+    return _run_query(query, use_cache=use_cache)
 
 
 def fetch_by_names(names: list[str], *, use_cache: bool = True) -> list[ArchiveRecord]:

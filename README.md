@@ -243,6 +243,41 @@ scripts/release-data.sh                      # upload as a release, update data/
 git add data/RELEASE && git commit && git push   # webhook redeploys from the new tag
 ```
 
+### Keeping it current (`pipeline drift`)
+
+You don't have to remember any of that. `.github/workflows/catalogue.yml` probes the Archive
+through Thursday (when new confirmations are published) and on Friday morning, and opens a pull
+request when there is something to rebuild for. Nothing publishes itself: the release is created
+as a **draft** and the `data/RELEASE` bump arrives as a PR, so merging stays the human step.
+
+```bash
+uv run python -m pipeline drift                       # has the Archive moved since the last release?
+uv run python -m pipeline drift --baseline m.json     # …compared to a specific manifest
+uv run python -m pipeline drift --emit-manifest data/manifest.json
+uv run python -m pipeline drift --diff-against prev/planets.json   # what actually changed colour
+```
+
+Three things about it are deliberate and easy to break:
+
+- **It fingerprints, it doesn't count.** `pscomppars` is a *composite* table that continuously
+  re-derives each planet's best-available parameters, so a revision rewrites a row while the row
+  count sits still. The probe sums the columns the pipeline consumes, so additions, removals and
+  revisions all move it — for the same single query a bare count would have cost.
+- **The gated set is defined once.** `catalog.GATE_CLAUSES` carries each completeness requirement
+  as both a Python predicate *and* its ADQL equivalent, and `gate_adql()` composes the remote
+  query from it. A hand-written mirror of the gate is how an earlier attempt concluded the
+  catalogue was "560 planets behind" when the difference was the gate correctly excluding planets
+  with no measurable host star. Don't retype it; `tests/test_drift.py` guards this.
+- **The baseline is the last release, so there's no state to keep.** `manifest.json` ships beside
+  `planets.json`, which means once a release is published the probe goes quiet by itself.
+  `scripts/release-data.sh` writes it too, so a manual release doesn't break the chain.
+
+`pipeline build` reuses `data/cache/records` for planets whose inputs are unchanged, so a refresh
+only recomputes what moved. That cache keys on the **full** instrument definition, not just its
+id — changing a bandpass centre or width changes every record's `instrument_views`, and keying on
+`roman-cgi` alone would have served the old filter set out of cache with no error. Anything the
+key doesn't cover (measured band samples, static observation data) still needs `--no-cache`.
+
 ```bash
 docker build -t exoplanet-palette .             # reproduce the deploy image locally
 docker run -p 8080:80 exoplanet-palette         # serve at http://localhost:8080

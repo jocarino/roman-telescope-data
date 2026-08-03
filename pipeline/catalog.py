@@ -10,6 +10,8 @@ microlensing planets are flagged `is_light_isolable=False` (their light is never
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
+from dataclasses import dataclass
 
 from pipeline.emit.build import PlanetInput
 from pipeline.fetch.archive import ArchiveRecord, fetch_bulk, fetch_by_names
@@ -128,6 +130,58 @@ def _model_temperature(rec: ArchiveRecord, eq_temp: float | None) -> float | Non
     return eq_temp
 
 
+@dataclass(frozen=True)
+class GateClause:
+    """One completeness requirement, expressed twice for the same set of rows.
+
+    `keep` decides it in Python for a fetched record; `adql` is the equivalent predicate for a
+    server-side query. Having both on one object is the point: anything that counts the gated
+    set remotely (the drift probe) is derived from this list rather than reimplementing it, so
+    the two cannot disagree. They did once — a hand-written count compared against the shipped
+    catalogue produced a phantom "560 planets behind" that was really this gate doing its job.
+    """
+
+    reason: str
+    keep: Callable[[ArchiveRecord], bool]
+    adql: str
+
+
+# Evaluated IN ORDER and short-circuited, so a later clause may assume the earlier ones held —
+# the Teff ceiling never sees a null because the clause above it already rejected those.
+GATE_CLAUSES: tuple[GateClause, ...] = (
+    GateClause(
+        "no size (neither radius nor mass)",
+        lambda r: r.pl_rade is not None or r.pl_bmasse is not None,
+        "(pl_rade is not null or pl_bmasse is not null)",
+    ),
+    GateClause(
+        "unknown host star (no stellar temperature; the illuminant is the colour)",
+        lambda r: r.st_teff is not None,
+        "st_teff is not null",
+    ),
+    # A host this hot is a stellar remnant — a hot subdwarf or white dwarf, the exposed cinder
+    # of a dead star (these are eclipse-timing "planets" around evolved binaries). Its light is
+    # UV-dominated, not a normal star's, so a reflected *visible* colour is meaningless. The cut
+    # sits above every genuine hot main-sequence star (A/early-B).
+    GateClause(
+        "host too hot (stellar remnant / hot subdwarf — not a normal star)",
+        lambda r: r.st_teff <= _MAX_HOST_TEFF_K,
+        f"st_teff <= {_MAX_HOST_TEFF_K}",
+    ),
+    GateClause(
+        "no temperature and none computable from star + orbit",
+        lambda r: r.pl_eqt is not None or (r.st_rad is not None and r.pl_orbsmax is not None),
+        "(pl_eqt is not null or (st_rad is not null and pl_orbsmax is not null))",
+    ),
+)
+
+
+def gate_adql() -> str:
+    """The gate as a server-side WHERE fragment, built from `GATE_CLAUSES`. Counting the gated
+    set without fetching it — see `pipeline.drift`."""
+    return " and ".join(c.adql for c in GATE_CLAUSES)
+
+
 def completeness_gate(rec: ArchiveRecord) -> tuple[bool, str | None]:
     """The minimum real data a planet needs before we will model a colour for it. Below this
     there is nothing to anchor an archetype to and the result would be pure guesswork, so we
@@ -138,19 +192,9 @@ def completeness_gate(rec: ArchiveRecord) -> tuple[bool, str | None]:
     showing it), and a planet TEMPERATURE (measured, or computable from the star + orbit).
     A missing radius on a known giant is still fine (the value is tagged 'assumed' and barely
     affects reflected-light colour); a missing/unknowable illuminant is not."""
-    if rec.pl_rade is None and rec.pl_bmasse is None:
-        return False, "no size (neither radius nor mass)"
-    if rec.st_teff is None:
-        return False, "unknown host star (no stellar temperature; the illuminant is the colour)"
-    if rec.st_teff > _MAX_HOST_TEFF_K:
-        # A host this hot is a stellar remnant — a hot subdwarf or white dwarf, the exposed
-        # cinder of a dead star (these are eclipse-timing "planets" around evolved binaries).
-        # Its light is UV-dominated, not a normal star's, so a reflected *visible* colour is
-        # meaningless. The cut sits above every genuine hot main-sequence star (A/early-B).
-        return False, "host too hot (stellar remnant / hot subdwarf — not a normal star)"
-    temp_computable = rec.st_rad is not None and rec.pl_orbsmax is not None
-    if rec.pl_eqt is None and not temp_computable:
-        return False, "no temperature and none computable from star + orbit"
+    for clause in GATE_CLAUSES:
+        if not clause.keep(rec):
+            return False, clause.reason
     return True, None
 
 
