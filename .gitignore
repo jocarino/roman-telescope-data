@@ -25,8 +25,7 @@ mprocs.yaml
 # OS
 .DS_Store
 
-# Private working docs — strategy and the internal defect list. Kept on disk, never published:
-# this repo is public, and the defect list in particular discusses unresolved licensing and
-# unshipped fixes, which is not something to broadcast while it is still true.
+# Private working notes live in a separate repo, not here. Guard rails so they cannot be
+# re-added to this public repo by accident.
 docs/marketing/
 docs/DEFECTS.md
