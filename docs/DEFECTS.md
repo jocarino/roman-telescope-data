@@ -8,6 +8,12 @@ Each item says what's wrong, where, how it was verified, and what it blocks. Ite
 **check** are things only you can confirm (deploy environment, third-party terms).
 
 Grouped by what happens if you ship without fixing it. Ordered within each group by effort.
+**Numbers are stable** — a fixed item moves to [Resolved](#resolved) and its number is not
+reused, so a reference to "defect 6" means the same thing next month.
+
+Item 1 carries a [background section](#background--what-these-numbers-actually-mean) explaining
+the coronagraph concepts from scratch — read it before touching the band configuration or writing
+anything public about Roman.
 
 ---
 
@@ -46,18 +52,122 @@ Two things to get right in the wording, because they're what a CGI person would 
 825 nm (11.4%); Zellem et al. 2022 says 17% / 12% (as-built). Worth well under 1 ΔE, but cite
 which you used.
 
-### 2. Analytics have never recorded anything
-**Where:** `Dockerfile` `ARG POSTHOG_KEY`, PostHog project settings
-**Blocks:** [99 tracking](./marketing/99-tracking.md), and any judgement about any channel.
+---
 
-The PostHog project taxonomy contains only built-ins — no `planet_viewed`, no `palette_copied`,
-no `roman_view_toggled`. There is no partial failure mode here, only zero.
+#### Background — what these numbers actually mean
 
-- [ ] **check** — is `POSTHOG_KEY` actually set on the Dokploy build?
-- [ ] **check** — is *"Cookieless server hash mode"* enabled in project settings? If it's off,
-      every event is dropped **silently, with no error**. `analytics.js` warns about exactly this.
+*Written for someone who hasn't read the coronagraph literature. Nothing here is assumed.*
 
-Fix this before Phase 1 or the launch teaches you nothing.
+**The problem Roman's coronagraph is solving.** A star is roughly a **billion** times brighter
+than a mature Jupiter orbiting it in reflected light. Putting both in one image is like
+photographing a firefly next to a lighthouse from a mile away. A **coronagraph** is the optical
+trick that makes it possible: a set of masks inside the instrument that cancel the star's light
+before it reaches the detector, while letting light from a slightly different direction through.
+The measure of success is the **flux ratio** (also called **contrast**) it can reach — planet
+brightness ÷ star brightness. Roman's Coronagraph Instrument (CGI) is a *technology
+demonstration*: its job is to prove the technique works in space, not to survey planets.
+
+**How close to the star it can look.** The relevant unit is **λ/D** — wavelength divided by
+telescope diameter — which is the natural angular scale of diffraction, the fundamental blur
+that any telescope imposes. For Roman (D = 2.4 m) at 575 nm, λ/D ≈ 0.05 arcseconds. No
+coronagraph can see a planet arbitrarily close to its star; the closest it can work is called the
+**inner working angle**. Roman's formal requirement is stated at 6–9 λ/D, i.e. roughly 0.3–0.44
+arcseconds. This is why a planet can be famous and still be unobservable — GJ 1214 b orbits at
+about a *thousandth* of an arcsecond as seen from Earth, so it's not marginal, it's four orders
+of magnitude inside the reach. Angular separation, not fame, decides.
+
+**What "575/10%" means.** A **bandpass** (or band, or filter) is a piece of glass that transmits
+only a range of wavelengths and blocks the rest. It's specified by a **centre wavelength** and a
+**fractional bandwidth** — the width as a percentage of the centre. So:
+
+| Band | Written as | Actually spans | Where that is |
+|---|---|---|---|
+| 1 | 575 nm, 10% | 546–604 nm | green-yellow, near the eye's peak sensitivity |
+| 2 | 660 nm, 15% | 611–709 nm | orange-red, eye still responds well |
+| 3 | 730 nm, 15% | 675–785 nm | deep red, eye response falling off fast |
+| 4 | 825 nm, 10% | 784–866 nm | **near-infrared — the eye sees nothing here** |
+
+Our pipeline models each of these as a **top-hat**: 100% transmission inside the range, 0%
+outside, a perfect rectangle. Real filters aren't rectangles — transmission rises, plateaus, and
+falls with sloped shoulders, so people quote the **FWHM** ("full width at half maximum"), the
+width measured where transmission has dropped to half its peak. That's the difference behind the
+~2% disagreement noted above: the Primer quotes the *design* width, Bailey and Zellem quote the
+*as-built measured* FWHM of the actual hardware. Both are correct answers to slightly different
+questions. Top-hats are a defensible v1 approximation; just say that's what they are.
+
+**Two different coronagraphs, not one.** CGI carries two architectures, and they are not
+interchangeable:
+- **Hybrid Lyot Coronagraph (HLC)** — a mask in the focal plane blocks the star's image, and a
+  second stop in the pupil plane blocks the diffracted light that leaks around it. Narrow field
+  of view, best raw contrast.
+- **Shaped Pupil Coronagraph (SPC)** — instead of blocking the star, the telescope's pupil is
+  reshaped so diffraction redistributes starlight *away* from a chosen region. Wider field, and
+  it's the mode used for spectroscopy.
+
+This is why the specification reads "Band 1 **with the hybrid Lyot**" — a band and a coronagraph
+together define an observing mode. The same filter used with a different mask is a different mode
+with different performance.
+
+**"Formally supported" vs "best effort" — these are contract words, not forecasts.** Every NASA
+mission has **Level-1 requirements**: the things it must demonstrate to be declared a success.
+CGI's single L1 requirement is to image a point source at a flux ratio of at least 10⁻⁷, at
+6–9 λ/D, around a star as bright as V = 5, in a 10% band centred below 600 nm. Everything else —
+the other bands, polarimetry, spectroscopy — is listed as **best effort**, meaning *the hardware
+is there and the team intends to use it, but the mission isn't contractually obliged to deliver
+it.*
+
+Two ways to misread this, and the reviewing astronomer flagged both:
+- **Too generous:** the requirement guarantees no per-planet result at all. It's one
+  demonstration on one astrophysical point source, which needn't even be a planet — a known
+  stellar companion used as a test target satisfies it. Writing "one guaranteed number *per
+  planet*" smuggles in a promise nobody made.
+- **Too harsh:** "best effort" is *not* a probability estimate. The instrument completed
+  ground testing in Bands 1, 3 and 4; there are standing working groups on observation planning,
+  polarimetry and data reduction; and the Primer itself anticipates optical spectra of up to two
+  exoplanets. Writing best-effort as "probably won't happen" is the mirror image of the hype
+  we're correcting, and the people who spent a decade on those modes will read it as a sneer.
+
+**Why the hardware for Band 2 exists but the band doesn't count.** The filters live on the
+**CFAM** — Colour Filter Assembly Mechanism — a physical wheel that rotates a chosen filter into
+the light path. All four filters are on that wheel, and the spectrometer even carries a second
+**Amici prism** (a prism arrangement that spreads light into a spectrum without deflecting the
+beam off-axis) for Band 2. What's missing is *ground testing*: it was never characterised before
+launch, so it can't be an officially supported mode. Hence the precise phrasing — **installed but
+untested**, not absent. Saying "not in the flight configuration" to someone who worked on that
+wheel is the kind of error that ends a conversation.
+
+**What "R ~ 50 spectroscopy" buys.** **Resolving power** R = λ/Δλ is how finely an instrument can
+split wavelengths. R ~ 50 at 730 nm means resolution elements about 15 nm wide, so across the
+109 nm of Band 3 you get roughly seven independent points. That is a coarse shape, not a spectrum
+with absorption lines in it — enough to see a broad methane depression, not enough to identify
+much.
+
+**Why any of this changes our colours.** Our "as Roman would see it" pipeline takes the modelled
+reflected-light spectrum, integrates it through each bandpass to get one number per band, then
+reconstructs a colour from those few samples via the CIE colour-matching functions. So the band
+set *is* the algorithm. Three consequences of the correction, and the third is the one to be
+ready for:
+
+1. **We lose a mid-visible sample.** Dropping 660 nm removes a band sitting where the eye still
+   responds strongly. That's real colour information gone.
+2. **Band 4 was never doing much and now does nothing.** At 825 nm the CIE colour-matching
+   functions are effectively zero — human vision stops around 780 nm. A near-infrared photometric
+   point contributes essentially nothing to a perceived colour. Our old 835/15% band overlapped
+   the visible by a sliver; 825/10% doesn't overlap at all.
+3. **So the corrected Roman view should be *worse* than what we currently publish.** Expect the
+   ΔE2000 values — our "how much colour identity survives Roman" number, where roughly 1 unit is a
+   just-noticeable difference to the eye — to get **larger** after the fix. We have been
+   overstating how much colour Roman recovers. That is unwelcome, and it is also the most
+   interesting and most defensible version of the project's whole thesis: a real instrument's
+   filter set costs you more than you'd guess, and here is exactly how much.
+
+**One term used throughout, in case it's unfamiliar.** **Geometric albedo** is the fraction of
+incident light a planet reflects straight back toward the observer, wavelength by wavelength.
+It's the input to everything above: albedo spectrum × host-star spectrum = reflected light, and
+that's what both the eye and Roman are sampling. It is *modelled* here, never measured — which is
+the reason the honesty rule exists in the first place.
+
+---
 
 ### 3. Three licence notices we are required to ship and don't
 **Blocks:** [13 credits](./marketing/13-credit-the-scientists.md), and any CC-licensed release downstream.
@@ -257,14 +367,37 @@ can least afford, and because two of them are *about our own code*.
 
 ---
 
+## Resolved
+
+Kept rather than deleted, so the record of what was wrong survives and the numbering stays stable.
+
+### 2. Analytics have never recorded anything — **fixed, verified 2026-08-03**
+**Was:** the PostHog project taxonomy contained only built-ins. Either `POSTHOG_KEY` (a
+`Dockerfile` `ARG`) was unset on the Dokploy build, or *"Cookieless server hash mode"* was off in
+project settings — in which case every event is dropped **silently, with no error**, which is the
+failure mode `analytics.js` warns about.
+
+**Now:** the taxonomy carries `planet_viewed`, `palette_copied`, `roman_view_toggled`,
+`light_source_swapped` and `phase_changed`, alongside `$pageview` and `$web_vitals`. Ingestion is
+working. (`exo_pipeline_selftest` and `exo_probe_no_optin` are also present — presumably the
+probes used to diagnose it.)
+
+**Worth keeping in mind:** because the failure is silent, a sudden zero is indistinguishable from
+a quiet week. If the numbers ever look impossibly low after a launch, check the key and the
+cookieless setting *before* concluding the launch failed. And two blind spots remain open as
+[item 15](#15-two-blind-spots-in-event-tracking) — tour completions and hold-to-peek still fire
+nothing, so those specific metrics are still fiction.
+
+---
+
 ## Suggested order
 
 **Evening 1 — stop being wrong.** Items 1 (band config + re-emit), 3 (three licence notices),
 4 (`LICENSE` + `CITATION.cff`), 10 (email in the footer). Clears every binding breach and the one
 factual error in the signature feature.
 
-**Evening 2 — turn the lights on.** Item 2 (analytics), 7 (`Disallow: /fragments/`), 16 (UTM
-check). Now you can measure whatever you do next.
+**Evening 2 — finish turning the lights on.** Items 7 (`Disallow: /fragments/`), 15 (the two
+missing events), 16 (UTM check). Analytics now ingest; these close the remaining blind spots.
 
 **Evening 3 — data hygiene.** Items 5 (catalogue refresh + cadence), 12 (self-describing header),
 13 (Zenodo trap). Unblocks the dataset deposit.

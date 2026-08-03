@@ -17,25 +17,24 @@ Sixteen reviewers, cast as the people most likely to reject each plan, agreed on
 of the individual docs said: **this project has correctness debt, and the plan was scheduling
 promotion on top of it.**
 
-Five headline defects, each found independently, each one that promotion would amplify rather
-than survive. **The full fix list — 17 items with file paths, evidence and a suggested order —
-is [`docs/DEFECTS.md`](../DEFECTS.md).**
+Four headline defects still open, each found independently, each one that promotion would amplify
+rather than survive. **The full fix list — with file paths, evidence, a coronagraph primer and a
+suggested order — is [`docs/DEFECTS.md`](../DEFECTS.md).** (A fifth, dead analytics, was fixed and
+verified on 2026-08-03.)
 
 1. **The Roman band configuration in `pipeline/config.py` is wrong.** Every "as Roman would see
    it" swatch — the signature feature — is computed through the wrong filter set. Our `835 nm`
    and `6%` widths trace to no primary source at all. Details and the verified flight
    configuration in [15](./15-roman-launch.md); the astronomer's audit is in
    [reviews/15-roman-review.md](./reviews/15-roman-review.md).
-2. **Analytics have never worked.** The PostHog project has not ingested a single event, so
-   there is currently no way to judge any of this. [reviews/99-tracking-review.md](./reviews/99-tracking-review.md).
-3. **About 97% of planet pages are orphans.** The gallery ships an empty grid built in JS with
+2. **About 97% of planet pages are orphans.** The gallery ships an empty grid built in JS with
    scroll-loading, so only ~100–200 planets sit in the crawlable link graph — and ~5,700 peek
    fragments are publicly indexable with no `noindex`. [reviews/03-seo-review.md](./reviews/03-seo-review.md).
-4. **Licence and contact gaps.** No `LICENSE` for our own code or data — so the dataset is not
+3. **Licence and contact gaps.** No `LICENSE` for our own code or data — so the dataset is not
    actually open and cannot be deposited — an outstanding CC BY 4.0 obligation to a source we
    redistribute, and **no email address anywhere on the site**, so no journalist can reach us
    today. [13](./13-credit-the-scientists.md), [06](./06-open-data.md), [02](./02-press-kit.md).
-5. **The catalogue is ~560 planets behind.** `pscomppars` holds 6,324; the site ships 5,764. New
+4. **The catalogue is ~560 planets behind.** `pscomppars` holds 6,324; the site ships 5,764. New
    confirmations are missing *by construction*, so the commonest newsjack story — "new planet
    discovered" — is the one we cannot answer. A refresh cadence is a prerequisite for
    [01](./01-newsjacking.md), not an optimisation. [reviews/01-newsjacking-review.md](./reviews/01-newsjacking-review.md).
@@ -76,7 +75,7 @@ Three structural advantages that decide what's worth doing:
 |---|---------|--------|----------------|------|
 | [01](./01-newsjacking.md) | Newsjacking exoplanet headlines | **blocked by defect 5** | revise | Speed isn't the moat — arXiv gives weeks, not days. Refresh the catalogue, then build the pre-made bench. |
 | [02](./02-press-kit.md) | Press kit | not started | rework | Split `/about` (human) from `/press` (assets). No email on the site today — fix that first, it's a five-minute job. |
-| [03](./03-seo-planet-pages.md) | SEO on planet pages | **blocked by defect 3** | rework | The link graph is the blocker, not the wording. Reverse colour index killed. |
+| [03](./03-seo-planet-pages.md) | SEO on planet pages | **blocked by defect 6** | rework | The link graph is the blocker, not the wording. Reverse colour index killed. |
 | [04](./04-wikimedia.md) | Wikimedia Commons | small version: **do it** | partly overturned | Campaign stays parked, but the small version is unblocked today — my DOI-unblocks-it reasoning was a policy misreading. |
 | [05](./05-machine-readable.md) | Machine/LLM-readable surface | not started | revise | `llms.txt` is folklore. Stable join keys and machine-checkable honesty are the real items. |
 | [06](./06-open-data.md) | Open dataset | **blocked by defect 4** | revise | The file has no licence, so it isn't open yet. Licence → describe → deposit once, well. |
@@ -89,9 +88,12 @@ Three structural advantages that decide what's worth doing:
 | [13](./13-credit-the-scientists.md) | Credit the scientists | **blocking** | revise | Audit was ~80% right; the reviewer found more, including the band error. |
 | [14](./14-educators.md) | Teachers, planetariums, clubs | not started | revise | Seven artifacts → two. The anchor lesson is the one worth building. |
 | [15](./15-roman-launch.md) | The Roman launch play | **clock running** | ship after two repairs | Predict band albedos, not hex codes. Band 2 hardware *is* installed — it's untested, not absent. |
-| [99](./99-tracking.md) | Tracking & measurement | **broken** | rework | Nothing is being measured. Metric changed from "depth" to "turned a knob". |
+| [99](./99-tracking.md) | Tracking & measurement | ingesting since 2026-08-03 | rework | Events now arrive. Metric changed from "depth" to "turned a knob"; two blind spots still open. |
 
 **Status values:** `not started` · `in progress` · `done` · `blocked` · `parked` · `dropped`.
+
+"Defect *n*" refers to the numbering in [`docs/DEFECTS.md`](../DEFECTS.md), which is stable — a
+fixed item keeps its number and moves to that doc's Resolved section.
 
 ---
 
@@ -103,10 +105,9 @@ Three structural advantages that decide what's worth doing:
 >
 > 1. **The Roman band configuration** ([15](./15-roman-launch.md)) — a data-side evening, and it
 >    unblocks 09, 11 and 02, all of which currently repeat the wrong figure.
-> 2. **Make analytics work** ([99](./99-tracking.md)) — otherwise Phase 1 teaches you nothing.
-> 3. **A `LICENSE`, the outstanding CC BY attribution, and an email address on the site**
+> 2. **A `LICENSE`, the outstanding CC BY attribution, and an email address on the site**
 >    ([13](./13-credit-the-scientists.md), [02](./02-press-kit.md)) — one evening for all three.
-> 4. **The crawlable link graph** ([03](./03-seo-planet-pages.md)) — the only slow one; start it
+> 3. **The crawlable link graph** ([03](./03-seo-planet-pages.md)) — the only slow one; start it
 >    early because it pays out over months.
 
 **Phase 0 — before promotion.** `/about` and `/press` ([02](./02-press-kit.md)), the credits page
