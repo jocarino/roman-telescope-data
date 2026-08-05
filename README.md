@@ -117,7 +117,12 @@ What the install does and doesn't do (`web/static/analytics.js`):
   of the questions above and costs far more events.
 - A fixed vocabulary: `$pageview`, `planet_viewed` (id + name), `roman_view_toggled`,
   `palette_copied` (format + which colour was on screen), `palette_downloaded`,
-  `light_source_swapped`, `phase_changed` (debounced — a drag is one event, not forty).
+  `light_source_swapped`, `phase_changed` (debounced — a drag is one event, not forty),
+  `peek_opened` (planet + view + `pointer`, so hold-to-peek can be told apart on touch from
+  mouse), and the guided-tour funnel: `tour_started` (`tour_id`, `stops`, `entry_stop`),
+  `tour_stop_viewed` (`stop`) and `tour_completed` (`stops_seen`). A tour page's pageview says
+  someone opened a walk; only those three say whether anyone finished it — and `peek_opened`
+  is the only signal at all from a gesture that fetches a fragment and never navigates.
 
 Call sites use `window.exoTrack && window.exoTrack(…)`, the same guard as `window.exoToast`,
 so an unkeyed build (or an ad blocker, which removes PostHog routinely) changes nothing about

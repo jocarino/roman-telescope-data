@@ -1821,6 +1821,7 @@ document.addEventListener("alpine:init", () => {
 (function () {
   var LP_MS = 450, MOVE_TOL = 12;
   var downCard = null, downAt = 0, sx = 0, sy = 0, moved = false, timer = null;
+  var downType = "";  // pointerType of the press being held — see the peek_opened event below
   var cache = {};  // peek url -> Promise<html>; fragments are static, cache for the session
 
   function fetchPeek(url) {
@@ -1859,6 +1860,20 @@ document.addEventListener("alpine:init", () => {
         });
       }
       peek.classList.add("on");
+      // A peek is the one interaction on the site that leaves no other trace: it is a fetch of
+      // a static fragment, so there is no navigation and no pageview behind it. It is also a
+      // press-and-hold, which means it is used most on exactly the phones the rest of the
+      // numbers see least — hence `pointer`, which answers whether that is actually true.
+      // Fired here rather than when the timer runs out: the fetch can still land after the
+      // finger has gone, and the guard above discards those, so this counts peeks that were
+      // really put on screen.
+      var nameEl = body.querySelector(".peek-name");
+      window.exoTrack && window.exoTrack("peek_opened", {
+        planet_id: (card.pathname || "").split("/").pop(),
+        planet_name: nameEl ? nameEl.textContent.trim() : "",
+        view: view,
+        pointer: downType || "unknown",
+      });
     });
   }
   function hidePeek() {
@@ -1871,6 +1886,7 @@ document.addEventListener("alpine:init", () => {
   document.addEventListener("pointerdown", function (e) {
     var card = e.target.closest && e.target.closest("a.card");
     downCard = card; downAt = Date.now(); moved = false; sx = e.clientX; sy = e.clientY;
+    downType = e.pointerType || "";
     clearTimeout(timer);
     if (card) {
       fetchPeek(card.getAttribute("data-peek"));  // warm the cache during the press

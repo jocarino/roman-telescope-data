@@ -6,6 +6,7 @@
 document.addEventListener("alpine:init", () => {
   Alpine.data("tour", (cfg) => ({
     n: (cfg && cfg.n) || 1,
+    id: (cfg && cfg.id) || "",
     i: 0,
     // The intro box starts closed on every viewport. Nothing here is remembered between loads,
     // so opening by default meant it came back on every refresh however many times you shut it,
@@ -13,13 +14,26 @@ document.addEventListener("alpine:init", () => {
     // kicker (in the accent colour) opens it for anyone who wants the framing.
     intro: false,
 
+    // Analytics bookkeeping. Deliberately not part of the reactive state — nothing in the DOM
+    // reads them, and Alpine would re-render the page on every stop for no reason.
+    _seen: null,     // stop number -> true, for the stops this visit actually reached
+    _done: false,    // has this visit already been counted as finishing the walk
+
     init() {
+      this._seen = {};
       // Deep link: /tours/darkest-worlds#stop-4 opens on that stop (shareable mid-tour).
       const m = /^#stop-(\d+)$/.exec(location.hash || "");
+      let entry = 1;
       if (m) {
         const k = parseInt(m[1], 10) - 1;
-        if (k >= 0 && k < this.n) this.i = k;
+        if (k >= 0 && k < this.n) { this.i = k; entry = k + 1; }
       }
+      // The pageview on /tours/<id> already says a tour was opened; this names WHICH tour
+      // without a regex over the URL, and — with tour_stop_viewed and tour_completed below —
+      // turns "does anyone finish one of these" into a funnel instead of a guess. `entry_stop`
+      // above 1 is a shared #stop-N link: that visit never sees stop 1 and must not read as
+      // someone who dropped out of the opening.
+      this._track("tour_started", { entry_stop: entry });
       this.$watch("i", () => this._sync(true));
       this.$nextTick(() => this._sync(false));
       this._swipe();
@@ -45,7 +59,38 @@ document.addEventListener("alpine:init", () => {
 
     _sync(pushHash) {
       if (pushHash) history.replaceState(null, "", "#stop-" + (this.i + 1));
+      this._reached(pushHash);
       this.$nextTick(() => window.TourStops && window.TourStops.draw(this.i));
+    },
+
+    // The progress curve: every stop this visit actually showed, once each. Not debounced,
+    // unlike the phase slider — a tour is a dozen stops at most, so the count is bounded by
+    // the tour's own length however hard someone leans on the arrow key, and dropping the
+    // stops that flicked past would leave stops_seen below claiming stops with no event.
+    //
+    // `viaNav` is false for the first render, which is what keeps completion honest: reaching
+    // the end is a move, so a #stop-N link that OPENS on the last stop is not a completion.
+    // (A one-stop tour is the exception — arriving is the whole walk.) Once per page load, so
+    // START AGAIN and a second lap stay one visit; a completion count above the start count
+    // would read as a bug in the numbers rather than an enthusiastic visitor.
+    _reached(viaNav) {
+      const stop = this.i + 1;
+      if (!this._seen[stop]) {
+        this._seen[stop] = true;
+        this._track("tour_stop_viewed", { stop: stop });
+      }
+      if ((viaNav || this.n === 1) && !this._done && this.i === this.n - 1) {
+        this._done = true;
+        this._track("tour_completed", { stops_seen: Object.keys(this._seen).length });
+      }
+    },
+
+    // Every tour event carries which tour and how long it is, so "how far do people get"
+    // is one query rather than a join against the tour list. No-op unless the build shipped
+    // analytics — see web/static/analytics.js for the gate.
+    _track(name, props) {
+      if (!window.exoTrack) return;
+      window.exoTrack(name, Object.assign({ tour_id: this.id, stops: this.n }, props));
     },
 
     // Sideways swipe steps the tour on touch devices. Touch events rather than pointer
