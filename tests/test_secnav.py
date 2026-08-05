@@ -36,6 +36,7 @@ SECTIONS = (
     "sec-tour",
     "sec-fiction",
     "sec-water",
+    "sec-next",
 )
 
 
