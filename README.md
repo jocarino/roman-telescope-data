@@ -232,6 +232,9 @@ HTTPS → enable the auto-deploy webhook (if the repo is private, add build arg
 `POSTHOG_KEY=phc_…` too if you want visitor analytics — see "Visitor analytics" above; the
 deploy is the only build that should ever carry it.
 
+**Mount a volume at `/var/log/site`** (Dokploy: Application → Advanced → Volumes) or the
+access log is thrown away on every deploy — see "The access log" below.
+
 **The data artifact is NOT in git** (a 6k-planet build is ~90 MB): each pipeline run's
 `planets.json` is published as a GitHub Release asset, and the committed one-line
 `data/RELEASE` names the tag. Clean builds download it (`scripts/fetch_data.py`); local
@@ -241,6 +244,36 @@ checkouts with the file on disk use it as-is. A data refresh is:
 uv run python -m pipeline build --bulk N     # regenerate data/planets.json
 scripts/release-data.sh                      # upload as a release, update data/RELEASE
 git add data/RELEASE && git commit && git push   # webhook redeploys from the new tag
+```
+
+### The access log
+
+PostHog is JavaScript, and the audience this project most wants to count — crawlers, and the
+assistants that quote the site — never runs JavaScript. A request line is the only evidence
+that GPTBot fetched `/llms.txt` or that something pulled a JSON record. So nginx writes one:
+
+```
+2026-08-05T16:43:38+00:00 203.0.113.0 "GET /llms.txt HTTP/1.1" 200 5 "-" "GPTBot/1.2 (+https://openai.com/gptbot)" 0.000
+```
+
+Two details make it worth having. **The address comes from `X-Forwarded-For`, not
+`$remote_addr`** — behind Dokploy's Traefik the latter is the proxy, identical on every line.
+And **it is truncated to the network** (IPv4 /24, IPv6 /64): the log answers "was this a bot
+and what did it fetch", never "who was this", and a truncated address still groups one noisy
+crawler into one line-item.
+
+It goes to two sinks: `/dev/stdout`, so `docker logs` and the Dokploy log pane work as
+before, and `/var/log/site/access.log`, which is the durable one **only if that directory is a
+mounted volume**. Without the mount nginx still writes the file, but it lives in the container
+and dies with it on the next deploy. Not `/var/log/nginx`: the official image symlinks
+`access.log` there to `/dev/stdout`, so a file written to that path would quietly go back to
+the container log — `tests/test_nginx_log.py` guards that trap and the rest of the format.
+
+Nothing in the image rotates it (~200 bytes a request); rotate on the host. Reading it:
+
+```bash
+awk -F'"' '{print $6}' access.log | sort | uniq -c | sort -rn | head   # user-agents by volume
+grep -c '"GET /llms.txt' access.log                              # agent-facing endpoints
 ```
 
 ### Keeping it current (`pipeline drift`)

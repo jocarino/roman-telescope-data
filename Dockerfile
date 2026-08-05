@@ -55,4 +55,13 @@ RUN GH_TOKEN="$GH_TOKEN" uv run python scripts/fetch_data.py \
 FROM nginx:alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /dist /usr/share/nginx/html
+
+# Where the access log lands. NOT /var/log/nginx: the official image symlinks
+# access.log there to /dev/stdout, so a file written to that path would quietly go to the
+# container log again and vanish with it. Mount a host directory or named volume here on
+# the deploy host (Dokploy → Advanced → Volumes → /var/log/site) or the log is still
+# discarded on every deploy — nginx will write it either way, it just won't outlive the
+# container. ~200 bytes per request; rotate on the host, nothing in the image does.
+RUN mkdir -p /var/log/site
+
 EXPOSE 80
