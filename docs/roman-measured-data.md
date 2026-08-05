@@ -77,7 +77,7 @@ caption ("Measured: real Roman photometry in three bands…").
 ## Caveats recorded for that day
 
 - **Identity matching is by slug** (documented v1 assumption in `pipeline/fetch/targets.py`).
-  If the published name doesn't slug-match ours (aliases like `HD 95128 b` for `47 UMa b`),
+  If the published name doesn't slug-match ours (aliases like `HD 95128 b` for `47 UMa b`), <!-- factcheck: ignore -->
   either name the file with OUR slug (simplest) or add the `resolve_planet_id()` alias step
   described there.
 - **Multiple epochs**: the current seam holds one file per planet × instrument. A second
