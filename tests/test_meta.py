@@ -177,6 +177,14 @@ def test_robots_points_at_the_sitemap_only_when_one_exists():
     assert robots_txt(Site()).startswith("User-agent: *\nAllow: /")
 
 
+def test_robots_keeps_the_peek_fragments_out_of_the_index():
+    """The ~5.8k hold-to-peek partials under /fragments/ have no <head> and so nowhere to put a
+    noindex — robots.txt is the only thing keeping a near-duplicate of every planet page out of
+    the index. Nothing on screen breaks if this line is dropped, so it needs an assertion."""
+    for site in (Site(), Site(base_url="https://x.test")):
+        assert "Disallow: /fragments/" in robots_txt(site)
+
+
 # ── hub pages ───────────────────────────────────────────────────────────────────────────
 
 

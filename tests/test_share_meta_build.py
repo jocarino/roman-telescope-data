@@ -233,6 +233,20 @@ def test_robots_txt_points_a_crawler_at_the_sitemap():
     assert "Allow: /" in robots
 
 
+def test_the_built_peek_fragments_are_uncrawlable():
+    """Two things have to hold together for the peek partials to stay out of the index, and
+    neither is visible on screen: robots.txt disallows the directory, and no page links into it
+    with an href (a Disallow'd URL that something links to can still be indexed URL-only). The
+    hold-to-peek gesture fetches them from a `data-peek` attribute, which no crawler follows."""
+    root = _site()
+    assert (root / "fragments" / "peek").is_dir(), "no peek fragments were built"
+    assert "Disallow: /fragments/" in (root / "robots.txt").read_text()
+    linkers = [
+        str(path.relative_to(root)) for path, html in _pages() if 'href="/fragments/' in html
+    ]
+    assert not linkers, f"pages link into /fragments/: {linkers[:5]}"
+
+
 def test_no_sitemap_is_written_without_a_base_url(tmp_path):
     """A sitemap of relative paths is invalid; not publishing one is the honest failure."""
     doc = json.loads(PLANETS_JSON.read_text())
