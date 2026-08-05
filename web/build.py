@@ -65,6 +65,7 @@ from web.meta import (
 )
 from web.modelspace import modelspace_ctx
 from web.og import CardSpec, card_png
+from web.related import build_related, rail_stats
 from web.sky import sky_chart_svg, sky_field_svg
 from web.svg import spectrum_svg
 from web.textures import surface_map_for, surface_maps_js
@@ -311,6 +312,7 @@ def _planet_ctx(
     sky_points: list[tuple[float, float]] | None = None,
     tour_membership: dict[str, list[dict]] | None = None,
     sky_field_urls: tuple[str, str] | None = None,
+    related: list | None = None,
 ) -> dict:
     view = rec.instrument_views[0]
     args = dict(
@@ -370,6 +372,10 @@ def _planet_ctx(
         # here rather than stored, like the lamp above — see web.modelspace. None for records
         # with no spectrum or no equilibrium temperature; the panel then does not render.
         "modelspace": modelspace_ctx(rec),
+        # Where to next: a handful of related planets, by colour / kind / patch of sky. These
+        # are the catalogue's interior edges — without them a planet page's only way onward is
+        # back to a colour hub carrying up to 1,830 links. See web/related.py.
+        "related": related or [],
     }
 
 
@@ -859,8 +865,16 @@ def build(
     # Stream one planet at a time: each context carries two rendered SVG spectra, so
     # materialising all of them first is ~1 GB of strings at 6k planets — enough to push a
     # small VPS into swap during deploy. Peak memory is now one context, not N.
+    related = build_related(records)
+    stats = rail_stats(related)
+    print(
+        f"  related rails: {stats['links']:,} interior links across {stats['planets']:,} "
+        f"planets ({stats['min_per_planet']}-{stats['max_per_planet']} per page)"
+    )
     for rec in records:
-        ctx = _planet_ctx(rec, fiction, sky_points, tour_membership, sky_field_urls)
+        ctx = _planet_ctx(
+            rec, fiction, sky_points, tour_membership, sky_field_urls, related.get(rec.id)
+        )
         pid = rec.id
         (out / "planet" / f"{pid}.html").write_text(
             page_tpl.render(ctx=ctx, meta=planet_meta(rec), site=site, build_id=build_id)

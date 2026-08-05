@@ -705,6 +705,7 @@
   {% if ctx.tours %}{% set _ = secs.append(('sec-tour', 'Guided tour')) %}{% endif %}
   {% if ctx.fiction %}{% set _ = secs.append(('sec-fiction', 'Seen in fiction')) %}{% endif %}
   {% if rec.habitability and ctx.hz_svg %}{% set _ = secs.append(('sec-water', 'Liquid water')) %}{% endif %}
+  {% if ctx.related %}{% set _ = secs.append(('sec-next', 'Where to next')) %}{% endif %}
   {% if secs|length > 1 %}
   <nav class="secnav" :class="stuck ? 'stuck' : ''" x-data="secnav()"
     @scroll.window.passive="onScroll()" aria-label="Jump to a section of this page">
@@ -1235,6 +1236,59 @@
     </ul>
     {% endif %}
   </div>
+  {% endif %}
+
+  {# ── Where to next: the catalogue's interior link graph, made visible.
+
+     Before this, a planet page's only way onward was the "same colour" link back to a hub
+     carrying up to 1,830 anchors — so every one of 5,764 pages was a cul-de-sac for a reader
+     and a single thin edge for a crawler. Each rail here states the fact it is linking on
+     ("Closest in colour"), because a row of unexplained planet names is a related-content
+     widget, and this site does not do those: see web/related.py for how the sets are chosen
+     (rings, so the links are mutual and every planet is on the receiving end of as many as it
+     gives). Renders for every planet in a catalogue large enough to have neighbours. ── #}
+  {% if ctx.related %}
+  <div class="panel next" id="sec-next">
+    <div class="next-head">
+      <h3>Where to next</h3>
+      <span class="next-tag">RELATED WORLDS</span>
+    </div>
+    <p class="next-intro">Each of these shares one stated fact with {{ rec.name }} — a colour,
+      a size class, or a patch of sky. Picked by the data, not by hand.</p>
+    {% for rail in ctx.related %}
+    <nav class="system-strip next-rail" aria-label="{{ rail.label }}">
+      <span class="system-lbl">{{ rail.label|upper }}<span class="next-why"> · {{ rail.blurb }}</span></span>
+      <span class="system-links">
+        {% for p in rail.planets %}
+        <a class="system-planet" href="/planet/{{ p.id }}" title="{{ p.name }} · {{ p.note }}">
+          <span class="system-dot" style="background:{{ p.hex }}"></span>{{ p.name }}</a>
+        {% endfor %}
+      </span>
+    </nav>
+    {% endfor %}
+  </div>
+  <style>
+    .panel.next { margin-top: 16px; padding: 14px; }
+    .next-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+    .next-head h3 { margin: 0; }
+    .next-tag {
+      font-family: var(--mono); font-size: 9.5px; letter-spacing: .7px; color: var(--fg-faint);
+    }
+    .next-intro { margin: 6px 0 2px; font-size: 13px; color: var(--fg-dim); }
+    /* Label on its own line, links under it — the same shape for all three rails. Letting them
+       share a line puts each rail's first planet at a different x, which reads as three
+       unrelated widgets rather than one list with three reasons. */
+    .next-rail .system-lbl { flex-basis: 100%; margin-bottom: -2px; }
+    .next-why { color: var(--fg-faint); font-weight: normal; }
+    @media (max-width: 720px) {
+      /* Vertical space is the scarce thing on a phone: the rail label alone says what the
+         relation is, so the sentence spelling it out is desktop-only. And the strip goes back
+         to label-beside-links, which is what .system-strip already does at this width. */
+      .next-why { display: none; }
+      .next-intro { display: none; }
+      .next-rail .system-lbl { flex-basis: auto; margin-bottom: 0; }
+    }
+  </style>
   {% endif %}
 </div>
 {%- endmacro %}
