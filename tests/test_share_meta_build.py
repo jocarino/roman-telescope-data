@@ -56,9 +56,7 @@ def _site(tmp_root: str = "") -> Path:
 def _pages() -> tuple[tuple[Path, str], ...]:
     root = _site()
     return tuple(
-        (p, p.read_text())
-        for p in sorted(root.rglob("*.html"))
-        if "fragments" not in p.parts
+        (p, p.read_text()) for p in sorted(root.rglob("*.html")) if "fragments" not in p.parts
     )
 
 
@@ -103,8 +101,11 @@ def test_every_page_carries_share_tags():
 def test_title_and_og_title_never_drift():
     """Both now come from the same PageMeta — base.html renders `meta.title` and no template
     overrides the block — so this can no longer drift by a typo. Kept as the guard that says
-    so: re-adding a hand-typed `{% block title %}` to any template turns this red."""
+    so: re-adding a hand-typed `{% block title %}` that disagrees turns this red, and a second
+    literal `<title>` in the head trips the count below (a browser would show the first, an
+    unfurler often the last)."""
     for path, html in _pages():
+        assert len(re.findall(r"<title[\s>]", html)) == 1, f"{path.name}: not exactly one <title>"
         title = _tag(html, r"<title>([^<]*)</title>")
         assert title == _og(html, "title"), f"{path.name}: <title> != og:title"
 

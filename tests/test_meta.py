@@ -2,7 +2,7 @@
 
 The failure this guards against is silent and expensive: a page ships, unfurls as a bare URL
 or a stale description, and nobody notices because nothing is broken on screen. So the checks
-are about agreement (the <title> and og:title come from two different places and must match),
+are about agreement (the <title> and og:title are one `PageMeta.title`, and must stay that way),
 honesty (never imply a colour was photographed), and completeness (every planet page reachable
 by a crawler, since the gallery grid is client-rendered and links to almost none of them).
 """
@@ -12,6 +12,7 @@ from __future__ import annotations
 import re
 import xml.etree.ElementTree as ET
 from dataclasses import replace
+from pathlib import Path
 
 import pytest
 
@@ -119,6 +120,27 @@ def test_descriptions_fit_an_unfurl():
         assert len(planet_description(rec)) <= 300
     for page in static_pages(5764):
         assert len(page.description) <= 300
+
+
+# ── one title, one place ────────────────────────────────────────────────────────────────
+
+
+def test_the_title_is_written_in_exactly_one_template():
+    """Every page template used to override `{% block title %}` with a hand-typed copy of its
+    `PageMeta.title`, so the title existed twice and a rename could leave the two disagreeing.
+    `base.html` now renders `meta.title` and nothing overrides it. The built-page check in
+    tests/test_share_meta_build.py only catches copies that *disagree*; this catches the
+    duplication itself, and runs without a fetched data release."""
+    templates = Path("web/templates")
+    overriding = sorted(
+        p.relative_to(templates).as_posix()
+        for p in templates.rglob("*.html")
+        if re.search(r"{%-?\s*block\s+title\b", p.read_text())
+    )
+    assert overriding == ["base.html"], f"title also written in {overriding}"
+    # Comments in base.html talk about the tag, so strip `{# … #}` before counting it.
+    head = re.sub(r"{#.*?#}", "", (templates / "base.html").read_text(), flags=re.S)
+    assert len(re.findall(r"<title[\s>]", head)) == 1
 
 
 # ── absolute vs relative URLs ───────────────────────────────────────────────────────────
