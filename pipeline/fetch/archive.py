@@ -13,7 +13,10 @@ import math
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
+
+from pipeline import provenance
 
 _TAP_URL = "https://exoplanetarchive.ipac.caltech.edu/TAP/sync"
 _CACHE_DIR = Path("data/cache")
@@ -145,19 +148,73 @@ def _cache_path(query: str) -> Path:
     return _CACHE_DIR / f"tap_{digest}.json"
 
 
+def _cache_meta_path(query: str) -> Path:
+    """Sidecar recording WHEN a cached response was fetched. A cache hit must not inherit the
+    build's timestamp — a rebuild today off a two-month-old cache is a two-month-old snapshot,
+    and `pipeline.provenance` reports it as one. Kept beside the payload rather than wrapped
+    around it so caches written before this existed stay readable."""
+    return _cache_path(query).with_suffix(".meta.json")
+
+
+def _cached_fetched_at(query: str, cache: Path) -> tuple[str, str]:
+    """(timestamp, how we know it) for an existing cache entry."""
+    meta = _cache_meta_path(query)
+    if meta.exists():
+        try:
+            recorded = json.loads(meta.read_text()).get("fetched_at")
+        except (OSError, json.JSONDecodeError):
+            recorded = None
+        if recorded:
+            return str(recorded), provenance.FETCHED_AT_RECORDED
+    try:
+        mtime = datetime.fromtimestamp(cache.stat().st_mtime, UTC)
+    except OSError:
+        return "", provenance.FETCHED_AT_UNKNOWN
+    return mtime.replace(microsecond=0).isoformat(), provenance.FETCHED_AT_CACHE_MTIME
+
+
 def _run_query(query: str, *, use_cache: bool = True) -> list[dict]:
     cache = _cache_path(query)
     if use_cache and cache.exists():
-        return json.loads(cache.read_text())
+        rows = json.loads(cache.read_text())
+        fetched_at, source = _cached_fetched_at(query, cache)
+        _record(query, rows, fetched_at=fetched_at, source=source, from_cache=True)
+        return rows
     params = urllib.parse.urlencode(
         {"request": "doQuery", "lang": "ADQL", "format": "json", "query": query}
     )
     url = f"{_TAP_URL}?{params}"
     with urllib.request.urlopen(url, timeout=60) as resp:  # noqa: S310 (trusted host)
         payload = json.loads(resp.read().decode())
+    fetched_at = datetime.now(UTC).replace(microsecond=0).isoformat()
     _CACHE_DIR.mkdir(parents=True, exist_ok=True)
     cache.write_text(json.dumps(payload, indent=2))
+    _cache_meta_path(query).write_text(
+        json.dumps({"query": query, "fetched_at": fetched_at}, indent=2)
+    )
+    _record(
+        query,
+        payload,
+        fetched_at=fetched_at,
+        source=provenance.FETCHED_AT_RECORDED,
+        from_cache=False,
+    )
     return payload
+
+
+def _record(
+    query: str, rows: object, *, fetched_at: str, source: str, from_cache: bool
+) -> None:
+    """Hand the query to the provenance collector so it reaches the file header verbatim."""
+    provenance.record_query(
+        service=_TAP_URL,
+        table=TABLE,
+        adql=query,
+        fetched_at=fetched_at,
+        fetched_at_source=source,
+        rows=len(rows) if isinstance(rows, list) else 0,
+        from_cache=from_cache,
+    )
 
 
 def run_adql(query: str, *, use_cache: bool = False) -> list[dict]:

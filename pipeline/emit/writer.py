@@ -6,6 +6,7 @@ from pathlib import Path
 
 from pipeline.config import GRID_ID, INSTRUMENTS, SCHEMA_VERSION, Instrument
 from pipeline.models import BandpassHeader, InstrumentHeader, PlanetRecord, PlanetsFile
+from pipeline.provenance import build_provenance
 from pipeline.rights import RIGHTS
 
 DEFAULT_OUT = Path("data/planets.json")
@@ -42,6 +43,9 @@ def write_planets(records: list[PlanetRecord], generated_at: str, out: Path = DE
         generated_at=generated_at,
         instruments=[_instrument_header(i) for i in INSTRUMENTS.values()],
         rights=RIGHTS.as_dict(),
+        provenance=build_provenance(
+            planet_count=len(records), generated_at=generated_at
+        ).as_dict(),
         planets=records,
     )
     out.parent.mkdir(parents=True, exist_ok=True)

@@ -122,4 +122,11 @@ PIPELINE_VERSION = "0.1.0"
 # colour and delta_e2000 changed. The real fix is that the emitted file header now carries the
 # instrument band set itself (see pipeline/rights.py and pipeline/emit/writer.py), so a reader
 # can tell two releases apart without trusting a version number.
+#
+# Also NOT a bump, deliberately: on 2026-08-05 the header gained a `provenance` block (the git
+# commit that built the file, and every TAP query behind it with the timestamp of the response
+# actually used). It is header-only and purely additive -- no record changed shape -- and this
+# number is part of the per-record cache key (pipeline/emit/cache.py), so bumping it would force
+# a full rebuild of every planet to announce a change no record made. The point of that block is
+# precisely that the file no longer needs a version number to say what it was built from.
 SCHEMA_VERSION = 5

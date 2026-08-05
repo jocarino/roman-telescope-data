@@ -175,12 +175,16 @@ jobs:
         id: release
         run: |
           tag="data-$(date -u +%Y%m%d-%H%M)"
+          # Same stamp scripts/release-data.sh applies: the tag is chosen here, after the
+          # build, so the file can only learn its own release name at this point.
+          python3 scripts/stamp_release_tag.py data/planets.json "$tag"
           schema=$(python3 -c "import json;print(json.load(open('data/planets.json'))['schema_version'])")
           size=$(python3 -c "import os;print(f'{os.path.getsize(\"data/planets.json\")/1e6:.1f}')")
+          snapshot=$(python3 -c "import json;p=json.load(open('data/planets.json')).get('provenance',{});print(p.get('upstream',{}).get('snapshot_at') or 'unknown')")
           gh release create "$tag" data/planets.json data/manifest.json \
             --draft \
             --title "Planet data $tag" \
-            --notes "planets.json: ${PLANET_COUNT} planets, schema v${schema}, ${size} MB. Built by the catalogue-refresh workflow; consumed by the deploy build via scripts/fetch_data.py. manifest.json is the drift probe's next baseline. **Draft — publish it when you merge the data/RELEASE PR, or the deploy cannot fetch the data.**"
+            --notes "planets.json: ${PLANET_COUNT} planets, schema v${schema}, ${size} MB. Built by the catalogue-refresh workflow at commit \`${GITHUB_SHA:0:12}\` from an Exoplanet Archive snapshot of ${snapshot} — \`pscomppars\` is a live table, so that timestamp, not the schema version, is what makes two releases comparable. The same values travel inside the file, under \`provenance\`. Consumed by the deploy build via scripts/fetch_data.py. manifest.json is the drift probe's next baseline. **Draft — publish it when you merge the data/RELEASE PR, or the deploy cannot fetch the data.**"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Open the data/RELEASE PR

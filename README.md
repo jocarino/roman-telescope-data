@@ -489,6 +489,30 @@ awk -F'"' '{print $6}' access.log | sort | uniq -c | sort -rn | head   # user-ag
 grep -c '"GET /llms.txt' access.log                              # agent-facing endpoints
 ```
 
+### The file describes itself (`provenance`)
+
+A downloaded `planets.json` travels far from this repo, so everything needed to interpret it
+rides **inside the file**: `rights` (licence, sources, the Archive acknowledgement we owe —
+`pipeline/rights.py`), `instruments` (the exact bandpasses behind `instrument_views`), and
+`provenance` (`pipeline/provenance.py`).
+
+`provenance` exists because the three version numbers people reach for identify the wrong
+things. `schema_version` describes the record *shape* — it cannot express a change of input
+data, and it stays put when one happens. `pipeline_version` is hand-maintained. The release
+tag names a publication. Meanwhile `pscomppars` is a **live table**: rows are added and values
+revised continuously, so two releases a month apart are built from different data with every
+version number matching. The block records what actually pins a build down:
+
+- `code.commit` — the git commit the pipeline ran at, and whether the tree was dirty.
+- `upstream.queries` — every TAP query behind the build, **verbatim**, each with the timestamp
+  of the response actually used.
+- `upstream.snapshot_at` — the oldest of those. A file is only as fresh as its stalest input,
+  so a rebuild off a two-month-old `data/cache` is a two-month-old snapshot and says so
+  instead of inheriting `generated_at`. (Cache entries carry a `.meta.json` sidecar with their
+  fetch time; entries predating it fall back to file mtime, labelled `cache-mtime`.)
+- `release_tag` — stamped in at publish time by `scripts/stamp_release_tag.py`, since the tag
+  is chosen after the build. Null in a locally built file, which is itself informative.
+
 ### Keeping it current (`pipeline drift`)
 
 You don't have to remember any of that. `.github/workflows/catalogue.yml` probes the Archive
