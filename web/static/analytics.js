@@ -28,9 +28,17 @@
 
   var cfg = window.EXO_ANALYTICS;
   var ph = window.posthog;
+
+  // Campaign tags come off the URL once the pageview has carried them, so a URL copied out of
+  // the address bar and re-posted doesn't credit its new audience to the old channel. When
+  // there is no pageview coming there is nothing to wait for, so strip immediately.
+  function stripCampaign() {
+    if (window.ExoCampaign) window.ExoCampaign.strip();
+  }
+
   // No key, or the library was blocked (ad blockers take it out routinely, which is fine and
   // must stay silent). Leaving window.exoTrack undefined makes every call site a no-op.
-  if (!cfg || !cfg.key || !ph || typeof ph.init !== "function") return;
+  if (!cfg || !cfg.key || !ph || typeof ph.init !== "function") { stripCampaign(); return; }
 
   try {
     ph.init(cfg.key, {
@@ -44,7 +52,22 @@
       person_profiles: "identified_only",
     });
   } catch (e) {
+    stripCampaign();
     return;
+  }
+
+  // Wait for the pageview EVENT, not for init() to return: PostHog captures it from a
+  // `setTimeout(…, 1)` inside its own loader, so anything synchronous here still runs first
+  // and would delete ?utm_source= a millisecond before the pageview read it. `eventCaptured`
+  // fires as the event is built, with the campaign properties already on it. If an older
+  // library has no `on`, the tag simply stays in the URL — attribution is intact either way,
+  // and that is the half that can't be recovered afterwards.
+  if (typeof ph.on === "function") {
+    var off = ph.on("eventCaptured", function (e) {
+      if (!e || e.event !== "$pageview") return;
+      if (off) off();
+      stripCampaign();
+    });
   }
 
   var timers = {};
