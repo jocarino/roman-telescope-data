@@ -1,11 +1,21 @@
 """Guard the nginx compression settings the deployed site depends on.
 
-`gzip_proxied any` is the load-bearing one. nginx defaults it to "off", which means it
+`gzip_proxied any` is the one worth pinning. nginx defaults it to "off", which means it
 SKIPS compression for any request carrying a Via header — i.e. one forwarded by a reverse
-proxy. Production sits behind Dokploy's Traefik, so if this line is ever "tidied" away
-every gallery visitor pulls the ~2.8 MB raw planet index instead of ~0.5 MB gzipped, and
-nothing in the site's own output looks wrong. The file explains why in a comment; this
-test makes deleting the comment insufficient to delete the behaviour.
+proxy.
+
+Measured 2026-08-05 with Traefik v3.3 terminating TLS in front of this exact config:
+Traefik forwards X-Forwarded-Proto/For but no Via, so the default would still compress
+today — the risk is conditional, not live. It is worth pinning anyway, because the same
+run showed the failure is total and silent: with the default, adding a single Via header
+sent a 1.3 MB response out raw, Traefik passed the uncompressed body straight through
+without compressing on nginx's behalf, and nothing in the site's own output looked wrong.
+At production size that is the ~2.8 MB planet index instead of ~0.5 MB.
+
+The file explains this in a comment; this test makes deleting the comment insufficient to
+delete the behaviour. Note the limit: it reads the file, not the wire. It cannot see a
+platform-level override, and TLS is none of its business — Traefik terminates HTTPS and
+nginx only ever listens on plain :80.
 """
 
 from __future__ import annotations
