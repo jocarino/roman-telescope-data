@@ -192,8 +192,8 @@ places from that one source:
   hover, tap or keyboard focus. Events are delegated, so terms inside fetched peek fragments work too.
   Use `g()` for **terms**; keep the `[i]` info buttons for **controls** (knobs, view switches).
 - **All together.** `/glossary` lists every term grouped by topic, searchable and deep-linkable
-  (`/glossary#quadrature`). It is deliberately **not linked from the nav** — you reach it by URL,
-  or by hovering a marked term.
+  (`/glossary#quadrature`). It is deliberately **kept out of the gallery toolbar** — you reach it
+  by hovering a marked term, by URL, or from the site footer.
 
 `tests/test_glossary.py` fails if a template marks a term the glossary doesn't define, so the
 two can't drift. Only the short tooltip text ships to every page (`glossary.terms.<build>.js`,
@@ -213,8 +213,23 @@ Add a source to the pipeline and it appears here on the next build — `tests/te
 fails if one does not, if a source has no plain-English line, or if the acknowledgement is ever
 paraphrased. `LICENSE-DATA` is the same list for humans and for machine-readable terms.
 
-Linked from the gallery's Explore menu, `/how`, `/roman`, and every planet page's provenance
-panel — unlike `/glossary`, this one is in the nav.
+Linked from the gallery's Explore menu, `/how`, `/roman`, every planet page's provenance panel,
+and the site footer.
+
+### The site footer (`web/templates/base.html`)
+
+The site had none, so every page but the 404 and the tour end-card stopped dead with `←
+ALL PLANETS` as its only exit. One compact footer now renders from `base.html` — the honesty
+line, four destinations (gallery, `/how`, `/credits`, `/glossary`), the licence and the repo.
+
+It lives in the base template rather than a macro each page opts into, because the failure was
+pages *forgetting*: a page cannot opt out of its own base. Its licence and repo URLs are Jinja
+globals set in `web/build._env()` from `pipeline.rights`, so the licence the footer offers and
+the one stamped into `planets.json` are the same fact. `tests/test_footer.py` checks the built
+`dist/` — every hub page and planet page carries it, and every destination it names exists.
+
+One known limit: the gallery is an infinite scroll, so its own footer sits below 5,764 cards.
+That page has the Explore menu, which carries the same links.
 
 ### Previewing several worktrees at once (`tools/exohub.py`)
 

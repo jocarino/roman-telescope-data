@@ -45,6 +45,7 @@ from pipeline.illuminant.blackbody import SUN
 from pipeline.models import PaletteStopModel, PlanetRecord, PlanetsFile
 from pipeline.palette.derive import derive_palette_from_hex
 from pipeline.palette.export import ase_bytes
+from pipeline.rights import RIGHTS
 from pipeline.roman_board import resolve as resolve_board
 from pipeline.sky import format_dec, format_ra
 from pipeline.tours import Tour, TourStop
@@ -271,12 +272,18 @@ def _cockpit_instruments(records: list[PlanetRecord]) -> dict:
 
 
 def _env() -> Environment:
-    return Environment(
+    env = Environment(
         loader=FileSystemLoader(_TEMPLATES),
         autoescape=select_autoescape(["html"]),
         trim_blocks=True,
         lstrip_blocks=True,
     )
+    # Globals, so base.html's footer renders on every page without each caller remembering to
+    # pass them. Both come from pipeline.rights rather than being typed here: the licence the
+    # footer offers and the licence stamped into planets.json are then the same fact.
+    env.globals["licence_url"] = RIGHTS.derived_licence
+    env.globals["repo_url"] = RIGHTS.full_text.split("/blob/")[0]
+    return env
 
 
 # PostHog EU cloud. `api_host` is where events go; the assets host serves the library itself

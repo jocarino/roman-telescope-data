@@ -89,6 +89,31 @@
 <body class="{% block bodyclass %}{% endblock %}">
   <div class="wrap">
     {% block content %}{% endblock %}
+
+    {# The site wrapper. It lives HERE rather than in a macro each page opts into, because the
+       problem it fixes is pages forgetting: before this, every page except the tour end-card
+       and the 404 ended in a dead stop, and the only way out was "← ALL PLANETS".
+
+       Four destinations, no cleverness. The honesty line comes first because it is the one
+       sentence that should be on every page of this site whether or not anyone scrolls to it,
+       and the licence sits beside the repo because someone who scrolled this far is the person
+       most likely to want to reuse a colour.
+
+       One known limit: the gallery is an infinite scroll, so its own footer is a long way
+       down — which is why the same links also live in that page's Explore menu. #}
+    <footer class="site-foot">
+      <p class="foot-honest">Every colour here is <b>modelled</b>, not photographed —
+        computed from physics, never a picture of the planet.</p>
+      <nav class="foot-nav" aria-label="Site">
+        <a href="/"><i class="foot-gl" aria-hidden="true">◧</i>All planets</a>
+        <a href="/how"><i class="foot-gl" aria-hidden="true">λ</i>How the colours work</a>
+        <a href="/credits"><i class="foot-gl" aria-hidden="true">§</i>Sources &amp; credits</a>
+        <a href="/glossary"><i class="foot-gl" aria-hidden="true">A–Z</i>Glossary</a>
+      </nav>
+      <p class="foot-meta">Exoplanet Palette ·
+        <a href="{{ licence_url }}" rel="license noopener" target="_blank">CC BY 4.0</a> ·
+        <a href="{{ repo_url }}" rel="noopener" target="_blank">GitHub ↗</a></p>
+    </footer>
   </div>
 </body>
 </html>
