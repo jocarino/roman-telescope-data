@@ -1,0 +1,1049 @@
+<?xml version='1.0' encoding='utf-8'?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:ns0="http://www.w3.org/2005/Atom" xmlns:ns1="http://purl.org/rss/1.0/modules/syndication/" xmlns:ns3="http://purl.org/rss/1.0/modules/content/" version="2.0">
+
+<channel>
+	<title>NASA</title>
+	<ns0:link href="https://www.nasa.gov/feed/" rel="self" type="application/rss+xml" />
+	<link>https://www.nasa.gov</link>
+	<description>Official National Aeronautics and Space Administration Website</description>
+	<lastBuildDate>Wed, 05 Aug 2026 16:03:27 +0000</lastBuildDate>
+	<language>en-US</language>
+	<ns1:updatePeriod>
+	hourly	</ns1:updatePeriod>
+	<ns1:updateFrequency>
+	1	</ns1:updateFrequency>
+	<generator>https://wordpress.org/?v=7.0.2</generator>
+	<item>
+		<title>NASA’s Perseverance Rover Watches Earth Vanish Behind Martian Moon</title>
+		<link>https://www.nasa.gov/solar-system/planets/mars/nasas-perseverance-rover-watches-earth-vanish-behind-martian-moon/</link>
+		
+		<dc:creator>Stephen Carney</dc:creator>
+		<pubDate>Wed, 05 Aug 2026 15:25:27 +0000</pubDate>
+				<category>Mars</category>
+		<category>Earth</category>
+		<category>Jet Propulsion Laboratory</category>
+		<category>Perseverance (Rover)</category>
+		<category>Phobos</category>
+		<category>Planetary Science</category>
+		<category>The Solar System</category>
+		<guid isPermaLink="false">https://www.nasa.gov/?p=1034946</guid>
+
+					<description>Earth and the Martian moon Phobos dance together in a series of images recently acquired by NASA’s Perseverance Mars rover. Earth appears as a point of light in the Martian sky, disappearing behind the crescent of Phobos, the larger of Mars’ two moons. This is the first time humanity has captured from the surface of [&amp;#8230;]</description>
+										<ns3:encoded>&lt;div id="" class="padding-top-5 padding-bottom-3 width-full maxw-full hds-module hds-module-full alignfull wp-block-nasa-blocks-article-intro"&gt;&lt;div class="width-full maxw-full article-header"&gt;&lt;div class="margin-bottom-2 width-full maxw-full"&gt;&lt;p class="label carbon-60 margin-0 margin-bottom-3 padding-0"&gt;3 min read&lt;/p&gt;&lt;h1 class="display-48 margin-bottom-2"&gt;Preparations for Next Moonwalk Simulations Underway (and Underwater)&lt;/h1&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div id="" class="hds-image-carousel grid-container grid-container-block padding-top-4 padding-bottom-4 hds-module hds-module-full alignfull wp-block-nasa-blocks-image-carousel"&gt;		&lt;div id="carousel-wrapper-carousel-6a736fdcd145a" class="hds-carousel-wrapper"&gt;
+			&lt;div class="image-carousel-slider margin-0" id="image-carousel-slider-carousel-6a736fdcd145a"
+				data-client-id="carousel-6a736fdcd145a"
+				data-variation="carousel"
+				data-autoplay="" 
+				data-autoplay-speed="2000" 
+				data-play-pause="" 
+				data-transition-type="slide"
+				data-progress=""
+				data-progress-labels=""
+				data-start-label="Start"
+				data-end-label="End"
+				data-labels-initialized="true"&gt;
+												&lt;div class="display-block width-full" data-label=""&gt;
+								&lt;figure class="margin-0"&gt;
+									&lt;div class="hds-cover-wrapper hds-image-carousel-slide margin-bottom-2"&gt;
+									&lt;div class="hds-media-wrapper margin-left-auto margin-right-auto"&gt;&lt;figure class="hds-media-inner hds-cover-wrapper hds-media-ratio-cover "&gt;&lt;img fetchpriority="high" decoding="async" width="1024" height="576" src="https://www.nasa.gov/wp-content/uploads/2026/08/1-pia26758-figure-a-inset-16x9-1.jpg?w=1024" class="attachment-large size-large" alt="A desolate landscape with a dark horizon sits under a hazy, gray-blue sky. A large rectangular inset in the sky, connected by lines to a smaller rectangle, shows a sequence of five faint crescent shapes with a tiny bright dot moving downward." style="transform: scale(1); transform-origin: 44% 0%; object-position: 44% 0%; object-fit: cover;" block_context="nasa-block" loading="eager" srcset="https://www.nasa.gov/wp-content/uploads/2026/08/1-pia26758-figure-a-inset-16x9-1.jpg 3653w, https://www.nasa.gov/wp-content/uploads/2026/08/1-pia26758-figure-a-inset-16x9-1.jpg?resize=300,169 300w, https://www.nasa.gov/wp-content/uploads/2026/08/1-pia26758-figure-a-inset-16x9-1.jpg?resize=768,432 768w, https://www.nasa.gov/wp-content/uploads/2026/08/1-pia26758-figure-a-inset-16x9-1.jpg?resize=1024,576 1024w, https://www.nasa.gov/wp-content/uploads/2026/08/1-pia26758-figure-a-inset-16x9-1.jpg?resize=1536,864 1536w, https://www.nasa.gov/wp-content/uploads/2026/08/1-pia26758-figure-a-inset-16x9-1.jpg?resize=2048,1152 2048w, https://www.nasa.gov/wp-content/uploads/2026/08/1-pia26758-figure-a-inset-16x9-1.jpg?resize=400,225 400w, https://www.nasa.gov/wp-content/uploads/2026/08/1-pia26758-figure-a-inset-16x9-1.jpg?resize=600,338 600w, https://www.nasa.gov/wp-content/uploads/2026/08/1-pia26758-figure-a-inset-16x9-1.jpg?resize=900,506 900w, https://www.nasa.gov/wp-content/uploads/2026/08/1-pia26758-figure-a-inset-16x9-1.jpg?resize=1200,675 1200w, https://www.nasa.gov/wp-content/uploads/2026/08/1-pia26758-figure-a-inset-16x9-1.jpg?resize=2000,1125 2000w" sizes="auto, (max-width: 1024px) 100vw, 1024px" /&gt;&lt;/figure&gt;&lt;figcaption class="hds-caption padding-y-2"&gt;&lt;div class="hds-caption-text p-sm margin-0"&gt;This annotated composite of nine images taken by Perseverance’s Mastcam-Z on July 2, 2026, shows Earth — the small bright dot moving from upper left to lower right — passing behind the Martian moon Phobos. The images in the inset were captured from the same rectangular patch of sky outlined in black.&lt;/div&gt;&lt;div class="hds-credits"&gt;NASA/JPL-Caltech/ASU/MSSS/SSI&lt;/div&gt;&lt;/figcaption&gt;&lt;/div&gt;									&lt;/div&gt;
+								&lt;/figure&gt;
+							&lt;/div&gt;
+													&lt;div class="display-block width-full" data-label=""&gt;
+								&lt;figure class="margin-0"&gt;
+									&lt;div class="hds-cover-wrapper hds-image-carousel-slide margin-bottom-2"&gt;
+									&lt;div class="hds-media-wrapper margin-left-auto margin-right-auto"&gt;&lt;figure class="hds-media-inner hds-cover-wrapper hds-media-ratio-cover "&gt;&lt;img decoding="async" width="1024" height="576" src="https://www.nasa.gov/wp-content/uploads/2026/08/2-pia26758-figure-b-timecode-16x9-1.jpg?w=1024" class="attachment-large size-large" alt="A dark horizon under a hazy gray-blue sky. A red-outlined rectangular inset, connected by lines to a smaller rectangle, shows five faint crescent shapes with a bright dot moving downward. Timecodes beneath each crescent indicate a span of 40 seconds." style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" block_context="nasa-block" loading="lazy" srcset="https://www.nasa.gov/wp-content/uploads/2026/08/2-pia26758-figure-b-timecode-16x9-1.jpg 3653w, https://www.nasa.gov/wp-content/uploads/2026/08/2-pia26758-figure-b-timecode-16x9-1.jpg?resize=300,169 300w, https://www.nasa.gov/wp-content/uploads/2026/08/2-pia26758-figure-b-timecode-16x9-1.jpg?resize=768,432 768w, https://www.nasa.gov/wp-content/uploads/2026/08/2-pia26758-figure-b-timecode-16x9-1.jpg?resize=1024,576 1024w, https://www.nasa.gov/wp-content/uploads/2026/08/2-pia26758-figure-b-timecode-16x9-1.jpg?resize=1536,864 1536w, https://www.nasa.gov/wp-content/uploads/2026/08/2-pia26758-figure-b-timecode-16x9-1.jpg?resize=2048,1152 2048w, https://www.nasa.gov/wp-content/uploads/2026/08/2-pia26758-figure-b-timecode-16x9-1.jpg?resize=400,225 400w, https://www.nasa.gov/wp-content/uploads/2026/08/2-pia26758-figure-b-timecode-16x9-1.jpg?resize=600,338 600w, https://www.nasa.gov/wp-content/uploads/2026/08/2-pia26758-figure-b-timecode-16x9-1.jpg?resize=900,506 900w, https://www.nasa.gov/wp-content/uploads/2026/08/2-pia26758-figure-b-timecode-16x9-1.jpg?resize=1200,675 1200w, https://www.nasa.gov/wp-content/uploads/2026/08/2-pia26758-figure-b-timecode-16x9-1.jpg?resize=2000,1125 2000w" sizes="auto, (max-width: 1024px) 100vw, 1024px" /&gt;&lt;/figure&gt;&lt;figcaption class="hds-caption padding-y-2"&gt;&lt;div class="hds-caption-text p-sm margin-0"&gt;The timecode annotations in the inset show the local solar time on Mars during which five individual images of the occultation were captured by NASA’s Perseverance on July 2, 2026. Earth disappears — and then reappears — behind the Martian moon Phobos.&lt;/div&gt;&lt;div class="hds-credits"&gt;NASA/JPL-Caltech/ASU/MSSS/SSI&lt;/div&gt;&lt;/figcaption&gt;&lt;/div&gt;									&lt;/div&gt;
+								&lt;/figure&gt;
+							&lt;/div&gt;
+									&lt;/div&gt;
+			&lt;div class="hds-carousel-nav display-flex margin-left-auto margin-right-0" data-carousel-id="image-carousel-slider-carousel-6a736fdcd145a"&gt;
+				&lt;button class="hds-carousel-nav-arrow hds-carousel-arrow-prev"&gt;
+					&lt;svg version="1.1" x="0px" y="0px" width="9px" height="9px" viewBox="0 0 9 9"&gt;&lt;path class="st0" d="M3.5,4.5l3.7-3.6L6.3,0L1.8,4.5L6.3,9l0.9-0.9L3.5,4.5z"&gt;&lt;/path&gt;&lt;/svg&gt;
+				&lt;/button&gt;
+							&lt;button class="hds-carousel-nav-arrow hds-carousel-arrow-next margin-right-0"&gt;
+					&lt;svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="9px" height="9px" viewBox="0 0 9 9"&gt;&lt;path class="st0" d="M5.5,4.5L1.8,8.1L2.7,9l4.5-4.5L2.7,0L1.8,0.9L5.5,4.5z"&gt;&lt;/path&gt;&lt;/svg&gt;
+				&lt;/button&gt;
+			&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;/div&gt;
+
+
+&lt;p class="wp-block-paragraph"&gt;Earth and the Martian moon Phobos dance together in a series of images recently acquired by NASA’s Perseverance Mars rover. Earth appears as a point of light in the Martian sky, disappearing behind the crescent of Phobos, the larger of Mars’ two moons.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;This is the first time humanity has captured from the surface of another planet an observation of Earth disappearing behind an object.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;The image sequence was taken by the rover’s &lt;a href="https://science.nasa.gov/mission/mars-2020-perseverance/science-instruments/" rel="noopener"&gt;Mastcam-Z&lt;/a&gt; instrument at about 7 p.m. local solar time (the Martian evening time where the rover is located) on July 2, the 1,907th Martian day, or sol, of the mission. In the composite image, Earth travels from the upper left of the frame toward the lower right while Phobos, moving from lower left to upper right, sweeps across its path. In the third frame of the sequence, the two meet, and our planet winks out behind the little moon’s shadowed edge.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;“The composite image makes for a unique Earth self-portrait, taken from the surface of another planet, with a Phobos photobomb,” said Justin Maki, the Mastcam-Z deputy principal investigator and imaging scientist for Perseverance at NASA’s Jet Propulsion Laboratory in Southern California.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;From where Perseverance sits on the rim of Mars’ Jezero Crater, the two objects could hardly look more different. Phobos, a &lt;a href="https://www.jpl.nasa.gov/images/pia26248-perseverance-views-a-transit-of-phobos/" rel="noopener"&gt;lumpy, potato-shaped moon&lt;/a&gt; about 17 miles (27 kilometers) across at its widest, orbits so close to Mars (4,850 miles, or 7,800 kilometers, away) that when the images were taken, Phobos appears roughly one-third the width of Earth’s Moon as seen from our planet. Some 195 million miles (314 million kilometers) away at the time, Earth is reduced to a single, pixel-size dot.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;“Phobos crosses the Martian sky three times a day, and Earth is visible for months at a stretch, but catching one directly behind the other takes planning and a little luck,” said Mark Lemmon, a Mastcam-Z co-investigator at the Space Science Institute in Boulder, Colorado, who planned the observation and assembled the composite.&lt;/p&gt;
+
+
+&lt;div id="" class="hds-media hds-module wp-block-image"&gt;&lt;div class="margin-left-auto margin-right-auto nasa-block-align-inline"&gt;&lt;div class="hds-media-wrapper margin-left-auto margin-right-auto"&gt;&lt;figure class="hds-media-inner hds-cover-wrapper hds-media-ratio-fit "&gt;&lt;a href="https://www.nasa.gov/wp-content/uploads/2026/08/e1-pia26758-phobos-earth-1907-cropped.jpg"&gt;&lt;img decoding="async" width="1535" height="333" src="https://www.nasa.gov/wp-content/uploads/2026/08/e1-pia26758-phobos-earth-1907-cropped.jpg?w=1535" class="attachment-2048x2048 size-2048x2048" alt="A grainy black image showing a horizontal sequence of seven faint crescent shapes evenly spaced from left to right. A tiny bright white dot moves diagonally from the upper left to the lower right, appearing to pass behind the crescent shapes." style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" block_context="nasa-block" loading="lazy" srcset="https://www.nasa.gov/wp-content/uploads/2026/08/e1-pia26758-phobos-earth-1907-cropped.jpg 1535w, https://www.nasa.gov/wp-content/uploads/2026/08/e1-pia26758-phobos-earth-1907-cropped.jpg?resize=300,65 300w, https://www.nasa.gov/wp-content/uploads/2026/08/e1-pia26758-phobos-earth-1907-cropped.jpg?resize=768,167 768w, https://www.nasa.gov/wp-content/uploads/2026/08/e1-pia26758-phobos-earth-1907-cropped.jpg?resize=1024,222 1024w, https://www.nasa.gov/wp-content/uploads/2026/08/e1-pia26758-phobos-earth-1907-cropped.jpg?resize=400,87 400w, https://www.nasa.gov/wp-content/uploads/2026/08/e1-pia26758-phobos-earth-1907-cropped.jpg?resize=600,130 600w, https://www.nasa.gov/wp-content/uploads/2026/08/e1-pia26758-phobos-earth-1907-cropped.jpg?resize=900,195 900w, https://www.nasa.gov/wp-content/uploads/2026/08/e1-pia26758-phobos-earth-1907-cropped.jpg?resize=1200,260 1200w" sizes="auto, (max-width: 1535px) 100vw, 1535px" /&gt;&lt;/a&gt;&lt;/figure&gt;&lt;figcaption class="hds-caption padding-y-2"&gt;&lt;div class="hds-caption-text p-sm margin-0"&gt;This composite of seven images of Earth passing behind the Martian moon Phobos was acquired from data taken on July 2, 2026, 1,907th Martian day, or sol, of the mission. The black background is the result of image processing that removed extraneous light in the background to enhance detail.&lt;/div&gt;&lt;div class="hds-credits"&gt;NASA/JPL-Caltech/ASU/MSSS/SSI&lt;/div&gt;&lt;/figcaption&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+
+
+&lt;h2 class="wp-block-heading"&gt;&lt;strong&gt;Transits, occultations, eclipses&lt;/strong&gt;&lt;/h2&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;Astronomers call the event captured in this observation an occultation: when a larger-appearing body completely blocks the one behind it from the viewer’s standpoint. By contrast, an eclipse occurs when one object moves into the shadow of another. When the Moon passes through Earth’s shadow, it’s called a lunar eclipse; when one object that appears to be the same size as another blocks it, like when the Moon passes before the Sun, it’s known as a solar eclipse.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;When the roles are reversed, with a smaller-looking object crossing the face of a larger-looking one, astronomers call that a transit. Perseverance has &lt;a href="https://www.jpl.nasa.gov/images/pia26380-perseverance-captures-transit-of-phobos/" rel="noopener"&gt;observed&lt;/a&gt; those, too: when Phobos or Deimos crosses the disk of the Sun as seen from Mars. These are sometimes described informally as “Martian solar eclipses.”&lt;/p&gt;
+
+
+
+&lt;h2 class="wp-block-heading"&gt;&lt;strong&gt;More about Perseverance&lt;/strong&gt;&lt;/h2&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;NASA’s Jet Propulsion Laboratory in Southern California, which is managed by Caltech, built and manages operations of the Perseverance rover on behalf of the agency’s Science Mission Directorate in Washington, as part of NASA’s Mars Exploration Program portfolio. Arizona State University leads the operations of the rover’s Mastcam-Z instrument, working in collaboration with Malin Space Science Systems in San Diego, on the design, fabrication, testing, and operation of the cameras.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;For more about Perseverance:&lt;/p&gt;
+
+
+
+&lt;p class="has-text-align-center wp-block-paragraph"&gt;&lt;a href="https://science.nasa.gov/mission/mars-2020-perseverance" target="_blank" rel="noreferrer noopener"&gt;&lt;strong&gt;https://science.nasa.gov/mission/mars-2020-perseverance&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;&lt;strong&gt;News Media Contacts&lt;/strong&gt;&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;DC Agle &amp;nbsp;&lt;br&gt;Jet Propulsion Laboratory, Pasadena, Calif.&lt;br&gt;818-393-9011 &lt;br&gt;&lt;a href="mailto:agle@jpl.nasa.gov" target="_blank" rel="noreferrer noopener"&gt;agle@jpl.nasa.gov&lt;/a&gt;&amp;nbsp;&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;Karen Fox&amp;nbsp;/ Alana Johnson &lt;br&gt;NASA&amp;nbsp;Headquarters, Washington&amp;nbsp;&lt;br&gt;240-285-5155&amp;nbsp;/ 202-672-4780 &lt;br&gt;&lt;a href="mailto:karen.c.fox@nasa.gov" target="_blank" rel="noreferrer noopener"&gt;karen.c.fox@nasa.gov&lt;/a&gt;&amp;nbsp;/&amp;nbsp;&lt;a href="mailto:alana.r.johnson@nasa.gov" target="_blank" rel="noreferrer noopener"&gt;alana.r.johnson@nasa.gov&lt;/a&gt;&amp;nbsp;&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;2026-054&lt;/p&gt;
+
+
+&lt;div id="" class="nasa-gb-align-full width-full maxw-full padding-x-3 padding-y-0 nasa_template_article_a hds-module hds-module-full alignfull wp-block-nasa-blocks-credits-and-details"&gt;
+&lt;section class="padding-x-0 padding-top-5 padding-bottom-2 desktop:padding-top-7 desktop:padding-bottom-9"&gt;
+	&lt;div class="grid-row grid-container maxw-widescreen padding-0"&gt;
+		&lt;div class="grid-col-12 desktop:grid-col-2 padding-right-4 margin-bottom-5 desktop:margin-bottom-0"&gt;
+			&lt;div class="padding-top-3 border-top-1px border-color-carbon-black"&gt;
+				&lt;div class="margin-bottom-2"&gt;
+					&lt;h2 class="heading-14"&gt;Share&lt;/h2&gt;
+				&lt;/div&gt;
+				&lt;div class="padding-bottom-2"&gt;
+					&lt;ul class="social-icons social-icons-round"&gt;
+						&lt;li class="social-icon social-icon-x"&gt;
+							&lt;a href="https://x.com/intent/tweet?via=NASA&amp;#038;text=NASA%E2%80%99s%20Perseverance%20Rover%20Watches%20Earth%20Vanish%20Behind%20Martian%20Moon&amp;#038;url=https%3A%2F%2Fwww.nasa.gov%2Fsolar-system%2Fplanets%2Fmars%2Fnasas-perseverance-rover-watches-earth-vanish-behind-martian-moon%2F" aria-label="Share on X."&gt;
+								&lt;svg width="1200" height="1227" viewBox="0 0 1200 1227" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;&lt;path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z" fill="white"/&gt;&lt;/svg&gt;
+							&lt;/a&gt;
+						&lt;/li&gt;
+						&lt;li class="social-icon social-icon-facebook"&gt;
+							&lt;a href="https://www.facebook.com/sharer.php?u=https%3A%2F%2Fwww.nasa.gov%2Fsolar-system%2Fplanets%2Fmars%2Fnasas-perseverance-rover-watches-earth-vanish-behind-martian-moon%2F" aria-label="Share on Facebook."&gt;
+								&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"&gt;&lt;path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/&gt;&lt;/svg&gt;
+							&lt;/a&gt;
+						&lt;/li&gt;
+						&lt;li class="social-icon social-icon-linkedin"&gt;
+							&lt;a href="https://www.linkedin.com/shareArticle?mini=true&amp;#038;url=https%3A%2F%2Fwww.nasa.gov%2Fsolar-system%2Fplanets%2Fmars%2Fnasas-perseverance-rover-watches-earth-vanish-behind-martian-moon%2F" aria-label="Share on LinkedIn."&gt;
+								&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"&gt;&lt;path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z"/&gt;&lt;/svg&gt;
+							&lt;/a&gt;
+						&lt;/li&gt;
+						&lt;li class="social-icon social-icon-rss"&gt;
+							&lt;a href="/feed/" aria-label="Subscribe to RSS feed."&gt;
+								&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" aria-hidden="true"&gt;&lt;path d="M493 652H392c0-134-111-244-244-244V307c189 0 345 156 345 345zm71 0c0-228-188-416-416-416V132c285 0 520 235 520 520z"/&gt;&lt;circle cx="219" cy="581" r="71"/&gt;&lt;/svg&gt;
+							&lt;/a&gt;
+						&lt;/li&gt;
+					&lt;/ul&gt;
+				&lt;/div&gt;
+			&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class="grid-col-12 desktop:grid-col-5 padding-right-4 margin-bottom-5 desktop:margin-bottom-0"&gt;
+			&lt;div class="padding-top-3 border-top-1px border-color-carbon-black"&gt;
+				&lt;div class="margin-bottom-2"&gt;
+					&lt;h2 class="heading-14"&gt;Details&lt;/h2&gt;
+				&lt;/div&gt;
+				&lt;div class="grid-row margin-bottom-3"&gt;
+					&lt;div class="grid-col-4"&gt;
+						&lt;div class="subheading"&gt;Last Updated&lt;/div&gt;
+					&lt;/div&gt;
+					&lt;div class="grid-col-8"&gt;Aug 05, 2026&lt;/div&gt;
+				&lt;/div&gt;
+						&lt;/div&gt;
+		&lt;/div&gt;
+	&lt;div class="grid-col-12 desktop:grid-col-5 padding-right-4 margin-bottom-5 desktop:margin-bottom-0"&gt;&lt;div class="padding-top-3 border-top-1px border-color-carbon-black "&gt;&lt;div class="margin-bottom-2"&gt;&lt;h2 class="heading-14"&gt;Related Terms&lt;/h2&gt;&lt;/div&gt;&lt;ul class="article-tags"&gt;&lt;li class="article-tag"&gt;&lt;a href="https://science.nasa.gov/mars/" rel="noopener"&gt;Mars&lt;/a&gt;&lt;/li&gt;&lt;li class="article-tag"&gt;&lt;a href="https://science.nasa.gov/earth/" rel="noopener"&gt;Earth&lt;/a&gt;&lt;/li&gt;&lt;li class="article-tag"&gt;&lt;a href="https://www.nasa.gov/jpl/"&gt;Jet Propulsion Laboratory&lt;/a&gt;&lt;/li&gt;&lt;li class="article-tag"&gt;&lt;a href="https://science.nasa.gov/mission/mars-2020-perseverance" rel="noopener"&gt;Perseverance (Rover)&lt;/a&gt;&lt;/li&gt;&lt;li class="article-tag"&gt;&lt;a href="https://www.nasa.gov/solar-system/planets/mars/mars-moons/phobos/"&gt;Phobos&lt;/a&gt;&lt;/li&gt;&lt;li class="article-tag"&gt;&lt;a href="https://science.nasa.gov/planetary-science/" rel="noopener"&gt;Planetary Science&lt;/a&gt;&lt;/li&gt;&lt;li class="article-tag"&gt;&lt;a href="https://science.nasa.gov/solar-system/" rel="noopener"&gt;The Solar System&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;&lt;/div&gt;
+	&lt;/div&gt;
+&lt;/section&gt;
+	&lt;/div&gt;
+
+&lt;div id="" class="nasa-gb-align-full width-full maxw-full padding-x-3 padding-y-0 hds-module hds-module-full alignfull wp-block-nasa-blocks-related-articles"&gt;		&lt;section class="hds-related-articles padding-x-0 padding-y-3 desktop:padding-top-7 desktop:padding-bottom-9"&gt;
+			&lt;div class="w-100 grid-row grid-container maxw-widescreen padding-0 text-align-left"&gt;
+				&lt;div class="margin-bottom-4"&gt;&lt;h2 style="max-width: 100%;" class="width-full w-full maxw-full"&gt;Explore More&lt;/h2&gt;&lt;/div&gt;
+			&lt;/div&gt;
+			&lt;div class="grid-row grid-container maxw-widescreen padding-0"&gt;
+										&lt;div class="grid-col-12 desktop:grid-col-4 margin-bottom-4 desktop:margin-bottom-0 desktop:padding-right-3"&gt;
+						&lt;a href="https://science.nasa.gov/earth/earth-observatory/the-paradox-of-lencois-maranhenses-national-park/" class="color-carbon-black" rel="noopener"&gt;
+							&lt;div class="margin-bottom-2"&gt;
+								&lt;div class="hds-cover-wrapper cover-hover-zoom bg-carbon-black minh-mobile"&gt;
+								&lt;figure class="hds-media-background  "&gt;&lt;img decoding="async" loading="lazy" alt="" style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" src="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_th.jpg" &gt;&lt;/figure&gt;								&lt;/div&gt;
+							&lt;/div&gt;
+							&lt;div class="padding-right-0 desktop:padding-right-10"&gt;
+								&lt;div class="subheading margin-bottom-1"&gt;5 min read&lt;/div&gt;
+								&lt;div class="margin-bottom-1"&gt;&lt;h3 class="related-article-title"&gt;The Paradox of Lençóis Maranhenses National Park&lt;/h3&gt;&lt;/div&gt;
+																	&lt;p class="p-md color-carbon-60"&gt;The coastal dune field in Brazil looks like a desert but fills with freshwater lagoons&amp;hellip;&lt;/p&gt;
+																&lt;div class="display-flex flex-align-center label related-article-label margin-bottom-1 color-carbon-60"&gt;
+									&lt;span class="display-flex flex-align-center margin-right-2"&gt;
+										&lt;svg version="1.1" class="square-2 margin-right-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="16px" height="16px" viewBox="0 0 16 16" style="enable-background:new 0 0 16 16;" xml:space="preserve"&gt;&lt;g&gt;&lt;g&gt;&lt;path d="M8,0C3.5,0-0.1,3.7,0,8.2C0.1,12.5,3.6,16,8,16c4.4,0,8-3.6,8-8C16,3.5,12.4,0,8,0z M8,15.2 C4,15.2,0.8,12,0.8,8C0.8,4,4,0.8,8,0.8c3.9,0,7.2,3.2,7.2,7.1C15.2,11.9,12,15.2,8,15.2z"/&gt;&lt;path d="M5.6,12c0.8-0.8,1.6-1.6,2.4-2.4c0.8,0.8,1.6,1.6,2.4,2.4c0-2.7,0-5.3,0-8C8.8,4,7.2,4,5.6,4 C5.6,6.7,5.6,9.3,5.6,12z"/&gt;&lt;/g&gt;&lt;/g&gt;&lt;/svg&gt;
+										&lt;span&gt;Article&lt;/span&gt;
+									&lt;/span&gt;
+									&lt;span class=""&gt;
+										13 hours ago									&lt;/span&gt;
+								&lt;/div&gt;
+							&lt;/div&gt;
+						&lt;/a&gt;
+					&lt;/div&gt;
+									&lt;div class="grid-col-12 desktop:grid-col-4 margin-bottom-4 desktop:margin-bottom-0 desktop:padding-right-3"&gt;
+						&lt;a href="https://science.nasa.gov/science-research/heliophysics/nasas-punch-sharpens-solar-storm-forecasting-in-first-test/" class="color-carbon-black" rel="noopener"&gt;
+							&lt;div class="margin-bottom-2"&gt;
+								&lt;div class="hds-cover-wrapper cover-hover-zoom bg-carbon-black minh-mobile"&gt;
+								&lt;figure class="hds-media-background  "&gt;&lt;img decoding="async" loading="lazy" alt="" style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" src="https://science.nasa.gov/wp-content/uploads/2026/08/punch-cme-overlay-image.jpg" &gt;&lt;/figure&gt;								&lt;/div&gt;
+							&lt;/div&gt;
+							&lt;div class="padding-right-0 desktop:padding-right-10"&gt;
+								&lt;div class="subheading margin-bottom-1"&gt;4 min read&lt;/div&gt;
+								&lt;div class="margin-bottom-1"&gt;&lt;h3 class="related-article-title"&gt;NASA’s PUNCH Sharpens Solar Storm Forecasting in First Test&lt;/h3&gt;&lt;/div&gt;
+																	&lt;p class="p-md color-carbon-60"&gt;Using continuous imagery from NASA’s PUNCH (Polarimeter to Unify the Corona and Heliosphere) mission, scientists&amp;hellip;&lt;/p&gt;
+																&lt;div class="display-flex flex-align-center label related-article-label margin-bottom-1 color-carbon-60"&gt;
+									&lt;span class="display-flex flex-align-center margin-right-2"&gt;
+										&lt;svg version="1.1" class="square-2 margin-right-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="16px" height="16px" viewBox="0 0 16 16" style="enable-background:new 0 0 16 16;" xml:space="preserve"&gt;&lt;g&gt;&lt;g&gt;&lt;path d="M8,0C3.5,0-0.1,3.7,0,8.2C0.1,12.5,3.6,16,8,16c4.4,0,8-3.6,8-8C16,3.5,12.4,0,8,0z M8,15.2 C4,15.2,0.8,12,0.8,8C0.8,4,4,0.8,8,0.8c3.9,0,7.2,3.2,7.2,7.1C15.2,11.9,12,15.2,8,15.2z"/&gt;&lt;path d="M5.6,12c0.8-0.8,1.6-1.6,2.4-2.4c0.8,0.8,1.6,1.6,2.4,2.4c0-2.7,0-5.3,0-8C8.8,4,7.2,4,5.6,4 C5.6,6.7,5.6,9.3,5.6,12z"/&gt;&lt;/g&gt;&lt;/g&gt;&lt;/svg&gt;
+										&lt;span&gt;Article&lt;/span&gt;
+									&lt;/span&gt;
+									&lt;span class=""&gt;
+										23 hours ago									&lt;/span&gt;
+								&lt;/div&gt;
+							&lt;/div&gt;
+						&lt;/a&gt;
+					&lt;/div&gt;
+									&lt;div class="grid-col-12 desktop:grid-col-4 margin-bottom-4 desktop:margin-bottom-0 desktop:padding-right-3"&gt;
+						&lt;a href="https://science.nasa.gov/earth/earth-observatory/august-2026-satellite-puzzler/" class="color-carbon-black" rel="noopener"&gt;
+							&lt;div class="margin-bottom-2"&gt;
+								&lt;div class="hds-cover-wrapper cover-hover-zoom bg-carbon-black minh-mobile"&gt;
+								&lt;figure class="hds-media-background  "&gt;&lt;img decoding="async" loading="lazy" alt="" style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" src="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/satellite-puzzler/2026_augustpuzzler.jpg" &gt;&lt;/figure&gt;								&lt;/div&gt;
+							&lt;/div&gt;
+							&lt;div class="padding-right-0 desktop:padding-right-10"&gt;
+								&lt;div class="subheading margin-bottom-1"&gt;2 min read&lt;/div&gt;
+								&lt;div class="margin-bottom-1"&gt;&lt;h3 class="related-article-title"&gt;August 2026 Satellite Puzzler&lt;/h3&gt;&lt;/div&gt;
+																	&lt;p class="p-md color-carbon-60"&gt;Your challenge is to tell us the location of the satellite image and why it&amp;hellip;&lt;/p&gt;
+																&lt;div class="display-flex flex-align-center label related-article-label margin-bottom-1 color-carbon-60"&gt;
+									&lt;span class="display-flex flex-align-center margin-right-2"&gt;
+										&lt;svg version="1.1" class="square-2 margin-right-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="16px" height="16px" viewBox="0 0 16 16" style="enable-background:new 0 0 16 16;" xml:space="preserve"&gt;&lt;g&gt;&lt;g&gt;&lt;path d="M8,0C3.5,0-0.1,3.7,0,8.2C0.1,12.5,3.6,16,8,16c4.4,0,8-3.6,8-8C16,3.5,12.4,0,8,0z M8,15.2 C4,15.2,0.8,12,0.8,8C0.8,4,4,0.8,8,0.8c3.9,0,7.2,3.2,7.2,7.1C15.2,11.9,12,15.2,8,15.2z"/&gt;&lt;path d="M5.6,12c0.8-0.8,1.6-1.6,2.4-2.4c0.8,0.8,1.6,1.6,2.4,2.4c0-2.7,0-5.3,0-8C8.8,4,7.2,4,5.6,4 C5.6,6.7,5.6,9.3,5.6,12z"/&gt;&lt;/g&gt;&lt;/g&gt;&lt;/svg&gt;
+										&lt;span&gt;Article&lt;/span&gt;
+									&lt;/span&gt;
+									&lt;span class=""&gt;
+										1 day ago									&lt;/span&gt;
+								&lt;/div&gt;
+							&lt;/div&gt;
+						&lt;/a&gt;
+					&lt;/div&gt;
+							&lt;/div&gt;
+		&lt;/section&gt;
+		&lt;/div&gt;
+
+&lt;div id="" class="hds-topic-cards nasa-gb-align-full maxw-full width-full padding-y-6 padding-x-3 color-mode-dark hds-module hds-module-full alignfull wp-block-nasa-blocks-topic-cards"&gt;		&lt;div class="grid-container grid-container-block-lg padding-x-0"&gt;
+			&lt;div class="grid-row flex-align-center margin-bottom-3"&gt;
+				&lt;div class="desktop:grid-col-8 margin-bottom-2 desktop:margin-bottom-0"&gt;
+					&lt;div class="label color-carbon-60 margin-bottom-2"&gt;Keep Exploring&lt;/div&gt;
+					&lt;h2 class="heading-36 line-height-sm"&gt;Discover Related Topics&lt;/h2&gt;
+				&lt;/div&gt;
+			&lt;/div&gt;
+				&lt;div class="grid-row grid-gap-2 hds-topic-cards-wrapper"&gt;
+					&lt;a href="https://science.nasa.gov/mission/mars-sample-return/perseverance-rover/" class="mobile:grid-col-12 tablet:grid-col-6 desktop:grid-col-3 topic-card margin-bottom-4 desktop:margin-bottom-0" rel="noopener"&gt;
+				&lt;div class="hds-topic-card hds-cover-wrapper cover-hover-zoom bg-carbon-black"&gt;
+					&lt;div class="skrim-overlay skrim-overlay-dark skrim-left mobile-skrim-top padding-3 display-flex flex-align-end flex-justify-start z-200"&gt;
+						&lt;div&gt;
+													&lt;h3 class="hds-topic-card-heading heading-29 color-spacesuit-white line-height-sm margin-top-0 margin-bottom-1"&gt;
+								&lt;span&gt;Mars Perseverance Rover&lt;/span&gt;
+								&lt;svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;&lt;circle class="color-nasa-red" cx="16" cy="16" r="16"&gt;&lt;/circle&gt;&lt;path d="M8 16.956h12.604l-3.844 4.106 1.252 1.338L24 16l-5.988-6.4-1.252 1.338 3.844 4.106H8v1.912z" class="color-spacesuit-white"&gt;&lt;/path&gt;&lt;/svg&gt;
+							&lt;/h3&gt;
+							&lt;p class="margin-bottom-0 margin-top-2 color-carbon-20-important"&gt;The Mars Perseverance rover is the first leg the Mars Sample Return Campaign’s interplanetary relay team. Its job is to&amp;hellip;&lt;/p&gt;
+													&lt;/div&gt;
+					&lt;/div&gt;
+											&lt;figure class="hds-media-background  "&gt;&lt;img decoding="async" loading="lazy" alt="" style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" src="https://science.nasa.gov/wp-content/uploads/2024/03/25147_PerseveranceOverview.jpg" &gt;&lt;/figure&gt;									&lt;/div&gt;
+			&lt;/a&gt;
+					&lt;a href="https://science.nasa.gov/mars/moons/phobos/" class="mobile:grid-col-12 tablet:grid-col-6 desktop:grid-col-3 topic-card margin-bottom-4 desktop:margin-bottom-0" rel="noopener"&gt;
+				&lt;div class="hds-topic-card hds-cover-wrapper cover-hover-zoom bg-carbon-black"&gt;
+					&lt;div class="skrim-overlay skrim-overlay-dark skrim-left mobile-skrim-top padding-3 display-flex flex-align-end flex-justify-start z-200"&gt;
+						&lt;div&gt;
+													&lt;h3 class="hds-topic-card-heading heading-29 color-spacesuit-white line-height-sm margin-top-0 margin-bottom-1"&gt;
+								&lt;span&gt;Phobos&lt;/span&gt;
+								&lt;svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;&lt;circle class="color-nasa-red" cx="16" cy="16" r="16"&gt;&lt;/circle&gt;&lt;path d="M8 16.956h12.604l-3.844 4.106 1.252 1.338L24 16l-5.988-6.4-1.252 1.338 3.844 4.106H8v1.912z" class="color-spacesuit-white"&gt;&lt;/path&gt;&lt;/svg&gt;
+							&lt;/h3&gt;
+							&lt;p class="margin-bottom-0 margin-top-2 color-carbon-20-important"&gt;Phobos is the larger of Mars’ two moons. It orbits Mars three times a day, and is so close to&amp;hellip;&lt;/p&gt;
+													&lt;/div&gt;
+					&lt;/div&gt;
+											&lt;figure class="hds-media-background  "&gt;&lt;img decoding="async" loading="lazy" alt="" style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" src="https://science.nasa.gov/wp-content/uploads/2023/07/phobosincolor_pia10369.jpg" &gt;&lt;/figure&gt;									&lt;/div&gt;
+			&lt;/a&gt;
+					&lt;a href="https://science.nasa.gov/planetary-science/programs/mars-exploration/" class="mobile:grid-col-12 tablet:grid-col-6 desktop:grid-col-3 topic-card margin-bottom-4 desktop:margin-bottom-0" rel="noopener"&gt;
+				&lt;div class="hds-topic-card hds-cover-wrapper cover-hover-zoom bg-carbon-black"&gt;
+					&lt;div class="skrim-overlay skrim-overlay-dark skrim-left mobile-skrim-top padding-3 display-flex flex-align-end flex-justify-start z-200"&gt;
+						&lt;div&gt;
+													&lt;h3 class="hds-topic-card-heading heading-29 color-spacesuit-white line-height-sm margin-top-0 margin-bottom-1"&gt;
+								&lt;span&gt;Mars Exploration&lt;/span&gt;
+								&lt;svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;&lt;circle class="color-nasa-red" cx="16" cy="16" r="16"&gt;&lt;/circle&gt;&lt;path d="M8 16.956h12.604l-3.844 4.106 1.252 1.338L24 16l-5.988-6.4-1.252 1.338 3.844 4.106H8v1.912z" class="color-spacesuit-white"&gt;&lt;/path&gt;&lt;/svg&gt;
+							&lt;/h3&gt;
+							&lt;p class="margin-bottom-0 margin-top-2 color-carbon-20-important"&gt;Mars is the only planet we know of inhabited entirely by robots. Learn more about the Mars Missions.&lt;/p&gt;
+													&lt;/div&gt;
+					&lt;/div&gt;
+											&lt;figure class="hds-media-background  "&gt;&lt;img decoding="async" loading="lazy" alt="" style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" src="https://science.nasa.gov/wp-content/uploads/2016/05/1-mars-nasa-gov-jpg.webp" &gt;&lt;/figure&gt;									&lt;/div&gt;
+			&lt;/a&gt;
+					&lt;a href="https://science.nasa.gov/planetary-science/" class="mobile:grid-col-12 tablet:grid-col-6 desktop:grid-col-3 topic-card margin-bottom-4 desktop:margin-bottom-0" rel="noopener"&gt;
+				&lt;div class="hds-topic-card hds-cover-wrapper cover-hover-zoom bg-carbon-black"&gt;
+					&lt;div class="skrim-overlay skrim-overlay-dark skrim-left mobile-skrim-top padding-3 display-flex flex-align-end flex-justify-start z-200"&gt;
+						&lt;div&gt;
+													&lt;h3 class="hds-topic-card-heading heading-29 color-spacesuit-white line-height-sm margin-top-0 margin-bottom-1"&gt;
+								&lt;span&gt;Planetary Science&lt;/span&gt;
+								&lt;svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;&lt;circle class="color-nasa-red" cx="16" cy="16" r="16"&gt;&lt;/circle&gt;&lt;path d="M8 16.956h12.604l-3.844 4.106 1.252 1.338L24 16l-5.988-6.4-1.252 1.338 3.844 4.106H8v1.912z" class="color-spacesuit-white"&gt;&lt;/path&gt;&lt;/svg&gt;
+							&lt;/h3&gt;
+							&lt;p class="margin-bottom-0 margin-top-2 color-carbon-20-important"&gt;NASA’s planetary science program explores the objects in our solar system to better understand its history and the distribution of&amp;hellip;&lt;/p&gt;
+													&lt;/div&gt;
+					&lt;/div&gt;
+											&lt;figure class="hds-media-background  "&gt;&lt;img decoding="async" loading="lazy" alt="" style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" src="https://science.nasa.gov/wp-content/uploads/2016/05/saturn2-jpg.webp" &gt;&lt;/figure&gt;									&lt;/div&gt;
+			&lt;/a&gt;
+				&lt;/div&gt;
+			&lt;/div&gt;
+		&lt;/div&gt;</ns3:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>Advanced Mini-laboratories Automate Space Station Research</title>
+		<link>https://www.nasa.gov/image-article/advanced-mini-laboratories-automate-space-station-research/</link>
+		
+		<dc:creator>Chris Getteau</dc:creator>
+		<pubDate>Wed, 05 Aug 2026 14:00:00 +0000</pubDate>
+				<category>International Space Station (ISS)</category>
+		<category>ISS Research</category>
+		<guid isPermaLink="false">https://www.nasa.gov/?post_type=image-article&amp;p=1034620</guid>
+
+					<description>The International Space Station hosts hundreds of science experiments at a time. Some experiments can take hours to perform, and researchers need to account for astronauts’ limited time. Fully automated devices, like Redwire’s &amp;#160;ADvanced Space Experiment Processors (ADSEPs), have been designed to conduct more space science with less crew time. Within each ADSEP facility there [&amp;#8230;]</description>
+										<ns3:encoded>&lt;div id="" class="hds-article-hero-header nasa-gb-align-full bg-carbon-90 width-full maxw-full color-mode-dark hds-module hds-module-full alignfull wp-block-nasa-blocks-article-hero-header"&gt;		&lt;div class="hds-cover-wrapper width-full maxw-full minh-tablet grid-container minh-tablet flex-column padding-0"&gt;
+			&lt;div class="hds-foreground-wrapper display-flex flex-direction-column"&gt;
+				&lt;div class="grid-container grid-container-block margin-top-auto width-full maxw-desktop-lg padding-y-9 padding-x-3 desktop:padding-x-3 z-400"&gt;
+					&lt;div class="z-400 grid-col-12 tablet:grid-col-12 desktop:grid-col-7 z-400"&gt;
+						&lt;div class="margin-0"&gt;
+							&lt;div class="label color-spacesuit-white margin-bottom-2"&gt;2 Min Read&lt;/div&gt;
+							&lt;h1 class="heading-41 line-height-md color-spacesuit-white-important"&gt;
+								Advanced Mini-laboratories Automate Space Station Research							&lt;/h1&gt;
+						&lt;/div&gt;
+					&lt;/div&gt;
+					&lt;div class="grid-col-12 tablet:grid-col-12 desktop:grid-col-5"&gt;&lt;/div&gt;
+					&lt;div class="skrim-overlay skrim-left mobile-skrim-top z-200"&gt;&lt;/div&gt;
+					&lt;figure class="hds-media-background  "&gt;&lt;img decoding="async" width="1536" height="1024" src="https://www.nasa.gov/wp-content/uploads/2024/08/iss071e486706.jpg?w=1536" class="attachment-1536x1536 size-1536x1536" alt="NASA astronaut and Expedition 71 Flight Engineer Tracy C. Dyson swaps out sample processors for the Pharmaceutical In-space Laboratory experiment that is exploring the production and manufacturing of medicines to benefit astronauts in space and humans on Earth. The processors were installed in the Advanced Space Experiment Processor, or ADSEP, that can process a variety of research samples and be delivered to the International Space Station and returned to Earth aboard the SpaceX Dragon cargo craft." style="transform: scale(1); transform-origin: 56% 85%; object-position: 56% 85%; object-fit: cover;" block_context="nasa-block" loading="lazy" srcset="https://www.nasa.gov/wp-content/uploads/2024/08/iss071e486706.jpg 8256w, https://www.nasa.gov/wp-content/uploads/2024/08/iss071e486706.jpg?resize=300,200 300w, https://www.nasa.gov/wp-content/uploads/2024/08/iss071e486706.jpg?resize=768,512 768w, https://www.nasa.gov/wp-content/uploads/2024/08/iss071e486706.jpg?resize=1024,683 1024w, https://www.nasa.gov/wp-content/uploads/2024/08/iss071e486706.jpg?resize=1536,1024 1536w, https://www.nasa.gov/wp-content/uploads/2024/08/iss071e486706.jpg?resize=2048,1365 2048w, https://www.nasa.gov/wp-content/uploads/2024/08/iss071e486706.jpg?resize=400,267 400w, https://www.nasa.gov/wp-content/uploads/2024/08/iss071e486706.jpg?resize=600,400 600w, https://www.nasa.gov/wp-content/uploads/2024/08/iss071e486706.jpg?resize=900,600 900w, https://www.nasa.gov/wp-content/uploads/2024/08/iss071e486706.jpg?resize=1200,800 1200w, https://www.nasa.gov/wp-content/uploads/2024/08/iss071e486706.jpg?resize=2000,1333 2000w" sizes="auto, (max-width: 1536px) 100vw, 1536px" /&gt;&lt;/figure&gt;				&lt;/div&gt;
+			&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class="padding-y-3 padding-x-3"&gt;
+			&lt;div class="grid-container grid-container-block padding-x-0"&gt;
+								&lt;figcaption class="hds-caption maxw-mobile desktop:padding-x-3"&gt;
+					&lt;div class="hds-caption-text p-sm margin-0 color-carbon-30"&gt;
+						&lt;div&gt;&lt;figcaption&gt;NASA astronaut Tracy C. Dyson swaps out sample processors in the Advanced Space Experiment Processor (ADSEP).&lt;/figcaption&gt;&lt;/div&gt;
+					&lt;/div&gt;
+										&lt;div class="hds-credits color-spacesuit-white-important"&gt;
+						&lt;span&gt;Credits: &lt;/span&gt;
+						&lt;span&gt;NASA&lt;/span&gt;
+					&lt;/div&gt;
+									&lt;/figcaption&gt;
+							&lt;/div&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
+
+
+&lt;p class="wp-block-paragraph"&gt;The International Space Station hosts hundreds of science experiments at a time. Some experiments can take hours to perform, and researchers need to account for astronauts’ limited time. Fully automated devices, like Redwire’s &amp;nbsp;&lt;a href="https://www.nasa.gov/mission/station/research-explorer/facility/?#id=369"&gt;ADvanced Space Experiment Processors&lt;/a&gt; (ADSEPs), have been designed to conduct more space science with less crew time.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;Within each ADSEP facility there are three to four “mini-laboratories”, called cassettes, that allow multiple studies with different needs to be performed at the same time. The latest model, &lt;a href="https://www.nasa.gov/mission/station/research-explorer/facility/?#id=9240"&gt;ADSEP-4&lt;/a&gt; can accommodate four cassettes and features imagery capabilities. Since 2017, ADSEPs have conducted and supported two dozen investigations aboard space station with new ones on the horizon.&lt;/p&gt;
+
+
+&lt;div id="" class="hds-media hds-module wp-block-image"&gt;&lt;div class="margin-left-auto margin-right-auto nasa-block-align-inline"&gt;&lt;div class="hds-media-wrapper margin-left-auto margin-right-auto"&gt;&lt;figure class="hds-media-inner hds-cover-wrapper hds-media-ratio-fit "&gt;&lt;a href="https://www.nasa.gov/wp-content/uploads/2026/02/jsc2024e038397orig.jpg"&gt;&lt;img decoding="async" width="2048" height="1152" src="https://www.nasa.gov/wp-content/uploads/2026/02/jsc2024e038397orig.jpg?w=2048" class="attachment-2048x2048 size-2048x2048" alt="Close-up microscope image of transparent, hexagonal and cubic crystals against a warm orange-pink background." style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" block_context="nasa-block" loading="lazy" srcset="https://www.nasa.gov/wp-content/uploads/2026/02/jsc2024e038397orig.jpg 3520w, https://www.nasa.gov/wp-content/uploads/2026/02/jsc2024e038397orig.jpg?resize=300,169 300w, https://www.nasa.gov/wp-content/uploads/2026/02/jsc2024e038397orig.jpg?resize=768,432 768w, https://www.nasa.gov/wp-content/uploads/2026/02/jsc2024e038397orig.jpg?resize=1024,576 1024w, https://www.nasa.gov/wp-content/uploads/2026/02/jsc2024e038397orig.jpg?resize=1536,864 1536w, https://www.nasa.gov/wp-content/uploads/2026/02/jsc2024e038397orig.jpg?resize=2048,1152 2048w, https://www.nasa.gov/wp-content/uploads/2026/02/jsc2024e038397orig.jpg?resize=400,225 400w, https://www.nasa.gov/wp-content/uploads/2026/02/jsc2024e038397orig.jpg?resize=600,338 600w, https://www.nasa.gov/wp-content/uploads/2026/02/jsc2024e038397orig.jpg?resize=900,506 900w, https://www.nasa.gov/wp-content/uploads/2026/02/jsc2024e038397orig.jpg?resize=1200,675 1200w, https://www.nasa.gov/wp-content/uploads/2026/02/jsc2024e038397orig.jpg?resize=2000,1125 2000w" sizes="auto, (max-width: 2048px) 100vw, 2048px" /&gt;&lt;/a&gt;&lt;/figure&gt;&lt;figcaption class="hds-caption padding-y-2"&gt;&lt;div class="hds-caption-text p-sm margin-0"&gt;Crystals are grown aboard the International Space Station as part of ADSEP-PIL-02, an investigation that aims to study the effects of microgravity on various types of crystals.&lt;/div&gt;&lt;div class="hds-credits"&gt;Redwire&lt;/div&gt;&lt;/figcaption&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+
+
+&lt;p class="wp-block-paragraph"&gt;The latest ADSEP investigations are related to &lt;a href="https://www.nasa.gov/missions/station/iss-research/crystallizing-proteins-in-space-helping-to-identify-potential-treatments-for-diseases/"&gt;&lt;/a&gt;growing seed crystals in space, which can be used to reformulate existing drugs or develop entirely new therapeutics. Previous experiments have shown that the unique microgravity environment allows the growth of larger and higher quality crystals. With Redwire’s Pharmaceutical In-Space Laboratory (PIL-BOX), a cassette-based system that uses the ADSEP facility, researchers can grow improved, space-grown seed crystals.&lt;/p&gt;
+
+
+&lt;div id="" class="hds-media hds-module wp-block-image"&gt;&lt;div class="margin-left-auto margin-right-auto nasa-block-align-inline"&gt;&lt;div class="hds-media-wrapper margin-left-auto margin-right-auto"&gt;&lt;figure class="hds-media-inner hds-cover-wrapper hds-media-ratio-fit "&gt;&lt;a href="https://images-assets.nasa.gov/image/iss074e0672783/iss074e0672783~large.jpg?w=1920&amp;#038;h=1280&amp;#038;fit=clip&amp;#038;crop=faces%2Cfocalpoint" rel="noopener"&gt;&lt;img decoding="async" width="1920" height="1280" src="https://images-assets.nasa.gov/image/iss074e0672783/iss074e0672783~large.jpg?w=1920&amp;amp;h=1280&amp;amp;fit=clip&amp;amp;crop=faces%2Cfocalpoint" class="attachment-2048x2048 size-2048x2048" alt="Adenot, wearing light blue polo shirt and black cargo pants, smiles as she holds a gray cassette the size of a lunchbox. The surrounding walls, ceiling, and floor are covered with cables, cameras, laptops, storage bags, and research equipment." style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" block_context="nasa-block" loading="lazy" srcset="https://images-assets.nasa.gov/image/iss074e0672783/iss074e0672783~large.jpg?w=1920&amp;amp;h=1280&amp;amp;fit=crop&amp;amp;crop=faces%2Cfocalpoint 1920w, https://images-assets.nasa.gov/image/iss074e0672783/iss074e0672783~large.jpg?w=300&amp;amp;h=200&amp;amp;fit=crop&amp;amp;crop=faces%2Cfocalpoint 300w, https://images-assets.nasa.gov/image/iss074e0672783/iss074e0672783~large.jpg?w=768&amp;amp;h=512&amp;amp;fit=crop&amp;amp;crop=faces%2Cfocalpoint 768w, https://images-assets.nasa.gov/image/iss074e0672783/iss074e0672783~large.jpg?w=1024&amp;amp;h=683&amp;amp;fit=crop&amp;amp;crop=faces%2Cfocalpoint 1024w, https://images-assets.nasa.gov/image/iss074e0672783/iss074e0672783~large.jpg?w=1536&amp;amp;h=1024&amp;amp;fit=crop&amp;amp;crop=faces%2Cfocalpoint 1536w, https://images-assets.nasa.gov/image/iss074e0672783/iss074e0672783~large.jpg?w=400&amp;amp;h=267&amp;amp;fit=crop&amp;amp;crop=faces%2Cfocalpoint 400w, https://images-assets.nasa.gov/image/iss074e0672783/iss074e0672783~large.jpg?w=600&amp;amp;h=400&amp;amp;fit=crop&amp;amp;crop=faces%2Cfocalpoint 600w, https://images-assets.nasa.gov/image/iss074e0672783/iss074e0672783~large.jpg?w=900&amp;amp;h=600&amp;amp;fit=crop&amp;amp;crop=faces%2Cfocalpoint 900w, https://images-assets.nasa.gov/image/iss074e0672783/iss074e0672783~large.jpg?w=1200&amp;amp;h=800&amp;amp;fit=crop&amp;amp;crop=faces%2Cfocalpoint 1200w" sizes="auto, (max-width: 1920px) 100vw, 1920px" /&gt;&lt;/a&gt;&lt;/figure&gt;&lt;figcaption class="hds-caption padding-y-2"&gt;&lt;div class="hds-caption-text p-sm margin-0"&gt;European Space Agency (ESA) astronaut Sophie Adenot displays a cassette for the ADvanced Space Experiment Processor (ADSEP).&lt;/div&gt;&lt;div class="hds-credits"&gt;NASA&lt;/div&gt;&lt;/figcaption&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+
+
+&lt;p class="wp-block-paragraph"&gt;Notable PIL-BOX experiments sponsored by the ISS National Laboratory have focused on cancer research. The &lt;a href="https://www.nasa.gov/mission/station/research-explorer/investigation/?#id=9439"&gt;ADSEP-PIL-10&lt;/a&gt; investigation, currently being conducted in orbit in collaboration with the Aspera Biomedicines, works to crystallize cancer-blocking and cancer-promoting molecules with the goal of creating an oral cancer medication. &lt;a href="https://www.nasa.gov/mission/station/research-explorer/investigation/?#id=9497"&gt;ADSEP-PIL-15&lt;/a&gt; crystalized cancer-treating medicines to help refine production, quality, and stability of these cancer drugs. A recent technology demonstration, &lt;a href="https://www.nasa.gov/mission/station/research-explorer/investigation/?#id=9317"&gt;ADSEP- ICC&lt;/a&gt; (Industrial Crystallization Cassette), tested a larger cassette to expand ADSEP function and scale crystallization production for commercial use.&lt;/p&gt;
+
+
+&lt;div id="" class="hds-media hds-module wp-block-image"&gt;&lt;div class="margin-left-auto margin-right-auto nasa-block-align-inline"&gt;&lt;div class="hds-media-wrapper margin-left-auto margin-right-auto"&gt;&lt;figure class="hds-media-inner hds-cover-wrapper hds-media-ratio-fit "&gt;&lt;a href="https://images-assets.nasa.gov/image/jsc2021e019402/jsc2021e019402~orig.jpg?w=1542&amp;#038;h=971&amp;#038;fit=clip&amp;#038;crop=faces%2Cfocalpoint" rel="noopener"&gt;&lt;img decoding="async" width="1542" height="971" src="https://images-assets.nasa.gov/image/jsc2021e019402/jsc2021e019402~orig.jpg?w=1542&amp;amp;h=971&amp;amp;fit=clip&amp;amp;crop=faces%2Cfocalpoint" class="attachment-2048x2048 size-2048x2048" alt="Image of several juvenile bobtail squid suspended in water against a light background. The small, translucent squid have rounded, oblong bodies covered with tiny brown pigment spots and have tiny tentacles extending just below their round black eyes. Four squid are in the forefront in focus while several others are blurred in the background." style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" block_context="nasa-block" loading="lazy" srcset="https://images-assets.nasa.gov/image/jsc2021e019402/jsc2021e019402~orig.jpg?w=1542&amp;amp;h=971&amp;amp;fit=crop&amp;amp;crop=faces%2Cfocalpoint 1542w, https://images-assets.nasa.gov/image/jsc2021e019402/jsc2021e019402~orig.jpg?w=300&amp;amp;h=189&amp;amp;fit=crop&amp;amp;crop=faces%2Cfocalpoint 300w, https://images-assets.nasa.gov/image/jsc2021e019402/jsc2021e019402~orig.jpg?w=768&amp;amp;h=484&amp;amp;fit=crop&amp;amp;crop=faces%2Cfocalpoint 768w, https://images-assets.nasa.gov/image/jsc2021e019402/jsc2021e019402~orig.jpg?w=1024&amp;amp;h=645&amp;amp;fit=crop&amp;amp;crop=faces%2Cfocalpoint 1024w, https://images-assets.nasa.gov/image/jsc2021e019402/jsc2021e019402~orig.jpg?w=1536&amp;amp;h=967&amp;amp;fit=crop&amp;amp;crop=faces%2Cfocalpoint 1536w, https://images-assets.nasa.gov/image/jsc2021e019402/jsc2021e019402~orig.jpg?w=400&amp;amp;h=252&amp;amp;fit=crop&amp;amp;crop=faces%2Cfocalpoint 400w, https://images-assets.nasa.gov/image/jsc2021e019402/jsc2021e019402~orig.jpg?w=600&amp;amp;h=378&amp;amp;fit=crop&amp;amp;crop=faces%2Cfocalpoint 600w, https://images-assets.nasa.gov/image/jsc2021e019402/jsc2021e019402~orig.jpg?w=900&amp;amp;h=567&amp;amp;fit=crop&amp;amp;crop=faces%2Cfocalpoint 900w, https://images-assets.nasa.gov/image/jsc2021e019402/jsc2021e019402~orig.jpg?w=1200&amp;amp;h=756&amp;amp;fit=crop&amp;amp;crop=faces%2Cfocalpoint 1200w" sizes="auto, (max-width: 1542px) 100vw, 1542px" /&gt;&lt;/a&gt;&lt;/figure&gt;&lt;figcaption class="hds-caption padding-y-2"&gt;&lt;div class="hds-caption-text p-sm margin-0"&gt;Juvenile bobtail squid swimming in seawater just after hatching as part of the ADSEP-UMAMI investigation.&lt;/div&gt;&lt;div class="hds-credits"&gt;University of Florida&lt;/div&gt;&lt;/figcaption&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+
+
+&lt;p class="wp-block-paragraph"&gt;ADSEPs are not limited to crystal growth and can &lt;a href="https://www.nasa.gov/mission/station/research-explorer/facility/?#id=9240"&gt;also be used&lt;/a&gt; for culturing cells and tissues, studying organisms, and researching materials-sciences. In 2021, &lt;a href="https://www.nasa.gov/mission/station/research-explorer/investigation/?#id=8298"&gt;ADSEP-UMAMI&lt;/a&gt; studied how bobtail squid interacted with beneficial microbes in the space environment. &lt;a href="https://www.frontiersin.org/journals/space-technologies/articles/10.3389/frspt.2026.1791484/full?utm=" rel="noopener"&gt;This research found&lt;/a&gt; that symbiotic interactions with microbes can lessen a host animal’s stress responses caused by spaceflight and accelerate developmental pathways such as growing neurons and tissues. These findings give insight into the importance of symbiotic relationships in closed ecosystems like spacecraft and have implications for astronauts and their own beneficial bacteria during space missions. &lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;The automation and versatility of ADSEPs permit a wide array of science experiments to be conducted aboard the orbiting laboratory, leading to findings that inform future space missions and are beneficial to people on Earth.&lt;/p&gt;
+</ns3:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>APOD: 2026 August 5 – Spokes on Saturn’s B Ring</title>
+		<link>https://science.nasa.gov/image-article/apod-2026-august-5-spokes-on-saturns-b-ring/</link>
+		
+		<dc:creator />
+		<pubDate>Wed, 05 Aug 2026 04:05:00 +0000</pubDate>
+				<category>APOD</category>
+		<guid isPermaLink="false">https://science.nasa.gov/image-article/apod-2026-august-5-spokes-on-saturns-b-ring/</guid>
+
+					<description>APODScienceAPODAPOD: 2026 August 5 – Spokes…Today’s APODArchiveSubmissionsIndexSearchCalendarRSSEducationAboutDiscuss  APOD Astronomy Picture of the Day Discover the cosmos! Each day a different image or photograph of our fascinating universe is featured, along with a brief explanation written by a professional astronomer. Brad Croslin Spokes on Saturn&amp;#8217;s B Ring Explanation: Don’t get spooked by Saturn’s ghostly spokes! Today [&amp;#8230;]</description>
+										<ns3:encoded>&lt;div id="" class="hds-module hds-module-full alignfull wp-block-nasa-blocks-secondary-navigation"&gt;&lt;div class="hds-secondary-navigation-wrapper z-top width-100 padding-0"&gt;&lt;div id="" class="hds-secondary-navigation width-full border-bottom-1px text-center hds-color-mode-dark hds-module hds-module-full alignfull wp-block-nasa-blocks-hdsnav"&gt;&lt;button type="button" class="hds-secondary-nav-mobile-button display-flex tablet:display-flex desktop:display-none width-full flex-align-center bg-carbon-90 border-color-carbon-80 color-spacesuit-white" aria-expanded="false" aria-controls="hds-secondary-nav-track"&gt;&lt;span&gt;APOD&lt;/span&gt;&lt;svg width="16" height="16" alt="" enable-background="new 0 0 400 400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"&gt;&lt;path d="m4.2 122.2 195.1 195.1 196.5-196.6-37.9-38-157.8 157.8-156.8-156.8z" /&gt;&lt;/svg&gt;&lt;/button&gt;&lt;div class="hds-secondary-nav-track grid-container grid-container-extrawide padding-0 tablet:padding-x-3 desktop:padding-x-2 hds-secondary-navigation-has-breadcrumbs"&gt;&lt;div class="hds-secondary-navigation-breadcrumbs display-none tablet:display-none desktop:display-flex flex-align-center"&gt;&lt;nav class="usa-breadcrumb" aria-label="Breadcrumbs"&gt;&lt;ol class="usa-breadcrumb__list"&gt;&lt;li class="usa-breadcrumb__list-item"&gt;&lt;a href="https://science.nasa.gov/" class="usa-breadcrumb__link" rel="noopener"&gt;&lt;span&gt;Science&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-breadcrumb__list-item"&gt;&lt;a href="https://science.nasa.gov/apod/apod-index/" class="usa-breadcrumb__link" rel="noopener"&gt;&lt;span&gt;APOD&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-breadcrumb__list-item usa-current" aria-current="page"&gt;&lt;span&gt;APOD: 2026 August 5 – Spokes…&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/nav&gt;&lt;/div&gt;&lt;div class="hds-secondary-navigation-menu-items"&gt;&lt;nav&gt;&lt;ul class="usa-nav__primary usa-accordion flex-justify-center margin-0"&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://science.nasa.gov/apod/" rel="noopener"&gt;Today’s APOD&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://science.nasa.gov/apod/archive/" rel="noopener"&gt;Archive&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://science.nasa.gov/apod/submit/" rel="noopener"&gt;Submissions&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://science.nasa.gov/apod/apod-index/" rel="noopener"&gt;Index&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://science.nasa.gov/apod/apod-search/" rel="noopener"&gt;Search&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://science.nasa.gov/apod/apod-calendar/" rel="noopener"&gt;Calendar&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://science.nasa.gov/feed/apod-basic/" rel="noopener"&gt;RSS&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://science.nasa.gov/apod/apod-education/" rel="noopener"&gt;Education&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://science.nasa.gov/apod/apod-about/" rel="noopener"&gt;About&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://asterisk.apod.com/viewtopic.php?t=45003" rel="noopener"&gt;Discuss&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/nav&gt;&lt;/div&gt;&lt;div class="hds-secondary-navigation-menu-spacer"&gt; &lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div id="" class="hds-media-detail-hero nasa-gb-align-wide width-full maxw-full margin-y-5 desktop:margin-y-7 padding-x-3 media-detail-hero--suppress-inner-media-caption hds-module alignwide wp-block-nasa-blocks-media-detail-hero"&gt;	&lt;div class="grid-container grid-container-block padding-x-0"&gt;
+					&lt;p class="label margin-bottom-1"&gt;APOD&lt;/p&gt;
+		
+									&lt;p class="heading-22 margin-top-0 margin-bottom-2"&gt;Astronomy Picture of the Day&lt;/p&gt;
+					
+					&lt;p class="p-md margin-top-0 margin-bottom-3 media-detail-hero__subtext"&gt;
+				&lt;a href="/apod/archive/"&gt;Discover the cosmos!&lt;/a&gt; Each day a different image or photograph of our fascinating universe is featured, along with a brief explanation written by a professional astronomer.			&lt;/p&gt;
+		
+					&lt;div class="media-detail-hero__media margin-bottom-6"&gt;
+				&lt;div id="" class="hds-media hds-module wp-block-image"&gt;&lt;div class="margin-left-auto margin-right-auto nasa-block-align-full"&gt;&lt;div class="hds-media-wrapper margin-left-auto margin-right-auto"&gt;&lt;figure class="hds-media-inner hds-cover-wrapper hds-media-ratio-cover "&gt;&lt;a href="https://assets.science.nasa.gov/content/dam/science/cds/apod/apod/2026/august/saturn_spokes.gif?w=1133&amp;#038;h=716&amp;#038;fit=clip&amp;#038;crop=faces%2Cfocalpoint" rel="noopener"&gt;&lt;img decoding="async" width="1133" height="716" src="https://assets.science.nasa.gov/content/dam/science/cds/apod/apod/2026/august/saturn_spokes.gif?w=1133&amp;#038;h=716&amp;#038;fit=clip&amp;#038;crop=faces%2Cfocalpoint" class="attachment-2048x2048 size-2048x2048" alt="A large gaseous planet surrounded by a large ring of material (actually multiple rings). The planet and its rings are rotating. A dark shadow appears at the left side of one of the rings and disappears after a short period of time." style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" block_context="nasa-block" loading="lazy" /&gt;&lt;/a&gt;&lt;/figure&gt;&lt;figcaption class="hds-caption padding-y-2"&gt;&lt;div class="hds-credits"&gt;Brad Croslin&lt;/div&gt;&lt;/figcaption&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;			&lt;/div&gt;
+		
+									&lt;h1 class="display-48 margin-top-0 margin-bottom-3"&gt;Spokes on Saturn&amp;#8217;s B Ring&lt;/h1&gt;
+					
+					&lt;div class="grid-row media-detail-hero__content-row"&gt;
+									&lt;div class="grid-col-12 desktop:grid-col-6"&gt;
+						&lt;p class="p-md margin-0 media-detail-hero__description"&gt;
+							&lt;strong&gt;Explanation:&lt;/strong&gt; Don’t get spooked by Saturn’s ghostly spokes! Today we feature a nearly two-hour timelapse of Saturn and its rings looping forwards and backwards. A day on Saturn is only 10 hours long, so two hours of observation covers quite a bit of its rotation. If you look closely, a ghoulish shadow appears and disappears as &lt;a href="https://science.nasa.gov/resource/saturns-rings-2/" rel="noopener"&gt;Saturn’s B ring&lt;/a&gt; rotates. Decades of observation with &lt;a href="https://science.nasa.gov/resource/ring-spokes-4/" rel="noopener"&gt;Voyager 2&lt;/a&gt;, &lt;a href="https://science.nasa.gov/image-article/apod-2009-june-2-spokes-reappear-on-saturns-rings/" rel="noopener"&gt;Cassini&lt;/a&gt;, and &lt;a href="https://science.nasa.gov/video-detail/hubble-saturn-oct2023-stsci-01hgxkq49bmac02hcazdvkea3f/" rel="noopener"&gt;Hubble&lt;/a&gt; show the appearance of Saturn’s spokes varies with &lt;a href="https://www.planetary.org/space-images/saturns-seasons" rel="noopener"&gt;the planet’s seasons&lt;/a&gt;. Like Earth, Saturn’s &lt;a href="https://www.youtube.com/watch?v=46G1foTIivo" rel="noopener"&gt;spin axis&lt;/a&gt; is tilted compared to the plane of its orbit around the Sun. During Saturn’s &lt;a href="https://education.nationalgeographic.org/resource/equinox/" rel="noopener"&gt;equinox&lt;/a&gt;, the rings are &lt;a href="https://science.nasa.gov/image-article/apod-2025-november-16-crossing-saturns-ring-plane/" rel="noopener"&gt;less tilted&lt;/a&gt; away from the Sun and the planet receives more evenly distributed sunlight and &lt;a href="https://science.nasa.gov/sun/what-is-the-solar-wind/" rel="noopener"&gt;solar wind&lt;/a&gt;. Although their origin is still uncertain, Saturn’s spokes may be shadows of and reflections off of dust and ice levitating above the rings caused by &lt;a href="https://science.nasa.gov/universe/overview/forces/#electromagnetic-force" rel="noopener"&gt;electromagnetic&lt;/a&gt; interactions between the solar wind and the planet’s magnetic field.&lt;br&gt;&lt;br&gt;Find dark skies and look up this August to witness &lt;a href="https://science.nasa.gov/solar-system/meteors-meteorites/perseids/" rel="noopener"&gt;the Perseid meteor shower&lt;/a&gt; uninhibited by the Moon!&lt;br&gt;&lt;strong&gt;Tomorrow’s picture:&lt;/strong&gt; the COSMOS						&lt;/p&gt;
+					&lt;/div&gt;
+				
+									&lt;div class="display-none desktop:display-block desktop:grid-col-1" aria-hidden="true"&gt;&lt;/div&gt;
+				
+									&lt;div class="grid-col-12 desktop:grid-col-5 margin-top-3 desktop:margin-top-0"&gt;
+						&lt;table class="media-detail-hero__meta-table width-full"&gt;
+							&lt;tbody&gt;
+																			&lt;tr class="media-detail-hero__meta-row"&gt;
+											&lt;th scope="row" class="label padding-y-1"&gt;Date:&lt;/th&gt;
+											&lt;td class="p-sm padding-y-1"&gt;
+												August 5, 2026											&lt;/td&gt;
+										&lt;/tr&gt;
+																			&lt;tr class="media-detail-hero__meta-row"&gt;
+											&lt;th scope="row" class="label padding-y-1"&gt;Credit &amp;#038; Copyright:&lt;/th&gt;
+											&lt;td class="p-sm padding-y-1"&gt;
+												&lt;a href="https://www.flickr.com/photos/203602634@N08/" rel="noopener"&gt;Brad Croslin&lt;/a&gt;											&lt;/td&gt;
+										&lt;/tr&gt;
+																			&lt;tr class="media-detail-hero__meta-row"&gt;
+											&lt;th scope="row" class="label padding-y-1"&gt;Authors &amp;#038; editors:&lt;/th&gt;
+											&lt;td class="p-sm padding-y-1"&gt;
+												Robert Nemiroff, Jerry Bonnell, Cecilia Chirenti, Keighley Rockcliffe											&lt;/td&gt;
+										&lt;/tr&gt;
+																			&lt;tr class="media-detail-hero__meta-row"&gt;
+											&lt;th scope="row" class="label padding-y-1"&gt;A service of:&lt;/th&gt;
+											&lt;td class="p-sm padding-y-1"&gt;
+												&lt;a href="https://science.gsfc.nasa.gov/astrophysics/" target="_blank" rel="noopener"&gt;ASD&lt;/a&gt; at &lt;a href="https://www.nasa.gov/" target="_blank" rel="noopener"&gt;NASA&lt;/a&gt; / &lt;a href="https://www.nasa.gov/centers/goddard/" target="_blank" rel="noopener"&gt;GSFC&lt;/a&gt;,&lt;br&gt;&lt;a href="https://science.nasa.gov/learn/about-science-activation/" target="_blank" rel="noopener"&gt;NASA Science Activation&lt;/a&gt; &amp;#038; &lt;a href="https://www.mtu.edu/" target="_blank" rel="noopener"&gt;Michigan Tech. U.&lt;/a&gt;											&lt;/td&gt;
+										&lt;/tr&gt;
+																&lt;/tbody&gt;
+						&lt;/table&gt;
+					&lt;/div&gt;
+							&lt;/div&gt;
+			&lt;/div&gt;
+	&lt;/div&gt;
+
+&lt;div id="" class="nasa-gb-align-wide nasa-button-link padding-y-1 padding-x-0 hds-module alignwide wp-block-nasa-blocks-related-link"&gt;
+			&lt;a href="https://science.nasa.gov/apod/random-apod/" target="_self" class="button-primary button-primary-md link-external-false" aria-label="Random APOD Generator" rel="noopener"&gt;
+			&lt;span class="line-height-alt-1"&gt;Random APOD Generator&lt;/span&gt;
+			&lt;svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;&lt;circle class="button-primary-circle" cx="16" cy="16" r="16"&gt;&lt;/circle&gt;&lt;path d="M8 16.956h12.604l-3.844 4.106 1.252 1.338L24 16l-5.988-6.4-1.252 1.338 3.844 4.106H8v1.912z" class="color-spacesuit-white"&gt;&lt;/path&gt;&lt;/svg&gt;
+		&lt;/a&gt;
+	
+	&lt;/div&gt;
+
+
+&lt;div style="height:1px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+&lt;div id="" class="hds-module alignwide wp-block-smd-block-next-prev"&gt;            &lt;div class="smd-next-prev-buttons-titles"&gt;
+            &lt;a class="smd-next-prev__prev" href="https://science.nasa.gov/image-article/apod-august-4-2026-curious-cometary-knots-in-the-helix-nebula/" rel="noopener"&gt;
+                &lt;div class="hds-next-prev-nav-arrow hds-next-prev-arrow-prev"&gt;
+                    &lt;svg version="1.1" x="0px" y="0px" width="9px" height="9px" viewBox="0 0 9 9"&gt;&lt;path class="st0" d="M3.5,4.5l3.7-3.6L6.3,0L1.8,4.5L6.3,9l0.9-0.9L3.5,4.5z"&gt;&lt;/path&gt;&lt;/svg&gt;
+                &lt;/div&gt;
+                &lt;div class="smd-next-prev-buttons-titles__content"&gt;
+                    &lt;div class="smd-next-prev-buttons-titles__prev-label"&gt;
+                        Yesterday&amp;#8217;s Image                    &lt;/div&gt;
+                    &lt;div class="smd-next-prev-buttons-titles__prev"&gt;
+                        APOD: 2026 August 4 – Curious Cometary Knots in the Helix Nebula                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/a&gt;
+            &lt;a class="smd-next-prev__next smd-next-prev__disabled" href="#"&gt;
+                &lt;div class="smd-next-prev-buttons-titles__content"&gt;
+                    &lt;div class="smd-next-prev-buttons-titles__next-label"&gt;
+                        Tomorrow&amp;#8217;s Image                    &lt;/div&gt;
+                    &lt;div class="smd-next-prev-buttons-titles__next"&gt;
+                                            &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class="hds-next-prev-nav-arrow hds-next-prev-arrow-next"&gt;
+                    &lt;svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="9px" height="9px" viewBox="0 0 9 9"&gt;&lt;path class="st0" d="M5.5,4.5L1.8,8.1L2.7,9l4.5-4.5L2.7,0L1.8,0.9L5.5,4.5z"&gt;&lt;/path&gt;&lt;/svg&gt;
+                &lt;/div&gt;
+            &lt;/a&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;</ns3:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>The Paradox of Lençóis Maranhenses National Park</title>
+		<link>https://science.nasa.gov/earth/earth-observatory/the-paradox-of-lencois-maranhenses-national-park/</link>
+		
+		<dc:creator />
+		<pubDate>Wed, 05 Aug 2026 04:01:00 +0000</pubDate>
+				<guid isPermaLink="false">https://science.nasa.gov/earth/earth-observatory/the-paradox-of-lencois-maranhenses-national-park/</guid>
+
+					<description>The coastal dune field in Brazil looks like a desert but fills with freshwater lagoons every year.</description>
+										<ns3:encoded>&lt;div id="" class="hds-module hds-module-full alignfull wp-block-nasa-blocks-secondary-navigation"&gt;&lt;div class="hds-secondary-navigation-wrapper z-top width-100 padding-0"&gt;&lt;div id="" class="hds-secondary-navigation width-full border-bottom-1px text-center hds-color-mode-dark hds-module hds-module-full alignfull wp-block-nasa-blocks-hdsnav"&gt;&lt;button type="button" class="hds-secondary-nav-mobile-button display-flex tablet:display-flex desktop:display-none width-full flex-align-center bg-carbon-90 border-color-carbon-80 color-spacesuit-white" aria-expanded="false" aria-controls="hds-secondary-nav-track"&gt;&lt;span&gt;Earth Observatory&lt;/span&gt;&lt;svg width="16" height="16" alt="" enable-background="new 0 0 400 400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"&gt;&lt;path d="m4.2 122.2 195.1 195.1 196.5-196.6-37.9-38-157.8 157.8-156.8-156.8z" /&gt;&lt;/svg&gt;&lt;/button&gt;&lt;div class="hds-secondary-nav-track grid-container grid-container-extrawide padding-0 tablet:padding-x-3 desktop:padding-x-2 hds-secondary-navigation-has-breadcrumbs"&gt;&lt;div class="hds-secondary-navigation-breadcrumbs display-none tablet:display-none desktop:display-flex flex-align-center"&gt;&lt;nav class="usa-breadcrumb" aria-label="Breadcrumbs"&gt;&lt;ol class="usa-breadcrumb__list"&gt;&lt;li class="usa-breadcrumb__list-item"&gt;&lt;a href="https://science.nasa.gov/" class="usa-breadcrumb__link" rel="noopener"&gt;&lt;span&gt;Science&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-breadcrumb__list-item"&gt;&lt;a href="https://science.nasa.gov/earth/earth-observatory" class="usa-breadcrumb__link" rel="noopener"&gt;&lt;span&gt;Earth Observatory&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-breadcrumb__list-item usa-current" aria-current="page"&gt;&lt;span&gt;The Paradox of Lençóis…&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/nav&gt;&lt;/div&gt;&lt;div class="hds-secondary-navigation-menu-items"&gt;&lt;nav&gt;&lt;ul class="usa-nav__primary usa-accordion flex-justify-center margin-0"&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://science.nasa.gov/earth" rel="noopener"&gt;Earth&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://science.nasa.gov/earth/earth-observatory" rel="noopener"&gt;Earth Observatory&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://science.nasa.gov/earth/earth-observatory/image-of-the-day/" rel="noopener"&gt;Image of the Day&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://science.nasa.gov/earth/earth-observatory/explorer/" rel="noopener"&gt;EO Explorer&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item"&gt;&lt;button type="button" class="usa-accordion__button usa-nav__link" aria-expanded="false" aria-controls="basic-nav-section-one"&gt;&lt;span&gt;Topics&lt;/span&gt;&lt;svg class="hds-desktop-submenu-toggle-icon display-none tablet:display-none desktop:display-block" width="16" height="16" alt="" enable-background="new 0 0 400 400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"&gt;&lt;path d="m4.2 122.2 195.1 195.1 196.5-196.6-37.9-38-157.8 157.8-156.8-156.8z" /&gt;&lt;/svg&gt;&lt;svg class="hds-mobile-submenu-toggle-icon display-block tablet:display-block desktop:display-none" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;&lt;circle cx="8" cy="8" r="7.5" fill="#0B3D91" stroke="white"/&gt;&lt;rect x="4" y="7.6001" width="8" height="0.8" fill="white"/&gt;&lt;rect class="hds-mobile-submenu-toggle-icon-line-vertical" x="7.59998" y="12" width="8" height="0.8" transform="rotate(-90 7.59998 12)" fill="white"/&gt;&lt;/svg&gt;&lt;/button&gt;&lt;ul id="basic-nav-section-one" class="usa-nav__submenu" hidden&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/" rel="noopener"&gt;All Topics&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/atmosphere/" rel="noopener"&gt;Atmosphere&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/land/" rel="noopener"&gt;Land&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/heat-radiation/" rel="noopener"&gt;Heat &amp;#038; Radiation&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/life-on-earth/" rel="noopener"&gt;Life on Earth&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/human-dimensions/" rel="noopener"&gt;Human Dimensions&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/natural-events/" rel="noopener"&gt;Natural Events&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/oceans/" rel="noopener"&gt;Oceans&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/remote-sensing-technology/" rel="noopener"&gt;Remote Sensing Technology&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/snow-and-ice/" rel="noopener"&gt;Snow &amp;#038; Ice&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/water/" rel="noopener"&gt;Water&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item"&gt;&lt;button type="button" class="usa-accordion__button usa-nav__link" aria-expanded="false" aria-controls="basic-nav-section-one"&gt;&lt;span&gt;More Content&lt;/span&gt;&lt;svg class="hds-desktop-submenu-toggle-icon display-none tablet:display-none desktop:display-block" width="16" height="16" alt="" enable-background="new 0 0 400 400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"&gt;&lt;path d="m4.2 122.2 195.1 195.1 196.5-196.6-37.9-38-157.8 157.8-156.8-156.8z" /&gt;&lt;/svg&gt;&lt;svg class="hds-mobile-submenu-toggle-icon display-block tablet:display-block desktop:display-none" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;&lt;circle cx="8" cy="8" r="7.5" fill="#0B3D91" stroke="white"/&gt;&lt;rect x="4" y="7.6001" width="8" height="0.8" fill="white"/&gt;&lt;rect class="hds-mobile-submenu-toggle-icon-line-vertical" x="7.59998" y="12" width="8" height="0.8" transform="rotate(-90 7.59998 12)" fill="white"/&gt;&lt;/svg&gt;&lt;/button&gt;&lt;ul id="basic-nav-section-one" class="usa-nav__submenu" hidden&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/collections/" rel="noopener"&gt;Collections&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/global-maps/" rel="noopener"&gt;Global Maps&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/world-of-change/" rel="noopener"&gt;World of Change&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/feature-articles/" rel="noopener"&gt;Articles&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/blogs/earth-matters/" rel="noopener"&gt;Earth Matters Blog&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/" rel="noopener"&gt;Blue Marble: Next Generation&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/kids/earth/eo-kids/" rel="noopener"&gt;EO Kids&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/kids/earth/mission-biomes/" rel="noopener"&gt;Mission: Biomes&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item"&gt;&lt;button type="button" class="usa-accordion__button usa-nav__link" aria-expanded="false" aria-controls="basic-nav-section-one"&gt;&lt;span&gt;About&lt;/span&gt;&lt;svg class="hds-desktop-submenu-toggle-icon display-none tablet:display-none desktop:display-block" width="16" height="16" alt="" enable-background="new 0 0 400 400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"&gt;&lt;path d="m4.2 122.2 195.1 195.1 196.5-196.6-37.9-38-157.8 157.8-156.8-156.8z" /&gt;&lt;/svg&gt;&lt;svg class="hds-mobile-submenu-toggle-icon display-block tablet:display-block desktop:display-none" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;&lt;circle cx="8" cy="8" r="7.5" fill="#0B3D91" stroke="white"/&gt;&lt;rect x="4" y="7.6001" width="8" height="0.8" fill="white"/&gt;&lt;rect class="hds-mobile-submenu-toggle-icon-line-vertical" x="7.59998" y="12" width="8" height="0.8" transform="rotate(-90 7.59998 12)" fill="white"/&gt;&lt;/svg&gt;&lt;/button&gt;&lt;ul id="basic-nav-section-one" class="usa-nav__submenu" hidden&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/about-the-eo/" rel="noopener"&gt;About Us&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/subscribe" rel="noopener"&gt;Subscribe&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/subscribe/feeds/" rel="noopener"&gt;🛜 RSS&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/contact-the-eo/" rel="noopener"&gt;Contact Us&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://science.nasa.gov/earth/earth-observatory/search/" rel="noopener"&gt;Search&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/nav&gt;&lt;/div&gt;&lt;div class="hds-secondary-navigation-menu-spacer"&gt; &lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div id="" class="hds-media hds-module wp-block-image"&gt;&lt;div class="margin-left-auto margin-right-auto nasa-block-align-wide"&gt;&lt;div class="hds-media-wrapper margin-left-auto margin-right-auto"&gt;&lt;figure class="hds-media-inner hds-cover-wrapper hds-media-ratio-none "&gt;&lt;a href="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608.jpg?w=2160&amp;#038;h=1413&amp;#038;fit=clip&amp;#038;crop=faces%2Cfocalpoint" rel="noopener"&gt;&lt;img fetchpriority="high" decoding="async" width="2160" height="1413" src="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608.jpg?w=2160&amp;#038;h=1413&amp;#038;fit=clip&amp;#038;crop=faces%2Cfocalpoint" class="attachment-2048x2048 size-2048x2048" alt="Bright white sand dunes stretch for dozens of kilometers between the dark blue Atlantic Ocean and green coastal vegetation. Blue and green freshwater lagoons fill low areas between the dunes, while dark-green vegetated patches lie within the dune field." style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" block_context="nasa-block" loading="eager" srcset="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608.jpg?w=2160&amp;#038;h=1413&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 2160w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608.jpg?w=300&amp;#038;h=196&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 300w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608.jpg?w=768&amp;#038;h=502&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 768w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608.jpg?w=1024&amp;#038;h=670&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 1024w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608.jpg?w=1536&amp;#038;h=1005&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 1536w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608.jpg?w=2048&amp;#038;h=1340&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 2048w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608.jpg?w=400&amp;#038;h=262&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 400w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608.jpg?w=600&amp;#038;h=393&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 600w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608.jpg?w=900&amp;#038;h=589&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 900w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608.jpg?w=1200&amp;#038;h=785&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 1200w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608.jpg?w=2000&amp;#038;h=1308&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 2000w" sizes="auto, (max-width: 2160px) 100vw, 2160px" /&gt;&lt;/a&gt;&lt;/figure&gt;&lt;figcaption class="hds-caption padding-y-2"&gt;&lt;div class="hds-caption-text p-sm margin-0"&gt;A mosaic of hundreds of freshwater lagoons partially filled the troughs around many of the park’s dunes when the &lt;a href="https://science.nasa.gov/mission/landsat/oli/" rel="noopener"&gt;OLI&lt;/a&gt; (Operational Land Imager) on &lt;a href="///Users/avoiland/Documents/c"&gt;&lt;a href="https://science.nasa.gov/mission/landsat-9/" rel="noopener"&gt;Landsat 9&lt;/a&gt;&lt;/a&gt; captured this image on June 8, 2026.&lt;/div&gt;&lt;div class="hds-credits"&gt;NASA Earth Observatory/Michala Garrison&lt;/div&gt;&lt;/figcaption&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+
+
+&lt;p class="wp-block-paragraph"&gt;The coastal dune system in &lt;a href="https://whc.unesco.org/en/list/1611/" rel="noopener"&gt;Lençóis Maranhenses National Park&lt;/a&gt; in northeastern Brazil is among the most surreal landscapes on Earth. At first glance, the park looks like a desert, but it is far from it. This place receives about 125 centimeters (50 inches) of rain per year—slightly more than Seattle and double what falls in London. &lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;The result is a paradox: rows of sparkling white quartz dunes, some rising 30 meters (100 feet), soar over a mosaic of blue and green freshwater lagoons. The park’s name stems from the Portuguese word lençóis&lt;strong&gt;, &lt;/strong&gt;meaning “bedsheets,” a reference that makes the most sense when the park is viewed from afar. From that perspective, the sweeping curves of the largest coastal dune field in South America resemble a rumpled, white bedsheet.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;These &lt;a href="https://science.nasa.gov/mission/landsat-9/" data-type="link" data-id="https://science.nasa.gov/mission/landsat-9/" rel="noopener"&gt;Landsat 9&lt;/a&gt; images were captured in June 2026, around the time when lagoon water levels typically peak. The partially impermeable layer of bedrock and clay beneath the sand prevents the lagoons from draining during the wet season. However, as rains subside between August and November, the &lt;a href="https://www.usgs.gov/publications/water-table" rel="noopener"&gt;water table&lt;/a&gt; falls, and by December, most of the lagoons dry up.&lt;/p&gt;
+
+
+&lt;div id="" class="hds-media hds-module wp-block-image"&gt;&lt;div class="margin-left-auto margin-right-auto nasa-block-align-wide"&gt;&lt;div class="hds-media-wrapper margin-left-auto margin-right-auto"&gt;&lt;figure class="hds-media-inner hds-cover-wrapper hds-media-ratio-none "&gt;&lt;a href="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazil_lencois_oli_20260608_crop.jpg?w=1440&amp;#038;h=997&amp;#038;fit=clip&amp;#038;crop=faces%2Cfocalpoint" rel="noopener"&gt;&lt;img decoding="async" width="1440" height="997" src="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazil_lencois_oli_20260608_crop.jpg?w=1440&amp;#038;h=997&amp;#038;fit=clip&amp;#038;crop=faces%2Cfocalpoint" class="attachment-2048x2048 size-2048x2048" alt="The various blue and greens of the lagoons are more visible in this view of a portion of the dune field. A small river with brown water is visible running northward through the dune field." style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" block_context="nasa-block" loading="lazy" srcset="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazil_lencois_oli_20260608_crop.jpg?w=1440&amp;#038;h=997&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 1440w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazil_lencois_oli_20260608_crop.jpg?w=300&amp;#038;h=208&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 300w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazil_lencois_oli_20260608_crop.jpg?w=768&amp;#038;h=532&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 768w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazil_lencois_oli_20260608_crop.jpg?w=1024&amp;#038;h=709&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 1024w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazil_lencois_oli_20260608_crop.jpg?w=400&amp;#038;h=277&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 400w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazil_lencois_oli_20260608_crop.jpg?w=600&amp;#038;h=415&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 600w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazil_lencois_oli_20260608_crop.jpg?w=900&amp;#038;h=623&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 900w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazil_lencois_oli_20260608_crop.jpg?w=1200&amp;#038;h=831&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 1200w" sizes="auto, (max-width: 1440px) 100vw, 1440px" /&gt;&lt;/a&gt;&lt;/figure&gt;&lt;figcaption class="hds-caption padding-y-2"&gt;&lt;div class="hds-caption-text p-sm margin-0"&gt;Winds blowing from the northeast created the lines of dunes visible in this detailed view of a portion of the Landsat 9 image shown above.&lt;/div&gt;&lt;div class="hds-credits"&gt;NASA Earth Observatory/Michala Garrison&lt;/div&gt;&lt;/figcaption&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+
+
+&lt;p class="wp-block-paragraph"&gt;The dune field, a tan area within an expanse of green, is the centerpiece of the park. It spans about 900 square kilometers (350 square miles), roughly the size of New York City. From above, shallower lagoons appear light blue, often taking on turquoise or aquamarine hues as sunlight reflects off the sand below. Deeper lagoons are darker, a result of the deeper water absorbing more red, yellow, and green wavelengths, leaving mostly blue light to scatter back. &lt;a href="https://www.usgs.gov/water-science-school/science/sediment-and-suspended-sediment" rel="noopener"&gt;Suspended sediment&lt;/a&gt;, microscopic algae, and &lt;a href="https://www.usgs.gov/labs/organic-matter-research-laboratory/what-organic-matter-0" rel="noopener"&gt;dissolved organic matter&lt;/a&gt; also contribute to the array of colors, giving some lagoons greener and browner tones.                                    &lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;Green vegetation surrounds the dune field, which sits at the intersection of three &lt;a href="https://salatainstitute.harvard.edu/beyond-the-amazon-brazils-six-biomes-shape-a-global-climate-story/" rel="noopener"&gt;Brazilian biomes&lt;/a&gt;: the Amazon rainforest to the west, the tropical wooded savannas of the Cerrado to the south, and the dry shrublands and thorn forests of the Caatinga to the east. Closest to the dunes are mangroves and &lt;a href="https://en.wikipedia.org/wiki/Atlantic_Coast_restingas" rel="noopener"&gt;restinga forests&lt;/a&gt;, ecosystems well adapted to sandy, coastal soils.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;The dune field exists because of the rare convergence of geologic and climatic conditions. Rivers, including the Mearim and Parnaíba, deliver the key ingredient—quartz sand—to this unusually flat portion of the Maranhão coastline in massive quantities. It has accumulated here over the past few hundred thousand years driven in part by fluctuating sea levels and shoreline&lt;em&gt; &lt;/em&gt;&lt;a href="https://www.ebsco.com/research-starters/earth-and-atmospheric-sciences/transgression-and-regression" rel="noopener"&gt;transgression and regression&lt;/a&gt;&lt;em&gt;.&lt;/em&gt; Persistent easterly trade winds have also played a critical role. During the dry season, winds often reach at least 50 kilometers per hour, fast enough to build the dunes and push them westward at a pace of roughly &lt;a href="https://whc.unesco.org/en/list/1611/#:~:text=4%20to%2025" rel="noopener"&gt;4 to 25 meters&lt;/a&gt; per year. That is fast for sand dunes, though not the fastest in the world. Satellites have tracked small barchan dunes in &lt;a href="https://science.nasa.gov/earth/earth-observatory/racing-dunes-in-namibia-150808/" rel="noopener"&gt;Namibia’s Sperrgebiet region&lt;/a&gt; moving at rates exceeding 80 meters per year.&lt;/p&gt;
+
+
+&lt;div id="" class="hds-media hds-module wp-block-image"&gt;&lt;div class="margin-left-auto margin-right-auto nasa-block-align-full"&gt;&lt;div class="hds-media-wrapper margin-left-auto margin-right-auto"&gt;&lt;figure class="hds-media-inner hds-cover-wrapper hds-media-ratio-none "&gt;&lt;a href="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_wide.jpg?w=2160&amp;#038;h=897&amp;#038;fit=clip&amp;#038;crop=faces%2Cfocalpoint" rel="noopener"&gt;&lt;img decoding="async" width="2160" height="897" src="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_wide.jpg?w=2160&amp;#038;h=897&amp;#038;fit=clip&amp;#038;crop=faces%2Cfocalpoint" class="attachment-2048x2048 size-2048x2048" alt="Bright white sand dunes stretch for dozens of kilometers between the dark blue Atlantic Ocean and green coastal vegetation. Blue and green freshwater lagoons fill low areas between the dunes, while dark-green vegetated patches lie within the dune field." style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" block_context="nasa-block" loading="lazy" srcset="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_wide.jpg?w=2160&amp;#038;h=897&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 2160w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_wide.jpg?w=300&amp;#038;h=125&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 300w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_wide.jpg?w=768&amp;#038;h=319&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 768w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_wide.jpg?w=1024&amp;#038;h=425&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 1024w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_wide.jpg?w=1536&amp;#038;h=638&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 1536w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_wide.jpg?w=2048&amp;#038;h=850&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 2048w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_wide.jpg?w=400&amp;#038;h=166&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 400w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_wide.jpg?w=600&amp;#038;h=249&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 600w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_wide.jpg?w=900&amp;#038;h=374&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 900w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_wide.jpg?w=1200&amp;#038;h=498&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 1200w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_wide.jpg?w=2000&amp;#038;h=831&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 2000w" sizes="auto, (max-width: 2160px) 100vw, 2160px" /&gt;&lt;/a&gt;&lt;/figure&gt;&lt;figcaption class="hds-caption padding-y-2"&gt;&lt;div class="hds-credits"&gt;NASA Earth Observatory/Michala Garrison&lt;/div&gt;&lt;/figcaption&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+
+
+&lt;p class="wp-block-paragraph"&gt;Landsat images, meanwhile, show the dune field at Lençóis Maranhenses has &lt;a href="https://livingatlas.arcgis.com/landsatexplorer/#mapCenter=-43.04471%2C-2.59792%2C11.655&amp;#038;mode=swipe&amp;#038;mainScene=1984-06-20%7CShort-wave+Infrared+for+Visualization%7C15569&amp;#038;secondaryScene=2026-06-08%7CShort-wave+Infrared+for+Visualization%7C10347060" target="_blank" rel="noreferrer noopener"&gt;extended westward&lt;/a&gt; by about 0.5 kilometers between 1986 and 2026 in some areas due to the conveyor belt of dunes running inland from the coastline. The nearly constant movement of sand prevents vegetation from becoming established across much of the dune field.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;UNESCO declared the park a World Heritage site in 2024, &lt;a href="https://whc.unesco.org/document/198949" rel="noopener"&gt;citing&lt;/a&gt; its remarkable geology and rich biodiversity. The park is home to more than 850 documented species, including &lt;a href="https://doi.org/10.1007/s11756-026-02217-1" rel="noopener"&gt;fish&lt;/a&gt;, birds, &lt;a href="https://zookeys.pensoft.net/articles.php?id=3400" rel="noopener"&gt;reptiles&lt;/a&gt;, mammals, and &lt;a href="https://www.academia.edu/6753141/The_planktonic_community_in_tropical_interdunal_ponds_Len%C3%A7%C3%B3is_Maranhenses_National_Park_Maranh%C3%A3o_State_Brazil_A_comunidade_planct%C3%B4nica_em_lagoas_interdunares" rel="noopener"&gt;phytoplankton&lt;/a&gt;. Among them are four endangered species, including the neotropical otter, West Indian manatee, scarlet ibis, and &lt;a href="https://www.sciencedirect.com/topics/agricultural-and-biological-sciences/leopardus-tigrinus" rel="noopener"&gt;oncilla&lt;/a&gt; (a type of wild cat). Among the lagoons’ most remarkable inhabitants are the &lt;a href="https://www.fishbase.se/summary/Hoplias-malabaricus.html" rel="noopener"&gt;trahira&lt;/a&gt;&lt;em&gt; (Hoplias malabaricus)&lt;/em&gt;, a predatory fish species with large canine-like teeth. During the dry season, it burrows far enough under the sand to find damp mud, where it enters a dormant state, emerging after the rains to hunt insects and other fish.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;&lt;em&gt;NASA Earth Observatory images by Michala Garrison, using Landsat data from the &lt;/em&gt;&lt;a href="http://earthexplorer.usgs.gov/" rel="noopener"&gt;&lt;em&gt;U.S. Geological Survey&lt;/em&gt;&lt;/a&gt;&lt;em&gt;.&lt;/em&gt; &lt;em&gt;Story by Adam Voiland.&lt;/em&gt;&lt;/p&gt;
+
+
+&lt;div id="" class="hds-featured-file-list bg-spacesuit-white padding-x-2 tablet:padding-x-3 desktop:padding-x-4 padding-y-5 desktop:padding-y-6 hds-module align wp-block-nasa-blocks-file-list"&gt;	&lt;div class="grid-container grid-container-block padding-0"&gt;
+		&lt;div class="grid-row width-full margin-bottom-4"&gt;
+			&lt;div class="grid-col-12 desktop:grid-col-6 margin-bottom-2 desktop:margin-bottom-0"&gt;
+				&lt;h2 class="heading-22"&gt;
+					Downloads				&lt;/h2&gt;
+			&lt;/div&gt;
+			&lt;div class="grid-col-12 desktop:grid-col-6"&gt;
+				&lt;div class="desktop:grid-col display-flex flex-align-center desktop:flex-justify-end"&gt;
+									&lt;/div&gt;
+			&lt;/div&gt;
+		&lt;/div&gt;
+
+					&lt;div class="hds-list-row hds-file-list-row"&gt;
+				&lt;div class="hds-list-thumbnail hds-file-list-thumbnail"&gt;
+					&lt;div class="hds-list-thumbnail-inner hds-file-list-thumbnail-inner hds-cover-wrapper"&gt;&lt;figure class="hds-media-background  "&gt;&lt;img decoding="async" width="6980" height="5125" src="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_lrg.jpg?w=6980&amp;#038;h=5125&amp;#038;fit=clip&amp;#038;crop=faces%2Cfocalpoint" class="attachment-thumbnail size-thumbnail" alt="Bright white sand dunes stretch for dozens of kilometers between the dark blue Atlantic Ocean and green coastal vegetation. Blue and green freshwater lagoons fill low areas between the dunes, while dark-green vegetated patches lie within the dune field." style="transform: scale(1.4); transform-origin: 80% 54%; object-position: 80% 54%; object-fit: cover;" block_context="nasa-block" loading="lazy" data-video-loop="" srcset="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_lrg.jpg?w=6980&amp;#038;h=5125&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 6980w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_lrg.jpg?w=300&amp;#038;h=220&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 300w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_lrg.jpg?w=768&amp;#038;h=564&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 768w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_lrg.jpg?w=1024&amp;#038;h=752&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 1024w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_lrg.jpg?w=1536&amp;#038;h=1128&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 1536w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_lrg.jpg?w=2048&amp;#038;h=1504&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 2048w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_lrg.jpg?w=400&amp;#038;h=294&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 400w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_lrg.jpg?w=600&amp;#038;h=441&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 600w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_lrg.jpg?w=900&amp;#038;h=661&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 900w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_lrg.jpg?w=1200&amp;#038;h=881&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 1200w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_lrg.jpg?w=2000&amp;#038;h=1468&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 2000w" sizes="auto, (max-width: 6980px) 100vw, 6980px" /&gt;&lt;/figure&gt;&lt;/div&gt;				&lt;/div&gt;
+				&lt;div class="hds-list-details"&gt;
+					&lt;div class="hds-list-name hds-file-list-name"&gt;
+						&lt;h2 class="heading-22"&gt;June 8, 2026&lt;/h2&gt;
+					&lt;/div&gt;
+					&lt;div class="hds-list-meta"&gt;
+						&lt;div class="hds-list-meta-item hds-list-date hds-file-list-date"&gt;
+							&lt;p class="p-sm"&gt;&lt;/p&gt;
+						&lt;/div&gt;
+						&lt;div class="hds-list-meta-item hds-file-list-filetype"&gt;
+							&lt;p class="p-sm"&gt;JPEG (36.77 MB)&lt;/p&gt;
+						&lt;/div&gt;
+					&lt;/div&gt;
+				&lt;/div&gt;
+				&lt;div class="hds-list-cta hds-file-list-download"&gt;
+					&lt;a aria-label="Download June 8, 2026" href="https://assets.science.nasa.gov/content/dam/science/esd/eo/images/iotd/2026/the-paradox-of-lençóis-maranhenses-national-park/brazillencois_oli_20260608_lrg.jpg" target="_blank" download rel="noopener"&gt;
+						&lt;svg aria-hidden="true" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;&lt;circle cx="16" cy="16.0001" r="16" fill="#1C67E3"/&gt;&lt;path d="M15.2357 8.00007L15.2357 16.4829L11.9504 13.4078L10.8801 14.4094L16.0001 19.2001L21.1201 14.4094L20.0499 13.4078L16.7645 16.4829L16.7645 8.00007L15.2357 8.00007Z" fill="white"/&gt;&lt;path fill-rule="evenodd" clip-rule="evenodd" d="M9.6 20.8001V18.4001H8V22.4001H24V18.4001H22.4V20.8001H9.6Z" fill="white"/&gt;&lt;/svg&gt;						
+					&lt;/a&gt;
+				&lt;/div&gt;
+			&lt;/div&gt;
+			&lt;/div&gt;
+
+	&lt;/div&gt;
+
+
+&lt;h2 class="wp-block-heading"&gt;References &amp;#038; Resources &lt;/h2&gt;
+
+
+
+&lt;ul class="wp-block-list"&gt;
+&lt;li&gt;Atlas Obscura (2020, July 16) &lt;a href="https://www.atlasobscura.com/articles/lencois-maranhenses" rel="noopener"&gt;The Brazilian Desert That Turns Into a Thousand Lagoons&lt;/a&gt;. Accessed August 4, 2026.&lt;/li&gt;
+
+
+
+&lt;li&gt;C.M. de M. Luna, M. (2011) &lt;a href="https://www.sciencedirect.com/science/article/abs/pii/S0169555X11000535" rel="noopener"&gt;Model for the genesis of coastal dune fields with vegetation&lt;/a&gt;. &lt;em&gt;Geomorphology,&lt;/em&gt; 129(3-4), 215-224.&lt;/li&gt;
+
+
+
+&lt;li&gt;CNN (2022, March 9) &lt;a href="https://www.cnn.com/travel/article/lencois-maranhenses-national-park-sand-dunes-brazil" rel="noopener"&gt;The unknown and otherworldly landscape of Brazil’s Lençóis Maranhenses National Park&lt;/a&gt;. Accessed August 4, 2026.&lt;/li&gt;
+
+
+
+&lt;li&gt;Global Alliance of National Park (2026) &lt;a href="https://national-parks.org/brazil/lencois-maranhenses/" rel="noopener"&gt;Lencois Maranhenses National Park&lt;/a&gt;. Accessed August 4, 2026.&lt;/li&gt;
+
+
+
+&lt;li&gt;Google Arts &amp;#038; Culture &lt;a href="https://artsandculture.google.com/story/len%C3%A7%C3%B3is-maranhenses-national-park-brazil-unesco/PwXhjuc32al5lw?hl=en" rel="noopener"&gt;Lençóis Maranhenses National Park, Brazil&lt;/a&gt;. Accessed August 4, 2026.&lt;/li&gt;
+
+
+
+&lt;li&gt;Luís Silva dos Santos, A., &lt;em&gt;et al.&lt;/em&gt; (2019) &lt;a href="https://doi.org/10.1038/s41598-019-43735-0" rel="noopener"&gt;Modelling Dunes from Lençóis Maranhenses National Park (Brazil): Largest dune field in South America&lt;/a&gt;. &lt;em&gt;Scientific Reports&lt;/em&gt;, 9(7434).&lt;/li&gt;
+
+
+
+&lt;li&gt;Marques, M., &lt;em&gt;et al. &lt;/em&gt;(2015) &lt;a href="https://doi.org/10.1007/s40415-015-0132-3" rel="noopener"&gt;Coastal plain forests in southern and southeastern Brazil: ecological drivers, floristic patterns and conservation status&lt;/a&gt;. B&lt;em&gt;razilian Journal of Botany,&lt;/em&gt; 38, 1–18.&lt;/li&gt;
+
+
+
+&lt;li&gt;Miranda, J.P., &lt;em&gt;et al.&lt;/em&gt;, (2012) &lt;a href="https://doi.org/10.3897/zookeys.246.2593" rel="noopener"&gt;Reptiles from Lençóis Maranhenses National Park, Maranhão, northeastern Brazil&lt;/a&gt;. &lt;em&gt;ZooKeys&lt;/em&gt;, 246, 51-68.&lt;/li&gt;
+
+
+
+&lt;li&gt;&lt;em&gt;National Geographic&lt;/em&gt; (2010, July) &lt;a href="https://www.nationalgeographic.com/magazine/article/brazil-dunes" rel="noopener"&gt;A Sea of Dunes.&lt;/a&gt; Accessed August 4, 2026.&lt;/li&gt;
+
+
+
+&lt;li&gt;Parteli, E.J.R. (2021) &lt;a href="https://arxiv.org/pdf/cond-mat/0410178" rel="noopener"&gt;Profile measurement and simulation of a transverse dune field in the  Lençóis Maranhenses&lt;/a&gt;. Accessed August 4, 2026.&lt;/li&gt;
+
+
+
+&lt;li&gt;Revista pesquisa fapesp (2013) &lt;a href="https://revistapesquisa.fapesp.br/en/the-secrets-of-the-lencois-maranhenses/" rel="noopener"&gt;The secrets of the Lençóis Maranhenses&lt;/a&gt;. Accessed August 4, 2026.&lt;/li&gt;
+
+
+
+&lt;li&gt;&lt;em&gt;Smithsonian Magazine&lt;/em&gt; (2014, June 20) &lt;a href="https://www.smithsonianmag.com/travel/Lencois-maranhenses-brazil-thousands-clear-blue-lagoons-in-sand-dunes-180951756/" rel="noopener"&gt;How Do Thousands of Clear Blue Lagoons End Up In These Brazilian Sand Dunes&lt;/a&gt;? Accessed August 4, 2026.&lt;/li&gt;
+
+
+
+&lt;li&gt;UNESCO (2024) &lt;a href="https://whc.unesco.org/en/list/1611/" rel="noopener"&gt;Lençóis Maranhenses National Park&lt;/a&gt;. Accessed August 4, 2026.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;div id="" class="hds-content-lists-inner hds-module hds-module-full alignfull wp-block-nasa-blocks-content-lists"&gt;			&lt;div id="content-list-c7600372-6da3-4659-b100-1ae0e7f148d3" class="hds-content-lists margin-y-3 padding-x-0 bg-spacesuit-white width-full maxw-full" data-starting-query="{"block_id":"content-list-c7600372-6da3-4659-b100-1ae0e7f148d3","categories":"","content_categories":"","exclude_child_terms":false,"exclude_child_pages":false,"layout":"grid","listing_page":"no","listing_page_category_id":2151,"meta_fields":[],"news_tags":"","number_of_items":3,"order":"DESC","orderby":"date","current_page":1,"requesting_id":1208996,"science_only":false,"search_query":"","show_content_type_tags":"yes","show_excerpts":"yes","show_pagination":true,"show_publish_date":"no","show_readtime":"yes","show_thumbnails":"yes","calendar_overflow_mode":"modal","science_org":"","content_science_orgs":"","internal_terms":"","mission_programs":"","mission_status":"","mission_target":"","mission_type":"","response_format":"html","show_drafts":false,"related_content":"1126207,1132228,1213894,1227581,1221869,1229731,1225748,1220946,1215743,1257016","use_content_term_filters":false,"filter_logic":"default","post_types":"any","base_terms":"{"category":"","science-org":"6478","internal-terms":"","news-tags":""}"}" data-current-query="{"block_id":"content-list-c7600372-6da3-4659-b100-1ae0e7f148d3","categories":"","content_categories":"","exclude_child_terms":false,"exclude_child_pages":false,"layout":"grid","listing_page":"no","listing_page_category_id":2151,"meta_fields":[],"news_tags":"","number_of_items":3,"order":"DESC","orderby":"date","current_page":1,"requesting_id":1208996,"science_only":false,"search_query":"","show_content_type_tags":"yes","show_excerpts":"yes","show_pagination":true,"show_publish_date":"no","show_readtime":"yes","show_thumbnails":"yes","calendar_overflow_mode":"modal","science_org":"","content_science_orgs":"","internal_terms":"","mission_programs":"","mission_status":"","mission_target":"","mission_type":"","response_format":"html","show_drafts":false,"related_content":"1126207,1132228,1213894,1227581,1221869,1229731,1225748,1220946,1215743,1257016","use_content_term_filters":false,"filter_logic":"default","post_types":"any","base_terms":"{"category":"","science-org":"6478","internal-terms":"","news-tags":""}"}"&gt;
+			&lt;div class="grid-container grid-container-widescreen padding-x-3"&gt;
+									&lt;div class="grid-row flex-align-start margin-bottom-3"&gt;
+						&lt;div class="desktop:grid-col-8 margin-bottom-2 desktop:margin-bottom-0"&gt;
+							&lt;h2 class="section-heading-sm line-height-sm"&gt;You may also be interested in:&lt;/h2&gt;
+							&lt;p class="margin-top-0 margin-bottom-2 maxh-tablet"&gt;Stay up-to-date with the latest content from NASA as we explore the universe and discover more about our home planet.&lt;/p&gt;
+						&lt;/div&gt;
+											&lt;/div&gt;
+							
+			&lt;div class="grid-row grid-container grid-container-block padding-0 margin-0 flex-justify-center"&gt;
+				
+								&lt;div class=" grid-col-12"&gt;
+					
+										
+										
+					&lt;div class="grid-row grid-container grid-container-block padding-0" style="display: block"&gt;
+						&lt;div id="filter-tags" class="grid-col-12 filter-tags-container"&gt;&lt;/div&gt;
+					&lt;/div&gt;
+
+					&lt;div class="smd-orbit-loader" role="status" aria-hidden="true"&gt;&lt;div class="orbit-plane"&gt;&lt;span class="orbit-dot"&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div id="post-list-container" class="hds-content-items hds-content-items-grid margin-top-2" aria-live="polite" data-rest-url="https://science.nasa.gov/wp-json/smd/v1/content-list"&gt;    &lt;div class="hds-content-item content-list-item-post"&gt;
+                    &lt;a href="https://science.nasa.gov/earth/earth-observatory/minute-man-national-historical-park-88300/" class="hds-content-item-thumbnail" rel="noopener"&gt;
+                &lt;figure class="hds-media-background  content-list-thumbnail"&gt;&lt;img decoding="async" loading="lazy" width="300px" height="300px" data-no-id="true" sizes="auto, (max-width: 300px) 100vw, 300px" srcset="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/88000/88300/minuteman_oli_2015288_front.jpg?fit=clip&amp;#038;crop=faces%2Cfocalpoint&amp;#038;w=300 300w" alt="" style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" src="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/88000/88300/minuteman_oli_2015288_front.jpg?fit=clip&amp;#038;crop=faces%2Cfocalpoint&amp;#038;w=300" &gt;&lt;/figure&gt;            &lt;/a&gt;
+                &lt;div class="hds-content-item-inner"&gt;
+            &lt;a href="https://science.nasa.gov/earth/earth-observatory/minute-man-national-historical-park-88300/" class="hds-content-item-heading" rel="noopener"&gt;
+                &lt;div class="hds-a11y-heading-22"&gt;Minute Man National Historical Park&lt;/div&gt;
+            &lt;/a&gt;
+                            &lt;div class="hds-content-item-readtime label margin-bottom-1"&gt;
+                    3 min read                &lt;/div&gt;
+                                                    &lt;p class="margin-top-0 margin-bottom-1"&gt;Sites relevant to the start of the American Revolutionary War are interspersed throughout the modern-day Boston metropolitan region.&lt;/p&gt;
+                                    &lt;div class="display-flex flex-align-center label color-carbon-60 margin-bottom-auto"&gt;&lt;svg version="1.1" class="square-2 margin-right-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="16px" height="16px" viewBox="0 0 16 16" style="enable-background:new 0 0 16 16;" xml:space="preserve"&gt;&lt;g&gt;&lt;g&gt;&lt;path d="M8,0C3.5,0-0.1,3.7,0,8.2C0.1,12.5,3.6,16,8,16c4.4,0,8-3.6,8-8C16,3.5,12.4,0,8,0z M8,15.2 C4,15.2,0.8,12,0.8,8C0.8,4,4,0.8,8,0.8c3.9,0,7.2,3.2,7.2,7.1C15.2,11.9,12,15.2,8,15.2z"/&gt;&lt;path d="M5.6,12c0.8-0.8,1.6-1.6,2.4-2.4c0.8,0.8,1.6,1.6,2.4,2.4c0-2.7,0-5.3,0-8C8.8,4,7.2,4,5.6,4 C5.6,6.7,5.6,9.3,5.6,12z"/&gt;&lt;/g&gt;&lt;/g&gt;&lt;/svg&gt;&lt;span&gt;Article&lt;/span&gt;&lt;/div&gt;                    &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;div class="hds-content-item content-list-item-post"&gt;
+                    &lt;a href="https://science.nasa.gov/earth/earth-observatory/colonial-national-historical-park-92382/" class="hds-content-item-thumbnail" rel="noopener"&gt;
+                &lt;figure class="hds-media-background  content-list-thumbnail"&gt;&lt;img decoding="async" loading="lazy" width="300px" height="300px" data-no-id="true" sizes="auto, (max-width: 300px) 100vw, 300px" srcset="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/92000/92382/colonialpark_oli_2016161_front.jpg?fit=clip&amp;#038;crop=faces%2Cfocalpoint&amp;#038;w=300 300w" alt="" style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" src="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/imagerecords/92000/92382/colonialpark_oli_2016161_front.jpg?fit=clip&amp;#038;crop=faces%2Cfocalpoint&amp;#038;w=300" &gt;&lt;/figure&gt;            &lt;/a&gt;
+                &lt;div class="hds-content-item-inner"&gt;
+            &lt;a href="https://science.nasa.gov/earth/earth-observatory/colonial-national-historical-park-92382/" class="hds-content-item-heading" rel="noopener"&gt;
+                &lt;div class="hds-a11y-heading-22"&gt;Colonial National Historical Park&lt;/div&gt;
+            &lt;/a&gt;
+                            &lt;div class="hds-content-item-readtime label margin-bottom-1"&gt;
+                    2 min read                &lt;/div&gt;
+                                                    &lt;p class="margin-top-0 margin-bottom-1"&gt;The colonial communities of “America’s historic triangle” played defining roles in the road to American independence.&lt;/p&gt;
+                                    &lt;div class="display-flex flex-align-center label color-carbon-60 margin-bottom-auto"&gt;&lt;svg version="1.1" class="square-2 margin-right-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="16px" height="16px" viewBox="0 0 16 16" style="enable-background:new 0 0 16 16;" xml:space="preserve"&gt;&lt;g&gt;&lt;g&gt;&lt;path d="M8,0C3.5,0-0.1,3.7,0,8.2C0.1,12.5,3.6,16,8,16c4.4,0,8-3.6,8-8C16,3.5,12.4,0,8,0z M8,15.2 C4,15.2,0.8,12,0.8,8C0.8,4,4,0.8,8,0.8c3.9,0,7.2,3.2,7.2,7.1C15.2,11.9,12,15.2,8,15.2z"/&gt;&lt;path d="M5.6,12c0.8-0.8,1.6-1.6,2.4-2.4c0.8,0.8,1.6,1.6,2.4,2.4c0-2.7,0-5.3,0-8C8.8,4,7.2,4,5.6,4 C5.6,6.7,5.6,9.3,5.6,12z"/&gt;&lt;/g&gt;&lt;/g&gt;&lt;/svg&gt;&lt;span&gt;Article&lt;/span&gt;&lt;/div&gt;                    &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;div class="hds-content-item content-list-item-post"&gt;
+                    &lt;a href="https://science.nasa.gov/earth/earth-observatory/belts-of-green-in-the-washington-suburbs/" class="hds-content-item-thumbnail" rel="noopener"&gt;
+                &lt;figure class="hds-media-background  content-list-thumbnail"&gt;&lt;img decoding="async" loading="lazy" width="300px" height="300px" data-no-id="true" sizes="auto, (max-width: 300px) 100vw, 300px" srcset="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/belts-of-green-in-the-washington-suburbs/ISS069-E-39302_th.jpg?fit=clip&amp;#038;crop=faces%2Cfocalpoint&amp;#038;w=300 300w" alt="" style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" src="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/2026/belts-of-green-in-the-washington-suburbs/ISS069-E-39302_th.jpg?fit=clip&amp;#038;crop=faces%2Cfocalpoint&amp;#038;w=300" &gt;&lt;/figure&gt;            &lt;/a&gt;
+                &lt;div class="hds-content-item-inner"&gt;
+            &lt;a href="https://science.nasa.gov/earth/earth-observatory/belts-of-green-in-the-washington-suburbs/" class="hds-content-item-heading" rel="noopener"&gt;
+                &lt;div class="hds-a11y-heading-22"&gt;Belts of Green in the Washington Suburbs&lt;/div&gt;
+            &lt;/a&gt;
+                            &lt;div class="hds-content-item-readtime label margin-bottom-1"&gt;
+                    3 min read                &lt;/div&gt;
+                                                    &lt;p class="margin-top-0 margin-bottom-1"&gt;Along the northeast side of the Capital Beltway in Maryland, green spaces weave through the developed landscape.&lt;/p&gt;
+                                    &lt;div class="display-flex flex-align-center label color-carbon-60 margin-bottom-auto"&gt;&lt;svg version="1.1" class="square-2 margin-right-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="16px" height="16px" viewBox="0 0 16 16" style="enable-background:new 0 0 16 16;" xml:space="preserve"&gt;&lt;g&gt;&lt;g&gt;&lt;path d="M8,0C3.5,0-0.1,3.7,0,8.2C0.1,12.5,3.6,16,8,16c4.4,0,8-3.6,8-8C16,3.5,12.4,0,8,0z M8,15.2 C4,15.2,0.8,12,0.8,8C0.8,4,4,0.8,8,0.8c3.9,0,7.2,3.2,7.2,7.1C15.2,11.9,12,15.2,8,15.2z"/&gt;&lt;path d="M5.6,12c0.8-0.8,1.6-1.6,2.4-2.4c0.8,0.8,1.6,1.6,2.4,2.4c0-2.7,0-5.3,0-8C8.8,4,7.2,4,5.6,4 C5.6,6.7,5.6,9.3,5.6,12z"/&gt;&lt;/g&gt;&lt;/g&gt;&lt;/svg&gt;&lt;span&gt;Article&lt;/span&gt;&lt;/div&gt;                    &lt;/div&gt;
+            &lt;/div&gt;
+    &lt;/div&gt;
+					
+					&lt;div id="pagination-container" class="pagination"&gt;
+&lt;nav class="hds-pagination hds-pagination--content-lists" role="navigation" aria-label="Pagination Navigation" data-mid-size="2" data-end-size="1" data-max-pages="4" &gt;
+&lt;span aria-current="page" class="page-numbers current" aria-label="Current Page, Page 1" aria-current="true" data-page-number="1"&gt;
+&lt;span&gt;1&lt;/span&gt;&lt;/span&gt;
+&lt;a class="page-numbers" href="#" aria-label="Goto Page 2" data-page-number="2"&gt;
+&lt;span&gt;2&lt;/span&gt;&lt;/a&gt;
+&lt;a class="page-numbers" href="#" aria-label="Goto Page 3" data-page-number="3"&gt;
+&lt;span&gt;3&lt;/span&gt;&lt;/a&gt;
+&lt;a class="page-numbers" href="#" aria-label="Goto Page 4" data-page-number="4"&gt;
+&lt;span&gt;4&lt;/span&gt;&lt;/a&gt;
+&lt;a class="next page-numbers" href="#" aria-label="Goto Next Page" data-page-number="2"&gt;Next&lt;/a&gt;
+&lt;/nav&gt;
+
+&lt;/div&gt;				&lt;/div&gt;
+			&lt;/div&gt;
+							&lt;/div&gt;
+			&lt;/div&gt;
+			&lt;/div&gt;
+
+&lt;div id="" class="hds-topic-cards nasa-gb-align-full maxw-full width-full padding-y-6 padding-x-3 color-mode-dark hds-module hds-module-full alignfull wp-block-nasa-blocks-topic-cards"&gt;		&lt;div class="grid-container grid-container-block-lg padding-x-0"&gt;
+			&lt;div class="grid-row flex-align-center margin-bottom-3"&gt;
+				&lt;div class="desktop:grid-col-8 margin-bottom-2 desktop:margin-bottom-0"&gt;
+					&lt;div class="label color-carbon-60 margin-bottom-2"&gt;Keep Exploring&lt;/div&gt;
+					&lt;h2 class="heading-36 line-height-sm"&gt;Discover More from NASA Earth Science&lt;/h2&gt;
+				&lt;/div&gt;
+			&lt;/div&gt;
+				&lt;div class="grid-row grid-gap-2 hds-topic-cards-wrapper"&gt;
+					&lt;a href="https://science.nasa.gov/earth/earth-observatory/subscribe/" class="mobile:grid-col-12 tablet:grid-col-6 desktop:grid-col-3 topic-card margin-bottom-4 desktop:margin-bottom-0" rel="noopener"&gt;
+				&lt;div class="hds-topic-card hds-cover-wrapper cover-hover-zoom bg-carbon-black"&gt;
+					&lt;div class="skrim-overlay skrim-overlay-dark skrim-left mobile-skrim-top padding-3 display-flex flex-align-end flex-justify-start z-200"&gt;
+						&lt;div&gt;
+													&lt;h3 class="hds-topic-card-heading heading-29 color-spacesuit-white line-height-sm margin-top-0 margin-bottom-1"&gt;
+								&lt;span&gt;Subscribe to Earth Observatory Newsletters&lt;/span&gt;
+								&lt;svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;&lt;circle class="color-nasa-red" cx="16" cy="16" r="16"&gt;&lt;/circle&gt;&lt;path d="M8 16.956h12.604l-3.844 4.106 1.252 1.338L24 16l-5.988-6.4-1.252 1.338 3.844 4.106H8v1.912z" class="color-spacesuit-white"&gt;&lt;/path&gt;&lt;/svg&gt;
+							&lt;/h3&gt;
+							&lt;p class="margin-bottom-0 margin-top-2 color-carbon-20-important"&gt;Subscribe to the Earth Observatory and get the Earth in your inbox.&lt;/p&gt;
+													&lt;/div&gt;
+					&lt;/div&gt;
+											&lt;figure class="hds-media-background  "&gt;&lt;img decoding="async" width="585" height="425" src="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/about/NASA-EO-Logo-mediumBlue2016-stacked-mark.png?w=585&amp;#038;h=425&amp;#038;fit=clip&amp;#038;crop=faces%2Cfocalpoint" class="attachment-1536x1536 size-1536x1536" alt="" style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" block_context="nasa-block" loading="lazy" srcset="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/about/NASA-EO-Logo-mediumBlue2016-stacked-mark.png?w=585&amp;#038;h=425&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 585w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/about/NASA-EO-Logo-mediumBlue2016-stacked-mark.png?w=300&amp;#038;h=218&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 300w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/about/NASA-EO-Logo-mediumBlue2016-stacked-mark.png?w=400&amp;#038;h=291&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 400w" sizes="auto, (max-width: 585px) 100vw, 585px" /&gt;&lt;/figure&gt;									&lt;/div&gt;
+			&lt;/a&gt;
+					&lt;a href="https://science.nasa.gov/earth/earth-observatory/image-of-the-day/" class="mobile:grid-col-12 tablet:grid-col-6 desktop:grid-col-3 topic-card margin-bottom-4 desktop:margin-bottom-0" rel="noopener"&gt;
+				&lt;div class="hds-topic-card hds-cover-wrapper cover-hover-zoom bg-carbon-black"&gt;
+					&lt;div class="skrim-overlay skrim-overlay-dark skrim-left mobile-skrim-top padding-3 display-flex flex-align-end flex-justify-start z-200"&gt;
+						&lt;div&gt;
+													&lt;h3 class="hds-topic-card-heading heading-29 color-spacesuit-white line-height-sm margin-top-0 margin-bottom-1"&gt;
+								&lt;span&gt;Earth Observatory Image of the Day&lt;/span&gt;
+								&lt;svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;&lt;circle class="color-nasa-red" cx="16" cy="16" r="16"&gt;&lt;/circle&gt;&lt;path d="M8 16.956h12.604l-3.844 4.106 1.252 1.338L24 16l-5.988-6.4-1.252 1.338 3.844 4.106H8v1.912z" class="color-spacesuit-white"&gt;&lt;/path&gt;&lt;/svg&gt;
+							&lt;/h3&gt;
+							&lt;p class="margin-bottom-0 margin-top-2 color-carbon-20-important"&gt;NASA&amp;#8217;s Earth Observatory brings you the Earth, every day, with in-depth stories and stunning imagery.&lt;/p&gt;
+													&lt;/div&gt;
+					&lt;/div&gt;
+											&lt;figure class="hds-media-background  "&gt;&lt;img decoding="async" width="2500" height="1407" src="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/iotd-banner.jpg?w=2500&amp;#038;h=1407&amp;#038;fit=clip&amp;#038;crop=faces%2Cfocalpoint" class="attachment-1536x1536 size-1536x1536" alt="" style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" block_context="nasa-block" loading="lazy" srcset="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/iotd-banner.jpg?w=2500&amp;#038;h=1407&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 2500w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/iotd-banner.jpg?w=300&amp;#038;h=169&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 300w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/iotd-banner.jpg?w=768&amp;#038;h=432&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 768w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/iotd-banner.jpg?w=1024&amp;#038;h=576&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 1024w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/iotd-banner.jpg?w=1536&amp;#038;h=864&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 1536w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/iotd-banner.jpg?w=2048&amp;#038;h=1153&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 2048w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/iotd-banner.jpg?w=400&amp;#038;h=225&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 400w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/iotd-banner.jpg?w=600&amp;#038;h=338&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 600w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/iotd-banner.jpg?w=900&amp;#038;h=507&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 900w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/iotd-banner.jpg?w=1200&amp;#038;h=675&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 1200w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/iotd/iotd-banner.jpg?w=2000&amp;#038;h=1126&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 2000w" sizes="auto, (max-width: 2500px) 100vw, 2500px" /&gt;&lt;/figure&gt;									&lt;/div&gt;
+			&lt;/a&gt;
+					&lt;a href="https://science.nasa.gov/earth/explore/" class="mobile:grid-col-12 tablet:grid-col-6 desktop:grid-col-3 topic-card margin-bottom-4 desktop:margin-bottom-0" rel="noopener"&gt;
+				&lt;div class="hds-topic-card hds-cover-wrapper cover-hover-zoom bg-carbon-black"&gt;
+					&lt;div class="skrim-overlay skrim-overlay-dark skrim-left mobile-skrim-top padding-3 display-flex flex-align-end flex-justify-start z-200"&gt;
+						&lt;div&gt;
+													&lt;p class="hds-topic-card-heading heading-29 color-spacesuit-white line-height-sm margin-top-0 margin-bottom-1"&gt;
+								&lt;span&gt;Explore Earth Science&lt;/span&gt;
+								&lt;svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;&lt;circle class="color-nasa-red" cx="16" cy="16" r="16"&gt;&lt;/circle&gt;&lt;path d="M8 16.956h12.604l-3.844 4.106 1.252 1.338L24 16l-5.988-6.4-1.252 1.338 3.844 4.106H8v1.912z" class="color-spacesuit-white"&gt;&lt;/path&gt;&lt;/svg&gt;
+							&lt;/p&gt;
+													&lt;/div&gt;
+					&lt;/div&gt;
+											&lt;figure class="hds-media-background  "&gt;&lt;img decoding="async" width="1920" height="1920" src="https://images-assets.nasa.gov/image/NHQ202212160009/NHQ202212160009~large.jpg?w=1920&amp;#038;h=1920&amp;#038;fit=clip&amp;#038;crop=faces%2Cfocalpoint" class="attachment-1536x1536 size-1536x1536" alt="" style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" block_context="nasa-block" loading="lazy" srcset="https://images-assets.nasa.gov/image/NHQ202212160009/NHQ202212160009~large.jpg?w=1920&amp;#038;h=1920&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 1920w, https://images-assets.nasa.gov/image/NHQ202212160009/NHQ202212160009~large.jpg?w=150&amp;#038;h=150&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 150w, https://images-assets.nasa.gov/image/NHQ202212160009/NHQ202212160009~large.jpg?w=300&amp;#038;h=300&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 300w, https://images-assets.nasa.gov/image/NHQ202212160009/NHQ202212160009~large.jpg?w=768&amp;#038;h=768&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 768w, https://images-assets.nasa.gov/image/NHQ202212160009/NHQ202212160009~large.jpg?w=1024&amp;#038;h=1024&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 1024w, https://images-assets.nasa.gov/image/NHQ202212160009/NHQ202212160009~large.jpg?w=1536&amp;#038;h=1536&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 1536w, https://images-assets.nasa.gov/image/NHQ202212160009/NHQ202212160009~large.jpg?w=50&amp;#038;h=50&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 50w, https://images-assets.nasa.gov/image/NHQ202212160009/NHQ202212160009~large.jpg?w=100&amp;#038;h=100&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 100w, https://images-assets.nasa.gov/image/NHQ202212160009/NHQ202212160009~large.jpg?w=200&amp;#038;h=200&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 200w, https://images-assets.nasa.gov/image/NHQ202212160009/NHQ202212160009~large.jpg?w=400&amp;#038;h=400&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 400w, https://images-assets.nasa.gov/image/NHQ202212160009/NHQ202212160009~large.jpg?w=600&amp;#038;h=600&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 600w, https://images-assets.nasa.gov/image/NHQ202212160009/NHQ202212160009~large.jpg?w=900&amp;#038;h=900&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 900w, https://images-assets.nasa.gov/image/NHQ202212160009/NHQ202212160009~large.jpg?w=1200&amp;#038;h=1200&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 1200w" sizes="auto, (max-width: 1920px) 100vw, 1920px" /&gt;&lt;/figure&gt;									&lt;/div&gt;
+			&lt;/a&gt;
+					&lt;a href="https://science.nasa.gov/earth/data/" class="mobile:grid-col-12 tablet:grid-col-6 desktop:grid-col-3 topic-card margin-bottom-4 desktop:margin-bottom-0" rel="noopener"&gt;
+				&lt;div class="hds-topic-card hds-cover-wrapper cover-hover-zoom bg-carbon-black"&gt;
+					&lt;div class="skrim-overlay skrim-overlay-dark skrim-left mobile-skrim-top padding-3 display-flex flex-align-end flex-justify-start z-200"&gt;
+						&lt;div&gt;
+													&lt;h3 class="hds-topic-card-heading heading-29 color-spacesuit-white line-height-sm margin-top-0 margin-bottom-1"&gt;
+								&lt;span&gt;Earth Science Data&lt;/span&gt;
+								&lt;svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;&lt;circle class="color-nasa-red" cx="16" cy="16" r="16"&gt;&lt;/circle&gt;&lt;path d="M8 16.956h12.604l-3.844 4.106 1.252 1.338L24 16l-5.988-6.4-1.252 1.338 3.844 4.106H8v1.912z" class="color-spacesuit-white"&gt;&lt;/path&gt;&lt;/svg&gt;
+							&lt;/h3&gt;
+							&lt;p class="margin-bottom-0 margin-top-2 color-carbon-20-important"&gt;Open access to NASA’s archive of Earth science data&lt;/p&gt;
+													&lt;/div&gt;
+					&lt;/div&gt;
+											&lt;figure class="hds-media-background  "&gt;&lt;img decoding="async" width="1536" height="768" src="https://science.nasa.gov/wp-content/uploads/2023/10/biosphere-sea-2008-lrg.png?w=1536" class="attachment-1536x1536 size-1536x1536" alt="" style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" block_context="nasa-block" loading="lazy" srcset="https://science.nasa.gov/wp-content/uploads/2023/10/biosphere-sea-2008-lrg.png 3600w, https://science.nasa.gov/wp-content/uploads/2023/10/biosphere-sea-2008-lrg.png?resize=300,150 300w, https://science.nasa.gov/wp-content/uploads/2023/10/biosphere-sea-2008-lrg.png?resize=768,384 768w, https://science.nasa.gov/wp-content/uploads/2023/10/biosphere-sea-2008-lrg.png?resize=1024,512 1024w, https://science.nasa.gov/wp-content/uploads/2023/10/biosphere-sea-2008-lrg.png?resize=1536,768 1536w, https://science.nasa.gov/wp-content/uploads/2023/10/biosphere-sea-2008-lrg.png?resize=2048,1024 2048w, https://science.nasa.gov/wp-content/uploads/2023/10/biosphere-sea-2008-lrg.png?resize=400,200 400w, https://science.nasa.gov/wp-content/uploads/2023/10/biosphere-sea-2008-lrg.png?resize=600,300 600w, https://science.nasa.gov/wp-content/uploads/2023/10/biosphere-sea-2008-lrg.png?resize=900,450 900w, https://science.nasa.gov/wp-content/uploads/2023/10/biosphere-sea-2008-lrg.png?resize=1200,600 1200w, https://science.nasa.gov/wp-content/uploads/2023/10/biosphere-sea-2008-lrg.png?resize=2000,1000 2000w" sizes="auto, (max-width: 1536px) 100vw, 1536px" /&gt;&lt;/figure&gt;									&lt;/div&gt;
+			&lt;/a&gt;
+				&lt;/div&gt;
+			&lt;/div&gt;
+		&lt;/div&gt;
+
+
+&lt;p class="wp-block-paragraph"&gt;&lt;/p&gt;
+</ns3:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>NASA Will Attempt to Observe Rocket Part’s Lunar Impact</title>
+		<link>https://www.nasa.gov/humans-in-space/commercial-space/nasa-will-attempt-to-observe-rocket-parts-lunar-impact/</link>
+		
+		<dc:creator>jjrussel</dc:creator>
+		<pubDate>Tue, 04 Aug 2026 20:00:14 +0000</pubDate>
+				<category>Commercial Space</category>
+		<category>Benefits to Science</category>
+		<category>Commercial Lunar Payload Services (CLPS)</category>
+		<category>Goddard Space Flight Center</category>
+		<category>Lunar Reconnaissance Orbiter (LRO)</category>
+		<category>Lunar Science</category>
+		<category>Missions</category>
+		<category>Science Mission Directorate</category>
+		<guid isPermaLink="false">https://www.nasa.gov/?p=1034711</guid>
+
+					<description>Using ground-based telescopes and space-based assets, NASA and SpaceX are tracking a used Falcon 9 upper stage from a commercial mission expected to impact the Moon on Wednesday, Aug. 5, near the Einstein and Bell craters. The impact poses no danger to Earth and NASA scientists are planning to collect lunar data from the event [&amp;#8230;]</description>
+										<ns3:encoded>&lt;div id="" class="hds-media hds-module wp-block-image"&gt;&lt;div class="margin-left-auto margin-right-auto nasa-block-align-inline"&gt;&lt;div class="hds-media-wrapper margin-left-auto margin-right-auto"&gt;&lt;figure class="hds-media-inner hds-cover-wrapper hds-media-ratio-cover "&gt;&lt;a href="https://www.nasa.gov/image-article/hanging-in-the-balance/"&gt;&lt;img decoding="async" width="2048" height="1365" src="https://www.nasa.gov/wp-content/uploads/2026/06/art002e024603orig.jpg?w=2048" class="attachment-2048x2048 size-2048x2048" alt="The Moon&amp;#039;s rugged surface is on display in this image. Most of the Moon is visible, with the bottom of the sphere disappearing into the darkness. This line between light and dark is called the terminator. The terminator is lined with many craters." style="transform: scale(1.2); transform-origin: 50% 26%; object-position: 50% 26%; object-fit: cover;" block_context="nasa-block" loading="lazy" srcset="https://www.nasa.gov/wp-content/uploads/2026/06/art002e024603orig.jpg 5568w, https://www.nasa.gov/wp-content/uploads/2026/06/art002e024603orig.jpg?resize=300,200 300w, https://www.nasa.gov/wp-content/uploads/2026/06/art002e024603orig.jpg?resize=768,512 768w, https://www.nasa.gov/wp-content/uploads/2026/06/art002e024603orig.jpg?resize=1024,683 1024w, https://www.nasa.gov/wp-content/uploads/2026/06/art002e024603orig.jpg?resize=1536,1024 1536w, https://www.nasa.gov/wp-content/uploads/2026/06/art002e024603orig.jpg?resize=2048,1365 2048w, https://www.nasa.gov/wp-content/uploads/2026/06/art002e024603orig.jpg?resize=400,267 400w, https://www.nasa.gov/wp-content/uploads/2026/06/art002e024603orig.jpg?resize=600,400 600w, https://www.nasa.gov/wp-content/uploads/2026/06/art002e024603orig.jpg?resize=900,600 900w, https://www.nasa.gov/wp-content/uploads/2026/06/art002e024603orig.jpg?resize=1200,800 1200w, https://www.nasa.gov/wp-content/uploads/2026/06/art002e024603orig.jpg?resize=2000,1333 2000w" sizes="auto, (max-width: 2048px) 100vw, 2048px" /&gt;&lt;/a&gt;&lt;/figure&gt;&lt;figcaption class="hds-caption padding-y-2"&gt;&lt;div class="hds-caption-text p-sm margin-0"&gt;The Moon&amp;#8217;s rocky, uneven, and otherworldly surface features are highlighted by the terminator – the difference between light and darkness.&lt;/div&gt;&lt;div class="hds-credits"&gt;NASA&lt;/div&gt;&lt;/figcaption&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+
+
+&lt;p class="wp-block-paragraph"&gt;Using ground-based telescopes and space-based assets, NASA and SpaceX are tracking a used Falcon 9 upper stage from a commercial mission expected to impact the Moon on Wednesday, Aug. 5, near the Einstein and Bell craters. The impact poses no danger to Earth and NASA scientists are planning to collect lunar data from the event and refine techniques for tracking objects in space.&amp;nbsp;&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;On Jan. 15, 2025, SpaceX launched the Falcon 9 rocket and successfully deployed Firefly Aerospace’s &lt;a href="https://www.nasa.gov/news-release/touchdown-carrying-nasa-science-fireflys-blue-ghost-lands-on-moon/" target="_blank" rel="noreferrer noopener"&gt;Blue Ghost 1&lt;/a&gt;&amp;nbsp;lunar lander to the Moon under NASA’s &lt;a href="https://www.nasa.gov/commercial-lunar-payload-services/" target="_blank" rel="noreferrer noopener"&gt;CLPS&lt;/a&gt; (Commercial Lunar Payload Services) initiative. Solar activity and gravitational forces caused the stage’s unplanned return to the Moon. NASA and SpaceX remain in communication about the upper stage and its flight path.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;Independent astronomers first identified the trajectory using publicly available data. &lt;a href="https://cneos.jpl.nasa.gov/" rel="noopener"&gt;NASA’s Center for Near Earth Object Studies&lt;/a&gt; at the agency’s Jet Propulsion Laboratory in Southern California, which tracks natural objects that could pose hazards to Earth, later confirmed the stage has a 100% chance of impacting the Moon. NASA will continue tracking it as part of training operations.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;Because the Moon has no atmosphere to slow incoming objects, it is struck by meteoroids daily. Human‑made object impacts are far less common but do occur. The rocket stage is expected to create a crater about 60 feet wide and 12 feet deep and throw dust and rock outward as ejecta. For comparison, a meteoroid with the same energy as the upper stage hits the Moon about every six days, so the lunar surface is constantly absorbing impacts with the same force. Despite the disturbance, observing impacts gives scientists valuable insight by revealing how ejecta plumes behave, helping to understand the Moon’s geology and refine models that guide future exploration and science missions.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;The impact will not be visible to the naked eye on Earth, but NASA will attempt to observe it in real time. The &lt;a href="https://www.nasa.gov/meteoroid-environment-office/"&gt;Meteoroid Environments Office&lt;/a&gt; at the agency’s Marshall Space Flight Center in Huntsville, will use ground‑based telescopes to image the impact; however, weather and lighting conditions may make viewing difficult.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;Additionally, NASA’s &lt;a href="https://science.nasa.gov/mission/lro/" rel="noopener"&gt;Lunar Reconnaissance Orbiter&lt;/a&gt; and the ShadowCam instrument aboard South Korea’s Korea Pathfinder Lunar Orbiter will look for chances to image the site before and after the impact. Image availability will depend on lighting, orbital timing, and spacecraft position, and it may take several days to receive imagery. Any data collected will help scientists better understand artificial impacts and their exploration implications.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;Although unplanned in this instance, disposing of upper stages on the lunar surface is a technically accepted and safe method and, in some cases, can be the only practical option for missions in low lunar orbit. Many operators choose controlled impacts because they provide predictable and trackable end of life outcomes.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;NASA is committed to debris mitigation and demonstrating responsible disposal practices that safeguard Earth, its orbital environment, and other planetary bodies while enabling discoveries that deepen our understanding of the solar system and benefit humanity.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;&lt;/p&gt;
+</ns3:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>NASA’s PUNCH Sharpens Solar Storm Forecasting in First Test</title>
+		<link>https://science.nasa.gov/science-research/heliophysics/nasas-punch-sharpens-solar-storm-forecasting-in-first-test/</link>
+		
+		<dc:creator />
+		<pubDate>Tue, 04 Aug 2026 18:02:55 +0000</pubDate>
+				<category>Coronagraph</category>
+		<category>Coronal Mass Ejections</category>
+		<category>Goddard Space Flight Center</category>
+		<category>Heliophysics</category>
+		<category>Heliophysics Division</category>
+		<category>Missions</category>
+		<category>Polarimeter to Unify the Corona and Heliosphere (PUNCH)</category>
+		<category>The Sun</category>
+		<guid isPermaLink="false">https://science.nasa.gov/science-research/heliophysics/nasas-punch-sharpens-solar-storm-forecasting-in-first-test/</guid>
+
+					<description>Using continuous imagery from NASA’s PUNCH (Polarimeter to Unify the Corona and Heliosphere) mission, scientists predicted the near-Earth arrival of a solar eruption to within 30 minutes in an initial proof of concept test. The results, presented Tuesday at the Committee on Space Research Scientific Meeting and under review at the journal Space Weather, could […]</description>
+										<ns3:encoded>
+&lt;p class="wp-block-paragraph"&gt;Using continuous imagery from NASA’s PUNCH (Polarimeter to Unify the Corona and Heliosphere) mission, scientists predicted the near-Earth arrival of a solar eruption to within 30 minutes in an initial proof of concept test. The results, presented Tuesday at the Committee on Space Research Scientific Meeting and under review at the journal Space Weather, could revolutionize the way Earth-impacting storms are forecasted.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;“We thought PUNCH would be good at this, but it’s a stunning result,” said Craig DeForest, principal investigator for PUNCH at Southwest Research Institute’s Solar System Science and Exploration Division in Boulder, Colorado. “To put it in perspective, this could be the space weather equivalent of going from a steam engine to a modern internal combustion engine.”&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;Solar storms are caused by huge explosions of material off the Sun called coronal mass ejections. Forecasting when the ejections will reach Earth is key for mitigating their impacts on power grids, satellites, and astronauts. However, until recently, coronal mass ejections could not continuously be tracked for much of their journey across the solar system.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;That changed in 2025 with the launch of the &lt;a href="https://science.nasa.gov/mission/punch/" rel="noopener"&gt;PUNCH&lt;/a&gt; mission, which uses four spacecraft in low Earth orbit to make continuous 3D observations of the inner solar system. Before PUNCH, coronal mass ejections could only be seen as they traversed one-fifth the way from the Sun to Earth, leaving scientists to guess what happened over the rest of the distance. With PUNCH’s wider field-of-view, scientists can now routinely track the solar explosions nearly all the way to Earth, capturing a new image every four minutes.&lt;/p&gt;
+
+
+&lt;div id="" class="width-full maxw-full margin-left-auto margin-right-auto hds-media-align-inline hds-module wp-block-nasa-blocks-video"&gt;&lt;div class="hds-cover-wrapper width-full maxw-full flex-column"&gt;&lt;div class="hds-video-container width-full embed-container" style=""&gt;&lt;video title="PUNCH CME Overlay 08042026" id="nasa-plus-4VNdy" class="video-js video-player vjs-fluid width-full" data-setup='{"controls":true,"preload":"auto","plugins":{"mux":{"debug":false,"data":{"env_key":"91nns8oppqdfqc44lgo4b1gni","player_name":"www.nasa.gov Player","video_name":"PUNCH CME Overlay 08042026"}}}}'  &gt;&lt;source src="https://assets.science.nasa.gov/content/dam/science/missions/punch/PUNCH_cme-front-overlay.mp4" type="video/mp4"&gt;&lt;p class="vjs-no-js"&gt;To view this video please enable JavaScript, and consider upgrading to a web browser that
+					&lt;a href="https://videojs.com/html5-video-support/" target="_blank" rel="noopener"&gt;supports HTML5 video&lt;/a&gt;&lt;/p&gt;&lt;/video&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="hds-media-caption hds-caption padding-y-2"&gt;&lt;div class="hds-caption-text p-sm margin-0"&gt;&lt;div&gt;This video created from PUNCH images shows the May 31, 2025 coronal mass ejection (CME) streaming out from the Sun. The yellow line shows the leading edge of the CME. By tracking a CME across the inner solar system, scientists are now able to predict when a solar storm will reach Earth better than ever before.&lt;/div&gt;&lt;/div&gt;&lt;div class="hds-credits"&gt;&lt;div&gt;NASA/PUNCH/SwRI&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+
+
+&lt;p class="wp-block-paragraph"&gt;Scientists used data from a coronal mass ejection that left the Sun on May 31, 2025, to retroactively test if they could improve forecast modeling. Scientists input the images into a computer model, which analyzed the leading edge of the coronal mass ejection over time. As it moved and evolved across the inner solar system, the model used the coronal mass ejection’s speed and geometry to calculate when it would reach Earth.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;Twelve hours after the coronal mass ejection left the Sun, the model settled on a final prediction showing the storm would arrive eight hours later. That predicted arrival time was ultimately accurate to within a half hour, making it 10 times better than currently used methods, which only provide a 5-hour window. In addition, the model itself revealed when the estimate had stabilized, so that a space weather forecaster would be able to predict the arrival time with confidence.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;“We accomplished an order of magnitude better result than the state-of-the-art method with a really basic process, just informed by the fact that the coronal mass ejection could be tracked continuously across the solar system,” DeForest said.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;These first results demonstrate the power of PUNCH’s wide-field imagery to track the solar events as they travel out from the Sun. Ultimately, the scientists think that with more refined PUNCH data and better models, they could be able to forecast coronal mass ejection arrival times even further in advance.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;Beyond space weather forecasting, the images also help scientists glean new insights on coronal mass ejections. The high-resolution images allowed the scientists to see new structures in coronal mass ejections, revealing that the clouds of material are clumpier than previously thought and continue to evolve as they cross the solar system.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;The PUNCH data is also helping scientists better understand how plasma, the solar material launched by coronal mass ejections, moves across space. This information can help astrophysicists better understand plasma’s behavior across the galaxy, such as in star-forming regions where it is nearly impossible to study on small scales.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;Southwest Research Institute, based in San Antonio, leads the PUNCH mission and operates the mission’s four spacecraft from its facilities in Boulder. The mission is managed by Space Science Mission Operations at NASA’s Goddard Space Flight Center in Greenbelt, Maryland, for the Science Mission Directorate at the agency’s headquarters in Washington.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;&lt;strong&gt;By Mara Johnson-Groh&lt;br&gt;NASA’s Goddard Space Flight Center, Greenbelt, Md.&lt;/strong&gt;&lt;/p&gt;
+</ns3:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>Ames Science Stars of the Month – August 2026</title>
+		<link>https://www.nasa.gov/general/ames-science-stars-of-the-month-august-2026/</link>
+		
+		<dc:creator>Aaron McKinnon</dc:creator>
+		<pubDate>Tue, 04 Aug 2026 17:08:04 +0000</pubDate>
+				<category>General</category>
+		<guid isPermaLink="false">https://www.nasa.gov/?p=1034722</guid>
+
+					<description>The NASA Ames Science Directorate recognizes the outstanding contributions of (pictured left to right) Danielle Lopez, Jennifer Claudio, and Duncan Mifsud. Their commitment to the NASA mission represents the entrepreneurial spirit, technical expertise, and collaborative disposition needed to explore this world and beyond. Space Biosciences Star of the Month: Danielle Lopez Danielle Lopez is the [&amp;#8230;]</description>
+										<ns3:encoded>&lt;div id="" class="hds-media hds-module wp-block-image"&gt;&lt;div class="margin-left-auto margin-right-auto nasa-block-align-inline"&gt;&lt;div class="hds-media-wrapper margin-left-auto margin-right-auto"&gt;&lt;figure class="hds-media-inner hds-cover-wrapper hds-media-ratio-fit "&gt;&lt;a href="https://www.nasa.gov/wp-content/uploads/2026/08/slide1.jpeg"&gt;&lt;img decoding="async" width="1920" height="1080" src="https://www.nasa.gov/wp-content/uploads/2026/08/slide1.jpeg?w=1920" class="attachment-2048x2048 size-2048x2048" alt="Image of the profile photos of the Ames stars of the month for August 2026. Pictured from left to right is Danielle Lopez, Jennifer Claudio, and Duncan Misfud." style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" block_context="nasa-block" loading="lazy" srcset="https://www.nasa.gov/wp-content/uploads/2026/08/slide1.jpeg 1920w, https://www.nasa.gov/wp-content/uploads/2026/08/slide1.jpeg?resize=300,169 300w, https://www.nasa.gov/wp-content/uploads/2026/08/slide1.jpeg?resize=768,432 768w, https://www.nasa.gov/wp-content/uploads/2026/08/slide1.jpeg?resize=1024,576 1024w, https://www.nasa.gov/wp-content/uploads/2026/08/slide1.jpeg?resize=1536,864 1536w, https://www.nasa.gov/wp-content/uploads/2026/08/slide1.jpeg?resize=400,225 400w, https://www.nasa.gov/wp-content/uploads/2026/08/slide1.jpeg?resize=600,338 600w, https://www.nasa.gov/wp-content/uploads/2026/08/slide1.jpeg?resize=900,506 900w, https://www.nasa.gov/wp-content/uploads/2026/08/slide1.jpeg?resize=1200,675 1200w" sizes="auto, (max-width: 1920px) 100vw, 1920px" /&gt;&lt;/a&gt;&lt;/figure&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+
+
+&lt;p class="wp-block-paragraph"&gt;The NASA Ames Science Directorate recognizes the outstanding contributions of (pictured left to right) Danielle Lopez, Jennifer Claudio, and Duncan Mifsud. Their commitment to the NASA mission represents the entrepreneurial spirit, technical expertise, and collaborative disposition needed to explore this world and beyond.&lt;/p&gt;
+
+
+&lt;div id="" class="hds-media hds-module wp-block-image"&gt;&lt;div class="margin-left-auto margin-right-auto nasa-block-align-inline"&gt;&lt;div class="hds-media-wrapper margin-left-auto margin-right-auto"&gt;&lt;figure class="hds-media-inner hds-cover-wrapper hds-media-ratio-fit "&gt;&lt;a href="https://www.nasa.gov/wp-content/uploads/2026/08/danielle-lopez-headshot.jpeg"&gt;&lt;img decoding="async" width="1463" height="2048" src="https://www.nasa.gov/wp-content/uploads/2026/08/danielle-lopez-headshot.jpeg?w=1463" class="attachment-2048x2048 size-2048x2048" alt="" style="transform: scale(1); transform-origin: 51% 29%; object-position: 51% 29%; object-fit: cover;" block_context="nasa-block" loading="lazy" srcset="https://www.nasa.gov/wp-content/uploads/2026/08/danielle-lopez-headshot.jpeg 3356w, https://www.nasa.gov/wp-content/uploads/2026/08/danielle-lopez-headshot.jpeg?resize=214,300 214w, https://www.nasa.gov/wp-content/uploads/2026/08/danielle-lopez-headshot.jpeg?resize=768,1075 768w, https://www.nasa.gov/wp-content/uploads/2026/08/danielle-lopez-headshot.jpeg?resize=731,1024 731w, https://www.nasa.gov/wp-content/uploads/2026/08/danielle-lopez-headshot.jpeg?resize=1097,1536 1097w, https://www.nasa.gov/wp-content/uploads/2026/08/danielle-lopez-headshot.jpeg?resize=1463,2048 1463w, https://www.nasa.gov/wp-content/uploads/2026/08/danielle-lopez-headshot.jpeg?resize=286,400 286w, https://www.nasa.gov/wp-content/uploads/2026/08/danielle-lopez-headshot.jpeg?resize=429,600 429w, https://www.nasa.gov/wp-content/uploads/2026/08/danielle-lopez-headshot.jpeg?resize=643,900 643w, https://www.nasa.gov/wp-content/uploads/2026/08/danielle-lopez-headshot.jpeg?resize=857,1200 857w, https://www.nasa.gov/wp-content/uploads/2026/08/danielle-lopez-headshot.jpeg?resize=1429,2000 1429w" sizes="auto, (max-width: 1463px) 100vw, 1463px" /&gt;&lt;/a&gt;&lt;/figure&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+
+
+&lt;h3 class="wp-block-heading"&gt;Space Biosciences Star of the Month: Danielle Lopez&lt;/h3&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;Danielle Lopez is the Deputy Project Manager for the Open Science Data Repository with Amentum in the Space Biosciences Division. She is recognized for her management efforts that have been critical to the success of Open Science at NASA including collaborations across directorates at Ames, across NASA centers, and with the public. Danielle has been a critical stabilizing force during challenging and tumultuous times, keeping multiple projects not only on track, but at the forefront of Open Science for the entire Agency.&amp;nbsp;&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;&lt;/p&gt;
+
+
+&lt;div id="" class="hds-media hds-module wp-block-image"&gt;&lt;div class="margin-left-auto margin-right-auto nasa-block-align-inline"&gt;&lt;div class="hds-media-wrapper margin-left-auto margin-right-auto"&gt;&lt;figure class="hds-media-inner hds-cover-wrapper hds-media-ratio-cover "&gt;&lt;a href="https://www.nasa.gov/wp-content/uploads/2026/08/jennifer-claudio.jpg"&gt;&lt;img decoding="async" width="1280" height="720" src="https://www.nasa.gov/wp-content/uploads/2026/08/jennifer-claudio.jpg?w=1280" class="attachment-2048x2048 size-2048x2048" alt="Profile portrait of Jennifer Claudio, a scientist at Ames." style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" block_context="nasa-block" loading="lazy" srcset="https://www.nasa.gov/wp-content/uploads/2026/08/jennifer-claudio.jpg 1280w, https://www.nasa.gov/wp-content/uploads/2026/08/jennifer-claudio.jpg?resize=300,169 300w, https://www.nasa.gov/wp-content/uploads/2026/08/jennifer-claudio.jpg?resize=768,432 768w, https://www.nasa.gov/wp-content/uploads/2026/08/jennifer-claudio.jpg?resize=1024,576 1024w, https://www.nasa.gov/wp-content/uploads/2026/08/jennifer-claudio.jpg?resize=400,225 400w, https://www.nasa.gov/wp-content/uploads/2026/08/jennifer-claudio.jpg?resize=600,338 600w, https://www.nasa.gov/wp-content/uploads/2026/08/jennifer-claudio.jpg?resize=900,506 900w, https://www.nasa.gov/wp-content/uploads/2026/08/jennifer-claudio.jpg?resize=1200,675 1200w" sizes="auto, (max-width: 1280px) 100vw, 1280px" /&gt;&lt;/a&gt;&lt;/figure&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+
+
+&lt;h3 class="wp-block-heading"&gt;Space Biosciences Star of the Month: Jennifer Claudio&lt;/h3&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;Jennifer Claudio is a research staff member with Blue Marble Space in the Space Biosciences Division. Jennifer has made outstanding contributions in supporting the 2026 GeneLab for High School (GL4HS) summer program. She is recognized for her efficiency and initiative executing the program. Notably, Jennifer swiftly and successfully overcame a security breach of the GL4HS learning platform, demonstrating her resourcefulness and commitment to the program.&lt;/p&gt;
+
+
+
+&lt;div style="height:10px" aria-hidden="true" class="wp-block-spacer"&gt;&lt;/div&gt;
+
+
+&lt;div id="" class="hds-media hds-module wp-block-image"&gt;&lt;div class="margin-left-auto margin-right-auto nasa-block-align-inline"&gt;&lt;div class="hds-media-wrapper margin-left-auto margin-right-auto"&gt;&lt;figure class="hds-media-inner hds-cover-wrapper hds-media-ratio-fit "&gt;&lt;a href="https://www.nasa.gov/wp-content/uploads/2026/08/duncan-mifsud.png"&gt;&lt;img decoding="async" width="751" height="501" src="https://www.nasa.gov/wp-content/uploads/2026/08/duncan-mifsud.png?w=751" class="attachment-2048x2048 size-2048x2048" alt="Image of Ames Research Center Astrophysics Researcher Duncan Mifsud, standing in a suit at a lectern." style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" block_context="nasa-block" loading="lazy" srcset="https://www.nasa.gov/wp-content/uploads/2026/08/duncan-mifsud.png 751w, https://www.nasa.gov/wp-content/uploads/2026/08/duncan-mifsud.png?resize=300,200 300w, https://www.nasa.gov/wp-content/uploads/2026/08/duncan-mifsud.png?resize=400,267 400w, https://www.nasa.gov/wp-content/uploads/2026/08/duncan-mifsud.png?resize=600,400 600w" sizes="auto, (max-width: 751px) 100vw, 751px" /&gt;&lt;/a&gt;&lt;/figure&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+
+
+&lt;h3 class="wp-block-heading"&gt;Astrophysics Star of the Month: Duncan Mifsud&lt;/h3&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;Duncan Mifsud&amp;nbsp;is a postdoctoral research scientist for the Bay Area Environmental Research Institute (BAERI) in the Astrophysics Division. Duncan is recognized this month for his exceptional work on the infrared analysis of several laboratory samples produced from the ultraviolet irradiation of soluble organic molecules as well as extraterrestrial sample returned from asteroid Bennu by NASA’s&amp;nbsp;&lt;em&gt;OSIRIS-REx&lt;/em&gt;&amp;nbsp;mission.&lt;/p&gt;
+</ns3:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>August 2026 Satellite Puzzler</title>
+		<link>https://science.nasa.gov/earth/earth-observatory/august-2026-satellite-puzzler/</link>
+		
+		<dc:creator />
+		<pubDate>Tue, 04 Aug 2026 16:31:46 +0000</pubDate>
+				<category>Earth Observatory</category>
+		<guid isPermaLink="false">https://science.nasa.gov/earth/earth-observatory/august-2026-satellite-puzzler/</guid>
+
+					<description>Your challenge is to tell us the location of the satellite image and why it is interesting.</description>
+										<ns3:encoded>&lt;div id="" class="hds-module hds-module-full alignfull wp-block-nasa-blocks-secondary-navigation"&gt;&lt;div class="hds-secondary-navigation-wrapper z-top width-100 padding-0"&gt;&lt;div id="" class="hds-secondary-navigation width-full border-bottom-1px text-center hds-color-mode-dark hds-module hds-module-full alignfull wp-block-nasa-blocks-hdsnav"&gt;&lt;button type="button" class="hds-secondary-nav-mobile-button display-flex tablet:display-flex desktop:display-none width-full flex-align-center bg-carbon-90 border-color-carbon-80 color-spacesuit-white" aria-expanded="false" aria-controls="hds-secondary-nav-track"&gt;&lt;span&gt;Earth Observatory&lt;/span&gt;&lt;svg width="16" height="16" alt="" enable-background="new 0 0 400 400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"&gt;&lt;path d="m4.2 122.2 195.1 195.1 196.5-196.6-37.9-38-157.8 157.8-156.8-156.8z" /&gt;&lt;/svg&gt;&lt;/button&gt;&lt;div class="hds-secondary-nav-track grid-container grid-container-extrawide padding-0 tablet:padding-x-3 desktop:padding-x-2 "&gt;&lt;div class="hds-secondary-navigation-menu-items"&gt;&lt;nav&gt;&lt;ul class="usa-nav__primary usa-accordion flex-justify-center margin-0"&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://science.nasa.gov/earth" rel="noopener"&gt;Earth&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://science.nasa.gov/earth/earth-observatory" rel="noopener"&gt;Earth Observatory&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://science.nasa.gov/earth/earth-observatory/image-of-the-day/" rel="noopener"&gt;Image of the Day&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://science.nasa.gov/earth/earth-observatory/explorer/" rel="noopener"&gt;EO Explorer&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item"&gt;&lt;button type="button" class="usa-accordion__button usa-nav__link" aria-expanded="false" aria-controls="basic-nav-section-one"&gt;&lt;span&gt;Topics&lt;/span&gt;&lt;svg class="hds-desktop-submenu-toggle-icon display-none tablet:display-none desktop:display-block" width="16" height="16" alt="" enable-background="new 0 0 400 400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"&gt;&lt;path d="m4.2 122.2 195.1 195.1 196.5-196.6-37.9-38-157.8 157.8-156.8-156.8z" /&gt;&lt;/svg&gt;&lt;svg class="hds-mobile-submenu-toggle-icon display-block tablet:display-block desktop:display-none" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;&lt;circle cx="8" cy="8" r="7.5" fill="#0B3D91" stroke="white"/&gt;&lt;rect x="4" y="7.6001" width="8" height="0.8" fill="white"/&gt;&lt;rect class="hds-mobile-submenu-toggle-icon-line-vertical" x="7.59998" y="12" width="8" height="0.8" transform="rotate(-90 7.59998 12)" fill="white"/&gt;&lt;/svg&gt;&lt;/button&gt;&lt;ul id="basic-nav-section-one" class="usa-nav__submenu" hidden&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/" rel="noopener"&gt;All Topics&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/atmosphere/" rel="noopener"&gt;Atmosphere&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/land/" rel="noopener"&gt;Land&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/heat-radiation/" rel="noopener"&gt;Heat &amp;#038; Radiation&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/life-on-earth/" rel="noopener"&gt;Life on Earth&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/human-dimensions/" rel="noopener"&gt;Human Dimensions&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/natural-events/" rel="noopener"&gt;Natural Events&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/oceans/" rel="noopener"&gt;Oceans&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/remote-sensing-technology/" rel="noopener"&gt;Remote Sensing Technology&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/snow-and-ice/" rel="noopener"&gt;Snow &amp;#038; Ice&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/topics/water/" rel="noopener"&gt;Water&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item"&gt;&lt;button type="button" class="usa-accordion__button usa-nav__link" aria-expanded="false" aria-controls="basic-nav-section-one"&gt;&lt;span&gt;More Content&lt;/span&gt;&lt;svg class="hds-desktop-submenu-toggle-icon display-none tablet:display-none desktop:display-block" width="16" height="16" alt="" enable-background="new 0 0 400 400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"&gt;&lt;path d="m4.2 122.2 195.1 195.1 196.5-196.6-37.9-38-157.8 157.8-156.8-156.8z" /&gt;&lt;/svg&gt;&lt;svg class="hds-mobile-submenu-toggle-icon display-block tablet:display-block desktop:display-none" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;&lt;circle cx="8" cy="8" r="7.5" fill="#0B3D91" stroke="white"/&gt;&lt;rect x="4" y="7.6001" width="8" height="0.8" fill="white"/&gt;&lt;rect class="hds-mobile-submenu-toggle-icon-line-vertical" x="7.59998" y="12" width="8" height="0.8" transform="rotate(-90 7.59998 12)" fill="white"/&gt;&lt;/svg&gt;&lt;/button&gt;&lt;ul id="basic-nav-section-one" class="usa-nav__submenu" hidden&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/collections/" rel="noopener"&gt;Collections&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/global-maps/" rel="noopener"&gt;Global Maps&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/world-of-change/" rel="noopener"&gt;World of Change&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/feature-articles/" rel="noopener"&gt;Articles&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/blogs/earth-matters/" rel="noopener"&gt;Earth Matters Blog&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/" rel="noopener"&gt;Blue Marble: Next Generation&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/kids/earth/eo-kids/" rel="noopener"&gt;EO Kids&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/kids/earth/mission-biomes/" rel="noopener"&gt;Mission: Biomes&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item"&gt;&lt;button type="button" class="usa-accordion__button usa-nav__link" aria-expanded="false" aria-controls="basic-nav-section-one"&gt;&lt;span&gt;About&lt;/span&gt;&lt;svg class="hds-desktop-submenu-toggle-icon display-none tablet:display-none desktop:display-block" width="16" height="16" alt="" enable-background="new 0 0 400 400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"&gt;&lt;path d="m4.2 122.2 195.1 195.1 196.5-196.6-37.9-38-157.8 157.8-156.8-156.8z" /&gt;&lt;/svg&gt;&lt;svg class="hds-mobile-submenu-toggle-icon display-block tablet:display-block desktop:display-none" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"&gt;&lt;circle cx="8" cy="8" r="7.5" fill="#0B3D91" stroke="white"/&gt;&lt;rect x="4" y="7.6001" width="8" height="0.8" fill="white"/&gt;&lt;rect class="hds-mobile-submenu-toggle-icon-line-vertical" x="7.59998" y="12" width="8" height="0.8" transform="rotate(-90 7.59998 12)" fill="white"/&gt;&lt;/svg&gt;&lt;/button&gt;&lt;ul id="basic-nav-section-one" class="usa-nav__submenu" hidden&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/about-the-eo/" rel="noopener"&gt;About Us&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/subscribe" rel="noopener"&gt;Subscribe&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/subscribe/feeds/" rel="noopener"&gt;🛜 RSS&lt;/a&gt;&lt;/li&gt;&lt;li class="usa-nav__submenu-item "&gt;&lt;a class="usa-nav__link" target="_self" href="https://science.nasa.gov/earth/earth-observatory/contact-the-eo/" rel="noopener"&gt;Contact Us&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li class="usa-nav__primary-item "&gt;&lt;a class="usa-nav__link" href="https://science.nasa.gov/earth/earth-observatory/search/" rel="noopener"&gt;Search&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/nav&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div id="" class="hds-media hds-module wp-block-image"&gt;&lt;div class="margin-left-auto margin-right-auto nasa-block-align-inline"&gt;&lt;div class="hds-media-wrapper margin-left-auto margin-right-auto"&gt;&lt;figure class="hds-media-inner hds-cover-wrapper hds-media-ratio-none "&gt;&lt;a href="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/satellite-puzzler/2026_augustpuzzler.jpg?w=720&amp;#038;h=480&amp;#038;fit=clip&amp;#038;crop=faces%2Cfocalpoint" rel="noopener"&gt;&lt;img fetchpriority="high" decoding="async" width="720" height="480" src="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/satellite-puzzler/2026_augustpuzzler.jpg?w=720&amp;#038;h=480&amp;#038;fit=clip&amp;#038;crop=faces%2Cfocalpoint" class="attachment-2048x2048 size-2048x2048" alt="A landform displays various shades of green interspersed with several especially dark channels toward the right and light brown patches toward the left." style="transform: scale(1); transform-origin: 50% 50%; object-position: 50% 50%; object-fit: cover;" block_context="nasa-block" loading="eager" srcset="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/satellite-puzzler/2026_augustpuzzler.jpg?w=720&amp;#038;h=480&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 720w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/satellite-puzzler/2026_augustpuzzler.jpg?w=300&amp;#038;h=200&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 300w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/satellite-puzzler/2026_augustpuzzler.jpg?w=400&amp;#038;h=267&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 400w, https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/images/satellite-puzzler/2026_augustpuzzler.jpg?w=600&amp;#038;h=400&amp;#038;fit=crop&amp;#038;crop=faces%2Cfocalpoint 600w" sizes="auto, (max-width: 720px) 100vw, 720px" /&gt;&lt;/a&gt;&lt;/figure&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+
+
+&lt;p class="wp-block-paragraph"&gt;Every month, &lt;a href="https://science.nasa.gov/earth/earth-observatory/" rel="noopener"&gt;NASA Earth Observatory&lt;/a&gt; features a puzzling satellite image. The August 2026 puzzler appears above. &lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;&lt;strong&gt;Your Challenge&lt;br&gt;&lt;/strong&gt;Identify the location shown in this satellite image. Share what clues you see, where you think it is, and what makes this place interesting or unique to you.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;&lt;strong&gt;How to Answer&lt;br&gt;&lt;/strong&gt;Submit your response using &lt;a href="https://science.nasa.gov/earth/earth-observatory/contact-the-eo/" rel="noopener"&gt;this form&lt;/a&gt; and select “Puzzler Answer” as the topic. Please include your preferred name or alias.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;You can keep it simple and just guess the location. Want to impress us? Tell us which satellite and instrument captured the image, which spectral bands were used, or point out a subtle detail about the geology or history of the area. If something catches your eye, or if this is your home or means something to you, we’d love to hear about it.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;&lt;strong&gt;The Prize&lt;br&gt;&lt;/strong&gt;We can’t offer prize money or a trip to space to see Earth like satellites and &lt;a href="https://www.youtube.com/playlist?list=PLq3vdkB7A7J4ZeJCbRJpgG4IsO62uWriU" rel="noopener"&gt;astronauts do&lt;/a&gt;. But we &lt;em&gt;can&lt;/em&gt; offer something almost as rewarding: puzzler bragging rights.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;About a week after the challenge, we’ll post the answer at the top of this page, along with a link to an Earth Observatory &lt;a href="https://science.nasa.gov/earth/earth-observatory/image-of-the-day/" target="_blank" rel="noreferrer noopener"&gt;Image of the Day&lt;/a&gt; story that explains the image in more detail. We’ll recognize the first person who correctly guesses the location, and we may also highlight readers who share especially thoughtful or interesting answers. By submitting a response, you acknowledge that your comments may be edited, excerpted, and published on this page.&lt;/p&gt;
+
+
+
+&lt;p class="wp-block-paragraph"&gt;Until then, zoom in, look closely, and enjoy the challenge. See you at the reveal!&lt;/p&gt;
+</ns3:encoded>
+					
+		
+		
+			</item>
+		</channel>
+</rss>

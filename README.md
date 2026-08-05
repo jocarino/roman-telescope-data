@@ -31,11 +31,26 @@ uv run python -m pipeline build                 # real Exoplanet Archive catalog
 uv run python -m pipeline build --source demo   # the three synthetic archetypes (offline)
 uv run python -m pipeline build --limit 1
 uv run pytest                                   # sanity gate, swap-seam, batch logic, export
-uv run ruff check pipeline web tests
+uv run ruff check pipeline web tests tools
 ```
 
 `build` prints each planet's true-colour hex, its Roman-view hex, the ΔE2000 between them
 (how much colour survives Roman), and the derived palette, then writes `data/planets.json`.
+
+### The one-planet fast path (`--planet`)
+
+```bash
+uv run python -m pipeline build --planet "K2-18 b" --out data/newsjack.json --no-cache
+```
+
+A dated release is always behind the Archive, so the planets that generate *"new planet
+discovered"* headlines are missing **by construction**. `--planet` pulls that single row from
+`pscomppars` and builds it in seconds. Always pair it with `--out`: the default writes
+`data/planets.json`, and you do not want a one-planet file where the catalogue was.
+
+If the completeness gate rejects it, that is still a usable answer — the gate prints which
+number is missing, and *"we can't compute a colour for this one yet, and here's exactly which
+number is missing"* is a better post than a guess.
 
 ## Web app (static site)
 
@@ -258,6 +273,61 @@ python3 tools/exohub.py mprocs          # one labelled pane per worktree, in mpr
   show `⚠ off-slot` since they aren't on the stable port.
 - **`mprocs`** writes a machine-specific `mprocs.yaml` (gitignored) and launches
   [mprocs](https://github.com/pvolok/mprocs) with a `dash` pane plus one `serve` pane per worktree.
+
+### Watching the news (`tools/newswatch.py`)
+
+When an exoplanet makes the news, we can put *our computed colour of that exact planet* in
+front of people who are already reading about it. `newswatch` is the machinery that makes that
+a five-minute job instead of a habit nobody keeps. Stdlib-only, like `exohub`.
+
+```bash
+python3 tools/newswatch.py aliases                       # build the name lookup (once, then weekly)
+python3 tools/newswatch.py feeds                         # do all seven sources still resolve?
+python3 tools/newswatch.py poll                          # the daily driver: <=3 briefings
+python3 tools/newswatch.py brief "K2-18 b"               # one planet, on demand
+python3 tools/newswatch.py bench                         # pre-write the ~50 briefings that cover most headlines
+```
+
+To try it without waiting for news, snapshot the feeds and replay them — deterministic, no
+network, and `--dry-run` leaves the state file alone so you can run it as often as you like:
+
+```bash
+python3 tools/newswatch.py feeds --save-fixture tests/fixtures/feeds
+python3 tools/newswatch.py poll --fixture tests/fixtures/feeds --dry-run
+```
+
+Five things about it are deliberate:
+
+- **It matches on an alias table, not a regex.** The press writes `TRAPPIST-1e`, `K2-18b`,
+  `HD189733b`, `Gliese 1214 b`, `51 Pegasi b`; the Archive writes `TRAPPIST-1 e`, `K2-18 b`,
+  `HD 189733 b`, `GJ 1214 b`, `51 Peg b`. Both sides are lowercased with spaces, hyphens and
+  apostrophes stripped, so they collapse to the same key, and every Archive name is expanded
+  into the long forms the press actually prints (`bet Pic b` → `beta Pictoris b`). The obvious
+  guard — *"a designation must contain a digit"* — silently discards every Greek-letter and
+  variable-star planet, so the guard is a length floor plus a system-dictionary check instead.
+- **The Roman view is gated on the band configuration in the data.** Releases before the
+  band-model correction carry four bands including a `660` and an `835` that trace to no primary
+  source. `newswatch` compares each record's bands against `pipeline/config.py` and **withholds
+  the Roman colour** when they disagree, because publishing *"as Roman would see it"* from a
+  wrong band model, to an audience containing the CGI team, is the one unrecoverable error
+  available to this project. `tests/test_newswatch.py` pins the two lists together.
+- **It prints facts, not copy.** Every scaffold leaves the one sentence of physics as a `⟨…⟩`
+  blank. That sentence is the only part of a post with any value, and a templated caption is
+  what kills a social account. A test enforces that the blanks stay blank.
+- **Three items a day, hard**, ranked by press-feed presence first, with 30-day per-planet
+  suppression (paper, press release and aggregator are one story arriving three times),
+  arXiv `replace` announcements dropped, and anything older than `--max-age-days` (7) ignored
+  — feeds move at wildly different speeds, and ESO's holds ten items, so its *newest* story
+  can be three weeks old. Whatever exceeds the cap is written to
+  `data/cache/newswatch-overflow.json` and named in the output — a silent cap would read as
+  "nothing else happened", which is a lie.
+- **A planet in the news that is *not* in the catalogue is the most valuable line it prints.**
+  That is a data task, and it is the majority case on a "new planet discovered" story; the
+  briefing hands you the `--planet` fast-path command for it.
+
+The tool needs `data/planets.json`, which is not in the repo — run `python3 scripts/fetch_data.py`
+first. `poll` appends every surfaced item to a newsjack log so the tracking is a side effect of
+running it rather than a discipline anyone has to maintain.
 
 ## Deploy (Dokploy / any static host)
 

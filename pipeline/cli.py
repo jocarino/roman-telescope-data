@@ -18,7 +18,7 @@ from pipeline.catalog import catalog_bulk, catalog_planets
 from pipeline.config import INSTRUMENTS, ROMAN_CGI
 from pipeline.demo_planets import demo_planets
 from pipeline.emit.cache import cached_build_record
-from pipeline.emit.writer import write_planets
+from pipeline.emit.writer import DEFAULT_OUT, write_planets
 from pipeline.solar_system import solar_system_planets
 from pipeline.system import attach_systems
 
@@ -32,6 +32,19 @@ def cmd_build(args: argparse.Namespace) -> None:
     instruments = [ROMAN_CGI] if args.targets_only is False else list(INSTRUMENTS.values())
     if args.source == "demo":
         inputs = demo_planets()
+    elif args.planet:
+        # The one-planet fast path. A dated release is always behind the Archive, so the
+        # commonest newsjackable story ("new planet discovered") is the one we cannot answer
+        # from data/planets.json. This pulls that single row live and builds it in seconds.
+        # It writes to --out, never over the release file, so nothing else is disturbed.
+        inputs = catalog_planets(list(args.planet), use_cache=not args.no_cache)
+        if not inputs:
+            print(
+                f"\nNo colour for {', '.join(args.planet)}: the completeness gate rejected it "
+                f"(reason above).\nThat is still a post — 'we can't compute a colour for this "
+                f"one yet, and here is exactly\nwhich number is missing' beats a guess."
+            )
+            return
     elif args.bulk is not None:
         inputs = solar_system_planets() + catalog_bulk(args.bulk, use_cache=not args.no_cache)
     else:
@@ -61,7 +74,7 @@ def cmd_build(args: argparse.Namespace) -> None:
     # Batch pass: link planets that share a host star (needs the whole set to group).
     attach_systems(records)
 
-    out = write_planets(records, generated_at)
+    out = write_planets(records, generated_at, args.out)
     n = len(records)
     print(f"\nWrote {n} planet(s) -> {out}  ({hits} from cache, {n - hits} rebuilt)")
 
@@ -129,6 +142,22 @@ def main() -> None:
         default=None,
         metavar="N",
         help="Scaled catalog: curated planets + nearest N well-characterised Archive planets",
+    )
+    p_build.add_argument(
+        "--planet",
+        action="append",
+        default=None,
+        metavar="NAME",
+        help="One-planet fast path: build just this Archive pl_name (repeatable). Use with "
+        "--out so the release planets.json is left alone. This is the newsjack path — a "
+        "planet in the news that postdates the release can be coloured in ~5 minutes.",
+    )
+    p_build.add_argument(
+        "--out",
+        type=Path,
+        default=DEFAULT_OUT,
+        metavar="PATH",
+        help=f"Where to write the JSON (default: {DEFAULT_OUT})",
     )
     p_build.add_argument("--limit", type=int, default=None, help="Only build the first N planets")
     p_build.add_argument("--no-cache", action="store_true", help="Bypass the TAP disk cache")

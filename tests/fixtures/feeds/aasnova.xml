@@ -1,0 +1,255 @@
+<?xml version='1.0' encoding='utf-8'?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:ns0="http://www.w3.org/2005/Atom" xmlns:ns1="http://purl.org/rss/1.0/modules/syndication/" xmlns:ns3="http://purl.org/rss/1.0/modules/content/" version="2.0">
+
+<channel>
+	<title>AAS Nova</title>
+	<ns0:link href="https://aasnova.org/feed/" rel="self" type="application/rss+xml" />
+	<link>https://aasnova.org/</link>
+	<description>Research highlights from the journals of the American Astronomical Society</description>
+	<lastBuildDate>Mon, 03 Aug 2026 18:25:19 +0000</lastBuildDate>
+	<language>en-US</language>
+	<ns1:updatePeriod>
+	hourly	</ns1:updatePeriod>
+	<ns1:updateFrequency>
+	1	</ns1:updateFrequency>
+	<generator>https://wordpress.org/?v=7.0.2</generator>
+
+<image>
+	<url>https://aasnova.org/wp-content/uploads/2017/10/cropped-favicon-1-32x32.png</url>
+	<title>AAS Nova</title>
+	<link>https://aasnova.org/</link>
+	<width>32</width>
+	<height>32</height>
+</image> 
+	<item>
+		<title>The Large Smooth Patch on Comet 9P/Tempel 1: Remnant of a Recent Past Event</title>
+		<link>https://doi.org/10.3847/PSJ/ae64ea#new_tab?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=the-large-smooth-patch-on-comet-9p-tempel-1-remnant-of-a-recent-past-event</link>
+		
+		<dc:creator>Kerry Hensley</dc:creator>
+		<pubDate>Wed, 05 Aug 2026 16:00:49 +0000</pubDate>
+				<category>Journals Digest</category>
+		<guid isPermaLink="false">https://aasnova.org/?p=15681</guid>
+
+					<description>&lt;p&gt;J. L. Rizos et al 2026 Planet. Sci. J. 7 123 Using gravitational flow simulations, researchers link smooth areas on the face of a comet to a single event 600–1,200 years ago, possibly connected to multiple close encounters with Jupiter.&lt;/p&gt;
+&lt;p&gt;The post &lt;a href="https://doi.org/10.3847/PSJ/ae64ea#new_tab"&gt;The Large Smooth Patch on Comet 9P/Tempel 1: Remnant of a Recent Past Event&lt;/a&gt; appeared first on &lt;a href="https://aasnova.org"&gt;AAS Nova&lt;/a&gt;.&lt;/p&gt;
+</description>
+										<ns3:encoded>&lt;div class="ewa-rteLine"&gt;J. L. Rizos et al 2026 &lt;em&gt;Planet. Sci. J.&lt;/em&gt; &lt;strong&gt;7&lt;/strong&gt; 123&lt;/div&gt;
+&lt;div&gt;
+&lt;blockquote&gt;
+&lt;div class="ewa-rteLine"&gt;Using gravitational flow simulations, researchers link smooth areas on the face of a comet to a single event 600–1,200 years ago, possibly connected to multiple close encounters with Jupiter.&lt;/div&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;p&gt;The post &lt;a href="https://doi.org/10.3847/PSJ/ae64ea#new_tab"&gt;The Large Smooth Patch on Comet 9P/Tempel 1: Remnant of a Recent Past Event&lt;/a&gt; appeared first on &lt;a href="https://aasnova.org"&gt;AAS Nova&lt;/a&gt;.&lt;/p&gt;
+</ns3:encoded>
+					
+		
+		
+		    <citation>Not available</citation>	</item>
+		<item>
+		<title>EXCELlent Work, Detectives! Solving the Murder of Star Formation in Galaxies with JWST</title>
+		<link>https://aasnova.org/2026/08/04/excellent-work-detectives-solving-the-murder-of-star-formation-in-galaxies-with-jwst/?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=excellent-work-detectives-solving-the-murder-of-star-formation-in-galaxies-with-jwst</link>
+		
+		<dc:creator>Astrobites</dc:creator>
+		<pubDate>Tue, 04 Aug 2026 16:00:52 +0000</pubDate>
+				<category>Astrobites</category>
+		<category>Highlights</category>
+		<category>galaxy evolution</category>
+		<category>JWST</category>
+		<category>star formation history</category>
+		<category>starburst galaxies</category>
+		<guid isPermaLink="false">https://aasnova.org/?p=15697</guid>
+
+					<description>&lt;p&gt;&lt;img width="702" height="505" src="https://aasnova.org/wp-content/uploads/2026/07/1432x2000-702x505.jpg" class="attachment-medium size-medium wp-post-image" alt="Arp 142" decoding="async" fetchpriority="high" srcset="https://aasnova.org/wp-content/uploads/2026/07/1432x2000-702x505.jpg 702w, https://aasnova.org/wp-content/uploads/2026/07/1432x2000-260x187.jpg 260w, https://aasnova.org/wp-content/uploads/2026/07/1432x2000-768x553.jpg 768w, https://aasnova.org/wp-content/uploads/2026/07/1432x2000-600x432.jpg 600w, https://aasnova.org/wp-content/uploads/2026/07/1432x2000-1320x950.jpg 1320w, https://aasnova.org/wp-content/uploads/2026/07/1432x2000.jpg 1432w" sizes="(max-width: 702px) 100vw, 702px" /&gt;&lt;/p&gt;
+&lt;p&gt;Astrobites reports on a whodunit of cosmic significance: who killed star formation in massive elliptical galaxies?&lt;/p&gt;
+&lt;p&gt;The post &lt;a href="https://aasnova.org/2026/08/04/excellent-work-detectives-solving-the-murder-of-star-formation-in-galaxies-with-jwst/"&gt;EXCELlent Work, Detectives! Solving the Murder of Star Formation in Galaxies with JWST&lt;/a&gt; appeared first on &lt;a href="https://aasnova.org"&gt;AAS Nova&lt;/a&gt;.&lt;/p&gt;
+</description>
+										<ns3:encoded>&lt;p&gt;&lt;img width="702" height="505" src="https://aasnova.org/wp-content/uploads/2026/07/1432x2000-702x505.jpg" class="attachment-medium size-medium wp-post-image" alt="Arp 142" decoding="async" loading="lazy" srcset="https://aasnova.org/wp-content/uploads/2026/07/1432x2000-702x505.jpg 702w, https://aasnova.org/wp-content/uploads/2026/07/1432x2000-260x187.jpg 260w, https://aasnova.org/wp-content/uploads/2026/07/1432x2000-768x553.jpg 768w, https://aasnova.org/wp-content/uploads/2026/07/1432x2000-600x432.jpg 600w, https://aasnova.org/wp-content/uploads/2026/07/1432x2000-1320x950.jpg 1320w, https://aasnova.org/wp-content/uploads/2026/07/1432x2000.jpg 1432w" sizes="auto, (max-width: 702px) 100vw, 702px" /&gt;&lt;/p&gt;&lt;blockquote&gt;&lt;p&gt;&lt;em&gt;Editor&amp;#8217;s Note:&lt;/em&gt; &lt;a href="http://astrobites.org" target="_blank" rel="noopener noreferrer"&gt;Astrobites&lt;/a&gt; is a graduate-student-run organization that digests astrophysical literature for undergraduate students. As part of the &lt;a href="https://aas.org/posts/news/2016/06/aas-and-astrobites-formalize-partnership" target="_blank" rel="noopener noreferrer"&gt;partnership&lt;/a&gt; between the AAS and astrobites, we occasionally repost astrobites content here at AAS Nova. We hope you enjoy this post from astrobites; the original can be viewed at &lt;a href="http://astrobites.org" target="_blank" rel="noopener noreferrer"&gt;astrobites.org&lt;/a&gt;.&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Title: &lt;/strong&gt;&lt;a href="https://doi.org/10.3847/1538-4357/ae459d"&gt;The JWST EXCELS Survey: Insights into the Nature of Quenching at Cosmic Noon&lt;/a&gt;&lt;br /&gt;
+&lt;strong&gt;Authors:&lt;/strong&gt; Maya Skarbinski et al.&lt;br /&gt;
+&lt;strong&gt;First Author&amp;#8217;s Institution: &lt;/strong&gt;Johns Hopkins University&lt;br /&gt;
+&lt;strong&gt;Status: &lt;/strong&gt;Published in &lt;em&gt;ApJ&lt;/em&gt;&lt;/p&gt;
+&lt;div&gt;
+&lt;h4 class="wp-block-heading"&gt;How to Quench a Galaxy&lt;/h4&gt;
+&lt;p&gt;Look at an image of the sky taken with a sufficiently sensitive telescope, and you’ll quickly notice that galaxies tend to cluster into two main types: blue &lt;a href="https://esahubble.org/wordbank/spiral-galaxy/"&gt;spiral galaxies&lt;/a&gt;, which have flat disk shapes with a central bulge, and red &lt;a href="https://esahubble.org/wordbank/elliptical-galaxy/"&gt;elliptical galaxies&lt;/a&gt;, which look like spherical or elliptical balls of red stars. Blue spiral galaxies can form tens to hundreds of stars every year, while elliptical galaxies have completely stopped forming stars, meaning that some process has to transform star-forming spirals into non-star-forming, or “quiescent,” elliptical galaxies. To form the current population of massive elliptical galaxies, this process had to be common about 2–3 billion years after the Big Bang at “&lt;a href="https://www.esa.int/Science_Exploration/Space_Science/Cosmic_eras"&gt;cosmic noon&lt;/a&gt;,” the period when star formation in the universe peaked. The processes that “&lt;a href="https://en.wikipedia.org/wiki/Quenching_(astronomy)"&gt;quench&lt;/a&gt;” star formation in massive galaxies are still being studied, and one of the best ways to study them is to find galaxies that recently quenched and look for clues about the processes that quenched them.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.space.com/astronomy/stars/why-do-some-starburst-galaxies-mysteriously-shut-down-new-study-provides-clues"&gt;Post-starburst&lt;/a&gt; galaxies are galaxies that have rapidly quenched after a short burst of star formation. Because these galaxies quenched so quickly and so recently, it’s often possible to find signs of whatever quenched them, like the signatures of past &lt;a href="https://astrobites.org/2016/03/11/how-to-grow-a-galaxy/"&gt;galaxy mergers&lt;/a&gt;, feedback from&lt;a href="https://astrobites.org/2016/06/01/reviewing-fantastic-beasts-agn-feedback-in-galaxies-and-clusters/"&gt; supermassive black hole accretion&lt;/a&gt;, or the &lt;a href="https://astrobites.org/2016/06/01/reviewing-fantastic-beasts-agn-feedback-in-galaxies-and-clusters/"&gt;shutoff of gas&lt;/a&gt; flowing into the galaxy. Rapid quenching is pretty &lt;a href="https://iopscience.iop.org/article/10.1088/1538-3873/ac0a59"&gt;uncommon now&lt;/a&gt;, but it was a &lt;a href="https://arxiv.org/abs/2404.17945"&gt;much more common&lt;/a&gt; way for galaxies to quench at cosmic noon. Understanding post-starburst galaxies at cosmic noon is therefore critical for understanding the formation of massive elliptical galaxies in the local universe.&lt;/p&gt;
+&lt;h4 class="wp-block-heading"&gt;The Quest for Quenched Galaxies&lt;/h4&gt;
+&lt;p&gt;Today’s article uses data from the JWST Early eXtragalactic Continuum and Emission Line Survey (&lt;a href="https://arxiv.org/abs/2405.02242" data-type="link" data-id="https://arxiv.org/abs/2405.02242"&gt;EXCELS&lt;/a&gt;) to identify post-starburst galaxies at cosmic noon and try to determine why they quenched. EXCELS is a spectroscopic survey, so the authors get a &lt;a href="https://astrobites.org/guides/spectroscopy-and-spectral-lines/"&gt;spectrum&lt;/a&gt; for every galaxy. The spectrum encodes information about the galaxy’s stellar population, including the mass of stars in the galaxy, the number of stars forming every year, and the history of star formation throughout the galaxy’s life.&lt;/p&gt;
+&lt;p&gt;The authors use a technique called &lt;a href="https://setosa.io/ev/principal-component-analysis/"&gt;principal component analysis&lt;/a&gt; to further divide the sample into young and old post-starbursts. Principal component analysis is a machine-learning technique that learns the most important features of a data set. This technique is used for “dimension reduction,” or reducing the number of data points needed to learn something about the object. A typical spectrum has hundreds or even thousands of data points, which means performing data analysis on a spectrum can be very computationally expensive. Principal component analysis takes these thousands of data points and learns broad patterns that correlate with each other. These patterns are called “supercolors” in the context of spectral data, and they encode things like the overall shape and color of the spectrum as well as the spectral shape around key features (see Figure 1 for a visualization). Since the overall shape, color, and emission/absorption line features of a spectrum come from the galaxy’s stellar population, this method can be used to identify galaxies with lots of star formation a billion years ago but very little star formation today — in other words, post-starburst galaxies.&lt;/p&gt;
+&lt;div id="attachment_15701" style="width: 712px" class="wp-caption aligncenter"&gt;&lt;a href="https://aasnova.org/wp-content/uploads/2026/07/PCA-Demo1.png" data-rel="lightbox-image-0" data-rl_title="Figure 1: An example of principal component analysis for sample star-forming (SF), quiescent (Qu), and post-starburst (PSB) galaxy spectra (left-hand side). Principal component analysis simplifies a many-dimensional data set (for example, spectra) into fewer dimensions. In this case, Super-Color 1 measures the overall color of the spectrum (shown on the left-hand side as the slope of the spectra, marked with red lines), while Super-Color 2 measures the shape of the spectrum around 4,000 angstroms (orange box). The authors use principal component analysis to identify post-starburst galaxies for further analysis (right-hand side). [Adapted from Skarbinski et al. 2026]" data-rl_caption="Figure 1: An example of principal component analysis for sample star-forming (SF), quiescent (Qu), and post-starburst (PSB) galaxy spectra (left-hand side). Principal component analysis simplifies a many-dimensional data set (for example, spectra) into fewer dimensions. In this case, Super-Color 1 measures the overall color of the spectrum (shown on the left-hand side as the slope of the spectra, marked with red lines), while Super-Color 2 measures the shape of the spectrum around 4,000 angstroms (orange box). The authors use principal component analysis to identify post-starburst galaxies for further analysis (right-hand side). [Adapted from Skarbinski et al. 2026]" title="Figure 1: An example of principal component analysis for sample star-forming (SF), quiescent (Qu), and post-starburst (PSB) galaxy spectra (left-hand side). Principal component analysis simplifies a many-dimensional data set (for example, spectra) into fewer dimensions. In this case, Super-Color 1 measures the overall color of the spectrum (shown on the left-hand side as the slope of the spectra, marked with red lines), while Super-Color 2 measures the shape of the spectrum around 4,000 angstroms (orange box). The authors use principal component analysis to identify post-starburst galaxies for further analysis (right-hand side). [Adapted from Skarbinski et al. 2026]"&gt;&lt;img decoding="async" aria-describedby="caption-attachment-15701" class="size-medium wp-image-15701" src="https://aasnova.org/wp-content/uploads/2026/07/PCA-Demo1-702x263.png" alt="demonstration of principal component analysis for spectra of different types of galaxies" width="702" height="263" srcset="https://aasnova.org/wp-content/uploads/2026/07/PCA-Demo1-702x263.png 702w, https://aasnova.org/wp-content/uploads/2026/07/PCA-Demo1-260x98.png 260w, https://aasnova.org/wp-content/uploads/2026/07/PCA-Demo1-768x288.png 768w, https://aasnova.org/wp-content/uploads/2026/07/PCA-Demo1-600x225.png 600w, https://aasnova.org/wp-content/uploads/2026/07/PCA-Demo1-1320x495.png 1320w, https://aasnova.org/wp-content/uploads/2026/07/PCA-Demo1.png 1440w" sizes="(max-width: 702px) 100vw, 702px" /&gt;&lt;/a&gt;&lt;p id="caption-attachment-15701" class="wp-caption-text"&gt;Figure 1: An example of principal component analysis for sample star-forming (SF), quiescent (Qu), and post-starburst (PSB) galaxy spectra (left-hand side). Principal component analysis simplifies a many-dimensional data set (for example, spectra) into fewer dimensions. In this case, Super-Color 1 measures the overall color of the spectrum (shown on the left-hand side as the slope of the spectra, marked with red lines), while Super-Color 2 measures the shape of the spectrum around 4,000 angstroms (orange box). The authors use principal component analysis to identify post-starburst galaxies for further analysis (right-hand side). [Adapted from Skarbinski et al. 2026]&lt;/p&gt;&lt;/div&gt;The authors apply principal component analysis to the galaxies in their sample and find that 11 of the galaxies in their sample are classified as post-starburst, 9 are quiescent, and 4 still have some star formation. To further analyze the stellar populations of the post-starbursts in their sample, the authors use a program called Bagpipes to fit the galaxies’ spectra. Bagpipes is a &lt;a href="https://astrobites.org/2026/01/30/sed-fitting/"&gt;spectral energy distribution fitting&lt;/a&gt; software, which means that it takes the observed spectrum of a real galaxy and tries to match it to a library of different stellar spectra. By measuring the relative contribution of different kinds of stars (which all have different lifetimes), Bagpipes can compute the likely history of star formation in the galaxy (e.g., when the star formation rate peaked) as well as the present-day properties of the galaxy (things like the mass in stars versus dust and the current star formation rate). The authors use the galaxies’ star formation histories to try to find clues as to how they quenched.&lt;/p&gt;
+&lt;h4 class="wp-block-heading"&gt;How Quickly Do Post-Starbursts Quench?&lt;/h4&gt;
+&lt;p&gt;First, the authors measure something called a “quenching timescale,” which they define as the length of time between when the galaxy’s star formation rate peaked and when it fell low enough that the galaxy was quenched. The quenching timescale depends on which process shut down star formation in the galaxy — feedback from black hole accretion or star formation should cause fast quenching, while galaxies that are starved of gas from the &lt;a href="https://astronomy.swin.edu.au/cosmos/*/Intergalactic+Medium"&gt;intergalactic medium&lt;/a&gt; should quench more slowly. The authors find that 15 of their galaxies quenched in under 500 million years, 6 took between 500 million and 1 billion years, and 3 took longer than 1 billion years to quench. The galaxies that had the highest peak star formation rates quenched the fastest, suggesting that feedback from star formation could have played a role in quenching these galaxies.&lt;/p&gt;
+&lt;div id="attachment_15702" style="width: 270px" class="wp-caption alignright"&gt;&lt;a href="https://aasnova.org/wp-content/uploads/2026/07/apjae459df7_hr.jpg" data-rel="lightbox-image-1" data-rl_title="Figure 2: Possible evolutionary tracks in supercolor for two example galaxies as they quench. The galaxy in the top panel quenches quickly and has post-starburst supercolors for about a billion years, while the galaxy in the bottom panel quenches without ever going through the post-starburst phase. The authors use these tracks to determine how important the post-starburst phase is for quenching massive galaxies. [Skarbinski et al. 2026]" data-rl_caption="Figure 2: Possible evolutionary tracks in supercolor for two example galaxies as they quench. The galaxy in the top panel quenches quickly and has post-starburst supercolors for about a billion years, while the galaxy in the bottom panel quenches without ever going through the post-starburst phase. The authors use these tracks to determine how important the post-starburst phase is for quenching massive galaxies. [Skarbinski et al. 2026]" title="Figure 2: Possible evolutionary tracks in supercolor for two example galaxies as they quench. The galaxy in the top panel quenches quickly and has post-starburst supercolors for about a billion years, while the galaxy in the bottom panel quenches without ever going through the post-starburst phase. The authors use these tracks to determine how important the post-starburst phase is for quenching massive galaxies. [Skarbinski et al. 2026]"&gt;&lt;img decoding="async" aria-describedby="caption-attachment-15702" class="size-thumbnail wp-image-15702" src="https://aasnova.org/wp-content/uploads/2026/07/apjae459df7_hr-260x347.jpg" alt="plots showing possible evolutionary tracks for two example galaxies" width="260" height="347" srcset="https://aasnova.org/wp-content/uploads/2026/07/apjae459df7_hr-260x347.jpg 260w, https://aasnova.org/wp-content/uploads/2026/07/apjae459df7_hr.jpg 595w" sizes="(max-width: 260px) 100vw, 260px" /&gt;&lt;/a&gt;&lt;p id="caption-attachment-15702" class="wp-caption-text"&gt;Figure 2: Possible evolutionary tracks in supercolor for two example galaxies as they quench. The galaxy in the top panel quenches quickly and has post-starburst supercolors for about a billion years, while the galaxy in the bottom panel quenches without ever going through the post-starburst phase. The authors use these tracks to determine how important the post-starburst phase is for quenching massive galaxies. [Skarbinski et al. 2026]&lt;/p&gt;&lt;/div&gt;Next, the authors measure how important the post-starburst phase is to form massive quiescent galaxies. Not all galaxies that quench go through a post-starburst phase; some objects, especially those that quench slowly, will transition directly from star forming to quiescent. The authors use the star formation histories from their spectral energy distribution fits to predict how the galaxies’ supercolors changed after their star formation peaked (Figure 2) and find that six of the nine quiescent galaxies went through a post-starburst phase in the past, while the other three did not. For the objects that went through a post-starburst phase, the median time spent as a post-starburst was around 600 million years.The authors can use this measured “visibility timescale” to constrain whether the post-starburst phase is important for forming massive quiescent galaxies. If the fraction of post-starburst galaxies in a sample is high, that can be for two reasons: either a larger fraction of galaxies will eventually go through a post-starburst phase, or the post-starburst phase is very long, making it easy to find post-starburst galaxies. Using the measured timescale of 600 million years and combining with results from &lt;a href="http://doi.org/10.1093/mnras/stad1098"&gt;another article&lt;/a&gt;, the authors find that 40% of quiescent galaxies likely went through a post-starburst phase; for the more massive end of the sample, this fraction increases to around 73% due to the shorter visibility timescale. This suggests that the post-starburst phase is very important for forming the kind of massive quiescent galaxies we see in the local universe.&lt;/p&gt;
+&lt;p&gt;While the post-starburst phase is important, the different quenching timescales present across the sample suggest that multiple pathways existed to quench galaxies at cosmic noon, similar to what has been found in &lt;a href="https://astrobites.org/2020/09/19/how-to-quench-a-galaxy/"&gt;less-distant galaxies&lt;/a&gt; and at cosmic noon in &lt;a href="https://astrobites.org/2025/10/07/inside-out-quench/"&gt;other&lt;/a&gt; &lt;a href="https://astrobites.org/2022/03/23/sprinting-through-green-valley/"&gt;samples&lt;/a&gt;. This is also supported by the fact that four of the five galaxies with sufficient data show evidence of an actively accreting supermassive black hole that may help shut down star formation in many (but perhaps not all) massive galaxies. While the precise processes that quench massive galaxies are still uncertain, one thing is clear: JWST EXCELS at solving the mystery!&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;em&gt;Original astrobite edited by Anavi Uppal.&lt;/em&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;h4&gt;About the author, Margaret Verrico:&lt;/h4&gt;
+&lt;p&gt;I am a fourth-year graduate student at the University of Illinois Urbana-Champaign. I study the connection between supermassive black hole transients and their host galaxies. I am also an avid knitter and reader, and I am passionate about opening up STEM opportunities for people of all backgrounds.&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;The post &lt;a href="https://aasnova.org/2026/08/04/excellent-work-detectives-solving-the-murder-of-star-formation-in-galaxies-with-jwst/"&gt;EXCELlent Work, Detectives! Solving the Murder of Star Formation in Galaxies with JWST&lt;/a&gt; appeared first on &lt;a href="https://aasnova.org"&gt;AAS Nova&lt;/a&gt;.&lt;/p&gt;
+</ns3:encoded>
+					
+		
+		
+		    <citation>Not available</citation>	</item>
+		<item>
+		<title>Isolating Sgr A East: The First Uncontaminated X-Ray Maps of a Galactic Center Supernova Remnant</title>
+		<link>https://doi.org/10.3847/1538-4357/ae5dbe#new_tab?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=isolating-sgr-a-east-the-first-uncontaminated-x-ray-maps-of-a-galactic-center-supernova-remnant</link>
+		
+		<dc:creator>Kerry Hensley</dc:creator>
+		<pubDate>Tue, 04 Aug 2026 16:00:08 +0000</pubDate>
+				<category>Journals Digest</category>
+		<guid isPermaLink="false">https://aasnova.org/?p=15679</guid>
+
+					<description>&lt;p&gt;Mayura Balakrishnan et al 2026 ApJ 1003 128 Sgr A East strongly overlaps with plasma associated with the Milky Way’s central supermassive black hole, but new efforts to disentangle this emission have successfully isolated the remnant’s emission.&lt;/p&gt;
+&lt;p&gt;The post &lt;a href="https://doi.org/10.3847/1538-4357/ae5dbe#new_tab"&gt;Isolating Sgr A East: The First Uncontaminated X-Ray Maps of a Galactic Center Supernova Remnant&lt;/a&gt; appeared first on &lt;a href="https://aasnova.org"&gt;AAS Nova&lt;/a&gt;.&lt;/p&gt;
+</description>
+										<ns3:encoded>&lt;div class="ewa-rteLine"&gt;Mayura Balakrishnan et al 2026 &lt;em&gt;ApJ&lt;/em&gt; &lt;strong&gt;1003&lt;/strong&gt; 128&lt;/div&gt;
+&lt;div&gt;
+&lt;blockquote&gt;
+&lt;div class="ewa-rteLine"&gt;Sgr A East strongly overlaps with plasma associated with the Milky Way’s central supermassive black hole, but new efforts to disentangle this emission have successfully isolated the remnant’s emission.&lt;/div&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;p&gt;The post &lt;a href="https://doi.org/10.3847/1538-4357/ae5dbe#new_tab"&gt;Isolating Sgr A East: The First Uncontaminated X-Ray Maps of a Galactic Center Supernova Remnant&lt;/a&gt; appeared first on &lt;a href="https://aasnova.org"&gt;AAS Nova&lt;/a&gt;.&lt;/p&gt;
+</ns3:encoded>
+					
+		
+		
+		    <citation>Not available</citation>	</item>
+		<item>
+		<title>TOI-2155 b: A Massive Brown Dwarf or a Very Low-Mass Star?</title>
+		<link>https://doi.org/10.3847/1538-3881/ae7370#new_tab?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=toi-2155-b-a-massive-brown-dwarf-or-a-very-low-mass-star</link>
+		
+		<dc:creator>Kerry Hensley</dc:creator>
+		<pubDate>Mon, 03 Aug 2026 16:00:43 +0000</pubDate>
+				<category>Journals Digest</category>
+		<guid isPermaLink="false">https://aasnova.org/?p=15677</guid>
+
+					<description>&lt;p&gt;Md Redyan Ahmed et al 2026 AJ 172 21 Slightly smaller than Jupiter but roughly 80 times as massive, TOI-2155b can provide a valuable test for models of stellar-mass objects near the hydrogen-burning mass limit.&lt;/p&gt;
+&lt;p&gt;The post &lt;a href="https://doi.org/10.3847/1538-3881/ae7370#new_tab"&gt;TOI-2155 b: A Massive Brown Dwarf or a Very Low-Mass Star?&lt;/a&gt; appeared first on &lt;a href="https://aasnova.org"&gt;AAS Nova&lt;/a&gt;.&lt;/p&gt;
+</description>
+										<ns3:encoded>&lt;div class="ewa-rteLine"&gt;Md Redyan Ahmed et al 2026 &lt;em&gt;AJ&lt;/em&gt; &lt;strong&gt;172&lt;/strong&gt; 21&lt;/div&gt;
+&lt;div&gt;
+&lt;blockquote&gt;
+&lt;div class="ewa-rteLine"&gt;Slightly smaller than Jupiter but roughly 80 times as massive, TOI-2155b can provide a valuable test for models of stellar-mass objects near the hydrogen-burning mass limit.&lt;/div&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;p&gt;The post &lt;a href="https://doi.org/10.3847/1538-3881/ae7370#new_tab"&gt;TOI-2155 b: A Massive Brown Dwarf or a Very Low-Mass Star?&lt;/a&gt; appeared first on &lt;a href="https://aasnova.org"&gt;AAS Nova&lt;/a&gt;.&lt;/p&gt;
+</ns3:encoded>
+					
+		
+		
+		    <citation>Not available</citation>	</item>
+		<item>
+		<title>Featured Image: Citizen Science and Solar Structure</title>
+		<link>https://aasnova.org/2026/08/03/featured-image-citizen-science-and-solar-structure/?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=featured-image-citizen-science-and-solar-structure</link>
+		
+		<dc:creator>Kerry Hensley</dc:creator>
+		<pubDate>Mon, 03 Aug 2026 16:00:24 +0000</pubDate>
+				<category>Highlights</category>
+		<category>Images</category>
+		<category>citizen science</category>
+		<category>eclipses</category>
+		<category>solar corona</category>
+		<category>Sun</category>
+		<guid isPermaLink="false">https://aasnova.org/?p=15740</guid>
+
+					<description>&lt;p&gt;&lt;img width="702" height="456" src="https://aasnova.org/wp-content/uploads/2026/07/apjlae8797f1_hr-702x456.jpg" class="attachment-medium size-medium wp-post-image" alt="solar corona during a solar eclipse" decoding="async" loading="lazy" srcset="https://aasnova.org/wp-content/uploads/2026/07/apjlae8797f1_hr-702x456.jpg 702w, https://aasnova.org/wp-content/uploads/2026/07/apjlae8797f1_hr-260x169.jpg 260w, https://aasnova.org/wp-content/uploads/2026/07/apjlae8797f1_hr-768x499.jpg 768w, https://aasnova.org/wp-content/uploads/2026/07/apjlae8797f1_hr-600x389.jpg 600w, https://aasnova.org/wp-content/uploads/2026/07/apjlae8797f1_hr-214x140.jpg 214w, https://aasnova.org/wp-content/uploads/2026/07/apjlae8797f1_hr.jpg 1063w" sizes="auto, (max-width: 702px) 100vw, 702px" /&gt;&lt;/p&gt;
+&lt;p&gt;Citizen scientists from the Dynamic Eclipse Broadcast Initiative recorded nearly an hour of coronal behavior during the 8 April 2024 solar eclipse.&lt;/p&gt;
+&lt;p&gt;The post &lt;a href="https://aasnova.org/2026/08/03/featured-image-citizen-science-and-solar-structure/"&gt;Featured Image: Citizen Science and Solar Structure&lt;/a&gt; appeared first on &lt;a href="https://aasnova.org"&gt;AAS Nova&lt;/a&gt;.&lt;/p&gt;
+</description>
+										<ns3:encoded>&lt;p&gt;&lt;img width="702" height="456" src="https://aasnova.org/wp-content/uploads/2026/07/apjlae8797f1_hr-702x456.jpg" class="attachment-medium size-medium wp-post-image" alt="solar corona during a solar eclipse" decoding="async" loading="lazy" srcset="https://aasnova.org/wp-content/uploads/2026/07/apjlae8797f1_hr-702x456.jpg 702w, https://aasnova.org/wp-content/uploads/2026/07/apjlae8797f1_hr-260x169.jpg 260w, https://aasnova.org/wp-content/uploads/2026/07/apjlae8797f1_hr-768x499.jpg 768w, https://aasnova.org/wp-content/uploads/2026/07/apjlae8797f1_hr-600x389.jpg 600w, https://aasnova.org/wp-content/uploads/2026/07/apjlae8797f1_hr-214x140.jpg 214w, https://aasnova.org/wp-content/uploads/2026/07/apjlae8797f1_hr.jpg 1063w" sizes="auto, (max-width: 702px) 100vw, 702px" /&gt;&lt;/p&gt;&lt;p&gt;During the 8 April 2024 solar eclipse, the path of totality swept across North America, dazzling millions of skygazers. Scattered along this path were 82 viewing sites of the Dynamic Eclipse Broadcast Initiative citizen science project, which aimed to observe the dynamics of the tenuous solar corona. Though poor weather dashed many observers&amp;#8217; hopes, the project managed to collect data at 11 sites spanning 2,700 kilometers, capturing 49 minutes of coronal behavior. The image above shows the solar corona as seen during totality from one of the DEB Initiative sites. In a recent research article, Matthew J. Penn (Southern Illinois University Carbondale; Tucson Amateur Astronomy Association) and collaborators described the results of the Initiative&amp;#8217;s viewing efforts, including identification of downflows and outflows, plumes, coronal loops, and apparent motion of background stars. To learn more about these observations of the solar corona, be sure to check out the full article linked below.&lt;/p&gt;
+&lt;h4&gt;Citation&lt;/h4&gt;
+&lt;p&gt;&amp;#8220;Structure and Dynamics of the Inner Corona Measured from the DEB Initiative 2024 Eclipse Image Sequence,&amp;#8221; Matthew J Penn et al 2026 &lt;em&gt;ApJL&lt;/em&gt; &lt;b&gt;1006&lt;/b&gt; L25. &lt;a href="https://doi.org/10.3847/2041-8213/ae8797"&gt;doi:10.3847/2041-8213/ae8797&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;The post &lt;a href="https://aasnova.org/2026/08/03/featured-image-citizen-science-and-solar-structure/"&gt;Featured Image: Citizen Science and Solar Structure&lt;/a&gt; appeared first on &lt;a href="https://aasnova.org"&gt;AAS Nova&lt;/a&gt;.&lt;/p&gt;
+</ns3:encoded>
+					
+		
+		
+		    <citation>"Structure and Dynamics of the Inner Corona Measured from the DEB Initiative 2024 Eclipse Image Sequence," Matthew J Penn et al 2026 <em>ApJL</em> <b>1006</b> L25. <a href="https://doi.org/10.3847/2041-8213/ae8797">doi:10.3847/2041-8213/ae8797</a></citation>	</item>
+		<item>
+		<title>Discovery of a Featureless Tidal Disruption Event at z ∼ 1 with the Wide Field Survey Telescope</title>
+		<link>https://doi.org/10.3847/2041-8213/ae710d#new_tab?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=discovery-of-a-featureless-tidal-disruption-event-at-z-%25e2%2588%25bc-1-with-the-wide-field-survey-telescope</link>
+		
+		<dc:creator>Kerry Hensley</dc:creator>
+		<pubDate>Fri, 31 Jul 2026 16:00:40 +0000</pubDate>
+				<category>Journals Digest</category>
+		<guid isPermaLink="false">https://aasnova.org/?p=15639</guid>
+
+					<description>&lt;p&gt;Jiazheng Zhu et al 2026 ApJL 1004 L10 Discovered just 6 billion years after the Big Bang, AT2025wet is the highest-redshift non-jetted tidal disruption event known, allowing researchers to probe the missing-energy puzzle.&lt;/p&gt;
+&lt;p&gt;The post &lt;a href="https://doi.org/10.3847/2041-8213/ae710d#new_tab"&gt;Discovery of a Featureless Tidal Disruption Event at &amp;lt;em&amp;gt;z&amp;lt;/em&amp;gt; ∼ 1 with the Wide Field Survey Telescope&lt;/a&gt; appeared first on &lt;a href="https://aasnova.org"&gt;AAS Nova&lt;/a&gt;.&lt;/p&gt;
+</description>
+										<ns3:encoded>&lt;div class="ewa-rteLine"&gt;Jiazheng Zhu et al 2026 &lt;em&gt;ApJL&lt;/em&gt; &lt;strong&gt;1004&lt;/strong&gt; L10&lt;/div&gt;
+&lt;div&gt;
+&lt;blockquote&gt;
+&lt;div class="ewa-rteLine"&gt;Discovered just 6 billion years after the Big Bang, AT2025wet is the highest-redshift non-jetted tidal disruption event known, allowing researchers to probe the missing-energy puzzle.&lt;/div&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;p&gt;The post &lt;a href="https://doi.org/10.3847/2041-8213/ae710d#new_tab"&gt;Discovery of a Featureless Tidal Disruption Event at &amp;lt;em&amp;gt;z&amp;lt;/em&amp;gt; ∼ 1 with the Wide Field Survey Telescope&lt;/a&gt; appeared first on &lt;a href="https://aasnova.org"&gt;AAS Nova&lt;/a&gt;.&lt;/p&gt;
+</ns3:encoded>
+					
+		
+		
+		    <citation>Not available</citation>	</item>
+		<item>
+		<title>Spying on a Split Comet</title>
+		<link>https://aasnova.org/2026/07/31/spying-on-a-split-comet/?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=spying-on-a-split-comet</link>
+		
+		<dc:creator>Lexi Gault</dc:creator>
+		<pubDate>Fri, 31 Jul 2026 16:00:40 +0000</pubDate>
+				<category>Features</category>
+		<category>Highlights</category>
+		<category>comets</category>
+		<category>Jupiter</category>
+		<category>solar system</category>
+		<guid isPermaLink="false">https://aasnova.org/?p=15744</guid>
+
+					<description>&lt;p&gt;&lt;img width="702" height="339" src="https://aasnova.org/wp-content/uploads/2026/07/ajae83acf2_hr-702x339.jpg" class="attachment-medium size-medium wp-post-image" alt="240P" decoding="async" loading="lazy" srcset="https://aasnova.org/wp-content/uploads/2026/07/ajae83acf2_hr-702x339.jpg 702w, https://aasnova.org/wp-content/uploads/2026/07/ajae83acf2_hr-260x126.jpg 260w, https://aasnova.org/wp-content/uploads/2026/07/ajae83acf2_hr-768x371.jpg 768w, https://aasnova.org/wp-content/uploads/2026/07/ajae83acf2_hr-600x290.jpg 600w, https://aasnova.org/wp-content/uploads/2026/07/ajae83acf2_hr.jpg 1237w" sizes="auto, (max-width: 702px) 100vw, 702px" /&gt;&lt;/p&gt;
+&lt;p&gt;A recent study investigated the possible mechanisms that caused a known Jupiter-family comet to split in two. &lt;/p&gt;
+&lt;p&gt;The post &lt;a href="https://aasnova.org/2026/07/31/spying-on-a-split-comet/"&gt;Spying on a Split Comet&lt;/a&gt; appeared first on &lt;a href="https://aasnova.org"&gt;AAS Nova&lt;/a&gt;.&lt;/p&gt;
+</description>
+										<ns3:encoded>&lt;p&gt;&lt;img width="702" height="339" src="https://aasnova.org/wp-content/uploads/2026/07/ajae83acf2_hr-702x339.jpg" class="attachment-medium size-medium wp-post-image" alt="240P" decoding="async" loading="lazy" srcset="https://aasnova.org/wp-content/uploads/2026/07/ajae83acf2_hr-702x339.jpg 702w, https://aasnova.org/wp-content/uploads/2026/07/ajae83acf2_hr-260x126.jpg 260w, https://aasnova.org/wp-content/uploads/2026/07/ajae83acf2_hr-768x371.jpg 768w, https://aasnova.org/wp-content/uploads/2026/07/ajae83acf2_hr-600x290.jpg 600w, https://aasnova.org/wp-content/uploads/2026/07/ajae83acf2_hr.jpg 1237w" sizes="auto, (max-width: 702px) 100vw, 702px" /&gt;&lt;/p&gt;&lt;p&gt;Traversing through the solar system, a comet split in two, and a recent study used six months of observations to investigate when and why.&lt;/p&gt;
+&lt;h4&gt;A Split Comet&lt;/h4&gt;
+&lt;div id="attachment_15750" style="width: 270px" class="wp-caption alignright"&gt;&lt;a href="https://aasnova.org/wp-content/uploads/2026/07/skylive_240P.jpeg" data-rel="lightbox-image-0" data-rl_title="Orbital path of 240P/NEAT (purple) and the position of the comet on 30 July 2026 (light blue teardrop). Click to enlarge. [TheSkyLive]" data-rl_caption="Orbital path of 240P/NEAT (purple) and the position of the comet on 30 July 2026 (light blue teardrop). Click to enlarge. [TheSkyLive]" title="Orbital path of 240P/NEAT (purple) and the position of the comet on 30 July 2026 (light blue teardrop). Click to enlarge. [TheSkyLive]"&gt;&lt;img loading="lazy" decoding="async" aria-describedby="caption-attachment-15750" class="size-thumbnail wp-image-15750" src="https://aasnova.org/wp-content/uploads/2026/07/skylive_240P-260x136.jpeg" alt="Orbit map" width="260" height="136" srcset="https://aasnova.org/wp-content/uploads/2026/07/skylive_240P-260x136.jpeg 260w, https://aasnova.org/wp-content/uploads/2026/07/skylive_240P-702x367.jpeg 702w, https://aasnova.org/wp-content/uploads/2026/07/skylive_240P-768x402.jpeg 768w, https://aasnova.org/wp-content/uploads/2026/07/skylive_240P-600x314.jpeg 600w, https://aasnova.org/wp-content/uploads/2026/07/skylive_240P-1536x804.jpeg 1536w, https://aasnova.org/wp-content/uploads/2026/07/skylive_240P-351x185.jpeg 351w, https://aasnova.org/wp-content/uploads/2026/07/skylive_240P-1320x691.jpeg 1320w, https://aasnova.org/wp-content/uploads/2026/07/skylive_240P.jpeg 1850w" sizes="auto, (max-width: 260px) 100vw, 260px" /&gt;&lt;/a&gt;&lt;p id="caption-attachment-15750" class="wp-caption-text"&gt;Orbital path of 240P/NEAT (purple) and the position of the comet on 30 July 2026 (light blue teardrop). Click to enlarge. [&lt;a href="https://theskylive.com/3dsolarsystem?obj=240p"&gt;TheSkyLive&lt;/a&gt;]&lt;/p&gt;&lt;/div&gt;While we often think of comets as icy remnants of the solar system&amp;#8217;s formation that populate the Kuiper Belt and Oort Cloud, some comets make their homes closer to the Sun. One such class, known as Jupiter-family comets, traveled from the Kuiper Belt to short orbital periods (less than 20 years) whose paths through the solar system are shaped by Jupiter&amp;#8217;s gravity. Discovered in 2002, 240P/NEAT is a Jupiter-family comet that loops between Jupiter and Mars on a 7.6-year orbit. Making close approaches to Jupiter, 240P experiences frequent, strong interactions with the gas giant that can alter the comet&amp;#8217;s orbit and cause sudden bursts in brightness as ice and dust are heated and outgassed from the comet&amp;#8217;s surface.&lt;/p&gt;
+&lt;p&gt;Most recently, 240P swept closest to Jupiter in July 2007, shifting the comet&amp;#8217;s perihelion distance (closest approach to the Sun) from 2.5 to 2.1 au, and several long-lived bursts in brightness in 2018/2019 could have been spurred by this orbital shift. Excitingly, a fainter comoving object, 240P-B, was first reported in June 2025 as the comet headed toward perihelion — at some point recently, 240P had split in two!&lt;/p&gt;
+&lt;p&gt;Over the last century, numerous split comets have been recorded, but detailed physical studies of these objects are rare. With growing evidence suggesting splitting and disintegration are the primary mechanisms of comet destruction, understanding the properties and cause of 240P&amp;#8217;s split is imperative.&lt;/p&gt;
+&lt;h4&gt;Observing 240P&lt;/h4&gt;
+&lt;p&gt;With 240P on the move to perihelion, David Jewitt (University of California, Los Angeles) and collaborators monitored the comet from October 2025 to April 2026 to establish the likely cause of its split. Employing the Alhambra Faint Object Spectrograph and Camera on the 2.56-meter Nordic Optical Telescope, the authors obtained detailed imaging of the comet from two months before to four months after perihelion to characterize both components.&lt;/p&gt;
+&lt;p&gt;Tracking both photometric and morphological changes across their observations, the authors estimated the dust-loss rates, physical sizes, and separation speed of 240P-A and 240P-B. The brighter component, 240P-A, has an estimated radius between 400 and 600 meters and a dust-loss rate almost four times higher than 240P-B. Because 240P-B is fainter, its radius is harder to constrain observationally. From its lower dust-loss rate and lower brightness, the authors estimated a radius around 300 meters (and no smaller than 50). Based on how the separation of the two comet pieces changes over time, the authors determined that the split of 240P occurred at least three years before their observations.&lt;/p&gt;
+&lt;div id="attachment_15749" style="width: 270px" class="wp-caption alignleft"&gt;&lt;a href="https://aasnova.org/wp-content/uploads/2026/07/ajae83acf7_hr.jpg" data-rel="lightbox-image-1" data-rl_title="Dust mass-loss rates for 240P-A (green circles) and 240P-B (yellow diamonds) over the course of the observations. Both components peak shortly before perihelion (dashed vertical line). Click to enlarge. [Jewitt et al 2026]" data-rl_caption="Dust mass-loss rates for 240P-A (green circles) and 240P-B (yellow diamonds) over the course of the observations. Both components peak shortly before perihelion (dashed vertical line). Click to enlarge. [Jewitt et al 2026]" title="Dust mass-loss rates for 240P-A (green circles) and 240P-B (yellow diamonds) over the course of the observations. Both components peak shortly before perihelion (dashed vertical line). Click to enlarge. [Jewitt et al 2026]"&gt;&lt;img loading="lazy" decoding="async" aria-describedby="caption-attachment-15749" class="size-thumbnail wp-image-15749" src="https://aasnova.org/wp-content/uploads/2026/07/ajae83acf7_hr-260x199.jpg" alt="dust mass-loss" width="260" height="199" srcset="https://aasnova.org/wp-content/uploads/2026/07/ajae83acf7_hr-260x199.jpg 260w, https://aasnova.org/wp-content/uploads/2026/07/ajae83acf7_hr-702x538.jpg 702w, https://aasnova.org/wp-content/uploads/2026/07/ajae83acf7_hr-768x588.jpg 768w, https://aasnova.org/wp-content/uploads/2026/07/ajae83acf7_hr-600x460.jpg 600w, https://aasnova.org/wp-content/uploads/2026/07/ajae83acf7_hr.jpg 970w" sizes="auto, (max-width: 260px) 100vw, 260px" /&gt;&lt;/a&gt;&lt;p id="caption-attachment-15749" class="wp-caption-text"&gt;Dust mass-loss rates for 240P-A (green circles) and 240P-B (yellow diamonds) over the course of the observations. Both components peak shortly before perihelion (dashed vertical line). Click to enlarge. [Jewitt et al 2026]&lt;/p&gt;&lt;/div&gt;
+&lt;h4&gt;Source of the Split&lt;/h4&gt;
+&lt;p&gt;How exactly did this fragmented comet get this way? The authors considered a number of comet-splitting mechanisms: tidal forces, asteroid impact, pressure buildup below the comet&amp;#8217;s surface, thermal stresses, and rotational instability. Given the comet&amp;#8217;s orbit, it has not had close enough encounters with the Sun or other planets for tidal forces to be the culprit, and it traverses well above the asteroid belt, avoiding collisions. Pressure buildup and thermal stresses can fracture comets, but both are unlikely to launch such a large fragment as seen in this system.&lt;/p&gt;
+&lt;p&gt;This leaves rotational instability as the likely source of 240P&amp;#8217;s split. Outgassing torques lead to rotational instability, especially in subkilometer comets like 240P, and 240P has exhibited recent outgassing. In addition, the separation speed between the 240P components is comparable to the escape speed of the primary comet, which is expected for rotational breakup. To confirm this hypothesis, future observations measuring the rotation period of 240P are necessary, but this study adds to the small number of split-comet observations that aid in understanding comet destruction.&lt;/p&gt;
+&lt;h4&gt;Citation&lt;/h4&gt;
+&lt;p&gt;&amp;#8220;Investigation of Split Comet 240P/NEAT,&amp;#8221; David Jewitt et al &lt;em&gt;AJ &lt;/em&gt;&lt;strong&gt;172 &lt;/strong&gt;113. &lt;a href="http://doi.org/10.3847/1538-3881/ae83ac"&gt;doi:10.3847/1538-3881/ae83ac&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;The post &lt;a href="https://aasnova.org/2026/07/31/spying-on-a-split-comet/"&gt;Spying on a Split Comet&lt;/a&gt; appeared first on &lt;a href="https://aasnova.org"&gt;AAS Nova&lt;/a&gt;.&lt;/p&gt;
+</ns3:encoded>
+					
+		
+		
+		    <citation>"Investigation of Split Comet 240P/NEAT," David Jewitt et al <em>AJ </em><strong>172 </strong>113. <a href="http://doi.org/10.3847/1538-3881/ae83ac">doi:10.3847/1538-3881/ae83ac</a></citation>	</item>
+		<item>
+		<title>Disk Lifetime Distribution as a Function of the Mass of Host Star</title>
+		<link>https://doi.org/10.3847/1538-4357/ae63c8#new_tab?utm_source=rss&amp;utm_medium=rss&amp;utm_campaign=disk-lifetime-distribution-as-a-function-of-the-mass-of-host-star</link>
+		
+		<dc:creator>Kerry Hensley</dc:creator>
+		<pubDate>Thu, 30 Jul 2026 16:00:19 +0000</pubDate>
+				<category>Journals Digest</category>
+		<guid isPermaLink="false">https://aasnova.org/?p=15636</guid>
+
+					<description>&lt;p&gt;Susanne Pfalzner et al 2026 ApJ 1003 119 The disks around young high-mass stars survive for roughly 3.72 million years, and those around low-mass stars survive for 7.20 million years, though the distributions for both populations are quite broad.&lt;/p&gt;
+&lt;p&gt;The post &lt;a href="https://doi.org/10.3847/1538-4357/ae63c8#new_tab"&gt;Disk Lifetime Distribution as a Function of the Mass of Host Star&lt;/a&gt; appeared first on &lt;a href="https://aasnova.org"&gt;AAS Nova&lt;/a&gt;.&lt;/p&gt;
+</description>
+										<ns3:encoded>&lt;div class="ewa-rteLine"&gt;Susanne Pfalzner et al 2026 &lt;em&gt;ApJ&lt;/em&gt; &lt;strong&gt;1003&lt;/strong&gt; 119&lt;/div&gt;
+&lt;div&gt;
+&lt;blockquote&gt;
+&lt;div class="ewa-rteLine"&gt;The disks around young high-mass stars survive for roughly 3.72 million years, and those around low-mass stars survive for 7.20 million years, though the distributions for both populations are quite broad.&lt;/div&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+&lt;p&gt;The post &lt;a href="https://doi.org/10.3847/1538-4357/ae63c8#new_tab"&gt;Disk Lifetime Distribution as a Function of the Mass of Host Star&lt;/a&gt; appeared first on &lt;a href="https://aasnova.org"&gt;AAS Nova&lt;/a&gt;.&lt;/p&gt;
+</ns3:encoded>
+					
+		
+		
+		    <citation>Not available</citation>	</item>
+		</channel>
+</rss>
