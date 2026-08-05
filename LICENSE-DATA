@@ -62,19 +62,36 @@ imposes no notice obligation here. We cite them anyway because it is the right t
 PICASO (Batalha et al. 2019, *ApJ* 878, 70) and `colour-science`
 ([doi:10.5281/zenodo.17837391](https://doi.org/10.5281/zenodo.17837391), BSD-3-Clause).
 
-## 4. Required acknowledgement, verbatim
+**Published results we use but do not redistribute** — Thorngren et al. (2016) for the
+parametric engine's metallicity, Kopparapu et al. (2014) for the habitable-zone edges,
+Carrión-González et al. (2021) for the Roman target list, the Roman Coronagraph Instrument
+Primer for the bandpasses, NASA's NSSDC fact sheets for the solar-system anchors — carry no
+licence obligation either. They are in `pipeline/rights.py` and on `/credits` with full
+citations, because a result used without a citation is the same problem as an asset used
+without a notice.
 
-Anything built on this data inherits this, because we inherit it:
+## 4. Required acknowledgements, verbatim
+
+Anything built on this data inherits both of these, because we inherit them.
+
+**NASA Exoplanet Archive:**
 
 > This research has made use of the NASA Exoplanet Archive, which is operated by the
 > California Institute of Technology, under contract with the National Aeronautics and Space
 > Administration under the Exoplanet Exploration Program.
 
-The sky panels additionally use one VizieR catalogue (CDS, Strasbourg,
-[doi:10.26093/cds/vizier](https://doi.org/10.26093/cds/vizier)): **VI/42**, the IAU
-constellation boundaries, which is what tells each host star which constellation it lies in.
-VizieR's terms require the original catalogue author and publication to be cited explicitly
+**VizieR / CDS, Strasbourg** — for catalogue **VI/42**, the IAU constellation boundaries, which
+is what tells each host star which constellation it lies in:
+
+> This research has made use of the VizieR catalogue access tool, CDS, Strasbourg, France
+> (DOI : 10.26093/cds/vizier). The original description of the VizieR service was published in
+> 2000, A&AS 143, 23.
+
+CDS additionally requires the original catalogue author and publication to be cited explicitly
 alongside VizieR itself — here, Roman N.G. (1987), *PASP* 99, 695.
+
+Both strings live in `pipeline/rights.py` (`ACKNOWLEDGEMENTS`) and travel inside every
+`planets.json` header, so a downloaded copy carries them too.
 
 All of the above is rendered for readers on the site's `/credits` page, generated from
 `pipeline/rights.py` (and `web/credits.py`) so the page cannot fall behind this file.

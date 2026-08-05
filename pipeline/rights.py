@@ -44,6 +44,21 @@ ARCHIVE_ACKNOWLEDGEMENT = (
     "Space Administration under the Exoplanet Exploration Program."
 )
 
+# CDS asks for this wording wherever a VizieR catalogue is used — and separately requires the
+# original catalogue's own authors to be cited, which is Roman (1987) below. Two sentences,
+# both theirs, both verbatim.
+VIZIER_ACKNOWLEDGEMENT = (
+    "This research has made use of the VizieR catalogue access tool, CDS, Strasbourg, France "
+    "(DOI : 10.26093/cds/vizier). The original description of the VizieR service was published "
+    "in 2000, A&AS 143, 23."
+)
+
+# Every acknowledgement we owe verbatim, in the order they appear on the credits page.
+ACKNOWLEDGEMENTS: tuple[tuple[str, str], ...] = (
+    ("NASA Exoplanet Archive", ARCHIVE_ACKNOWLEDGEMENT),
+    ("VizieR / CDS, Strasbourg", VIZIER_ACKNOWLEDGEMENT),
+)
+
 
 @dataclass(frozen=True)
 class Source:
@@ -96,6 +111,63 @@ SOURCES: tuple[Source, ...] = (
         url="https://natashabatalha.github.io/picaso/",
         licence="imported, not redistributed",
         citation="Batalha et al. (2019), ApJ 878, 70, doi:10.3847/1538-4357/ab1b51",
+        note="PICASO 4.0.1, with the opacity database from Zenodo record 14861730 — both are "
+        "needed to reproduce the committed spectra, and the opacity database carries its own "
+        "citation. See docs/picaso-runbook.md.",
+    ),
+    Source(
+        name="Thorngren et al. (2016)",
+        role="the mass-metallicity relation that sets atmospheric metallicity in the "
+        "parametric engine — the engine behind most planets on this site",
+        url="https://iopscience.iop.org/article/10.3847/0004-637X/831/1/64",
+        licence="published result; citation as courtesy",
+        citation="Thorngren, Fortney, Murray-Clay & Lopez (2016), ApJ 831, 64, "
+        "doi:10.3847/0004-637X/831/1/64",
+        note="Smaller planets get more metal-rich atmospheres, which is why a Neptune-mass "
+        "world and a Jupiter-mass world at the same temperature do not come out the same "
+        "colour here.",
+    ),
+    Source(
+        name="Kopparapu et al. (2014)",
+        role="the habitable-zone edges behind the 'could there be liquid water' lens",
+        url="https://iopscience.iop.org/article/10.1088/2041-8205/787/2/L29",
+        licence="published result; citation as courtesy",
+        citation="Kopparapu, Ramirez, SchottelKotte, Kasting, Domagal-Goldman & Eymet (2014), "
+        "ApJL 787, L29, doi:10.1088/2041-8205/787/2/L29",
+        note="Table 1 coefficients, for a 1 Earth-mass planet. The zone is orbital distance "
+        "only: no atmosphere has been measured for any planet we mark.",
+    ),
+    Source(
+        name="Carrión-González et al. (2021)",
+        role="the eligible-planet list behind the Roman target board",
+        url="https://doi.org/10.1051/0004-6361/202039993",
+        licence="published result; citation as courtesy",
+        citation="Carrión-González, García Muñoz, Santos, Cabrera, Csizmadia & Rauer (2021), "
+        "A&A 651, A7, doi:10.1051/0004-6361/202039993",
+        note="Table 4 — planets whose reflected light the Roman coronagraph could reach. The "
+        "board quotes their scenario counts directly rather than recomputing them.",
+    ),
+    Source(
+        name="Roman Coronagraph Instrument Primer (CPP)",
+        role="the filter bandpasses the 'as Roman would see it' colour is reconstructed from",
+        url="https://roman.ipac.caltech.edu/docs/RomanCoronagraphPrimer_Current.pdf",
+        licence="NASA/JPL-Caltech public document",
+        citation="Roman Coronagraph Instrument Primer, Community Participation Program, "
+        "8 January 2025, p. 5",
+        note="We model the three flight bands — 575 nm, 730 nm and 825 nm — as top-hat "
+        "filters at their nominal design widths (10%, 15%, 10%). That is a CONVENTION, and it "
+        "matters: real filter profiles have sloped shoulders, and the as-built widths measured "
+        "on the ground run one to two points wider than the nominal figures. Band 2 (660 nm) "
+        "is on the filter wheel but was never characterised as a supported observing mode, so "
+        "it is not modelled here.",
+    ),
+    Source(
+        name="NASA planetary fact sheets (NSSDC)",
+        role="orbit and size data for the five solar-system anchors",
+        url="https://nssdc.gsfc.nasa.gov/planetary/factsheet/",
+        licence="public domain (NASA)",
+        note="The anchors are not in the Exoplanet Archive, so their orbital numbers come from "
+        "here instead.",
     ),
     Source(
         name="colour-science",
@@ -141,6 +213,24 @@ CARRIED_ASSETS: tuple[Source, ...] = (
 )
 
 
+# Which source a record's own `params.spectrum_source` tag owes its citation to, and the same
+# for each instrument in `pipeline.config.INSTRUMENTS`. A reader holding `planets.json` can see
+# "spectrum_source": "cahoy" on a record and resolve who to cite without reading our code —
+# and, more to the point, a new engine or instrument added without a credit fails
+# tests/test_credits.py rather than shipping uncredited. Values are `Source.name`.
+ENGINE_CREDITS: tuple[tuple[str, str], ...] = (
+    ("parametric", "Thorngren et al. (2016)"),
+    ("cahoy", "Cahoy et al. (2010) albedo grid"),
+    ("picaso", "PICASO"),
+    ("karkoschka1998", "Karkoschka (1998)"),
+    ("payne2026", "Payne et al. (2026)"),
+)
+
+INSTRUMENT_CREDITS: tuple[tuple[str, str], ...] = (
+    ("roman-cgi", "Roman Coronagraph Instrument Primer (CPP)"),
+)
+
+
 @dataclass(frozen=True)
 class Rights:
     """The rights block stamped into the file header."""
@@ -164,9 +254,16 @@ class Rights:
         "republished_fields are upstream facts we pass through and cannot license to you; use "
         "them under their own source's terms, listed in sources."
     )
+    # Kept as a plain string as well as in `acknowledgements`: it was already in the header of
+    # released files, and a consumer reading rights.acknowledgement should not break because a
+    # second acknowledgement turned up.
     acknowledgement: str = ARCHIVE_ACKNOWLEDGEMENT
+    acknowledgements: tuple[tuple[str, str], ...] = ACKNOWLEDGEMENTS
     full_text: str = "https://github.com/jocarino/roman-telescope-data/blob/main/LICENSE-DATA"
     sources: tuple[Source, ...] = field(default_factory=lambda: SOURCES)
+    # spectrum_source / instrument id -> the Source.name above that it owes.
+    engine_credits: tuple[tuple[str, str], ...] = ENGINE_CREDITS
+    instrument_credits: tuple[tuple[str, str], ...] = INSTRUMENT_CREDITS
 
     def as_dict(self) -> dict:
         return asdict(self)

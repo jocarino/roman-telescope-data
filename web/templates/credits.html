@@ -54,10 +54,12 @@
   {# ── The acknowledgement, verbatim. It is a condition of use, not a courtesy, and it is
      inherited by anything built on our data — so it is quoted, not paraphrased. ────────── #}
   <section class="cr-sec" id="acknowledgement">
-    <h2 class="cr-h">Required acknowledgement</h2>
-    <p class="cr-intro">The NASA Exoplanet Archive asks for this wording. Anything built on this
-      site's data inherits it, because we inherit it:</p>
-    <blockquote class="cr-quote">{{ rights.acknowledgement }}</blockquote>
+    <h2 class="cr-h">Required acknowledgements</h2>
+    <p class="cr-intro">Two of our sources ask to be acknowledged in particular words. Here they
+      are, unedited. Anything built on this site's data inherits them, because we inherit them:</p>
+    {% for who, text in rights.acknowledgements %}
+    <blockquote class="cr-quote"><span class="cr-quote-who">{{ who }}</span>{{ text }}</blockquote>
+    {% endfor %}
   </section>
 
   {# ── Pictures. Already credited where they appear (under each render, in the photo

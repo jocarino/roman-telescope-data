@@ -62,6 +62,30 @@ PLAIN: dict[str, str] = {
         "standard transform into sRGB. We use it rather than hand-rolled maths so the "
         "colour step is a published standard, not our arithmetic."
     ),
+    "Thorngren et al. (2016)": (
+        "The finding that smaller giant planets hold more metal-rich atmospheres than bigger "
+        "ones. It is what stops every modelled planet at the same temperature coming out the "
+        "same colour — for most of the catalogue, this paper is quietly setting the chemistry."
+    ),
+    "Kopparapu et al. (2014)": (
+        "The climate-model calculation of where a star's habitable zone begins and ends. It is "
+        "the arithmetic behind the 'could there be liquid water' filter — which is about "
+        "orbital distance only, and never about an atmosphere anyone has measured."
+    ),
+    "Carrión-González et al. (2021)": (
+        "The study that worked out which known exoplanets Roman's coronagraph could actually "
+        "catch in reflected light. Its Table 4 is the target board: the shortlist, and the "
+        "counts quoted on that page."
+    ),
+    "Roman Coronagraph Instrument Primer (CPP)": (
+        "NASA's own specification of the Roman coronagraph's filters — which colours of light "
+        "each one lets through. Every 'as Roman would see it' swatch on this site is the model "
+        "spectrum pushed through those three filters and reassembled."
+    ),
+    "NASA planetary fact sheets (NSSDC)": (
+        "The reference numbers for the solar system's own planets — size, orbit, distance from "
+        "the Sun. The five anchors are not in the exoplanet catalogue, so theirs come here."
+    ),
     "IAU constellation boundaries (Roman 1987), via VizieR / CDS": (
         "The official map of which patch of sky belongs to which constellation. It is why a "
         "planet page can tell you its host star is in Lyra, and why the sky chart can point "

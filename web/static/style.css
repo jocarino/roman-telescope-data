@@ -2949,9 +2949,16 @@ a.rtb-name:hover { color: var(--accent); }
 /* The acknowledgement is quoted because it is required wording, and looking quoted is how a
    reader knows not to rewrite it. */
 .cr-quote {
-  margin: 0; padding: 12px 16px; background: var(--bg-3);
+  margin: 0 0 10px; padding: 12px 16px; background: var(--bg-3);
   border: 1px solid var(--line); border-left: 4px solid var(--accent);
   font-size: 12.5px; line-height: 1.7; color: var(--fg-dim); font-style: italic;
+}
+
+.cr-quote:last-of-type { margin-bottom: 0; }
+/* Who is owed the wording, above it — two quotes in a row are otherwise indistinguishable. */
+.cr-quote-who {
+  display: block; margin-bottom: 6px; font-family: var(--mono); font-size: 9px;
+  letter-spacing: .8px; text-transform: uppercase; color: var(--accent); font-style: normal;
 }
 
 .cr-table { width: 100%; border-collapse: collapse; font-size: 12px; }

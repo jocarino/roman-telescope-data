@@ -9,12 +9,22 @@ one without a plain-English line, or drop one from the page, and this fails.
 
 from __future__ import annotations
 
+import re
 from html import escape
+from pathlib import Path
 
 import pytest
 
+from pipeline.config import INSTRUMENTS, ROMAN_CGI
 from pipeline.observations import OBSERVATIONS
-from pipeline.rights import ARCHIVE_ACKNOWLEDGEMENT, CARRIED_ASSETS, SOURCES
+from pipeline.rights import (
+    ACKNOWLEDGEMENTS,
+    ARCHIVE_ACKNOWLEDGEMENT,
+    CARRIED_ASSETS,
+    ENGINE_CREDITS,
+    INSTRUMENT_CREDITS,
+    SOURCES,
+)
 from web.build import _env
 from web.credits import PLAIN, credits_context, image_credits, science_sources
 from web.meta import Site, static_pages
@@ -82,9 +92,65 @@ def test_licences_stored_as_urls_are_printed_by_name():
     assert f'href="{payne.licence_url}" target="_blank" rel="noopener">CC BY 4.0</a>' in _html()
 
 
-def test_the_archive_acknowledgement_is_verbatim():
-    """The Archive asks for exact wording; paraphrasing it fails the condition it is under."""
-    assert ARCHIVE_ACKNOWLEDGEMENT in _html()
+def test_every_required_acknowledgement_is_verbatim():
+    """The Archive and CDS both ask for exact wording; paraphrasing fails the condition it is
+    under. Iterating the tuple means a third one added later is checked automatically."""
+    html = _html()
+    assert ARCHIVE_ACKNOWLEDGEMENT in html
+    for who, text in ACKNOWLEDGEMENTS:
+        assert _on_page(text, html), f"{who}: acknowledgement missing or paraphrased"
+
+
+# ── no engine and no instrument can ship uncredited ─────────────────────────────────────
+
+
+def _pipeline_engine_ids() -> set[str]:
+    """Every value the pipeline can write into `params.spectrum_source`, read out of the code
+    that writes it rather than from a list someone has to remember to update."""
+    root = Path(__file__).resolve().parents[1] / "pipeline"
+    ids = {"parametric"}  # router.py's fallback, written as a literal there
+    for path in root.rglob("*.py"):
+        text = path.read_text()
+        ids |= set(re.findall(r'spectrum_source\s*=\s*"([a-z0-9]+)"', text))
+        ids |= set(re.findall(r'\bsource\s*=\s*"([a-z0-9]+)"', text))
+        # router.py picks engines by label: ("cahoy", make_cahoy)
+        ids |= set(re.findall(r'\(\s*"([a-z0-9]+)"\s*,\s*make_', text))
+    # `source` on a BandSampleSet is "simulated"/"measured" — a state, not an engine.
+    return ids - {"simulated", "measured"}
+
+
+def test_every_spectrum_engine_names_a_credited_source():
+    """The guard the whole page exists for: add an engine, and it must bring a credit with it."""
+    credited = dict(ENGINE_CREDITS)
+    known = {s.name for s in SOURCES}
+    for engine in _pipeline_engine_ids():
+        assert engine in credited, (
+            f"spectrum_source '{engine}' has no entry in rights.ENGINE_CREDITS — "
+            "an engine cannot ship uncredited"
+        )
+        assert credited[engine] in known, f"{engine}: credits an unknown source"
+    for engine, name in credited.items():
+        assert engine in _pipeline_engine_ids(), f"stale ENGINE_CREDITS entry: {engine}"
+        assert _on_page(name, _html()), f"{engine}: its source is not on the credits page"
+
+
+def test_every_instrument_names_a_credited_bandpass_source():
+    """Adding HWO later is appending an Instrument — it must append a citation too."""
+    credited = dict(INSTRUMENT_CREDITS)
+    known = {s.name for s in SOURCES}
+    assert set(credited) == set(INSTRUMENTS), "instrument credits and the registry disagree"
+    for inst_id, name in credited.items():
+        assert name in known, f"{inst_id}: credits an unknown source"
+
+
+def test_the_bandpass_entry_states_its_width_convention():
+    """A bandpass number without its convention is not a citation — nominal design widths and
+    as-built FWHMs differ, and a reader checking our Roman colours needs to know which."""
+    primer = next(e for e in science_sources() if e.name.startswith("Roman Coronagraph"))
+    assert "top-hat" in primer.note
+    assert "nominal" in primer.note
+    for band in ROMAN_CGI.bands:
+        assert f"{band.center_nm:.0f} nm" in primer.note, f"{band.id} not named in the note"
 
 
 def test_the_page_states_both_rights_layers():
@@ -142,8 +208,6 @@ def test_the_page_is_in_the_sitemap_set():
 
 def test_the_site_links_to_it():
     """A credits page nobody can reach is the same as no credits page."""
-    from pathlib import Path
-
     templates = Path(__file__).resolve().parents[1] / "web" / "templates"
     linked = [t.name for t in templates.glob("*.html") if 'href="/credits"' in t.read_text()]
     assert "gallery.html" in linked, "the front page must link the credits"
