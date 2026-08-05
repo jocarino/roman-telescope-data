@@ -48,6 +48,7 @@ python3 -m http.server 8799 --directory dist    # preview at http://localhost:87
 Long-pressing a gallery card peeks its detail fragment; Alpine.js drives search / filter / sort and
 the true↔Roman toggle; palettes export as hex, CSS variables, or `.ase`. Also on the site: a
 colour census of the whole catalog (`/census`), the Roman target board (`/roman` — see below),
+sources and credits (`/credits` — see below),
 a phase slider with an automatic full
 lunar-cycle animation in the EXOSCOPE (per-planet random phases on the gallery), a "Seen in
 fiction" overlay, and clean extensionless URLs. No backend, no build toolchain beyond Python.
@@ -197,6 +198,23 @@ places from that one source:
 `tests/test_glossary.py` fails if a template marks a term the glossary doesn't define, so the
 two can't drift. Only the short tooltip text ships to every page (`glossary.terms.<build>.js`,
 ~14 KB); the long entries live on the glossary page.
+
+### Sources and credits (`/credits`)
+
+Everything this site runs on is someone else's published work, and all of it used to be
+credited only in files you had to clone the repo to read. `/credits` puts the whole list on the
+site: what each source gives us in plain English, its formal citation with a DOI link, its
+licence, and the NASA Exoplanet Archive's requested acknowledgement quoted verbatim.
+
+The page is **generated, not written**. `web/credits.py` reads `pipeline/rights.py` (the same
+rights block stamped into `planets.json`), plus the image credits already curated in
+`web/textures.py` and `pipeline/observations.py`; the template types out no source of its own.
+Add a source to the pipeline and it appears here on the next build — `tests/test_credits.py`
+fails if one does not, if a source has no plain-English line, or if the acknowledgement is ever
+paraphrased. `LICENSE-DATA` is the same list for humans and for machine-readable terms.
+
+Linked from the gallery's Explore menu, `/how`, `/roman`, and every planet page's provenance
+panel — unlike `/glossary`, this one is in the nav.
 
 ### Previewing several worktrees at once (`tools/exohub.py`)
 

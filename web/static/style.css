@@ -2893,3 +2893,110 @@ a.rtb-name:hover { color: var(--accent); }
   .sec-tab { font-size: 10.5px; padding: 6px 9px; }
   [id^="sec-"] { scroll-margin-top: 54px; }
 }
+
+/* ---- SOURCES & CREDITS (/credits) -------------------------------------------------------
+   A reference page, so it is set as one: numbered entries, each a hard-edged panel carrying
+   the plain-English line first and the formal citation under it. The citation is deliberately
+   NOT the small print — an astronomer arriving to check what we ran on should find a real
+   reference at normal reading size, and a newcomer should not have to parse it to learn what
+   the source does. Same rule as everywhere else on this site: no one label serves only one
+   of the two audiences. */
+.cr { max-width: 860px; }
+.cr-sec { margin: 0 0 34px; }
+.cr-h {
+  margin: 0 0 6px; font-family: var(--mono); font-size: 11px; letter-spacing: .7px;
+  text-transform: uppercase; color: var(--accent); font-weight: normal;
+}
+.cr-intro { margin: 0 0 14px; font-size: 12.5px; line-height: 1.7; color: var(--fg-dim); }
+.cr-intro strong { color: var(--fg); }
+.cr-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.cr-item { background: var(--bg-3); border: 1px solid var(--line); padding: 14px 16px; }
+.cr-item:hover { border-color: var(--accent); }
+/* Number, name and licence on one line: the licence is a fact about the row, not a footnote,
+   so it sits with the name rather than at the bottom where nobody looks. */
+.cr-item-head {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; margin-bottom: 8px;
+}
+.cr-n {
+  font-family: var(--pixel); font-size: 9px; color: var(--fg-faint); letter-spacing: .5px;
+}
+/* A small flex-basis, not `auto`: flexbox decides line breaks on an item's UNSHRUNK size, so
+   with `auto` every name long enough to wrap (all of them at 390px) pushes itself onto a line
+   below the number. 140px keeps the number and the name on one row and lets the name wrap
+   inside it; on a wide panel it grows to fill and the licence chip still sits right. */
+.cr-name {
+  margin: 0; flex: 1 1 140px; min-width: 0;
+  font-size: 13px; letter-spacing: .2px; font-weight: 600;
+}
+.cr-name a { color: var(--fg); border-bottom: 1px solid var(--line); }
+.cr-name a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+.cr-lic {
+  margin-left: auto; font-family: var(--mono); font-size: 9.5px; letter-spacing: .4px;
+  text-transform: uppercase; color: var(--fg-faint); border: 1px solid var(--line);
+  padding: 3px 7px; white-space: nowrap;
+}
+.cr-plain { margin: 0; font-size: 13px; line-height: 1.7; color: var(--fg); }
+.cr-cite {
+  margin: 9px 0 0; font-family: var(--mono); font-size: 11.5px; line-height: 1.6;
+  color: var(--fg-dim); word-break: break-word;
+}
+.cr-cite-lbl {
+  display: inline-block; margin-right: 8px; font-size: 9px; letter-spacing: .8px;
+  text-transform: uppercase; color: var(--accent);
+}
+.cr-note { margin: 8px 0 0; font-size: 11.5px; line-height: 1.65; color: var(--fg-faint); }
+
+/* The acknowledgement is quoted because it is required wording, and looking quoted is how a
+   reader knows not to rewrite it. */
+.cr-quote {
+  margin: 0; padding: 12px 16px; background: var(--bg-3);
+  border: 1px solid var(--line); border-left: 4px solid var(--accent);
+  font-size: 12.5px; line-height: 1.7; color: var(--fg-dim); font-style: italic;
+}
+
+.cr-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.cr-table th {
+  text-align: left; font-family: var(--mono); font-size: 9px; letter-spacing: .8px;
+  text-transform: uppercase; color: var(--fg-faint); font-weight: normal;
+  padding: 0 10px 6px 0; border-bottom: 1px solid var(--line);
+}
+.cr-table td {
+  padding: 9px 10px 9px 0; border-bottom: 1px solid var(--line); vertical-align: top;
+  line-height: 1.6; color: var(--fg-dim);
+}
+.cr-kind {
+  display: block; font-family: var(--mono); font-size: 9px; letter-spacing: .5px;
+  text-transform: uppercase; color: var(--fg-faint); margin-top: 3px;
+}
+.cr-used { color: var(--fg-faint); }
+
+/* The rights block reuses the intro-box row rhythm: a small accent label, then the sentence. */
+.cr-rights { background: var(--bg-3); border: 1px solid var(--line); padding: 4px 18px 14px; }
+.cr-row {
+  display: grid; grid-template-columns: 92px 1fr; gap: 14px; align-items: baseline;
+  padding: 11px 0; border-top: 1px solid var(--line);
+}
+.cr-row:first-of-type { border-top: 0; }
+.cr-row-lbl {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .8px; text-transform: uppercase;
+  color: var(--accent); padding-top: 2px;
+}
+.cr-row p { margin: 0; font-size: 12.5px; line-height: 1.7; color: var(--fg-dim); }
+.cr-row code {
+  font-family: var(--mono); font-size: 11px; color: var(--fg); background: #000;
+  border: 1px solid var(--line); padding: 1px 5px;
+}
+.cr-foot-note {
+  margin: 13px 0 0; padding-top: 11px; border-top: 1px solid var(--line);
+  font-size: 11.5px; line-height: 1.65; color: var(--fg-faint);
+}
+.cr-foot { display: flex; gap: 20px; flex-wrap: wrap; margin: 24px 0 0; font-size: 13px; }
+
+@media (max-width: 720px) {
+  /* The licence chip stops fighting the name for the same line, and the rights labels stack
+     over their sentences — 92px of label leaves too little for a paragraph at 390px. */
+  .cr-lic { margin-left: 0; }
+  .cr-row { grid-template-columns: 1fr; gap: 4px; padding: 10px 0; }
+  .cr-table { font-size: 11.5px; }
+  .cr-table td { padding-right: 6px; }
+}

@@ -105,13 +105,38 @@ SOURCES: tuple[Source, ...] = (
         citation="doi:10.5281/zenodo.17837391",
     ),
     Source(
-        name="VizieR / CDS, Strasbourg",
-        role="star catalogue behind the sky charts",
-        url="https://vizier.cds.unistra.fr",
-        licence="acknowledgement requested",
-        citation="doi:10.26093/cds/vizier; 2000, A&AS 143, 23",
-        note="The original catalogue authors and publication references must be cited "
-        "explicitly alongside VizieR itself.",
+        name="IAU constellation boundaries (Roman 1987), via VizieR / CDS",
+        role="which constellation each host star sits in, on the sky charts",
+        url="https://cdsarc.cds.unistra.fr/viz-bin/cat/VI/42",
+        licence="public catalogue data; acknowledgement requested",
+        citation="Roman (1987), PASP 99, 695 — CDS catalogue VI/42; "
+        "VizieR: doi:10.26093/cds/vizier, 2000, A&AS 143, 23",
+        note="Catalogue VI/42 is redistributed verbatim as "
+        "pipeline/data/constellation_boundaries.dat. VizieR's terms require the original "
+        "catalogue author and publication to be cited explicitly alongside VizieR itself, "
+        "which is why Roman (1987) is named first here.",
+    ),
+)
+
+# Third-party files this repository CARRIES and serves to a browser, as opposed to the science
+# inputs above. Separate tuple, not part of `Rights`: none of it is in `planets.json`, so
+# stamping it into that file's header would be noise. The site's credits page renders both.
+# LICENSE-DATA section 3 is the same list for humans; if you change one, change both.
+CARRIED_ASSETS: tuple[Source, ...] = (
+    Source(
+        name="Silkscreen (Jason Kottke)",
+        role="the pixel typeface every label on this site is set in",
+        url="https://fonts.google.com/specimen/Silkscreen",
+        licence="SIL Open Font License 1.1",
+        note="OFL.txt ships beside both copies of the font, as section 2 of that licence "
+        "requires.",
+    ),
+    Source(
+        name="Alpine.js v3.14.8",
+        role="the small amount of interactivity on these pages",
+        url="https://alpinejs.dev",
+        licence="MIT",
+        note="Copyright and permission notice retained inside the minified file.",
     ),
 )
 

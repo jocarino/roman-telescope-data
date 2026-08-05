@@ -55,6 +55,7 @@ acknowledgement (below).
 | **Silkscreen** (Jason Kottke) | `web/static/fonts/`, `web/assets/fonts/` | SIL OFL 1.1 | `OFL.txt` shipped beside both copies, per §2 of that licence |
 | **Alpine.js** v3.14.8 | `web/static/vendor/alpine.min.js` | MIT | Copyright + permission notice retained in the file |
 | **Solar System Scope** surface maps | referenced by `web/textures.py` | CC BY 4.0 | Credited in the lightbox; **downstream reusers of our renders must carry that credit forward** |
+| **IAU constellation boundaries** (Roman 1987) | `pipeline/data/constellation_boundaries.dat` (verbatim, CDS catalogue VI/42) | Public catalogue data; acknowledgement requested | Roman N.G. (1987), *PASP* 99, 695, cited explicitly alongside VizieR — see §4 |
 
 Software we *import* rather than redistribute — PICASO, `colour-science`, htmx, Jinja2 —
 imposes no notice obligation here. We cite them anyway because it is the right thing to do:
@@ -69,9 +70,14 @@ Anything built on this data inherits this, because we inherit it:
 > California Institute of Technology, under contract with the National Aeronautics and Space
 > Administration under the Exoplanet Exploration Program.
 
-The sky panels additionally use VizieR (CDS, Strasbourg,
-[doi:10.26093/cds/vizier](https://doi.org/10.26093/cds/vizier)); the original catalogue
-authors and publication references must be cited explicitly alongside it.
+The sky panels additionally use one VizieR catalogue (CDS, Strasbourg,
+[doi:10.26093/cds/vizier](https://doi.org/10.26093/cds/vizier)): **VI/42**, the IAU
+constellation boundaries, which is what tells each host star which constellation it lies in.
+VizieR's terms require the original catalogue author and publication to be cited explicitly
+alongside VizieR itself — here, Roman N.G. (1987), *PASP* 99, 695.
+
+All of the above is rendered for readers on the site's `/credits` page, generated from
+`pipeline/rights.py` (and `web/credits.py`) so the page cannot fall behind this file.
 
 ## 5. Open question — the Cahoy grid
 

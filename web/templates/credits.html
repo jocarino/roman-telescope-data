@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% from "macros.html" import back_link, g %}
+{% block content %}
+{# Sources & credits. Nothing on this page is typed here: every entry comes from
+   web/credits.py, which reads pipeline.rights (the same block stamped into planets.json),
+   web/textures.py and pipeline/observations.py. Add a source to the pipeline and it appears
+   here on the next build — see tests/test_credits.py, which fails if one ever does not.
+
+   Two audiences, one row: the plain-English line says what the source GIVES this site, the
+   citation beside it is the formal reference an astronomer would want. Neither is hidden
+   behind the other. #}
+<div class="cr">
+  <div class="site-head">
+    {{ back_link() }}
+    <h1>Sources &amp; credits</h1>
+    <span class="tagline">the data, models and code this site is built on — and what we owe
+      each of them</span>
+  </div>
+
+  <p class="subhead lede">This site computes colours. It does not measure anything. Every
+    number it starts from, every model spectrum, every real photograph and every line of the
+    colour maths comes from someone else's published work, listed here in full. Where a source
+    asks to be acknowledged in particular words, those words appear below exactly as asked.</p>
+
+  {# ── The science inputs ─────────────────────────────────────────────────────────────── #}
+  <section class="cr-sec" id="science">
+    <h2 class="cr-h">The scientific inputs</h2>
+    <p class="cr-intro">Data, model grids and code. Between them these produce every swatch on
+      this site; without them there would be nothing to compute.</p>
+    <ol class="cr-list">
+      {% for s in sources %}
+      <li class="cr-item panel">
+        <div class="cr-item-head">
+          <span class="cr-n" aria-hidden="true">{{ '%02d'|format(loop.index) }}</span>
+          <h3 class="cr-name"><a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.name }}</a></h3>
+          <span class="cr-lic" title="Licence / terms of use">{% if s.licence_url %}<a
+            href="{{ s.licence_url }}" target="_blank" rel="noopener">{{ s.licence }}</a>{% else %}{{ s.licence }}{% endif %}</span>
+        </div>
+        <p class="cr-plain">{{ s.plain }}</p>
+        {% if s.citation %}
+        <p class="cr-cite"><span class="cr-cite-lbl">Cite</span>
+          {#- A software citation is often the DOI and nothing else; printing it and then its
+              link would say the same string twice, so in that case the citation IS the link. -#}
+          {% if s.citation == 'doi:' ~ s.doi %}<a href="https://doi.org/{{ s.doi }}"
+            target="_blank" rel="noopener">{{ s.citation }}</a>{% else %}{{ s.citation }}{% if s.doi %}
+          — <a href="https://doi.org/{{ s.doi }}" target="_blank" rel="noopener">doi.org/{{ s.doi }}</a>{% endif %}{% endif %}</p>
+        {% endif %}
+        {% if s.note %}<p class="cr-note">{{ s.note }}</p>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  {# ── The acknowledgement, verbatim. It is a condition of use, not a courtesy, and it is
+     inherited by anything built on our data — so it is quoted, not paraphrased. ────────── #}
+  <section class="cr-sec" id="acknowledgement">
+    <h2 class="cr-h">Required acknowledgement</h2>
+    <p class="cr-intro">The NASA Exoplanet Archive asks for this wording. Anything built on this
+      site's data inherits it, because we inherit it:</p>
+    <blockquote class="cr-quote">{{ rights.acknowledgement }}</blockquote>
+  </section>
+
+  {# ── Pictures. Already credited where they appear (under each render, in the photo
+     lightbox); collected here so the whole answer is in one place. ─────────────────────── #}
+  <section class="cr-sec" id="images">
+    <h2 class="cr-h">Photographs and surface maps</h2>
+    <p class="cr-intro">Two kinds of real image appear on this site: the
+      {{ g('measured', 'measured') }} surface maps that give the five solar-system worlds their
+      real geography, and the telescope images of the handful of planets anyone has actually
+      photographed. <strong>Neither sets a colour.</strong> Every map is rescaled so its average
+      matches the colour the physics produced, and the telescope images are infrared and
+      false-coloured — they are shown beside the swatch, never as it.</p>
+    <table class="cr-table">
+      <thead>
+        <tr><th>Credit</th><th>Licence</th><th>Used on</th></tr>
+      </thead>
+      <tbody>
+        {% for im in images %}
+        <tr>
+          <td>{{ im.credit }}
+            <span class="cr-kind">{{ 'surface map' if im.kind == 'map' else 'telescope image' }}</span></td>
+          <td>{{ im.licence }}</td>
+          {# Each planet links to that image's own release page, so the trail back to the
+             original is per-image — one rightsholder can have several. #}
+          <td class="cr-used">{% for name, url in im.uses %}<a href="{{ url }}" target="_blank"
+            rel="noopener">{{ name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  {# ── Things we serve to your browser. ──────────────────────────────────────────────────── #}
+  <section class="cr-sec" id="assets">
+    <h2 class="cr-h">Carried with the site</h2>
+    <p class="cr-intro">Not science, but not ours either — third-party files this site ships to
+      your browser.</p>
+    <ul class="cr-list cr-list-plain">
+      {% for a in assets %}
+      <li class="cr-item panel">
+        <div class="cr-item-head">
+          <h3 class="cr-name"><a href="{{ a.url }}" target="_blank" rel="noopener">{{ a.name }}</a></h3>
+          <span class="cr-lic" title="Licence">{% if a.licence_url %}<a
+            href="{{ a.licence_url }}" target="_blank" rel="noopener">{{ a.licence }}</a>{% else %}{{ a.licence }}{% endif %}</span>
+        </div>
+        <p class="cr-plain">{{ a.plain }}</p>
+        {% if a.note %}<p class="cr-note">{{ a.note }}</p>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  {# ── What is ours, and on what terms. The two-layer point matters: claiming the whole
+     dataset would assert rights over upstream facts we do not hold. ─────────────────────── #}
+  <section class="cr-sec" id="ours">
+    <h2 class="cr-h">What we made, and how to use it</h2>
+    <div class="cr-rights panel">
+      <div class="cr-row">
+        <span class="cr-row-lbl">Ours</span>
+        <p>The colours, palettes, spectra plots, Roman-view reconstructions, planet renders,
+          share cards and sky charts — everything computed here — are published under
+          <a href="{{ rights.derived_licence }}" target="_blank" rel="noopener">CC&nbsp;BY&nbsp;4.0</a>.
+          In the data file that means the fields
+          {% for f in rights.derived_fields %}<code>{{ f }}</code>{% if not loop.last %} · {% endif %}{% endfor %}.</p>
+      </div>
+      <div class="cr-row">
+        <span class="cr-row-lbl">Not ours</span>
+        {# rights.republished_note is written for someone holding the data file, so name the
+           file here rather than leaving "this file" to mean the page you are reading. #}
+        <p><em>In the downloadable dataset:</em> {{ rights.republished_note }} Those are the
+          fields
+          {% for f in rights.republished_fields %}<code>{{ f }}</code>{% if not loop.last %} · {% endif %}{% endfor %}.</p>
+      </div>
+      <div class="cr-row">
+        <span class="cr-row-lbl">Attribution</span>
+        <p>&ldquo;{{ rights.attribution }}&rdquo;, with a link back — and, more important to us
+          than the credit, <strong>the word {{ g('modelled', 'modelled') }}</strong>.
+          {{ rights.honesty }}</p>
+      </div>
+      <div class="cr-row">
+        <span class="cr-row-lbl">Warranty</span>
+        <p>{{ rights.holder }}. {{ rights.warranty }}</p>
+      </div>
+      <p class="cr-foot-note">Full terms, including the one source whose redistribution rights
+        are still unresolved:
+        <a href="{{ rights.full_text }}" target="_blank" rel="noopener">LICENSE-DATA</a>. If you
+        publish anything built on these colours, please cite the sources above as well as this
+        site — the Archive acknowledgement in particular travels with the data.</p>
+    </div>
+  </section>
+
+  <p class="cr-foot"><a href="/how">How we get the colours →</a>
+    <a href="/glossary">Glossary →</a>
+    <a href="/">◧ Browse all planets →</a></p>
+</div>
+{% endblock %}

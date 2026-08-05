@@ -49,6 +49,7 @@ from pipeline.roman_board import resolve as resolve_board
 from pipeline.sky import format_dec, format_ra
 from pipeline.tours import Tour, TourStop
 from pipeline.tours import resolve as resolve_tours
+from web.credits import credits_context
 from web.hubs import FAMILY_LABEL, build_colour_hubs
 from web.hz import hz_strip_svg
 from web.meta import (
@@ -782,6 +783,15 @@ def build(
         env.get_template("glossary.html").render(
             meta=hub["/glossary"], site=site,
             categories=glossary["categories"], terms=glossary["terms"], build_id=build_id
+        )
+    )
+    # Sources & credits: every scientific input, rendered from pipeline.rights — the same
+    # rights block stamped into planets.json — plus the image and asset credits. Nothing on
+    # that page is typed into the template, so a new source cannot ship uncredited.
+    (out / "credits.html").write_text(
+        env.get_template("credits.html").render(
+            meta=hub["/credits"], site=site, build_id=build_id,
+            **credits_context({r.id: r.name for r in records}),
         )
     )
     # Colour census: the whole catalog as one dataset (same fetched index).
