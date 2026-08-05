@@ -198,6 +198,16 @@ def test_hub_paths_are_unique_so_the_build_can_key_on_them():
     assert len(set(paths)) == len(paths)
 
 
-@pytest.mark.parametrize("path", ["/", "/how", "/compare", "/sky", "/tours/"])
+@pytest.mark.parametrize("path", ["/", "/how", "/compare", "/sky", "/tours"])
 def test_build_can_look_up_every_hub_page_it_renders(path):
     assert path in {p.path for p in static_pages(10)}
+
+
+def test_hub_paths_are_in_the_form_the_links_use():
+    """One page, one URL. Every internal link is extensionless and slash-free (`/tours`, not
+    `/tours/index.html` or `/tours/`), so the canonical these paths become has to match, or
+    the page advertises a URL nothing on the site actually links to."""
+    for page in static_pages(10):
+        assert page.path.startswith("/"), page.path
+        assert not page.path.endswith(".html"), page.path
+        assert page.path == "/" or not page.path.endswith("/"), page.path

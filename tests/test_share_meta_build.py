@@ -75,6 +75,21 @@ def _name_meta(html: str, name: str) -> str | None:
     return _tag(html, rf'<meta name="{name}" content="([^"]*)">')
 
 
+def _served_url(rel_path: str) -> str:
+    """The one URL a built artifact is meant to be reached by: extensionless, no trailing
+    slash, `/` for the site root. `dist/census.html` is reachable as both `/census.html` and
+    `/census`, and `dist/tours/index.html` as `/tours`, `/tours/` and `/tours/index.html` --
+    which is precisely why the site has to pick one form and use it everywhere."""
+    url = "/" + rel_path
+    if url == "/index.html":
+        return "/"
+    if url.endswith("/index.html"):
+        url = url[: -len("/index.html")]
+    elif url.endswith(".html"):
+        url = url[: -len(".html")]
+    return url
+
+
 # ── every page ──────────────────────────────────────────────────────────────────────────
 
 
@@ -147,13 +162,10 @@ def test_sitemap_lists_every_built_html_page():
     for path, html in _pages():
         if _name_meta(html, "robots") == "noindex, follow":
             continue
-        rel = "/" + path.relative_to(root).as_posix()
-        rel = rel.replace("/index.html", "/")  # tours/index.html is served as /tours/
+        rel = _served_url(path.relative_to(root).as_posix())
         # The build writes `census.html`; the site links to, and canonicalises, `/census`
         # (nginx `try_files $uri $uri.html` serves both). Extensionless is the one form every
-        # internal link uses, so it is the canonical one -- map the artifact to it here.
-        if rel.endswith(".html"):
-            rel = rel[: -len(".html")]
+        # internal link uses, so it is the canonical one -- `_served_url` maps the artifact to it.
         assert BASE + rel in locs, f"{rel} is built but absent from sitemap.xml"
 
 
@@ -167,6 +179,60 @@ def test_no_sitemap_url_carries_a_html_extension():
     }
     offenders = sorted(u for u in locs if u.endswith(".html"))
     assert not offenders, f"sitemap carries non-canonical .html URLs: {offenders[:5]}"
+
+
+# Internal hrefs that are not page navigations: real files served as themselves, so their
+# extension is the URL and not a stray artifact name.
+_ASSET_PREFIXES = ("/static/", "/og/", "/palettes/", "/fragments/", "/data/")
+_ASSET_SUFFIXES = (".ase", ".png", ".svg", ".css", ".js", ".json", ".xml", ".txt", ".webmanifest")
+
+
+def _internal_links(html: str) -> set[str]:
+    """Root-relative hrefs, reduced to the path a crawler would fetch (query and fragment
+    dropped). Skips assets, and skips Alpine's `:href` bindings, which are JS expressions."""
+    links = set()
+    for href in re.findall(r'(?<![:@\w])href="(/[^"]*)"', html):
+        path = href.split("?")[0].split("#")[0]
+        if not path or path.startswith(_ASSET_PREFIXES) or path.endswith(_ASSET_SUFFIXES):
+            continue
+        links.add(path)
+    return links
+
+
+def test_no_internal_link_carries_a_html_extension():
+    """The other half of the sitemap's extensionless rule. A canonical says `/sky` while a link
+    says `/sky.html`, and the site is telling a crawler two different URLs for one page: the
+    link is what gets followed and counted, the canonical is what gets indexed. Both forms are
+    served (nginx `try_files $uri $uri.html`), so nothing looks broken while it drifts."""
+    offenders = {
+        (path.name, link)
+        for path, html in _pages()
+        for link in _internal_links(html)
+        if link.endswith(".html")
+    }
+    assert not offenders, f"internal links using the artifact filename: {sorted(offenders)[:5]}"
+
+
+def test_every_internal_link_matches_the_canonical_of_the_page_it_reaches():
+    """Stronger than the rule above, and the one that catches trailing slashes: follow every
+    internal link to the file nginx would serve, and check that page's own canonical agrees
+    that this is its URL. `/tours/` vs `/tours` fails here while both still serve fine."""
+    root = _site()
+    canonical_of = {
+        _served_url(path.relative_to(root).as_posix()): _tag(
+            html, r'<link rel="canonical" href="([^"]*)">'
+        )
+        for path, html in _pages()
+    }
+    mismatched = []
+    for path, html in _pages():
+        for link in _internal_links(html):
+            # Targets outside this fixture's ~95-planet subset simply aren't built here (a
+            # planet page links its siblings); their form is checked wherever they do exist.
+            target = canonical_of.get(link.rstrip("/") or "/")
+            if target and target != BASE + link:
+                mismatched.append((path.name, link, target))
+    assert not mismatched, f"link form disagrees with the target's canonical: {mismatched[:5]}"
 
 
 def test_every_planet_page_is_reachable_by_a_static_link():

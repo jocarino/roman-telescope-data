@@ -1,4 +1,4 @@
-// "Your sky tonight" (/sky.html): the whole catalog filtered to what is above the
+// "Your sky tonight" (/sky): the whole catalog filtered to what is above the
 // visitor's horizon right now. Location: latitude slider + tz-estimated longitude,
 // or exact via one-shot geolocation (shared localStorage keys with the planet-page
 // horizon overlay, so the two stay in sync). Sky maths come from window.ExoSky (app.js).
@@ -47,7 +47,7 @@
     var geoState = lon != null ? "ok" : "";
     var selected = null;   // hosts shown in the "at that spot" panel
 
-    // ── arriving from a planet page: /sky.html?planet=<id> (or ?host=<star name>) ──
+    // ── arriving from a planet page: /sky?planet=<id> (or ?host=<star name>) ──
     // The visitor asked for one specific star, so the page opens pointed at it: crosshaired
     // and centred, in the view that can actually show it, with the band widened to the least
     // equipment that reaches it. Band and view are set in memory only — a deep link must not
