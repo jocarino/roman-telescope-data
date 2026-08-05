@@ -217,7 +217,9 @@ def static_pages(n_planets: int) -> list[PageMeta]:
                 "Curated walks through the catalogue: the darkest worlds, the bluest, the "
                 "ones you could almost see from your garden."
             ),
-            path="/tours/",
+            # No trailing slash: every link to the tours index is `/tours`, and the canonical
+            # has to be the form the links use or the two disagree about which URL the page is.
+            path="/tours",
             priority="0.7",
         ),
         PageMeta(

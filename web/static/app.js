@@ -24,7 +24,7 @@ const ExoRandom = {
   },
 };
 
-// Shared sky maths for the "your horizon" overlay and the /sky.html "your sky tonight"
+// Shared sky maths for the "your horizon" overlay and the /sky "your sky tonight"
 // page. All angles in degrees; `lon` is the exact longitude if geolocation was granted,
 // or null to estimate it from the clock's UTC offset (15°/hour — up to an hour of sky
 // off under daylight saving).

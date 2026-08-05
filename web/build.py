@@ -833,7 +833,7 @@ def build(
 
     # Tour pages themselves (the walks were resolved before the gallery, which links them).
     # Their metas come back so the tours reach the sitemap alongside everything else.
-    tour_metas = _tour_pages(env, tours, out, build_id, len(records), site, hub["/tours/"])
+    tour_metas = _tour_pages(env, tours, out, build_id, len(records), site, hub["/tours"])
     tour_membership: dict[str, list[dict]] = {}
     for tour in tours:
         for stop in tour.stops:
