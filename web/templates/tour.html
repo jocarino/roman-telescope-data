@@ -2,7 +2,10 @@
 {% from "macros.html" import provenance_badge, jinfo, palette_full %}
 {% block content %}
 {%- set last = stops|length - 1 %}
-<div class="tour-page" x-data="tour({ n: {{ stops|length }} })"
+{# `id` is carried purely so the tour's events can name themselves — without it every
+   tour_started / tour_stop_viewed / tour_completed looks alike in the dashboard. forceescape
+   because tojson leaves double quotes intact, which would end the attribute here. #}
+<div class="tour-page" x-data="tour({ n: {{ stops|length }}, id: {{ tour.id|tojson|forceescape }} })"
   @keydown.window.arrow-right="next()" @keydown.window.arrow-left="prev()">
   <div class="site-head">
     <a class="back" href="/tours" aria-label="Back to all tours">←<span class="back-txt"> ALL TOURS</span></a>

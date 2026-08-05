@@ -10,6 +10,7 @@ snippet is asserted as hard as its presence.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -18,6 +19,20 @@ from web.build import build
 
 PLANETS_JSON = Path("data/planets.json")
 KEY = "phc_testtoken0000000000000000000000000000"
+
+_ROOT = Path(__file__).resolve().parents[1]
+_STATIC = _ROOT / "web" / "static"
+
+# Every way an event name reaches PostHog: `window.exoTrack("x", …)` at a call site, tours.js's
+# `_track("x", …)` wrapper, and analytics.js's own internal `send("x", …)`. Deliberately NOT a
+# bare `track(` — app.js has a component method of that name whose argument is a palette
+# format ("css-vars", "hex"), not an event, and matching it would put junk in the vocabulary.
+_EVENT_CALL = re.compile(r'(?<![A-Za-z0-9_$])(?:exoTrack|_track|send)\(\s*"([a-z][a-z0-9_]*)"')
+
+
+def _emitted_events() -> set[str]:
+    """Every event name the shipped front-end can actually send."""
+    return {n for p in sorted(_STATIC.glob("*.js")) for n in _EVENT_CALL.findall(p.read_text())}
 
 pytestmark = pytest.mark.skipif(not PLANETS_JSON.exists(), reason="needs a fetched data release")
 
@@ -85,3 +100,47 @@ def test_the_shipped_script_keeps_its_privacy_promises(tmp_path):
     assert 'cookieless_mode: "always"' in js
     assert "autocapture: false" in js
     assert "disable_session_recording: true" in js
+
+
+# ── The vocabulary ──────────────────────────────────────────────────────────────
+# The README calls the event list "fixed" and tells the next person that adding one is a
+# guarded line at the call site plus a line in that list. Nothing enforced the second half, so
+# an event could ship and be invisible to everyone reading the docs — which is how the site
+# ended up with a tours page and a hold-to-peek gesture that reported nothing at all.
+
+
+def test_every_event_is_in_the_readme_vocabulary():
+    readme = (_ROOT / "README.md").read_text()
+    missing = sorted(n for n in _emitted_events() if f"`{n}`" not in readme)
+    assert not missing, (
+        f"events emitted by web/static/*.js but absent from the README list: {missing}. "
+        "Add them there, or the vocabulary stops being the documentation it claims to be."
+    )
+
+
+def test_the_untracked_gestures_report():
+    """Guided tours and hold-to-peek were the two blind spots: a tour could be opened and
+    nothing after it was visible, and a peek is a fetch of a static fragment — no navigation,
+    no pageview, nothing. Both are the mobile-heavy end of the site, so their absence bent the
+    numbers in exactly one direction."""
+    wanted = {"tour_started", "tour_stop_viewed", "tour_completed", "peek_opened"}
+    assert wanted <= _emitted_events()
+
+    # Guarded like every other call site, so an unkeyed build and an ad-blocked page behave
+    # identically to a reporting one.
+    assert 'window.exoTrack && window.exoTrack("peek_opened"' in (_STATIC / "app.js").read_text()
+    assert "if (!window.exoTrack) return;" in (_STATIC / "tours.js").read_text()
+
+
+def test_tour_pages_name_the_tour_they_are(tmp_path):
+    """Without the id in x-data every tour event reads `tour_id: ""` and the whole funnel
+    collapses into one undifferentiated walk."""
+    out = build(_tiny(tmp_path), tmp_path / "dist", og_cards=False, posthog_key=KEY)
+    pages = [p for p in (out / "tours").glob("*.html") if p.name != "index.html"]
+    assert pages, "no tour pages were built, so this test checked nothing"
+    for p in pages:
+        # The id is written through tojson|forceescape, because a raw double quote would end
+        # the attribute. Which entity form the escaper picks is its business — the HTML parser
+        # hands Alpine the decoded string either way — so compare after decoding.
+        html = p.read_text().replace("&#34;", '"').replace("&quot;", '"')
+        assert f'id: "{p.stem}"' in html, p.name
