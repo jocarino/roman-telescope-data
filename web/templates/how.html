@@ -383,8 +383,16 @@
         measurement it would take is the
         star-weighted mean albedo inside the band:</p>
       <span class="formula">value<sub>band</sub> = ∫<sub>band</sub> A(λ)·S(λ) dλ / ∫<sub>band</sub> S(λ) dλ</span>
-      <p>Bands: 575&nbsp;nm (10% width), 660 and 730&nbsp;nm (6%, the {{ g('spectroscopy') }} channels),
-        835&nbsp;nm (15%). To get a colour back we interpolate the four samples across the
+      {# The band set is quoted from the CGI Primer's own mode table (CPP, 8 Jan 2025, p.5) —
+         575/10%, 730/15%, 825/10%. This paragraph carried the old four-band figures long after
+         pipeline/config.py was corrected, which is exactly how a wrong spec regresses: say
+         where the numbers come from, so the next reader can check them. #}
+      <p>Bands: 575&nbsp;nm (10% width), 730&nbsp;nm (15%, the {{ g('spectroscopy') }} channel)
+        and 825&nbsp;nm (10%) — the three supported {{ g('roman-4-band', 'flight modes') }}, as
+        listed in Roman's own Coronagraph Primer. A fourth filter at 660&nbsp;nm is installed on
+        the instrument but was never characterised on the ground, so it is not a supported
+        observing mode and is not modelled here. To get a colour back we interpolate the three
+        samples across the
         visible grid and re-run step&nbsp;3. Below 575&nbsp;nm Roman receives <strong>zero
         information</strong> — precisely the blue-violet region where many of these planets
         live — so the reconstruction holds the spectrum flat there rather than inventing data.

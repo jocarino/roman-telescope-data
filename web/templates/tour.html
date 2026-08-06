@@ -97,7 +97,7 @@
           <div><dt>Distance</dt><dd>{{ s.dist }}</dd></div>
           <div><dt>Reflects{{ jinfo("The share of its star's light this planet sends back (CIE luminance Y). Earth reflects about 30%. Every swatch on this site is brightened to a standard display brightness, so a dark planet still shows its hue — this number is what actually comes back.", "Reflects") }}</dt>
             <dd>{{ s.reflect }}</dd></div>
-          <div><dt>As Roman would see it{{ jinfo("The Roman Space Telescope's coronagraph samples visible light in four narrow bands. This is the colour rebuilt from those four samples alone, and how far it lands from the full-spectrum colour in perceptual units (ΔE): under ~2 is invisible to the eye, ~10 reads as a different shade, 20+ as a different colour.", "As Roman would see it") }}</dt>
+          <div><dt>As Roman would see it{{ jinfo("The Roman Space Telescope's coronagraph samples visible light in three narrow bands. This is the colour rebuilt from those three samples alone, and how far it lands from the full-spectrum colour in perceptual units (ΔE): under ~2 is invisible to the eye, ~10 reads as a different shade, 20+ as a different colour.", "As Roman would see it") }}</dt>
             <dd><span class="ts-chip" style="background: {{ s.roman_hex }}"></span>{{ s.roman_hex }}
               {% if s.roman_de %}<span class="ts-de">ΔE {{ s.roman_de }}</span>{% endif %}</dd></div>
           <div><dt>Model assumes</dt><dd>{{ s.cloud }}</dd></div>

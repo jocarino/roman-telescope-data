@@ -386,7 +386,7 @@
         b.dot = mk("circle", { class: "dg-dot", r: 3.4, cx: b.cx, cy: b.cy }, svg);
         b.fdot = fader(b.dot);
       });
-      /* What Roman can rebuild: the four samples joined up, held flat below the first band
+      /* What Roman can rebuild: the three samples joined up, held flat below the first band
        * because nothing was measured there — the reconstruction never invents a slope. */
       var recon = mk("path", { class: "dg-recon", d: pathFrom(
         [[P.x0, bands[0].cy]].concat(bands.map(function (b) { return [b.cx, b.cy]; }),

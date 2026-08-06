@@ -81,7 +81,7 @@
       "id": "roman-blind-spots",
       "title": "Where Roman loses the colour",
       "kicker": "the worlds the band view gets furthest wrong",
-      "intro": "The Roman Space Telescope's coronagraph will not see a planet's whole spectrum. It sees visible light through four narrow filters, and a colour has to be rebuilt from those four samples. Usually that lands close. On these worlds it does not: the reconstruction misses the features that carried the colour and comes back a different colour entirely — deep blue planets returning as salmon pink. Each stop shows both, side by side.",
+      "intro": "The Roman Space Telescope's coronagraph will not see a planet's whole spectrum. It sees visible light through three narrow filters, and a colour has to be rebuilt from those three samples. Usually that lands close. On these worlds it does not: the reconstruction misses the features that carried the colour and comes back a different colour entirely — deep blue planets returning as salmon pink. Each stop shows both, side by side.",
       "basis": "Picked automatically from the current data: the largest perceptual gap (ΔE2000) between the full-spectrum colour and the Roman band reconstruction, one per star system.",
       "honesty": "Both colours are modelled. The Roman band view is what Roman's supported filters would recover from this modelled spectrum — no real Roman measurements exist yet.",
       "select": { "rule": "roman-gap", "limit": 10 }
