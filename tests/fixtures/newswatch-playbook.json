@@ -1,0 +1,44 @@
+{
+  "_comment": [
+    "A SYNTHETIC playbook, for tests only. Deliberately not the real one — the real one is",
+    "editorial and lives in the private notes repo. This file exists to prove the loading,",
+    "templating and blank-preserving behaviour without putting any marketing copy in a",
+    "public repository, which is the whole point of the split.",
+    "Every string here is nonsense on purpose. If it ever starts reading like real copy,",
+    "someone has moved the plan back into the open."
+  ],
+  "bench": ["K2-18 b", "beta Pictoris b", "Nonexistent Planet z"],
+  "honesty_by_provenance": {
+    "model-microlensing": "FIXTURE microlensing honesty line.",
+    "_default": "FIXTURE default honesty line."
+  },
+  "bluesky_limit": 300,
+  "bluesky_budget_template": "{name} is {colour_name} ({hex}). {honesty} {url_bluesky}",
+  "alert_act_now": ["FIXTURE act-now advice for {name}, window ~2 h."],
+  "alert_stock": ["FIXTURE stock advice.", "<pre>brief \"{archive_name}\"</pre>"],
+  "where_to_go": [
+    "  FIXTURE WHERE TO GO",
+    "    bluesky {search_bluesky}",
+    "    reddit  {search_reddit}",
+    "    page    {page}"
+  ],
+  "copy_header": ["  FIXTURE COPY SCAFFOLDS <angle brackets are yours>"],
+  "scaffolds": [
+    {
+      "title": "FIXTURE bluesky ({bluesky_budget} left)",
+      "lines": [
+        "    {name} is {colour_name} ({hex}).",
+        "    <ONE sentence of physics goes here>",
+        "    {honesty}",
+        "    {url_bluesky}"
+      ]
+    },
+    {
+      "title": "FIXTURE typo block",
+      "lines": ["    a deliberate {not_a_real_field} that must survive rendering"]
+    }
+  ],
+  "checklist": ["  FIXTURE CHECKLIST", "    1. provenance is {provenance}, release {release}"],
+  "standing_infrared": ["  FIXTURE INFRARED PARAGRAPH"],
+  "closing": ["  FIXTURE CLOSING, campaign {id}"]
+}
