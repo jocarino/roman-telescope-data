@@ -145,7 +145,7 @@
       "term": "Spectroscopy",
       "category": "light",
       "short": "Splitting light into its wavelengths to see the whole spectrum, rather than measuring one total brightness.",
-      "long": "A spectrograph spreads incoming light out like a prism and records how much arrives at each wavelength, which reveals the fingerprints of individual molecules. Two of Roman's four coronagraph bands, at 660 and 730 nanometres, feed a slit spectrograph at low resolution; the other two do plain photometry.",
+      "long": "A spectrograph spreads incoming light out like a prism and records how much arrives at each wavelength, which reveals the fingerprints of individual molecules. One of Roman's three supported coronagraph bands, at 730 nanometres, feeds a slit spectrograph at low resolution; the other two do plain photometry. A fourth filter at 660 nm has spectroscopy hardware installed as well, but it was never tested on the ground, so it is not an official observing mode.",
       "seeAlso": ["photometry", "bandpass", "albedo-spectrum"]
     },
     {
