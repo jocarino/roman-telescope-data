@@ -50,6 +50,10 @@ from email.utils import parsedate_to_datetime
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
+# Run as `python3 tools/newswatch.py`, sys.path[0] is tools/, not the repo root — so the one
+# sibling import below (pipeline.explain, which is stdlib-only itself) would not resolve.
+if str(REPO) not in sys.path:
+    sys.path.insert(0, str(REPO))
 PLANETS = REPO / "data" / "planets.json"
 RELEASE_FILE = REPO / "data" / "RELEASE"
 CACHE = REPO / "data" / "cache"
@@ -1022,6 +1026,21 @@ def brief_planet(rec: dict, out: list[str], base: str, *, headline: str | None =
     else:
         out.append("  outside tolerance → post the CHANGE, not the swatch.")
 
+    # -- why this colour, read back out of the spectrum ---------------------
+    from pipeline.explain import physics_note
+
+    note = physics_note(rec)
+    if note is not None:
+        out.append("")
+        out.append("  WHY THIS COLOUR   (from our own spectrum — check it, don't paste it)")
+        out.append(_wrap(note.mechanism, "    "))
+        out.append(_wrap(note.evidence, "    "))
+        out.append(_wrap(note.illuminant, "    "))
+        if note.contradiction:
+            out.append(_wrap(f"⚠ {note.contradiction} — worth a look before posting.", "    "))
+        if full:
+            out.append(_wrap(note.caveat, "    "))
+
     # -- context worth a line, never a section ------------------------------
     extras: list[str] = []
     hab = rec.get("habitability")
@@ -1505,6 +1524,7 @@ def alert_text(item: Item, target: Target, base: str, *, now: datetime,
     else:
         lines += ["", *_alert_verdict(item, rec), *_alert_facts(rec, base)]
         lines += paper_diff_lines(item, rec)
+        lines += _alert_physics(rec)
 
     q = urllib.parse.quote(name)
     lines += [
@@ -1579,6 +1599,26 @@ def _alert_facts(rec: dict, base: str) -> list[str]:
     assumed = [k.replace("_", " ") for k, v in src.items() if v == "assumed"]
     out.append("Outside tolerance ⇒ post the <i>change</i>, not the swatch."
                + (f" Least sure: {_esc(', '.join(assumed))}." if assumed else ""))
+    return out
+
+
+def _alert_physics(rec: dict) -> list[str]:
+    """Why this planet is this colour, read back out of its own spectrum.
+
+    The one sentence of physics is still yours to write — this is the cheat sheet you check it
+    against, not the sentence itself. It says what OUR MODEL did, which is a claim about the
+    model rather than a measurement of the planet, and every number in it is verifiable
+    against the spectrum plot on the planet page.
+    """
+    from pipeline.explain import physics_note
+
+    note = physics_note(rec)
+    if note is None:
+        return []
+    out = ["", "<b>Why this colour</b> (from our own spectrum — check, don't paste)",
+           _esc(note.mechanism), f"<i>{_esc(note.evidence)}</i>", _esc(note.illuminant)]
+    if note.contradiction:
+        out.append(f"⚠️ <b>{_esc(note.contradiction)}</b> — worth a look before posting.")
     return out
 
 

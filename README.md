@@ -360,6 +360,15 @@ Six things about it are deliberate:
   named planet rather than a population result — are answerable from the feed item, so the
   alert carries the verdict and the evidence for each. It reports; it doesn't act: a 1/4 story
   you happen to know is a big deal is still yours to jack.
+- **It says why the planet is that colour, derived from its own spectrum.** The colour came
+  out of a deterministic pipeline, so the reason is already in the record: `pipeline/explain.py`
+  reads the regime the engine assigned and the shape of the 81-point albedo curve, and states
+  the mechanism plus the numbers behind it — checkable against the plot on the planet page. It
+  leads with the regime, not the curve: a dark cloud-free planet's residual blue *does* tilt
+  blue-green, and an earlier version called HD 189733 b and WASP-12 b "blue-green" on that
+  basis, with the right numbers and the wrong mechanism. When the spectrum and the regime
+  disagree it says so rather than smoothing over it. The cheat sheet you check it against is
+  [`docs/why-these-colours.md`](docs/why-these-colours.md). It still won't write the sentence.
 - **Checklist step 2 can run itself — and a model never decides the verdict.** `--diff-paper`
   finds the paper linked from the story, has Claude **quote** its stated radius, mass, T_eq and
   host T_eff — the number as printed, the unit as printed, and the sentence each came from —
