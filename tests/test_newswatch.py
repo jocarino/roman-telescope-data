@@ -339,6 +339,7 @@ def test_a_host_only_match_never_becomes_the_string_unknown(aliases, monkeypatch
 
 
 def test_a_missing_planet_alert_carries_a_runnable_fast_path(aliases, monkeypatch):
+    monkeypatch.setattr(nw, "data_pr_nudge", lambda **kw: "")
     it, t = _resolve("First image of TOI-700 d", aliases, monkeypatch)
     assert t.kind == "planet-missing"
     text = nw.alert_text(it, t, "https://example.test", now=datetime.now(UTC))
@@ -346,11 +347,107 @@ def test_a_missing_planet_alert_carries_a_runnable_fast_path(aliases, monkeypatc
     assert "NOT IN OUR CATALOGUE" in text
 
 
+def test_the_missing_planet_path_merges_rather_than_writing_a_lone_file(aliases, monkeypatch):
+    """A briefing alone leaves the link in your own post 404ing — the site reads the merged
+    catalogue, so the command the alert hands you has to be the one that reaches it."""
+    monkeypatch.setattr(nw, "data_pr_nudge", lambda **kw: "")
+    it, t = _resolve("First image of TOI-700 d", aliases, monkeypatch)
+    text = nw.alert_text(it, t, "https://example.test", now=datetime.now(UTC))
+    assert "--merge-into data/planets.json" in text
+    assert "release-data.sh" in text
+
+
+def test_an_open_data_pr_is_surfaced_on_a_missing_planet(aliases, monkeypatch):
+    """The Thursday probe opens a PR and drafts the release; nothing reaches the site until a
+    human merges. A 'not in catalogue' alert is exactly when that matters."""
+    monkeypatch.setattr(nw, "data_pr_nudge",
+                        lambda **kw: "📦 <b>A data refresh PR is already open</b> — #99.")
+    it, t = _resolve("First image of TOI-700 d", aliases, monkeypatch)
+    text = nw.alert_text(it, t, "https://example.test", now=datetime.now(UTC))
+    assert "data refresh PR is already open" in text
+
+
+def test_the_nudge_never_breaks_an_alert(monkeypatch):
+    """Best effort by design: failing an alert about a breaking story over a missing nicety
+    would be the wrong trade."""
+    def boom(*a, **k):
+        raise OSError("network down")
+    monkeypatch.setattr(nw.urllib.request, "urlopen", boom)
+    assert nw.data_pr_nudge() == ""
+
+
 def test_press_is_act_now_and_a_preprint_is_pre_build():
     """'Popping off' and 'about to' need opposite responses; alerting both the same way
     trains you to ignore both."""
     assert nw.tier_of(_item(PRESS, "t", "x")) == nw.TIER_ACT
     assert nw.tier_of(_item(ARXIV, "t", "x")) == nw.TIER_STOCK
+
+
+def test_the_travel_test_is_answered_not_asked(aliases, monkeypatch):
+    """Question one of the runbook used to cost a human 60 seconds per alert. All four parts
+    are answerable from the feed item, so the tool answers them."""
+    monkeypatch.setattr(nw, "_ALIASES", aliases)
+    it = _item(PRESS, "Signs of water on K2-18 b", "t1")
+    it.has_image = True
+    passed, evidence = nw.travel_test(it)
+    assert passed == [True, True, True, True]
+    assert "water" in evidence[0]
+
+
+def test_a_population_result_from_a_preprint_scores_low(aliases, monkeypatch):
+    monkeypatch.setattr(nw, "_ALIASES", aliases)
+    it = _item(ARXIV, "Occurrence rates of sub-Neptunes in the Kepler field", "t2")
+    passed, _ = nw.travel_test(it)
+    assert sum(passed) == 0
+
+
+def test_superlatives_count_as_civilian_nouns(aliases, monkeypatch):
+    """Regression: 'Faintest planet ever imaged from Earth' — an obvious civilian hook —
+    scored zero because the list held only nouns."""
+    monkeypatch.setattr(nw, "_ALIASES", aliases)
+    it = _item(PRESS, "Faintest planet ever imaged from Earth found after 10 years", "t3")
+    passed, _ = nw.travel_test(it)
+    assert passed[0] is True
+
+
+@pytest.mark.parametrize(
+    ("xml", "expected"),
+    [
+        ('<item><description>&lt;img src="x.jpg"/&gt;text</description></item>', True),
+        ('<item><enclosure url="http://x/y.jpg" type="image/jpeg"/></item>', True),
+        ('<item><enclosure url="http://x/y.mp3" type="audio/mpeg"/></item>', False),
+        ("<item><description>plain text</description></item>", False),
+    ],
+)
+def test_picture_detection(xml, expected):
+    """A story with an institution-supplied image travels several times further — and that
+    image is precisely what our swatch argues with."""
+    import xml.etree.ElementTree as ET
+    node = ET.fromstring(xml)
+    raw = node.findtext("description") or ""
+    assert nw._has_image(node, raw) is expected
+
+
+def test_the_stock_digest_is_one_short_message_with_no_attachment(aliases, monkeypatch):
+    """Preprints have no clock, so a briefing nobody asked for is just noise — and noise is
+    what makes a person mute the channel."""
+    monkeypatch.setattr(nw, "_ALIASES", aliases)
+    items = []
+    for n, title in enumerate(["Transit timing of K2-18 b", "Atmosphere of beta Pictoris b"]):
+        it = _item(ARXIV, title, f"s{n}")
+        it.planets, it.hosts = nw.find_planets(title, aliases)
+        items.append(it)
+    text = nw.digest_text(items, _cat(), now=datetime.now(UTC))
+    assert text.count("\n·") == 2 or text.count("\n· ") == 2
+    assert len(text) < 700
+    assert "No clock" in text
+
+
+def test_the_digest_still_flags_a_planet_we_cannot_colour(aliases, monkeypatch):
+    monkeypatch.setattr(nw, "_ALIASES", aliases)
+    it = _item(ARXIV, "First look at TOI-700 d", "s9")
+    it.planets, it.hosts = nw.find_planets(it.title, aliases)
+    assert "not in catalogue" in nw.digest_text([it], _cat(), now=datetime.now(UTC))
 
 
 def test_an_act_now_alert_pushes_the_reply_window_and_stock_does_not(aliases, monkeypatch):
@@ -378,14 +475,58 @@ def test_an_alert_without_a_playbook_still_carries_the_links(aliases, monkeypatc
 
 
 def test_every_alert_fits_in_one_telegram_message(aliases, monkeypatch):
-    """Telegram hard-caps at 4096 characters; the alert is a summary and must not be truncated
-    into uselessness. The full briefing goes as an attachment instead."""
+    """The alert IS the briefing now, so the 4096 cap is a real constraint rather than a
+    formality. Telegram counts rendered text, not markup, which is why the search links are
+    anchors — four URLs are ~400 characters as text and ~30 as anchors."""
     now = datetime.now(UTC)
+    pb = nw.load_playbook(PLAYBOOK_FIXTURE)
     long_title = "Astronomers report " + "a very long headline " * 20
     for feed in (PRESS, ARXIV):
         it, t = _resolve(f"{long_title} about K2-18 b", aliases, monkeypatch)
         it.feed = feed
-        assert len(nw.alert_text(it, t, "https://example.test", now=now)) < nw.TELEGRAM_LIMIT
+        assert nw.alert_fits(nw.alert_text(it, t, "https://example.test", now=now, playbook=pb))
+
+
+def test_alert_fits_measures_rendered_text_not_markup():
+    """A message that is mostly anchors can exceed 4096 characters of HTML and still be well
+    inside the limit — measuring the markup would reject alerts Telegram accepts."""
+    anchors = "".join(f'<a href="https://example.test/{i:04d}/very/long/path">x</a>'
+                      for i in range(200))
+    assert len(anchors) > nw.TELEGRAM_LIMIT
+    assert nw.alert_fits(anchors)
+
+
+def test_the_alert_carries_the_facts_and_the_clocked_scaffolds(aliases, monkeypatch):
+    """The whole point of dropping the attachment: everything you need is in the message."""
+    monkeypatch.setattr(nw, "_ALIASES", aliases)
+    pb = nw.load_playbook(PLAYBOOK_FIXTURE)
+    it = _item(PRESS, "Signs of water on K2-18 b", "m1")
+    it.planets, it.hosts = nw.find_planets(it.title, aliases)
+    text = nw.alert_text(it, nw.resolve_target(it, _cat()), "https://example.test",
+                         now=datetime.now(UTC), playbook=pb)
+    assert "CHECK vs PAPER" in text            # the four numbers
+    assert "travels" in text                   # the verdict
+    assert "FIXTURE bluesky" in text           # the scaffold with a clock
+    assert "FIXTURE typo block" not in text    # the ones without
+
+
+def test_no_attachment_is_sent_unless_asked(aliases, monkeypatch):
+    """A document you must tap into is worse than text you can read, for the same content."""
+    monkeypatch.setattr(nw, "_ALIASES", aliases)
+    sent = {"messages": 0, "documents": 0}
+
+    class FakeTG:
+        def message(self, html):
+            sent["messages"] += 1
+        def document(self, *a, **k):
+            sent["documents"] += 1
+
+    it = _item(PRESS, "Signs of water on K2-18 b", "m2")
+    it.planets, it.hosts = nw.find_planets(it.title, aliases)
+    nw.notify_items(FakeTG(), [it], _cat(), "https://example.test",
+                    now=datetime.now(UTC), attach=False,
+                    playbook=nw.load_playbook(PLAYBOOK_FIXTURE))
+    assert sent == {"messages": 1, "documents": 0}
 
 
 def test_alert_escapes_html_so_a_headline_cannot_break_the_message(aliases, monkeypatch):
@@ -439,6 +580,36 @@ def playbook():
     return nw.load_playbook(PLAYBOOK_FIXTURE)
 
 
+def test_the_compact_brief_shows_only_the_scaffolds_with_a_clock(playbook):
+    """Seven scaffolds at minute three of a two-hour window is the same as no briefing.
+    The rest are named, not printed, so nothing is hidden — just deferred."""
+    rec = _rec("k2-18-b", "K2-18 b", "K2-18")
+    fields = nw.brief_fields(rec, rec["name"], "https://example.test", playbook)
+    compact: list[str] = []
+    nw.brief_copy(compact, playbook, fields)
+    full: list[str] = []
+    nw.brief_copy(full, playbook, fields, full=True)
+    assert len(compact) < len(full)
+    assert "--full" in "\n".join(compact)          # says where the rest went
+
+
+def test_the_compact_brief_is_short_enough_to_read(playbook):
+    """The whole point of the compact layout. A briefing nobody reads is a briefing that
+    does not exist, and the full one ran past 200 lines."""
+    rec = _rec("k2-18-b", "K2-18 b", "K2-18")
+    compact = nw.render_brief(rec, "K2-18 b", "https://example.test", playbook=playbook)
+    full = nw.render_brief(rec, "K2-18 b", "https://example.test", playbook=playbook, full=True)
+    assert len(compact.splitlines()) < 70
+    assert len(full.splitlines()) > len(compact.splitlines())
+
+
+def test_the_verdict_sits_above_the_facts_it_triages(playbook):
+    """An answer to 'what do I look at' printed after the thing it triages is not an answer."""
+    rec = _rec("k2-18-b", "K2-18 b", "K2-18")
+    text = nw.render_brief(rec, "K2-18 b", "https://example.test", playbook=playbook)
+    assert text.index("BEFORE YOU POST") < text.index("CHECK AGAINST THE PAPER")
+
+
 def test_copy_scaffolds_always_leave_the_physics_sentence_blank(playbook):
     """A ready-to-post caption is the thing 11-bluesky-mastodon.md says kills the account.
     If someone ever 'helpfully' fills this in, this test is what stops it shipping."""
@@ -482,13 +653,28 @@ def test_without_a_playbook_the_search_links_are_still_there():
     assert "bsky.app/search" in text and "hn.algolia.com" in text
 
 
-def test_no_marketing_copy_is_embedded_in_this_repository():
+def test_no_marketing_copy_is_emitted_without_a_playbook(aliases, monkeypatch):
     """The guard on the split itself. If someone pastes the playbook back into the tool to
-    'simplify' it, this fails — which is the only moment anyone would notice."""
-    source = Path("tools/newswatch.py").read_text().lower()
+    'simplify' it, this fails — the only moment anyone would notice.
+
+    It checks what the tool *emits*, not what its source says. An earlier version grepped the
+    source and flagged a comment explaining why picture detection matters — rationale in a
+    comment is not publishable copy, and a guard that cannot tell the difference gets deleted
+    the first time it cries wolf.
+    """
+    monkeypatch.setattr(nw, "_ALIASES", aliases)
+    rec = _rec("k2-18-b", "K2-18 b", "K2-18")
+    it = _item(PRESS, "Signs of water on K2-18 b", "g1")
+    it.planets, it.hosts = nw.find_planets(it.title, aliases)
+    emitted = "\n".join([
+        nw.render_brief(rec, "K2-18 b", "https://example.test", playbook=None),
+        nw.alert_text(it, nw.resolve_target(it, _cat()), "https://example.test",
+                      now=datetime.now(UTC), playbook=None),
+        nw.digest_text([it], _cat(), now=datetime.now(UTC)),
+    ]).lower()
     for phrase in ("#exoplanet", "quote-post", "artist's impression", "unlisted if automated",
-                   "sleep-on-it", "one sentence of physics", "graphemes"):
-        assert phrase not in source, f"marketing copy leaked back into the public tool: {phrase}"
+                   "sleep-on-it", "one sentence of physics", "graphemes", "reply, don't post"):
+        assert phrase not in emitted, f"marketing copy leaked into public output: {phrase}"
 
 
 def test_an_unset_playbook_env_var_does_not_resolve_to_the_repo_root(monkeypatch):
@@ -504,7 +690,7 @@ def test_a_typo_in_the_playbook_does_not_crash_the_briefing(playbook):
     rec = _rec("k2-18-b", "K2-18 b", "K2-18")
     fields = nw.brief_fields(rec, rec["name"], "https://example.test", playbook)
     out: list[str] = []
-    nw.brief_copy(out, playbook, fields)
+    nw.brief_copy(out, playbook, fields, full=True)   # the typo block is a deferred scaffold
     assert "{not_a_real_field}" in "\n".join(out)
 
 

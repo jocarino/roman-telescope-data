@@ -19,6 +19,7 @@ from pipeline.config import INSTRUMENTS, ROMAN_CGI
 from pipeline.demo_planets import demo_planets
 from pipeline.emit.cache import cached_build_record
 from pipeline.emit.writer import DEFAULT_OUT, write_planets
+from pipeline.models import PlanetsFile
 from pipeline.solar_system import solar_system_planets
 from pipeline.system import attach_systems
 
@@ -71,8 +72,41 @@ def cmd_build(args: argparse.Namespace) -> None:
         )
         print(f"  palette     : {' '.join(s.hex for s in tc.palette)}")
 
+    merged_into = None
+    if args.merge_into is not None:
+        # Splice the freshly built planet(s) into an existing catalogue instead of writing a
+        # lone file. Without this the fast path gives you a briefing but the SITE still does
+        # not have the planet — so the link in the post you just wrote would 404. Curation
+        # ranks, palettes and tours are all re-derived at web-build time, so a merged record
+        # needs nothing further; only `attach_systems` is a pipeline-time batch pass, and it
+        # is re-run below over the whole set so the new planet links to its siblings and they
+        # link back to it.
+        existing = PlanetsFile.model_validate_json(args.merge_into.read_text())
+        by_id = {r.id: r for r in existing.planets}
+        added = [r.id for r in records if r.id not in by_id]
+        replaced = [r.id for r in records if r.id in by_id]
+        for rec in records:
+            by_id[rec.id] = rec
+        records = list(by_id.values())
+        merged_into = (existing, added, replaced)
+
     # Batch pass: link planets that share a host star (needs the whole set to group).
     attach_systems(records)
+
+    if merged_into is not None:
+        existing, added, replaced = merged_into
+        # Keep the file's own generated_at: this is the same catalogue with a planet spliced
+        # in, not a fresh build, and the drift manifest is keyed off the release it belongs to.
+        out = write_planets(records, existing.generated_at, args.merge_into)
+        print(f"\nMerged into {out}: {len(added)} added, {len(replaced)} replaced, "
+              f"{len(records)} planets total.")
+        if added:
+            print(f"  added: {', '.join(added)}")
+        print("\nThe site is built from the RELEASE asset, not this file. To publish:")
+        print("  scripts/release-data.sh")
+        print("  git add data/RELEASE && git commit -m 'Data release …' && git push")
+        print("  (the deploy webhook rebuilds from the new tag)")
+        return
 
     out = write_planets(records, generated_at, args.out)
     n = len(records)
@@ -158,6 +192,16 @@ def main() -> None:
         default=DEFAULT_OUT,
         metavar="PATH",
         help=f"Where to write the JSON (default: {DEFAULT_OUT})",
+    )
+    p_build.add_argument(
+        "--merge-into",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help="Splice the built planet(s) into an existing catalogue instead of writing a lone "
+        "file, replacing any record with the same id and re-linking stellar systems. This is "
+        "how a newsjacked planet reaches the SITE: merge, then scripts/release-data.sh, then "
+        "commit data/RELEASE. Overrides --out.",
     )
     p_build.add_argument("--limit", type=int, default=None, help="Only build the first N planets")
     p_build.add_argument("--no-cache", action="store_true", help="Bypass the TAP disk cache")

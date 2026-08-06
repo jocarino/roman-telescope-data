@@ -21,6 +21,12 @@ picaso = [
     "astropy>=6.0",
     "pandas>=2.0",
 ]
+# The paper-diff step of tools/newswatch.py (`--diff-paper`). Optional on purpose: the poll
+# path is stdlib-only so the newswatch workflow runs on bare python3 with no install step,
+# and only this one feature needs the SDK.
+paperdiff = [
+    "anthropic>=0.116",
+]
 
 [dependency-groups]
 dev = [
