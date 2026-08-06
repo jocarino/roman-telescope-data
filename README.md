@@ -9,9 +9,9 @@ spectrum) and **as Roman would see it** (reconstructed from the four Roman Coron
 bands, both computed at quadrature — a coronagraph never sees full phase) — the signature
 feature is how much colour identity survives that filter set.
 
-The production catalog models **5,759 planets** — every confirmed exoplanet in the NASA
-Exoplanet Archive that passes the data-completeness gate (6,290 fetched, 531 excluded
-because no colour could honestly be derived).
+The production catalog models **5,764 planets** — every confirmed exoplanet in the NASA
+Exoplanet Archive that passes the data-completeness gate; the rest are excluded because no
+colour could honestly be derived from what the Archive knows about them.
 
 See `CLAUDE.md` for the domain background and the full architecture; plans and runbooks
 live in `docs/`.

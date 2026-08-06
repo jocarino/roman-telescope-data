@@ -106,6 +106,16 @@ project as for an astronomy nerd**. This is a hard requirement, not a nicety. In
 - All displayed numbers rounded sensibly; store spectra downsampled to 5 nm steps.
 - Keep the science honest: every palette page must state model assumptions
   (cloud state, metallicity, phase angle) — these are modelled, not photographed.
+- **Prose about the project is checked against the project.** Run
+  `uv run python tools/factcheck.py docs README.md` (or point it at any draft) before publishing
+  copy. The catalogue has tests; the writing about the catalogue did not, and that is where this
+  project's worst errors have been — a draft called TrES-2 b near-black when its swatch is <!-- factcheck: ignore -->
+  `#2fa1ff`, another listed a brown dwarf as a Roman target. Both contradicted something already
+  in the repo. The checker treats the source tree and `planets.json` as ground truth for paths,
+  constants, object names, colours and counts, and lists measurement claims that carry no source
+  for a human to settle. It must run under `uv` (otherwise Archive abbreviations aren't expanded
+  and it over-reports — it says so when that happens), and it must never keep its own copy of
+  `catalog._display_name` or `colour.family`; importing them is the entire point.
 
 ## Working in parallel (multiple sessions)
 
