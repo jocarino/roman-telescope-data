@@ -223,6 +223,16 @@ def static_pages(n_planets: int) -> list[PageMeta]:
             priority="0.7",
         ),
         PageMeta(
+            title=f"Sources and credits · {SITE_NAME}",
+            description=(
+                "Every scientific input behind these colours, credited: the NASA Exoplanet "
+                "Archive, the albedo models, the measured solar-system spectra, and the "
+                "colour-science library that does the CIE maths."
+            ),
+            path="/credits",
+            priority="0.4",
+        ),
+        PageMeta(
             title=f"Glossary · {SITE_NAME}",
             description=(
                 "Every piece of jargon on this site in plain English — albedo, equilibrium "

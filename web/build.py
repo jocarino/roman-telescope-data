@@ -45,10 +45,12 @@ from pipeline.illuminant.blackbody import SUN
 from pipeline.models import PaletteStopModel, PlanetRecord, PlanetsFile
 from pipeline.palette.derive import derive_palette_from_hex
 from pipeline.palette.export import ase_bytes
+from pipeline.rights import RIGHTS
 from pipeline.roman_board import resolve as resolve_board
 from pipeline.sky import format_dec, format_ra
 from pipeline.tours import Tour, TourStop
 from pipeline.tours import resolve as resolve_tours
+from web.credits import credits_context
 from web.hubs import FAMILY_LABEL, build_colour_hubs
 from web.hz import hz_strip_svg
 from web.meta import (
@@ -270,12 +272,18 @@ def _cockpit_instruments(records: list[PlanetRecord]) -> dict:
 
 
 def _env() -> Environment:
-    return Environment(
+    env = Environment(
         loader=FileSystemLoader(_TEMPLATES),
         autoescape=select_autoescape(["html"]),
         trim_blocks=True,
         lstrip_blocks=True,
     )
+    # Globals, so base.html's footer renders on every page without each caller remembering to
+    # pass them. Both come from pipeline.rights rather than being typed here: the licence the
+    # footer offers and the licence stamped into planets.json are then the same fact.
+    env.globals["licence_url"] = RIGHTS.derived_licence
+    env.globals["repo_url"] = RIGHTS.full_text.split("/blob/")[0]
+    return env
 
 
 # PostHog EU cloud. `api_host` is where events go; the assets host serves the library itself
@@ -782,6 +790,15 @@ def build(
         env.get_template("glossary.html").render(
             meta=hub["/glossary"], site=site,
             categories=glossary["categories"], terms=glossary["terms"], build_id=build_id
+        )
+    )
+    # Sources & credits: every scientific input, rendered from pipeline.rights — the same
+    # rights block stamped into planets.json — plus the image and asset credits. Nothing on
+    # that page is typed into the template, so a new source cannot ship uncredited.
+    (out / "credits.html").write_text(
+        env.get_template("credits.html").render(
+            meta=hub["/credits"], site=site, build_id=build_id,
+            **credits_context({r.id: r.name for r in records}),
         )
     )
     # Colour census: the whole catalog as one dataset (same fetched index).
