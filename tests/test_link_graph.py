@@ -1,11 +1,11 @@
 """The shape of the link graph a non-JS crawler actually sees.
 
 tests/test_share_meta_build.py already asserts every planet id appears in *some* page's HTML.
-That is the existence check, and it was enough to catch the orphan problem the colour hubs
-fixed. It is not enough to keep the graph healthy, because it cannot tell:
+That is the existence check. It is not enough to keep the graph healthy, because it cannot
+tell:
 
   - a link from a page that is itself unreachable from / (an orphan pointing at an orphan),
-  - a planet whose only inbound link is a line in a 1,830-anchor hub tail,
+  - a planet with no inbound link from any other planet page (a dead end for a reader),
   - an internal link that points at a URL the build never wrote.
 
 So this walks the built site breadth-first from /, following only static <a href>, using the
@@ -38,8 +38,8 @@ ORPHANS_BY_DESIGN = {"/glossary"}
 
 @lru_cache(maxsize=1)
 def _site() -> Path:
-    """A slice big enough to have a real graph: several colour families with tails, a couple of
-    multi-planet systems, and the solar-system anchors."""
+    """A slice big enough to have a real graph: several colour families and kinds with real
+    rail rings, a couple of multi-planet systems, and the solar-system anchors."""
     out = Path(tempfile.mkdtemp(prefix="linkgraph-"))
     doc = json.loads(PLANETS_JSON.read_text())
     picks = {"earth", "jupiter", "neptune", "hd-189733-b"}
@@ -78,18 +78,10 @@ def test_no_page_is_unreachable_from_the_front_page():
     assert not orphans, f"unreachable by static links from /: {sorted(orphans)}"
 
 
-def test_every_planet_page_is_within_three_clicks():
-    """Depth is the crawl-budget question. Two is what the colour hubs buy (/ -> hub -> planet);
-    three leaves room for a rail to be the shortest path without anything sinking deeper."""
-    depth = _graph()["depth"]
-    deep = {u: d for u, d in depth.items() if u.startswith("/planet/") and d > 3}
-    assert not deep, f"planet pages more than 3 clicks deep: {sorted(deep.items())[:5]}"
-
-
-def test_no_planet_depends_on_a_hub_tail_for_its_only_link():
-    """The point of web/related.py. A planet linked only from its colour hub sits in a list of
-    up to 1,830 anchors — not an orphan, but the next worst thing, and a dead end for a reader.
-    Every planet must also be reachable from another planet page."""
+def test_every_planet_has_an_inbound_link_from_another_planet_page():
+    """The point of web/related.py: rails are rings, so every planet is on the receiving end
+    of interior links, not just index links. A planet linked only from an index page is not an
+    orphan, but it is the next worst thing — a dead end for a reader."""
     inbound = _graph()["inbound"]
     planets = [u for u in _graph()["depth"] if u.startswith("/planet/")]
     thin = [

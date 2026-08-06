@@ -268,18 +268,6 @@
         </span>
       </nav>
       {% endif %}
-      {# The way back out to this planet's colour family. Small, but it is the edge that turns
-         the colour hubs from a one-way index into a connected graph: hub -> planet -> hub ->
-         5,000 more planets, all in served HTML rather than JS. See web/hubs.py. #}
-      <nav class="system-strip" aria-label="More planets of this colour">
-        <span class="system-lbl">SAME COLOUR</span>
-        <span class="system-links">
-          <a class="system-planet" href="/colour/{{ ctx.colour_family }}"
-            title="Every planet in the {{ ctx.colour_family_label|lower }} family, and why they are that colour">
-            <span class="system-dot" style="background:{{ rec.true_colour.hex }}"></span>{{
-            ctx.colour_family_label }} planets</a>
-        </span>
-      </nav>
     </div>
   </div>
 
@@ -1243,9 +1231,9 @@
 
   {# ── Where to next: the catalogue's interior link graph, made visible.
 
-     Before this, a planet page's only way onward was the "same colour" link back to a hub
-     carrying up to 1,830 anchors — so every one of 5,764 pages was a cul-de-sac for a reader
-     and a single thin edge for a crawler. Each rail here states the fact it is linking on
+     Without these rails every one of 5,764 pages is a cul-de-sac for a reader and a crawler
+     alike — the gallery grid is client-rendered, so rail links are the static edges between
+     planet pages. Each rail here states the fact it is linking on
      ("Closest in colour"), because a row of unexplained planet names is a related-content
      widget, and this site does not do those: see web/related.py for how the sets are chosen
      (rings, so the links are mutual and every planet is on the receiving end of as many as it

@@ -1,15 +1,12 @@
 """Related-planet rails: the interior structure of the catalogue's link graph.
 
-The colour hubs (web/hubs.py) put every planet back in the crawlable graph — one static link
-each, from the tail list of its family's hub. That fixed reachability and nothing else: a
-crawl of the full build shows all 5,764 planet pages reachable, but 3,245 of them with exactly
-one inbound link, and that link sitting somewhere inside a page carrying up to 1,830 anchors.
-Technically not an orphan; practically close to one, and a dead end for a reader too — the only
-way onward from a planet was back to a 1,800-item index.
+The gallery grid is built in JS and scroll-loaded, so planet links there do not exist in the
+served HTML. These rails are the static edges between planet pages: without them each of the
+5,764 planet pages is a dead end for a reader, and thin-to-invisible for a crawler that does
+not execute JS.
 
-These rails add interior edges: from each planet to a handful of others that are related for a
-stated reason. Three rails, each a *ring* rather than a nearest-neighbour list, which is the
-load-bearing choice here:
+Each planet links to a handful of others that are related for a stated reason. Three rails,
+each a *ring* rather than a nearest-neighbour list, which is the load-bearing choice here:
 
     nearest-neighbour is asymmetric — B can be A's closest match while A is nobody's, so some
     planets gain no inbound links at all and the tail stays as thin as it was. A ring is

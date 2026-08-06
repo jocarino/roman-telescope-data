@@ -413,21 +413,6 @@
     <a class="sh-all" href="/tours">all {{ tours|length }} tours →</a>
   </nav>
 
-  {# Browse by colour family. Not a decoration: the grid above is built in JS and scroll-loaded,
-     so these are the only links from this page into the catalogue that exist in the served
-     HTML. Every planet sits on exactly one of these hubs, which is what puts the whole
-     catalogue two clicks from here for a reader and a crawler alike. See web/hubs.py. #}
-  <nav class="by-colour" aria-label="Browse planets by colour family">
-    <span class="bc-lbl">Browse by colour</span>
-    <ul class="bc-list">
-      {% for h in colour_hubs %}
-      <li><a href="/colour/{{ h.family }}">
-        <i style="background: {{ h.swatches[0] }}" aria-hidden="true"></i>{{ h.label }}
-        <span class="bc-n">{{ '{:,}'.format(h.count) }}</span></a></li>
-      {% endfor %}
-    </ul>
-  </nav>
-
   {# Cards are rendered incrementally in JS from a fetched index (scales to thousands): the grid
      starts empty, the component fills it in batches as you scroll. #}
   <div class="grid" x-ref="grid"></div>
@@ -499,20 +484,5 @@
     .sh-strip { order: 3; flex-basis: 100%; margin: 0 -20px; padding: 2px 20px; }
     .sh-all { margin-left: auto; }
   }
-  /* "Browse by colour": the static link layer under the JS grid. Deliberately plain -- it is
-     an index, not a feature, and it has to stay legible at 8-14 items. */
-  .by-colour { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 4px 0 14px; }
-  .bc-lbl {
-    font-family: var(--mono); font-size: 10.5px; letter-spacing: .5px; color: var(--dim);
-    text-transform: uppercase;
-  }
-  .bc-list { display: flex; flex-wrap: wrap; gap: 5px; list-style: none; margin: 0; padding: 0; }
-  .bc-list a {
-    display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px;
-    border: 1px solid var(--line); font-size: 12.5px; text-decoration: none; color: inherit;
-  }
-  .bc-list a:hover, .bc-list a:focus-visible { border-color: var(--accent); color: var(--accent); }
-  .bc-list i { width: 11px; height: 11px; display: block; border: 1px solid rgba(0,0,0,.35); }
-  .bc-n { font-family: var(--mono); font-size: 10.5px; color: var(--dim); }
 </style>
 {% endblock %}
