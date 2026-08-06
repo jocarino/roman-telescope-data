@@ -110,15 +110,8 @@ TRAVEL_NOUNS = (
 # the most dangerous number this tool prints.
 FLIGHT_BANDS = ("cgi-575", "cgi-730", "cgi-825")
 
-# The pre-built bench. Stock beats speed: these are the planets that actually generate
-# exoplanet headlines, and a briefing written in daylight turns a jack into a 5-minute publish.
-BENCH = (
-    "TRAPPIST-1 b", "TRAPPIST-1 d", "TRAPPIST-1 e", "TRAPPIST-1 f", "TRAPPIST-1 g",
-    "K2-18 b", "LHS 1140 b", "Proxima Cen b", "GJ 1214 b", "WASP-39 b", "55 Cnc e",
-    "HD 189733 b", "HD 209458 b", "TrES-2 b", "Kepler-7 b", "WASP-12 b", "WASP-76 b",
-    "WASP-121 b", "TOI-700 d", "Kepler-186 f", "GJ 486 b", "GJ 367 b", "LP 890-9 c",
-    "47 UMa b", "ups And d", "HR 8799 b",
-)
+# The pre-built bench — which planets we write briefings for in advance — is an editorial
+# choice, so it lives in the playbook (see the note further down), not here.
 
 # Prefixes a designation regex always forgets, plus the press's own spellings. The lookup is
 # built from the Archive; this file only holds what the Archive does NOT give us: IAU
@@ -768,30 +761,84 @@ def utm(url: str, source: str, campaign: str) -> str:
     return f"{url}?utm_source={source}&utm_medium=newsjack&utm_campaign={campaign}"
 
 
-STANDING_INFRARED = (
-    "The standing infrared answer (write it once, reuse it — never improvise it at 23:40):\n"
-    "  \"That measurement is infrared. It tells you what the atmosphere is MADE of, not what\n"
-    "   the planet looks like — those are different wavelengths and different physics. Which\n"
-    "   is the interesting part: composition is exactly what a visible-light albedo model\n"
-    "   needs as input, so this result constrains the colour rather than reporting it.\"\n"
-    "  Boundary to get right, or a scientist will correct you in public: optical SECONDARY-\n"
-    "  ECLIPSE photometry (TESS, CHEOPS, Kepler) DOES constrain geometric albedo at ~0.6–0.8 µm.\n"
-    "  \"Infrared tells us nothing about colour\" is true. \"Space telescopes tell us nothing\n"
-    "  about colour\" is false."
-)
+# --------------------------------------------------------------------------
+# the playbook — the editorial half, which does NOT live in this repository
+# --------------------------------------------------------------------------
+#
+# Everything above this line is mechanism: feeds, name matching, ranking, the numbers, the
+# band gate. It is engineering, it is worth testing in CI, and none of it is sensitive.
+#
+# Everything a *marketer* would recognise — where to post, in what order, the copy scaffolds,
+# the accuracy checklist's wording, the standing infrared answer, which planets we pre-write
+# for — lives in the PRIVATE notes repo and is loaded at run time. This repository is public;
+# publishing the playbook would hand over the one part of the plan that took judgement, and
+# would also mean a public workflow log could leak it.
+#
+# Same pattern as data/tours.json and data/roman-targets.json, which CLAUDE.md describes as
+# "the WORDS live here and the data is re-joined against the catalogue of the moment".
+#
+# With no playbook the tool still works and still alerts — it prints the facts, states that
+# the editorial half is missing, and says where it should be. That is the honest failure:
+# a facts briefing is useful, and silently omitting the copy would look like a bug.
 
-CHECKLIST = (
-    "1. Open the PAPER, not the press release. Copy out its radius, mass, T_eq, host T_eff.",
-    "2. Diff those four against ours below. >10% radius/mass or >100 K on either temperature",
-    "   => our swatch used superseded numbers. Post the CHANGE, not the swatch. Better story.",
-    "3. Provenance flag goes in the POST TEXT, not just on the page.",
-    "4. Say the release date out loud if it predates the paper.",
-    "5. Name the assumption you trust least. Can't name one? You don't know this planet.",
-    "6. State the wavelength the news is about (see the infrared paragraph above).",
-    "7. Sleep-on-it triggers: contradicts the paper · says habitable/not habitable · names a",
-    "   person. Those wait until morning. No exceptions, ever.",
-    "8. Have the correction sentence written BEFORE you post (drafted for you below).",
-)
+PLAYBOOK_ENV = "NEWSWATCH_PLAYBOOK"
+PLAYBOOK_DEFAULT = REPO / "docs" / "notes" / "marketing" / "newswatch-playbook.json"
+
+
+class _Fields(dict):
+    """Leave an unknown {placeholder} alone instead of raising.
+
+    The playbook is prose edited by hand in another repository. A typo in it must not be able
+    to crash the alert that a story is breaking — a briefing with one literal `{hxe}` in it is
+    recoverable at 23:40; a traceback is not.
+    """
+
+    def __missing__(self, key: str) -> str:
+        return "{" + key + "}"
+
+
+@dataclass
+class Playbook:
+    path: Path
+    data: dict
+
+    def section(self, key: str) -> list[str]:
+        val = self.data.get(key)
+        if val is None:
+            return []
+        return list(val) if isinstance(val, list) else [val]
+
+    def render(self, key: str, fields: dict) -> list[str]:
+        return [line.format_map(_Fields(fields)) for line in self.section(key)]
+
+    @property
+    def bench(self) -> list[str]:
+        return list(self.data.get("bench", []))
+
+    def honesty(self, provenance: str) -> str:
+        table = self.data.get("honesty_by_provenance", {})
+        return table.get(provenance) or table.get("_default", "")
+
+
+def load_playbook(explicit: Path | None = None) -> Playbook | None:
+    # Note `Path("")` is `Path(".")`, which exists and is truthy — so an unset env var must be
+    # filtered as a *string* before it ever becomes a Path, or this reads the repo root.
+    env = os.environ.get(PLAYBOOK_ENV, "").strip()
+    path = explicit or (Path(env) if env else PLAYBOOK_DEFAULT)
+    if not path.is_file():
+        return None
+    return Playbook(path, json.loads(path.read_text()))
+
+
+def _playbook_missing(out: list[str]) -> None:
+    out.append("")
+    out.append("  EDITORIAL HALF NOT LOADED — facts only.")
+    out.append(_wrap(
+        "The checklist, the where-to-post tiers and the copy scaffolds live in the private "
+        "notes repo, not in this one. Point the tool at them with --playbook PATH or "
+        f"${PLAYBOOK_ENV}; the default location is a symlink at "
+        f"{PLAYBOOK_DEFAULT.relative_to(REPO)}. Recreate it with: "
+        "ln -sfn ~/Documents/Dev/<notes-checkout> docs/notes", "    "))
 
 
 def _wrap(text: str, indent: str = "  ") -> str:
@@ -927,15 +974,11 @@ def brief_planet(rec: dict, out: list[str], base: str, *, headline: str | None =
                    f"insolation={hab['insolation_earth']:.2f}×Earth")
         for c in hab.get("caveats", [])[:2]:
             out.append(_wrap(c, "    "))
-        out.append(_wrap(
-            "If the story is a 'potentially habitable planet' story, this is where a quiet, "
-            "well-sourced DISAGREEMENT with a hype cycle is the most shareable thing this "
-            "project can produce. Only make that argument when you are certain.", "    "))
 
     obs = rec.get("real_observations") or []
     if obs:
         out.append("")
-        out.append("  WE HAVE REAL OBSERVATIONS FOR THIS ONE — lead with that, it is the armour")
+        out.append("  REAL OBSERVATIONS EXIST FOR THIS ONE")
         for o in obs[:3]:
             out.append(f"    {o.get('telescope')} ({o.get('year')}): {o.get('band')} — "
                        f"{o.get('credit')}")
@@ -946,140 +989,104 @@ def brief_planet(rec: dict, out: list[str], base: str, *, headline: str | None =
         out.append("")
         out.append(f"  SYSTEM   {sysd['hostname']} has {sysd['member_count']} "
                    f"known planets: {sibs}")
-        out.append("    (a system story is a chance to post the whole family as one image)")
 
 
-def brief_where(out: list[str], name: str, base: str, slug: str) -> None:
-    q = urllib.parse.quote(name)
+def brief_where(out: list[str], pb: Playbook | None, fields: dict) -> None:
+    """Where to go, and in what order. The tactics are the playbook's; the SEARCH URLS stay
+    here, because building a query string is mechanism, not editorial."""
+    if pb is None:
+        out.append("")
+        out.append("  WHERE TO GO")
+        for label, key in (("Bluesky", "search_bluesky"), ("Reddit", "search_reddit"),
+                           ("r/space", "search_reddit_space"), ("HN", "search_hn")):
+            out.append(f"    {label:9} {fields[key]}")
+        return
     out.append("")
-    out.append("  WHERE TO GO — reply, don't post. This is the whole tactic.")
-    out.append("    Tier 1, within ~2 hours (the only hard clock):")
-    out.append(f"      Bluesky   https://bsky.app/search?q={q}")
-    out.append("        -> reply to / quote-post the RESEARCHER or JOURNALIST who announced it.")
-    out.append("           Astronomers engage back; this is how 13-credit-the-scientists starts.")
-    out.append("    Tier 1b, same evening or next morning"
-               " (threads form 6–18 h later, not at min 40):")
-    out.append(f"      Reddit    https://www.reddit.com/search/?q={q}&sort=new")
-    out.append(f"      r/space   https://www.reddit.com/r/space/search/?q={q}&restrict_sr=1&sort=new")
-    out.append(f"      HN        https://hn.algolia.com/?query={q}&sort=byDate")
-    out.append("        -> a comment on a 4-comment thread is worth nothing; on a climbing")
-    out.append("           2-hour-old thread it is worth a lot. Check, don't rush.")
-    out.append("    Tier 2: your own Bluesky + Mastodon post (home turf, costs nothing).")
-    out.append("    Tier 3, within the week and NEVER in a hurry: the dated note on the planet")
-    out.append(f"      page ({site_url(base)}/planet/{slug}). The only part still earning")
-    out.append("      traffic in six months. Last thing to write, not first.")
+    out.extend(pb.render("where_to_go", fields))
+
+
+def brief_copy(out: list[str], pb: Playbook | None, fields: dict) -> None:
+    """Scaffolds, not copy — and not from this repository. See the playbook note above."""
+    if pb is None:
+        return
     out.append("")
-    out.append("    NEVER pitch a journalist about their own published story. Two standing")
-    out.append("    exceptions they actively want: a CORRECTION (\"the radius in para 4 is the")
-    out.append("    2023 value\"), and answering one who publicly asked what colour something is.")
+    out.extend(pb.render("copy_header", fields))
+    for block in pb.data.get("scaffolds", []):
+        title = str(block.get("title", "")).format_map(_Fields(fields))
+        out.append("")
+        out.append(f"  \u2500\u2500 {title} \u2500\u2500")
+        for line in block.get("lines", []):
+            out.append(line.format_map(_Fields(fields)))
 
 
-def brief_copy(rec: dict, out: list[str], base: str) -> None:
-    """Scaffolds, not copy. Every ⟨…⟩ is a blank you fill by hand."""
-    pid, name = rec["id"], rec["name"]
+def brief_fields(rec: dict, name: str, base: str, pb: Playbook | None) -> dict:
+    """Everything a playbook line may interpolate, in one place — so adding a scaffold in the
+    notes repo never needs a code change here. That is the whole point of the split."""
+    pid = rec["id"]
     tc = rec["true_colour"]
-    hexv, cname = tc["hex"], colour_name(tc["hex"])
-    prov = rec["provenance"]
-    honesty = {
-        "measured-albedo": "Computed from a MEASURED spectrum — one of the few we can check.",
-        "measured-cgi": "Built from real Roman coronagraph photometry.",
-        "simulated-cgi": "Simulated Roman observation, not a measurement.",
-        "model-microlensing": ("MODEL-ONLY, permanently: we have never received a single photon "
-                               "from this planet."),
-    }.get(prov, "Modelled, not photographed. No exoplanet has ever had its visible colour "
-                "measured directly.")
+    hexv = tc["hex"]
+    cname = colour_name(hexv)
+    honesty = pb.honesty(rec["provenance"]) if pb else ""
+    page = f"{site_url(base)}/planet/{pid}"
+    q = urllib.parse.quote(name)
 
-    out.append("")
-    out.append("  COPY SCAFFOLDS   ⟨angle brackets are YOUR words⟩")
-    out.append(_wrap(
-        "Deliberately not ready-to-post. A templated caption is the exact thing that kills the "
-        "account (11-bluesky-mastodon.md) — the one sentence of physics is the only part of the "
-        "post with any value, and it has to be yours. Everything else is filled in.", "    "))
-
-    bsky_url = utm(f"{site_url(base)}/planet/{pid}", "bluesky", pid)
-    fixed = (f"{name} is {cname} ({hexv}). ⟨⟩ {honesty} " + bsky_url + " 🔭 #exoplanet")
-    budget = 300 - len(fixed) + 2
-    out.append("")
-    out.append(f"  ── Bluesky (300 graphemes; you have ~{budget} for the physics sentence) ──")
-    out.append(f"    {name} is {cname} ({hexv}).")
-    out.append("    ⟨ONE sentence of physics — why THIS colour. Not a summary of the news:")
-    out.append("      'why is this one blue' beats 'scientists discover'.⟩")
-    out.append(f"    {honesty}")
-    out.append(f"    {bsky_url} 🔭 #exoplanet #astronomy")
-    out.append("    Attach the 1200×1200 disc image. A post cannot have both an image and a")
-    out.append("    link card, and the image is the product — so the URL sits as plain text.")
-
-    out.append("")
-    out.append("  ── Mastodon (500; same body, room to breathe. Post unlisted if automated) ──")
-    out.append(f"    Same as above + ⟨one extra clause on the assumption you trust least⟩ + "
-               f"{utm(f'{site_url(base)}/planet/{pid}', 'mastodon', pid)}")
-
-    out.append("")
-    out.append("  ── Alt text (~250 chars; a blind reader must get the FINDING, and the")
-    out.append("     finding IS the colour. Never write 'image of a planet') ──")
-    out.append(_wrap(
-        f"A rendered disc of {name}, coloured {cname} ({hexv}), on a dark background. "
-        f"⟨one clause on the visible feature — e.g. 'the disc is uniformly lit with no "
-        f"banding'⟩. The colour is computed from a model albedo spectrum, not photographed.",
-        "    "))
-
-    out.append("")
-    out.append("  ── Reddit / HN comment (top-level, in the thread that already exists) ──")
-    out.append(_wrap(
-        f"⟨Lead with the caveat — if your first job is saying what the model can't do, nobody "
-        f"minds the link.⟩ If you're curious what {name} would actually look like: {hexv}, "
-        f"{cname}, computed from its albedo model times the host star's spectrum, through the "
-        f"CIE 1931 colour-matching functions. ⟨the one physics sentence⟩ {honesty} "
-        f"Assumptions (cloud state, metallicity, phase angle) are on the page: "
-        f"{utm(f'{site_url(base)}/planet/{pid}', 'reddit', pid)}. Corrections welcome — "
-        f"particularly on the cloud-deck assumption.", "    "))
-    out.append("    One link. No pitch. Do this only with a real comment history (10-reddit.md).")
-
-    out.append("")
-    out.append("  ── Planet-page dated note (Tier 3 — write this LAST, within the week) ──")
-    out.append(_wrap(
-        f"In the news, {datetime.now(UTC):%-d %b %Y}: ⟨the result, one sentence⟩. ⟨What that "
-        f"does or does not change about the colour we compute — including 'nothing, because "
-        f"the measurement is infrared', if that is the honest answer.⟩", "    "))
-
-    out.append("")
-    out.append("  ── The correction, pre-written (checklist 8 — a wire desk's speed comes from")
-    out.append("     the retraction path existing in advance, not from being sure) ──")
-    out.append(_wrap(
-        f"I got {name} wrong above: ⟨what⟩. The corrected value is ⟨x⟩, from ⟨source⟩. The "
-        f"page is updated.", "    "))
-
-    out.append("")
-    out.append("  ── The standing counter-story (one link, no new claims, no new risk) ──")
-    out.append(_wrap(
-        "The picture on that article is an artist's impression. This one is computed from "
-        "physics, and the site tells you exactly where the model ends and the measurement "
-        "begins.", "    "))
+    # What a Bluesky post costs before the physics sentence exists, so the one sentence that
+    # matters is written to a real budget instead of trimmed afterwards. The *shape* of that
+    # fixed text is copy, so its template comes from the playbook; only the arithmetic is
+    # ours. Without a playbook the budget is unknowable, so it is reported as 0 rather than
+    # guessed — a made-up budget is worse than none.
+    budget = 0
+    if pb is not None:
+        tpl = pb.data.get("bluesky_budget_template", "")
+        fixed = tpl.format_map(_Fields({
+            "name": name, "colour_name": cname, "hex": hexv, "honesty": honesty,
+            "url_bluesky": utm(page, "bluesky", pid),
+        }))
+        budget = max(0, int(pb.data.get("bluesky_limit", 300)) - len(fixed))
+    return {
+        "name": name,
+        "id": pid,
+        "hex": hexv,
+        "colour_name": cname,
+        "provenance": rec["provenance"],
+        "confidence": tc["confidence"],
+        "honesty": honesty,
+        "page": page,
+        "release": release_tag(),
+        "url_bluesky": utm(page, "bluesky", pid),
+        "url_mastodon": utm(page, "mastodon", pid),
+        "url_reddit": utm(page, "reddit", pid),
+        "url_hn": utm(page, "hn", pid),
+        "search_bluesky": f"https://bsky.app/search?q={q}",
+        "search_reddit": f"https://www.reddit.com/search/?q={q}&sort=new",
+        "search_reddit_space":
+            f"https://www.reddit.com/r/space/search/?q={q}&restrict_sr=1&sort=new",
+        "search_hn": f"https://hn.algolia.com/?query={q}&sort=byDate",
+        "today": f"{datetime.now(UTC):%-d %b %Y}",
+        "bluesky_budget": budget,
+    }
 
 
 def render_brief(rec: dict | None, name: str, base: str, *, headline: str | None = None,
                  source: str | None = None, link: str | None = None,
-                 with_checklist: bool = True) -> str:
+                 with_checklist: bool = True, playbook: Playbook | None = None) -> str:
     out: list[str] = []
     if rec is None:
         brief_missing(name, out, base)
         out.append(RULE)
         return "\n".join(out)
     brief_planet(rec, out, base, headline=headline, source=source, link=link)
-    brief_where(out, rec["name"], base, rec["id"])
-    brief_copy(rec, out, base)
-    if with_checklist:
-        out.append("")
-        out.append("  ACCURACY CHECKLIST — five minutes, every time, no exceptions")
-        for line in CHECKLIST:
-            out.append(f"    {line}")
-        out.append("")
-        for line in STANDING_INFRARED.splitlines():
-            out.append(f"  {line}")
-        out.append("")
-        out.append("  Then set a 24-hour reminder to re-check the Archive for this planet.")
-        out.append("  If our colour moves, update the page AND reply to your own post. That one")
-        out.append("  habit converts the biggest risk here into the most credible thing we do.")
+    fields = brief_fields(rec, rec["name"], base, playbook)
+    brief_where(out, playbook, fields)
+    brief_copy(out, playbook, fields)
+    if playbook is None:
+        _playbook_missing(out)
+    elif with_checklist:
+        for key in ("checklist", "standing_infrared", "closing"):
+            lines = playbook.render(key, fields)
+            if lines:
+                out.append("")
+                out.extend(lines)
     out.append("")
     out.append(RULE)
     return "\n".join(out)
@@ -1212,7 +1219,8 @@ def _age(published: datetime | None, now: datetime) -> str:
     return f"{int(hours // 24)} d ago"
 
 
-def alert_text(item: Item, target: Target, base: str, *, now: datetime) -> str:
+def alert_text(item: Item, target: Target, base: str, *, now: datetime,
+               playbook: Playbook | None = None) -> str:
     """The message that lands on the phone. Its only job is to answer 'do I care right now',
     in the time it takes to read a notification. Everything else is in the attachment."""
     tier = tier_of(item)
@@ -1288,38 +1296,39 @@ def alert_text(item: Item, target: Target, base: str, *, now: datetime) -> str:
         "",
         f"<b>Why it ranked ({item.score})</b>: {_esc('; '.join(item.reasons))}",
         "",
+        f'<a href="https://bsky.app/search?q={q}">Bluesky</a> · '
+        f'<a href="https://www.reddit.com/search/?q={q}&amp;sort=new">Reddit</a> · '
+        f'<a href="https://hn.algolia.com/?query={q}&amp;sort=byDate">HN</a>',
     ]
-    if tier == TIER_ACT:
-        lines += [
-            "<b>Reply, don't post</b> — the researcher/journalist window is ~2 h.",
-            f'<a href="https://bsky.app/search?q={q}">Bluesky</a> · '
-            f'<a href="https://www.reddit.com/search/?q={q}&amp;sort=new">Reddit</a> · '
-            f'<a href="https://hn.algolia.com/?query={q}&amp;sort=byDate">HN</a>',
-            "Reddit/HN threads form 6–18 h later — check tonight, don't rush now.",
-        ]
-    else:
-        lines += [
-            "No clock on this one. It is <i>stock</i>: write the bench entry in daylight,",
-            "with the checklist done, so the press wave later is a 5-minute publish.",
-            f"<pre>python3 tools/newswatch.py brief \"{_esc(target.archive_name)}\"</pre>",
-        ]
+    # What to DO with those links is editorial, so it comes from the playbook. Without one
+    # the alert is still complete and actionable — it just doesn't tell you the tactics.
+    if playbook is not None:
+        advice = playbook.render(
+            "alert_act_now" if tier == TIER_ACT else "alert_stock",
+            {"name": _esc(name), "archive_name": _esc(target.archive_name)},
+        )
+        if advice:
+            lines += ["", *advice]
     if item.link:
         lines += ["", f'<a href="{_esc(item.link)}">the story</a>']
     return "\n".join(lines)
 
 
 def notify_items(tg: Telegram, surfaced: list[Item], catalogue: Catalogue, base: str,
-                 *, now: datetime, attach: bool = True) -> int:
+                 *, now: datetime, attach: bool = True,
+                 playbook: Playbook | None = None) -> int:
     sent = 0
     for it in surfaced:
         target = resolve_target(it, catalogue)
-        tg.message(alert_text(it, target, base, now=now))
+        tg.message(alert_text(it, target, base, now=now, playbook=playbook))
         if attach:
             body = render_brief(target.record, target.name, base, headline=it.title,
-                                source=f"{it.feed.name} ({it.feed.kind})", link=it.link)
+                                source=f"{it.feed.name} ({it.feed.kind})", link=it.link,
+                                playbook=playbook)
             fname = f"{slug(target.name) or 'briefing'}-{now:%Y%m%d}.md"
-            tg.document(fname, f"```\n{body}\n```\n",
-                        caption="Full briefing — facts, checklist and copy scaffolds.")
+            caption = ("Full briefing — facts, checklist and copy scaffolds." if playbook
+                       else "Full briefing — FACTS ONLY, no playbook loaded.")
+            tg.document(fname, f"```\n{body}\n```\n", caption=caption)
         sent += 1
     return sent
 
@@ -1418,8 +1427,11 @@ def cmd_poll(args: argparse.Namespace) -> None:
     global _ALIASES
     _ALIASES = load_aliases()
     _, catalogue = load_catalogue()
+    playbook = load_playbook(_playbook_arg(args))
     state = load_state()
     now = datetime.now(UTC)
+    if playbook is None:
+        print("note: no playbook — briefings will be facts only. See --playbook.")
 
     last = state.get("last_poll")
     if last:
@@ -1471,7 +1483,7 @@ def cmd_poll(args: argparse.Namespace) -> None:
                 target.record, target.name, args.base_url,
                 headline=f"{it.title}\n\n{why}",
                 source=f"{it.feed.name} ({it.feed.kind})",
-                link=it.link,
+                link=it.link, playbook=playbook,
             ))
             print()
 
@@ -1486,7 +1498,7 @@ def cmd_poll(args: argparse.Namespace) -> None:
             )
         if surfaced:
             n = notify_items(tg, surfaced, catalogue, args.base_url, now=now,
-                             attach=not args.no_attach)
+                             attach=not args.no_attach, playbook=playbook)
             state["last_alert"] = now.isoformat()
             print(f"Alerted {n} item(s) to Telegram.")
         elif args.notify_quiet_days and _quiet_streak(state, now) >= args.notify_quiet_days:
@@ -1558,14 +1570,27 @@ def cmd_brief(args: argparse.Namespace) -> None:
         if pl:
             rec = catalogue.get(pl[0])
             name = pl[0]
-    print(render_brief(rec, name, args.base_url, with_checklist=not args.no_checklist))
+    print(render_brief(rec, name, args.base_url, with_checklist=not args.no_checklist,
+                       playbook=load_playbook(_playbook_arg(args))))
+
+
+def _playbook_arg(args: argparse.Namespace) -> Path | None:
+    p = getattr(args, "playbook", None)
+    return Path(p) if p else None
 
 
 def cmd_bench(args: argparse.Namespace) -> None:
+    playbook = load_playbook(_playbook_arg(args))
+    if playbook is None or not playbook.bench:
+        sys.exit(
+            "The bench list is editorial — which planets are worth pre-writing — so it lives "
+            "in the playbook, not\nin this repository. Point at it with --playbook PATH or "
+            f"${PLAYBOOK_ENV}\n(default: {PLAYBOOK_DEFAULT.relative_to(REPO)})."
+        )
     _, catalogue = load_catalogue()
     outdir = Path(args.out)
     outdir.mkdir(parents=True, exist_ok=True)
-    names = list(BENCH)
+    names = list(playbook.bench)
     targets = REPO / "data" / "roman-targets.json"
     if targets.exists():
         for t in json.loads(targets.read_text()).get("targets", []):
@@ -1587,7 +1612,7 @@ def cmd_bench(args: argparse.Namespace) -> None:
             f"Written in daylight, with the checklist done, so a jack is a five-minute\n"
             f"publish instead of a sixty-minute scramble. Re-generate after every data\n"
             f"release: `python3 tools/newswatch.py bench`\n\n```\n"
-            + render_brief(rec, rec["name"], args.base_url) + "\n```\n"
+            + render_brief(rec, rec["name"], args.base_url, playbook=playbook) + "\n```\n"
         )
         written += 1
     print(f"Wrote {written} bench briefings to {outdir}")
@@ -1610,6 +1635,15 @@ def main() -> None:
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     base_default = os.environ.get("SITE_BASE_URL", "")
     sub = p.add_subparsers(required=True)
+
+    def playbook_arg(sp: argparse.ArgumentParser) -> None:
+        sp.add_argument(
+            "--playbook", metavar="PATH", default=None,
+            help="The editorial half — checklist, where-to-post tiers, copy scaffolds, bench "
+                 f"list — which lives in the PRIVATE notes repo, not here. Or ${PLAYBOOK_ENV}. "
+                 f"Default: {PLAYBOOK_DEFAULT.relative_to(REPO)} (a gitignored symlink). "
+                 "Without it the tool still runs and still alerts, with facts only.",
+        )
 
     f = sub.add_parser("feeds", help="Check every source resolves; optionally snapshot them")
     f.add_argument("--save-fixture", metavar="DIR",
@@ -1647,6 +1681,7 @@ def main() -> None:
                          f"Feeds move at very different speeds — ESO's holds ten items and can "
                          f"serve a three-week-old release as its newest.")
     po.add_argument("--base-url", default=base_default, help="Site origin (or $SITE_BASE_URL)")
+    playbook_arg(po)
     po.set_defaults(func=cmd_poll)
 
     b = sub.add_parser("brief", help="Briefing for one planet, on demand")
@@ -1654,11 +1689,15 @@ def main() -> None:
     b.add_argument("--planets", metavar="PATH", help="Alternative planets.json (fast-path output)")
     b.add_argument("--base-url", default=base_default)
     b.add_argument("--no-checklist", action="store_true")
+    playbook_arg(b)
     b.set_defaults(func=cmd_brief)
 
-    be = sub.add_parser("bench", help="Pre-write the ~20 briefings that cover most headlines")
-    be.add_argument("--out", default="docs/marketing/bench", metavar="DIR")
+    be = sub.add_parser("bench", help="Pre-write the briefings that cover most headlines")
+    be.add_argument("--out", default="docs/notes/marketing/bench", metavar="DIR",
+                    help="Where to write them. Defaults inside the private notes repo, since "
+                         "a bench briefing is finished copy.")
     be.add_argument("--base-url", default=base_default)
+    playbook_arg(be)
     be.set_defaults(func=cmd_bench)
 
     nt = sub.add_parser("notify", help="Send a test message, to prove the channel works")

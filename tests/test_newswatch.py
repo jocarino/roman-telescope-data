@@ -160,7 +160,7 @@ def _rec(pid, name, host, hex_="#8bd6f4"):
             "colour": {"hex": "#e0ca8c"},
             "reconstruction_error": {"delta_e2000": 31.3},
         }],
-        "system": {"member_count": 2},
+        "system": {"member_count": 2, "hostname": host, "siblings": []},
         "meta": {"generated_at": "2026-08-06T00:00:00+00:00"},
     }
 
@@ -354,14 +354,27 @@ def test_press_is_act_now_and_a_preprint_is_pre_build():
 
 
 def test_an_act_now_alert_pushes_the_reply_window_and_stock_does_not(aliases, monkeypatch):
+    """The advice itself is editorial, so it comes from the playbook — but WHICH advice is
+    chosen is the tool's job, and that is what this pins."""
     monkeypatch.setattr(nw, "_ALIASES", aliases)
+    pb = nw.load_playbook(PLAYBOOK_FIXTURE)
     now = datetime.now(UTC)
     for feed, expect_window in ((PRESS, True), (ARXIV, False)):
         it = _item(feed, "Signs of water on K2-18 b", "x")
         it.planets, it.hosts = nw.find_planets(it.title, aliases)
-        text = nw.alert_text(it, nw.resolve_target(it, _cat()), "https://example.test", now=now)
+        text = nw.alert_text(it, nw.resolve_target(it, _cat()), "https://example.test",
+                             now=now, playbook=pb)
         assert ("~2 h" in text) is expect_window
         assert ("stock" in text) is not expect_window
+
+
+def test_an_alert_without_a_playbook_still_carries_the_links(aliases, monkeypatch):
+    monkeypatch.setattr(nw, "_ALIASES", aliases)
+    it = _item(PRESS, "Signs of water on K2-18 b", "x")
+    it.planets, it.hosts = nw.find_planets(it.title, aliases)
+    text = nw.alert_text(it, nw.resolve_target(it, _cat()), "https://example.test",
+                         now=datetime.now(UTC))
+    assert "bsky.app/search" in text and "K2-18 b" in text
 
 
 def test_every_alert_fits_in_one_telegram_message(aliases, monkeypatch):
@@ -418,17 +431,87 @@ def test_colour_names_are_the_words_a_blind_reader_gets(hex_str, expected):
 
 # --- the scaffolds must stay scaffolds -------------------------------------
 
-def test_copy_scaffolds_always_leave_the_physics_sentence_blank():
+PLAYBOOK_FIXTURE = Path("tests/fixtures/newswatch-playbook.json")
+
+
+@pytest.fixture
+def playbook():
+    return nw.load_playbook(PLAYBOOK_FIXTURE)
+
+
+def test_copy_scaffolds_always_leave_the_physics_sentence_blank(playbook):
     """A ready-to-post caption is the thing 11-bluesky-mastodon.md says kills the account.
     If someone ever 'helpfully' fills this in, this test is what stops it shipping."""
-    rec = {
-        "id": "k2-18-b", "name": "K2-18 b", "provenance": "model",
-        "true_colour": {"hex": "#8bd6f4", "palette": [], "confidence": "high",
-                        "luminance_y": 0.1, "out_of_gamut": False},
-    }
+    rec = _rec("k2-18-b", "K2-18 b", "K2-18")
+    fields = nw.brief_fields(rec, rec["name"], "https://example.test", playbook)
     out: list[str] = []
-    nw.brief_copy(rec, out, "https://example.test")
+    nw.brief_copy(out, playbook, fields)
     text = "\n".join(out)
-    assert "⟨" in text and "⟩" in text
-    assert "ONE sentence of physics" in text
+    assert "<ONE sentence of physics goes here>" in text
     assert "utm_medium=newsjack" in text
+
+
+def test_the_bluesky_budget_is_what_is_left_after_the_fixed_parts(playbook):
+    """The budget must shrink as the fixed text grows, or it is decoration."""
+    short = nw.brief_fields(_rec("a-b", "A b", "A"), "A b", "https://x.test", playbook)
+    long = nw.brief_fields(_rec("a-b", "A very long planet name indeed b", "A"),
+                           "A very long planet name indeed b", "https://x.test", playbook)
+    assert long["bluesky_budget"] < short["bluesky_budget"]
+    assert short["bluesky_budget"] > 0
+
+
+# --- the public/private split ----------------------------------------------
+#
+# The rule: this repository is public and contains NO marketing content. The mechanism is
+# here; the playbook — where to post, the copy, the checklist wording, the bench list — is
+# in the private notes repo and loaded at run time.
+
+def test_without_a_playbook_the_tool_still_produces_a_briefing():
+    """Facts only, and it says so. A public clone must be useful, not broken."""
+    text = nw.render_brief(_rec("k2-18-b", "K2-18 b", "K2-18"), "K2-18 b",
+                           "https://example.test", playbook=None)
+    assert "#8bd6f4" in text                       # the facts survive
+    assert "EDITORIAL HALF NOT LOADED" in text     # and it is honest about the rest
+    assert "COPY SCAFFOLDS" not in text
+
+
+def test_without_a_playbook_the_search_links_are_still_there():
+    """Building a query string is mechanism, not editorial — it stays public."""
+    text = nw.render_brief(_rec("k2-18-b", "K2-18 b", "K2-18"), "K2-18 b",
+                           "https://example.test", playbook=None)
+    assert "bsky.app/search" in text and "hn.algolia.com" in text
+
+
+def test_no_marketing_copy_is_embedded_in_this_repository():
+    """The guard on the split itself. If someone pastes the playbook back into the tool to
+    'simplify' it, this fails — which is the only moment anyone would notice."""
+    source = Path("tools/newswatch.py").read_text().lower()
+    for phrase in ("#exoplanet", "quote-post", "artist's impression", "unlisted if automated",
+                   "sleep-on-it", "one sentence of physics", "graphemes"):
+        assert phrase not in source, f"marketing copy leaked back into the public tool: {phrase}"
+
+
+def test_an_unset_playbook_env_var_does_not_resolve_to_the_repo_root(monkeypatch):
+    """Regression: `Path("")` is `Path(".")`, which exists and is truthy, so an empty env var
+    made the loader try to read the working directory as JSON."""
+    monkeypatch.setenv(nw.PLAYBOOK_ENV, "")
+    assert nw.load_playbook() is None or nw.load_playbook().path != Path(".")
+
+
+def test_a_typo_in_the_playbook_does_not_crash_the_briefing(playbook):
+    """The playbook is prose edited by hand in another repo. A bad placeholder must not be
+    able to kill the alert that a story is breaking — a literal {oops} is recoverable."""
+    rec = _rec("k2-18-b", "K2-18 b", "K2-18")
+    fields = nw.brief_fields(rec, rec["name"], "https://example.test", playbook)
+    out: list[str] = []
+    nw.brief_copy(out, playbook, fields)
+    assert "{not_a_real_field}" in "\n".join(out)
+
+
+def test_playbook_supplies_the_bench_list(playbook):
+    assert "K2-18 b" in playbook.bench
+
+
+def test_honesty_line_falls_back_to_the_default(playbook):
+    assert playbook.honesty("model-microlensing").startswith("FIXTURE microlensing")
+    assert playbook.honesty("something-new").startswith("FIXTURE default")

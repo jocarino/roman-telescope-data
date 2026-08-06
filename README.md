@@ -296,7 +296,22 @@ python3 tools/newswatch.py feeds --save-fixture tests/fixtures/feeds
 python3 tools/newswatch.py poll --fixture tests/fixtures/feeds --dry-run
 ```
 
-Five things about it are deliberate:
+**This repository holds the mechanism, not the plan.** Feed polling, name matching, ranking,
+the numbers and the band gate live here, where they can be read and tested. The *editorial*
+half — where to post and in what order, the copy scaffolds, the accuracy checklist's wording,
+the standing infrared answer, which planets are worth pre-writing — lives in a private
+**playbook** (`marketing/newswatch-playbook.json` in the notes repo) and is loaded at run time
+via `--playbook` or `$NEWSWATCH_PLAYBOOK`; the default path is the gitignored `docs/notes`
+symlink. Same pattern as `data/tours.json`: the words live elsewhere and are re-joined against
+the catalogue of the moment.
+
+Without a playbook the tool still runs and still alerts — it prints the facts, says the
+editorial half is missing, and tells you where it should be. That is deliberate: a facts
+briefing is genuinely useful, and silently omitting the copy would look like a bug.
+`tests/test_newswatch.py` fails if marketing copy is ever pasted back into this repo, which is
+the only moment anyone would notice.
+
+Six things about it are deliberate:
 
 - **It matches on an alias table, not a regex.** The press writes `TRAPPIST-1e`, `K2-18b`,
   `HD189733b`, `Gliese 1214 b`, `51 Pegasi b`; the Archive writes `TRAPPIST-1 e`, `K2-18 b`, <!-- factcheck: ignore -->
@@ -311,9 +326,12 @@ Five things about it are deliberate:
   the Roman colour** when they disagree, because publishing *"as Roman would see it"* from a
   wrong band model, to an audience containing the CGI team, is the one unrecoverable error
   available to this project. `tests/test_newswatch.py` pins the two lists together.
-- **It prints facts, not copy.** Every scaffold leaves the one sentence of physics as a `⟨…⟩`
-  blank. That sentence is the only part of a post with any value, and a templated caption is
-  what kills a social account. A test enforces that the blanks stay blank.
+- **It prints facts, not copy.** Every scaffold in the playbook leaves the one sentence of
+  physics as a blank. That sentence is the only part of a post with any value, and a templated
+  caption is what kills a social account. A test enforces that the blanks stay blank.
+- **A typo in the playbook cannot crash a briefing.** It is prose edited by hand in another
+  repository, so an unknown `{placeholder}` renders literally rather than raising. A stray
+  `{hxe}` at 23:40 is recoverable; a traceback while a story is breaking is not.
 - **Three items a day, hard**, ranked by press-feed presence first, with 30-day per-planet
   suppression (paper, press release and aggregator are one story arriving three times),
   arXiv `replace` announcements dropped, and anything older than `--max-age-days` (7) ignored
@@ -331,52 +349,42 @@ running it rather than a discipline anyone has to maintain.
 
 #### Unattended: twice a day, to a phone
 
-`.github/workflows/newswatch.yml` polls at 07:00 and 17:00 UTC (08:00 / 18:00 Lisbon in summer)
-and pushes anything worth knowing to Telegram. The morning run catches arXiv (announced 20:00 ET
-Sun–Thu) plus overnight US press; the evening run catches the European press day, which is when
-ESO and ESA release.
-
-Two secrets and one variable, in **Settings → Secrets and variables → Actions**:
-
-| | name | where it comes from |
-|---|---|---|
-| secret | `NEWSWATCH_TELEGRAM_TOKEN` | [@BotFather](https://t.me/BotFather) → `/newbot` |
-| secret | `NEWSWATCH_TELEGRAM_CHAT_ID` | message the bot once, then `api.telegram.org/bot<TOKEN>/getUpdates` → `result[0].message.chat.id` |
-| variable | `SITE_BASE_URL` | your origin, so the alert links are clickable |
-
-Prove the channel before anything depends on it:
+`poll --notify` pushes anything worth knowing to Telegram:
 
 ```bash
-export NEWSWATCH_TELEGRAM_TOKEN=… NEWSWATCH_TELEGRAM_CHAT_ID=…
-python3 tools/newswatch.py notify --attach
+export NEWSWATCH_TELEGRAM_TOKEN=…       # @BotFather -> /newbot
+export NEWSWATCH_TELEGRAM_CHAT_ID=…     # message the bot, then /getUpdates
+python3 tools/newswatch.py notify --attach     # prove the channel first
+python3 tools/newswatch.py poll --notify
 ```
 
 Each alert is **one message** you can act on from a lock screen — tier, headline, source, age,
 the colour, the four numbers to diff against the paper, why it ranked, and the three search
-links — with the full briefing attached as a `.md`. Alerts come in two tiers, because *"popping
-off"* and *"about to"* need opposite responses:
+links — with the full briefing attached as a `.md`. Two tiers, because *"popping off"* and
+*"about to"* need opposite responses:
 
-- 🔴 **ACT NOW** — a press/aggregator feed, so the general-audience cycle has started and the
+- 🔴 **ACT NOW** — a press/aggregator feed: the general-audience cycle has started and the
   reply window is about two hours wide.
-- 🔵 **PRE-BUILD** — arXiv only. No clock. The right move is to write the bench entry in
-  daylight, which is the plan's *stock beats speed*.
+- 🔵 **PRE-BUILD** — arXiv only. No clock; write the bench entry in daylight instead.
 
-Three things about the workflow are deliberate:
+**The schedule does not live in this repository.** It runs from the private notes repo
+(`.github/workflows/newswatch.yml` there) at 07:00 and 17:00 UTC — the morning run catches
+arXiv plus overnight US press, the evening run the European press day. That job checks *this*
+repo out for the code and uses the notes repo for the playbook, so a world-readable workflow
+log can never carry the plan, the Telegram secrets sit beside the plan they serve, and the
+newsjack log is committed to private git instead of surviving in an Actions cache.
 
-- **`--quiet` is not optional.** This repository is public, so every workflow log is
-  world-readable, and the briefing is the private half — where to post, and half-written copy.
-  The job prints one line per item (tier, score, feed, planet); the substance goes to the chat
-  and nowhere else. To debug a run, use `workflow_dispatch` with `dry_run` and read the message
-  you get, rather than dropping `--quiet`.
-- **Silence is distinguishable from breakage.** A quiet news day is the common case, so a
+Two things about it are worth knowing here:
+
+- **Silence stays distinguishable from breakage.** A quiet news day is the common case, so a
   broken watcher would look exactly like one. `poll` sends a heartbeat after
   `--notify-quiet-days` (3) of nothing, and the workflow pings Telegram with `curl` on failure —
   `curl` rather than the tool, because if the tool is what broke it can't report its own death.
-- **No `uv sync` anywhere.** `newswatch` and `scripts/fetch_data.py` are stdlib-only, so the job
-  is bare `python3` and takes seconds. State (seen ids, 30-day suppression, alias table) lives in
-  an Actions cache under a rolling key; the catalogue is cached on `hashFiles('data/RELEASE')` so
-  86 MB downloads only when the release moves. Losing the cache is survivable rather than silent:
-  the 7-day recency gate bounds a re-alert to at most a week, and the run logs a warning.
+  `--notify` with no credentials exits non-zero rather than quietly doing nothing.
+- **`--quiet` is still used, even in a private log.** It prints one line per item and sends the
+  substance only to the chat. Defence in depth: the job is one `repository:` line away from
+  being runnable somewhere public, and the habit is what makes that safe rather than the
+  setting. To debug a run, use `workflow_dispatch` with `dry_run` and read the message you get.
 
 ## Deploy (Dokploy / any static host)
 
