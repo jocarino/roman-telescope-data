@@ -332,13 +332,21 @@ Six things about it are deliberate:
 - **A typo in the playbook cannot crash a briefing.** It is prose edited by hand in another
   repository, so an unknown `{placeholder}` renders literally rather than raising. A stray
   `{hxe}` at 23:40 is recoverable; a traceback while a story is breaking is not.
-- **Three items a day, hard**, ranked by press-feed presence first, with 30-day per-planet
+- **The cap is per tier**, because the two tiers cost different amounts of attention: at most
+  3 ACT NOW (a full message and an attachment each) and 5 PRE-BUILD (one line inside a single
+  digest). Capping the mixed list would spend the whole budget on preprints on a day when a
+  press release also broke. Ranking is by press-feed presence first, with 30-day per-planet
   suppression (paper, press release and aggregator are one story arriving three times),
   arXiv `replace` announcements dropped, and anything older than `--max-age-days` (7) ignored
   — feeds move at wildly different speeds, and ESO's holds ten items, so its *newest* story
   can be three weeks old. Whatever exceeds the cap is written to
   `data/cache/newswatch-overflow.json` and named in the output — a silent cap would read as
   "nothing else happened", which is a lie.
+- **The "will it travel" test is answered, not asked.** All four of its questions — a word a
+  non-astronomer already owns, an institution-supplied picture, a press office behind it, one
+  named planet rather than a population result — are answerable from the feed item, so the
+  alert carries the verdict and the evidence for each. It reports; it doesn't act: a 1/4 story
+  you happen to know is a big deal is still yours to jack.
 - **A planet in the news that is *not* in the catalogue is the most valuable line it prints.**
   That is a data task, and it is the majority case on a "new planet discovered" story; the
   briefing hands you the `--planet` fast-path command for it.
@@ -358,14 +366,17 @@ python3 tools/newswatch.py notify --attach     # prove the channel first
 python3 tools/newswatch.py poll --notify
 ```
 
-Each alert is **one message** you can act on from a lock screen — tier, headline, source, age,
-the colour, the four numbers to diff against the paper, why it ranked, and the three search
-links — with the full briefing attached as a `.md`. Two tiers, because *"popping off"* and
-*"about to"* need opposite responses:
+Two tiers, because *"popping off"* and *"about to"* need opposite responses — and they get
+opposite amounts of your attention:
 
-- 🔴 **ACT NOW** — a press/aggregator feed: the general-audience cycle has started and the
-  reply window is about two hours wide.
-- 🔵 **PRE-BUILD** — arXiv only. No clock; write the bench entry in daylight instead.
+- 🔴 **ACT NOW** — a press/aggregator feed: the cycle has started and the reply window is
+  about two hours wide. One full message per item, actionable from a lock screen (headline,
+  source, age, the colour, the four numbers to diff against the paper, the travel verdict,
+  the three search links) plus the briefing as a `.md` attachment.
+- 🔵 **PRE-BUILD** — arXiv only. No clock, ever. All of them collapse into **one digest
+  message per run**, one line each, **no attachment**. Its only job is to let you notice a
+  planet worth putting on the bench before its press wave. A briefing nobody asked for is
+  noise, and noise is what makes a person mute the channel.
 
 **The schedule does not live in this repository.** It runs from the private notes repo
 (`.github/workflows/newswatch.yml` there) at 07:00 and 17:00 UTC — the morning run catches
@@ -376,11 +387,12 @@ newsjack log is committed to private git instead of surviving in an Actions cach
 
 Two things about it are worth knowing here:
 
-- **Silence stays distinguishable from breakage.** A quiet news day is the common case, so a
-  broken watcher would look exactly like one. `poll` sends a heartbeat after
-  `--notify-quiet-days` (3) of nothing, and the workflow pings Telegram with `curl` on failure —
-  `curl` rather than the tool, because if the tool is what broke it can't report its own death.
-  `--notify` with no credentials exits non-zero rather than quietly doing nothing.
+- **A quiet run sends nothing at all.** Silence still has to be distinguishable from breakage,
+  but the failure ping does that job: the workflow pings Telegram with `curl` when a run fails
+  — `curl` rather than the tool, because if the tool is what broke it can't report its own
+  death. A periodic "still alive" message is a notification you can do nothing with, and those
+  are what train a person to stop reading the ones they can. `--notify` with no credentials
+  exits non-zero rather than quietly doing nothing.
 - **`--quiet` is still used, even in a private log.** It prints one line per item and sends the
   substance only to the chat. Defence in depth: the job is one `repository:` line away from
   being runnable somewhere public, and the habit is what makes that safe rather than the

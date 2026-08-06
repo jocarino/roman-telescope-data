@@ -353,6 +353,73 @@ def test_press_is_act_now_and_a_preprint_is_pre_build():
     assert nw.tier_of(_item(ARXIV, "t", "x")) == nw.TIER_STOCK
 
 
+def test_the_travel_test_is_answered_not_asked(aliases, monkeypatch):
+    """Question one of the runbook used to cost a human 60 seconds per alert. All four parts
+    are answerable from the feed item, so the tool answers them."""
+    monkeypatch.setattr(nw, "_ALIASES", aliases)
+    it = _item(PRESS, "Signs of water on K2-18 b", "t1")
+    it.has_image = True
+    passed, evidence = nw.travel_test(it)
+    assert passed == [True, True, True, True]
+    assert "water" in evidence[0]
+
+
+def test_a_population_result_from_a_preprint_scores_low(aliases, monkeypatch):
+    monkeypatch.setattr(nw, "_ALIASES", aliases)
+    it = _item(ARXIV, "Occurrence rates of sub-Neptunes in the Kepler field", "t2")
+    passed, _ = nw.travel_test(it)
+    assert sum(passed) == 0
+
+
+def test_superlatives_count_as_civilian_nouns(aliases, monkeypatch):
+    """Regression: 'Faintest planet ever imaged from Earth' — an obvious civilian hook —
+    scored zero because the list held only nouns."""
+    monkeypatch.setattr(nw, "_ALIASES", aliases)
+    it = _item(PRESS, "Faintest planet ever imaged from Earth found after 10 years", "t3")
+    passed, _ = nw.travel_test(it)
+    assert passed[0] is True
+
+
+@pytest.mark.parametrize(
+    ("xml", "expected"),
+    [
+        ('<item><description>&lt;img src="x.jpg"/&gt;text</description></item>', True),
+        ('<item><enclosure url="http://x/y.jpg" type="image/jpeg"/></item>', True),
+        ('<item><enclosure url="http://x/y.mp3" type="audio/mpeg"/></item>', False),
+        ("<item><description>plain text</description></item>", False),
+    ],
+)
+def test_picture_detection(xml, expected):
+    """A story with an institution-supplied image travels several times further — and that
+    image is precisely what our swatch argues with."""
+    import xml.etree.ElementTree as ET
+    node = ET.fromstring(xml)
+    raw = node.findtext("description") or ""
+    assert nw._has_image(node, raw) is expected
+
+
+def test_the_stock_digest_is_one_short_message_with_no_attachment(aliases, monkeypatch):
+    """Preprints have no clock, so a briefing nobody asked for is just noise — and noise is
+    what makes a person mute the channel."""
+    monkeypatch.setattr(nw, "_ALIASES", aliases)
+    items = []
+    for n, title in enumerate(["Transit timing of K2-18 b", "Atmosphere of beta Pictoris b"]):
+        it = _item(ARXIV, title, f"s{n}")
+        it.planets, it.hosts = nw.find_planets(title, aliases)
+        items.append(it)
+    text = nw.digest_text(items, _cat(), now=datetime.now(UTC))
+    assert text.count("\n·") == 2 or text.count("\n· ") == 2
+    assert len(text) < 700
+    assert "No clock" in text
+
+
+def test_the_digest_still_flags_a_planet_we_cannot_colour(aliases, monkeypatch):
+    monkeypatch.setattr(nw, "_ALIASES", aliases)
+    it = _item(ARXIV, "First look at TOI-700 d", "s9")
+    it.planets, it.hosts = nw.find_planets(it.title, aliases)
+    assert "not in catalogue" in nw.digest_text([it], _cat(), now=datetime.now(UTC))
+
+
 def test_an_act_now_alert_pushes_the_reply_window_and_stock_does_not(aliases, monkeypatch):
     """The advice itself is editorial, so it comes from the playbook — but WHICH advice is
     chosen is the tool's job, and that is what this pins."""
@@ -482,13 +549,28 @@ def test_without_a_playbook_the_search_links_are_still_there():
     assert "bsky.app/search" in text and "hn.algolia.com" in text
 
 
-def test_no_marketing_copy_is_embedded_in_this_repository():
+def test_no_marketing_copy_is_emitted_without_a_playbook(aliases, monkeypatch):
     """The guard on the split itself. If someone pastes the playbook back into the tool to
-    'simplify' it, this fails — which is the only moment anyone would notice."""
-    source = Path("tools/newswatch.py").read_text().lower()
+    'simplify' it, this fails — the only moment anyone would notice.
+
+    It checks what the tool *emits*, not what its source says. An earlier version grepped the
+    source and flagged a comment explaining why picture detection matters — rationale in a
+    comment is not publishable copy, and a guard that cannot tell the difference gets deleted
+    the first time it cries wolf.
+    """
+    monkeypatch.setattr(nw, "_ALIASES", aliases)
+    rec = _rec("k2-18-b", "K2-18 b", "K2-18")
+    it = _item(PRESS, "Signs of water on K2-18 b", "g1")
+    it.planets, it.hosts = nw.find_planets(it.title, aliases)
+    emitted = "\n".join([
+        nw.render_brief(rec, "K2-18 b", "https://example.test", playbook=None),
+        nw.alert_text(it, nw.resolve_target(it, _cat()), "https://example.test",
+                      now=datetime.now(UTC), playbook=None),
+        nw.digest_text([it], _cat(), now=datetime.now(UTC)),
+    ]).lower()
     for phrase in ("#exoplanet", "quote-post", "artist's impression", "unlisted if automated",
-                   "sleep-on-it", "one sentence of physics", "graphemes"):
-        assert phrase not in source, f"marketing copy leaked back into the public tool: {phrase}"
+                   "sleep-on-it", "one sentence of physics", "graphemes", "reply, don't post"):
+        assert phrase not in emitted, f"marketing copy leaked into public output: {phrase}"
 
 
 def test_an_unset_playbook_env_var_does_not_resolve_to_the_repo_root(monkeypatch):

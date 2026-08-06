@@ -96,12 +96,16 @@ MANUAL_SOURCES = (
     ("Bluesky astro feed / list", "fastest human signal; see 11-bluesky-mastodon.md"),
 )
 
-# Nouns a non-astronomer already owns. Test One of "will it travel" — stories travel on
-# these, not on results.
+# Words a non-astronomer already owns. Question one of "will it travel" — stories travel on
+# these, not on results. Superlatives earn their place beside the nouns: "faintest planet ever
+# imaged" is a civilian hook doing exactly the same work as "nearest", and an earlier version
+# of this list scored that headline 0 for lack of one.
 TRAVEL_NOUNS = (
     "earth-like", "earthlike", "habitable", "life", "biosignature", "nearest", "closest",
     "first", "water", "ocean", "diamond", "rain", "seven planets", "twin", "super-earth",
     "atmosphere", "clouds", "colour", "color", "blue", "goldilocks", "alien", "signs of",
+    "faintest", "smallest", "largest", "biggest", "oldest", "youngest", "brightest",
+    "darkest", "hottest", "coldest", "fastest", "strangest", "ever seen", "ever imaged",
 )
 
 # The flight configuration of Roman's coronagraph, per pipeline/config.py:ROMAN_CGI.
@@ -198,7 +202,8 @@ _SHORT_TO_LONG = {
 }
 _LONG_TO_SHORT = {**CONSTELLATION_LONG_TO_SHORT, **GREEK_LONG_TO_SHORT}
 
-MAX_SURFACED_PER_DAY = 3
+MAX_ACT_PER_RUN = 3            # full message + attachment each; the real attention budget
+MAX_STOCK_PER_RUN = 5          # one line each inside a single digest, so cheaper to carry
 MAX_PLANETS_PER_ITEM = 3       # more than this and it's a catalogue paper, not a story
 SUPPRESS_DAYS = 30             # paper, press release and aggregator are one story, thrice
 MAX_AGE_DAYS = 7               # a three-week-old press release is not a newsjack
@@ -430,10 +435,44 @@ class Item:
     summary: str
     published: datetime | None
     announce_type: str | None = None
+    has_image: bool = False
     planets: list[str] = field(default_factory=list)
     hosts: list[str] = field(default_factory=list)
     score: int = 0
     reasons: list[str] = field(default_factory=list)
+
+
+# The "will it travel" test, which the runbook used to ask you to do by hand in sixty seconds.
+# All four questions are answerable from the feed item, so the tool answers them. It reports
+# the verdict; it does not act on it — a 1/4 story you happen to know is a big deal is still
+# yours to jack, and a 4/4 one you don't fancy is still yours to skip.
+TRAVEL_TESTS = (
+    ("civilian noun", "a word a non-astronomer already owns"),
+    ("picture", "an institution-supplied image — what our swatch argues with"),
+    ("press office", "NASA/ESA/ESO and the like, not a preprint"),
+    ("one planet", "one named world, not a population result"),
+)
+
+
+def travel_test(item: Item) -> tuple[list[bool], list[str]]:
+    """Returns (four booleans in TRAVEL_TESTS order, the evidence for each)."""
+    title = item.title.lower()
+    nouns = [n for n in TRAVEL_NOUNS if n in title]
+    title_planets, _ = find_planets(item.title, _ALIASES)
+    results = [
+        bool(nouns),
+        item.has_image,
+        item.feed.kind in ("press", "editorial"),
+        len(title_planets) == 1,
+    ]
+    evidence = [
+        ", ".join(nouns[:3]) if nouns else "none in the headline",
+        "yes" if item.has_image else "none in the feed item",
+        item.feed.name if results[2] else f"{item.feed.name} — no press office",
+        title_planets[0] if results[3] else (
+            f"{len(title_planets)} in the title" if title_planets else "none in the title"),
+    ]
+    return results, evidence
 
 
 def _text(el, *tags: str) -> str:
@@ -471,6 +510,28 @@ def trim_feed(body: bytes, keep: int) -> bytes:
     return ET.tostring(root, encoding="utf-8", xml_declaration=True)
 
 
+MEDIA_NS = "{http://search.yahoo.com/mrss/}"
+
+
+def _has_image(node, raw_summary: str) -> bool:
+    """Does this item ship an illustration?
+
+    Part of the "will it travel" test, and the only one of its four questions that needed a
+    new input. A story with an institution-supplied artist's impression travels several times
+    further than one without — and that picture is precisely what our swatch argues with, so
+    it doubles as our relevance test.
+    """
+    for tag in (f"{MEDIA_NS}content", f"{MEDIA_NS}thumbnail", "enclosure", "image"):
+        for el in node.iter(tag):
+            mime = (el.get("type") or el.get("medium") or "").lower()
+            url = (el.get("url") or "").lower()
+            if mime.startswith("image") or mime == "image" or re.search(
+                r"\.(jpg|jpeg|png|webp|gif)(\?|$)", url
+            ):
+                return True
+    return "<img" in raw_summary.lower()
+
+
 def parse_feed(feed: Feed, body: bytes) -> list[Item]:
     root = ET.fromstring(body)
     nodes = root.findall(".//item") or root.findall(f".//{ATOM_NS}entry")
@@ -481,8 +542,9 @@ def parse_feed(feed: Feed, body: bytes) -> list[Item]:
         if not link:
             le = node.find(f"{ATOM_NS}link")
             link = le.get("href", "") if le is not None else ""
-        summary = _text(node, "description", "summary", f"{ATOM_NS}summary")
-        summary = re.sub(r"<[^>]+>", " ", summary)
+        raw_summary = _text(node, "description", "summary", f"{ATOM_NS}summary")
+        has_image = _has_image(node, raw_summary)
+        summary = re.sub(r"<[^>]+>", " ", raw_summary)
         summary = re.sub(r"\s+", " ", summary).strip()
         uid = _text(node, "guid", f"{ATOM_NS}id") or link or title
         raw_date = _text(node, "pubDate", "published", "updated", f"{ATOM_NS}published")
@@ -500,7 +562,7 @@ def parse_feed(feed: Feed, body: bytes) -> list[Item]:
         at = node.find(f"{ARXIV_NS}announce_type")
         items.append(Item(
             feed=feed, uid=uid, title=title, link=link, summary=summary,
-            published=published,
+            published=published, has_image=has_image,
             announce_type=at.text.strip() if at is not None and at.text else None,
         ))
     return items
@@ -1291,10 +1353,22 @@ def alert_text(item: Item, target: Target, base: str, *, now: datetime,
             ">10% on R/M or >100 K on either ⇒ post the <i>change</i>, not the swatch.",
         ]
 
-    q = urllib.parse.quote(name)
+    # Step 1 of the runbook, answered rather than asked. All four questions are answerable
+    # from the feed item, so there is no reason to make a human do it at 60 seconds a time.
+    passed, evidence = travel_test(item)
+    marks = "".join("✅" if p else "▫️" for p in passed)
     lines += [
         "",
-        f"<b>Why it ranked ({item.score})</b>: {_esc('; '.join(item.reasons))}",
+        f"<b>Will it travel? {marks} {sum(passed)}/4</b>",
+        *[f"  {'✅' if p else '▫️'} {label} — {_esc(ev)}"
+          for (label, _), p, ev in zip(TRAVEL_TESTS, passed, evidence, strict=True)],
+    ]
+    if sum(passed) < 2:
+        lines.append("<i>Under 2/4 — stories travel on nouns and pictures, not results. "
+                     "Skipping this is free.</i>")
+
+    q = urllib.parse.quote(name)
+    lines += [
         "",
         f'<a href="https://bsky.app/search?q={q}">Bluesky</a> · '
         f'<a href="https://www.reddit.com/search/?q={q}&amp;sort=new">Reddit</a> · '
@@ -1317,8 +1391,19 @@ def alert_text(item: Item, target: Target, base: str, *, now: datetime,
 def notify_items(tg: Telegram, surfaced: list[Item], catalogue: Catalogue, base: str,
                  *, now: datetime, attach: bool = True,
                  playbook: Playbook | None = None) -> int:
+    """Two very different messages, because the two tiers are two different jobs.
+
+    ACT NOW gets the full alert plus the briefing as an attachment: there is a clock, and you
+    need everything to hand. PRE-BUILD gets ONE line inside ONE digest for the whole run, and
+    no attachment at all — a preprint has no clock, so a briefing you didn't ask for is just
+    noise, and noise is what makes a person mute the channel. The briefing is a command away
+    on the rare occasion you want it.
+    """
+    act = [it for it in surfaced if tier_of(it) == TIER_ACT]
+    stock = [it for it in surfaced if tier_of(it) != TIER_ACT]
     sent = 0
-    for it in surfaced:
+
+    for it in act:
         target = resolve_target(it, catalogue)
         tg.message(alert_text(it, target, base, now=now, playbook=playbook))
         if attach:
@@ -1330,7 +1415,31 @@ def notify_items(tg: Telegram, surfaced: list[Item], catalogue: Catalogue, base:
                        else "Full briefing — FACTS ONLY, no playbook loaded.")
             tg.document(fname, f"```\n{body}\n```\n", caption=caption)
         sent += 1
+
+    if stock:
+        tg.message(digest_text(stock, catalogue, now=now))
+        sent += 1
     return sent
+
+
+def digest_text(stock: list[Item], catalogue: Catalogue, *, now: datetime) -> str:
+    """One line per preprint, one message per run, nothing attached.
+
+    Its only job is to let you notice a planet you might want on the bench before its press
+    wave. Nothing here is actionable today, and the message says so, so it can be read in two
+    seconds and dismissed without guilt.
+    """
+    lines = [f"🔵 <b>PRE-BUILD</b> · {len(stock)} preprint{'s' if len(stock) > 1 else ''}"]
+    for it in stock:
+        target = resolve_target(it, catalogue)
+        mark = "" if target.record is not None else " ⚠️ not in catalogue"
+        lines.append(
+            f'· <a href="{_esc(it.link)}">{_esc(target.name)}</a>{mark} — '
+            f"{_esc(it.title[:70])}{'…' if len(it.title) > 70 else ''}"
+        )
+    lines.append("")
+    lines.append("<i>No clock on any of these. Ignore unless a name is one you want ready.</i>")
+    return "\n".join(lines)
 
 
 # --------------------------------------------------------------------------
@@ -1448,9 +1557,16 @@ def cmd_poll(args: argparse.Namespace) -> None:
         print(f"⚠  feed error — {e}")
     kept, dropped = rank(items, catalogue, state, now=now, max_age_days=args.max_age_days)
 
-    surfaced = kept[:MAX_SURFACED_PER_DAY]
+    # The cap is per tier, because the two cost very different amounts of attention. An ACT
+    # NOW is a full message plus an attachment; a PRE-BUILD is one line inside a shared
+    # digest. Capping the mixed list at three would spend the whole budget on preprints on a
+    # day when a press release also broke — which is exactly backwards.
+    act = [i for i in kept if tier_of(i) == TIER_ACT][:MAX_ACT_PER_RUN]
+    stock = [i for i in kept if tier_of(i) != TIER_ACT][:MAX_STOCK_PER_RUN]
+    surfaced = act + stock
     print(f"{len(items)} items polled · {len(kept)} passed the filters · "
-          f"showing the top {len(surfaced)} (hard cap {MAX_SURFACED_PER_DAY})")
+          f"showing {len(act)} act-now (cap {MAX_ACT_PER_RUN}) + "
+          f"{len(stock)} pre-build (cap {MAX_STOCK_PER_RUN})")
     print("dropped: " + ", ".join(f"{v} {k}" for k, v in dropped.items() if v))
     if len(kept) > len(surfaced):
         overflow = REPO / "data" / "cache" / "newswatch-overflow.json"
@@ -1500,18 +1616,14 @@ def cmd_poll(args: argparse.Namespace) -> None:
             n = notify_items(tg, surfaced, catalogue, args.base_url, now=now,
                              attach=not args.no_attach, playbook=playbook)
             state["last_alert"] = now.isoformat()
-            print(f"Alerted {n} item(s) to Telegram.")
-        elif args.notify_quiet_days and _quiet_streak(state, now) >= args.notify_quiet_days:
-            # A heartbeat, so silence stays distinguishable from breakage. Without it you
-            # cannot tell "no exoplanet news" from "the workflow has been failing for a week".
-            tg.message(
-                f"🟢 <b>newswatch</b> — quiet for {args.notify_quiet_days} day(s). "
-                f"{len(items)} items polled, nothing worth jacking. Still running."
-            )
-            state["last_heartbeat"] = now.isoformat()
-            print("No items; sent a heartbeat.")
+            print(f"Sent {n} message(s) to Telegram.")
         else:
-            print("No items to alert.")
+            # Deliberately silent. Silence still has to be distinguishable from breakage, but
+            # the failure ping in the workflow does that job — it fires on a broken run, which
+            # is the case that matters. A periodic "still alive" message is a notification you
+            # can do nothing with, and those are what train a person to stop reading the ones
+            # they can.
+            print("Nothing to alert. No message sent.")
 
     if not args.dry_run:
         for it in items:
@@ -1526,13 +1638,6 @@ def cmd_poll(args: argparse.Namespace) -> None:
         print(f"Logged {len(surfaced)} to {path}")
     else:
         print("--dry-run: state not advanced, nothing logged. Re-run gives the same answer.")
-
-
-def _quiet_streak(state: dict, now: datetime) -> float:
-    last = state.get("last_heartbeat") or state.get("last_alert")
-    if not last:
-        return 999.0
-    return (now - datetime.fromisoformat(last)).total_seconds() / 86400
 
 
 def cmd_notify(args: argparse.Namespace) -> None:
@@ -1669,10 +1774,6 @@ def main() -> None:
                          "and NEWSWATCH_TELEGRAM_CHAT_ID). Exits non-zero if they are unset.")
     po.add_argument("--no-attach", action="store_true",
                     help="Alert only; don't attach the full briefing as a document")
-    po.add_argument("--notify-quiet-days", type=float, default=3.0, metavar="N",
-                    help="With --notify and nothing to report, send a heartbeat if it has been "
-                         "N days since the last message (default 3; 0 disables). Silence must "
-                         "stay distinguishable from breakage.")
     po.add_argument("--quiet", action="store_true",
                     help="Print one line per item instead of the briefings. Use this in CI: "
                          "this repository is public and a workflow log is world-readable.")
