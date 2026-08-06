@@ -67,6 +67,25 @@ PLAIN: dict[str, str] = {
         "ones. It is what stops every modelled planet at the same temperature coming out the "
         "same colour — for most of the catalogue, this paper is quietly setting the chemistry."
     ),
+    "Parmentier et al. (2016)": (
+        "The work that showed clouds do not simply burn away as a planet gets hotter. Different "
+        "substances condense at different temperatures, so a planet's sky can clear and then "
+        "cloud over again further up the thermometer — around 1,600 K it is hot enough for rock "
+        "itself to condense into a bright haze. It is why some of the hottest worlds here are "
+        "pale rather than dark."
+    ),
+    "Demory et al. (2011, 2013)": (
+        "The measurement of how much light Kepler-7 b actually reflects — about a third of it, "
+        "far more than a scorched planet has any right to. It is the real number our model of "
+        "hot, cloudy planets is set against, and the reason we know the old version of that "
+        "model was wrong."
+    ),
+    "Ackerman & Marley (2001)": (
+        "The description of how cloud droplets fall. A cloud is only visible if it stays up, so "
+        "on a planet with weak gravity the deck floats high and bright, while stronger gravity "
+        "pulls it down out of sight. It is why two equally hot planets here are not equally "
+        "cloudy."
+    ),
     "Kopparapu et al. (2014)": (
         "The climate-model calculation of where a star's habitable zone begins and ends. It is "
         "the arithmetic behind the 'could there be liquid water' filter — which is about "
