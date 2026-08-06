@@ -1270,6 +1270,41 @@ def resolve_target(item: Item, catalogue: Catalogue) -> Target:
     return Target("unknown", None, "none")
 
 
+GH_REPO = os.environ.get("GH_REPO", "jocarino/roman-telescope-data")
+
+
+def data_pr_nudge(*, timeout: int = 15) -> str:
+    """Is a catalogue-refresh PR sitting open, unmerged?
+
+    The Thursday drift probe opens one and creates the release as a DRAFT, so nothing reaches
+    the site until a human merges and publishes. A "not in our catalogue" alert is the exact
+    moment that matters — the planet may already be built and waiting on you. Unauthenticated:
+    the repo is public, and two runs a day is nowhere near the 60/hour anonymous limit.
+
+    Best effort by design. If GitHub is unreachable this returns "" and the alert goes out
+    without the nudge; failing an alert about a breaking story over a missing nicety would be
+    the wrong trade.
+    """
+    url = (f"https://api.github.com/repos/{GH_REPO}/pulls"
+           f"?state=open&per_page=20")
+    try:
+        req = urllib.request.Request(
+            url, headers={"User-Agent": UA, "Accept": "application/vnd.github+json"})
+        with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310 (github.com)
+            prs = json.loads(resp.read().decode())
+    except Exception:  # noqa: BLE001 — a nudge must never break an alert
+        return ""
+    data_prs = [p for p in prs
+                if str(p.get("head", {}).get("ref", "")).startswith("data/refresh-")]
+    if not data_prs:
+        return ""
+    p = data_prs[0]
+    return (f"📦 <b>A data refresh PR is already open</b> — "
+            f'<a href="{_esc(p["html_url"])}">#{p["number"]}</a>. '
+            f"Merge it and publish its draft release and the catalogue moves without a manual "
+            f"build. Check there before running the commands above.")
+
+
 def _age(published: datetime | None, now: datetime) -> str:
     if published is None:
         return "undated"
@@ -1319,13 +1354,20 @@ def alert_text(item: Item, target: Target, base: str, *, now: datetime,
     elif target.kind == "planet-missing":
         lines += [
             "⚠️ <b>NOT IN OUR CATALOGUE</b> — we cannot post a colour for this one yet.",
-            "This is the majority case on a 'new planet discovered' story. Fast path:",
+            "This is the majority case on a 'new planet discovered' story.",
             "",
+            "<b>Build it and put it on the site</b> — merging is what the site actually",
+            "reads; a briefing alone leaves your own link 404ing:",
             f"<pre>uv run python -m pipeline build --planet \"{_esc(target.archive_name)}\" \\\n"
-            f"    --out data/newsjack.json --no-cache</pre>",
-            "",
+            f"    --merge-into data/planets.json --no-cache\n"
+            f"scripts/release-data.sh\n"
+            "git add data/RELEASE &amp;&amp; git commit -m 'Data release' "
+            "&amp;&amp; git push</pre>",
             "If the gate rejects it, the missing number is itself the post.",
         ]
+        nudge = data_pr_nudge()
+        if nudge:
+            lines += ["", nudge]
     else:
         tc = rec["true_colour"]
         stale, stale_why = roman_is_stale(rec)

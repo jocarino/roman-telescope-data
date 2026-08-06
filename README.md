@@ -52,6 +52,19 @@ If the completeness gate rejects it, that is still a usable answer — the gate 
 number is missing, and *"we can't compute a colour for this one yet, and here's exactly which
 number is missing"* is a better post than a guess.
 
+**To get that planet onto the site**, merge it into the catalogue rather than writing a lone
+file — otherwise you have a briefing and the site still 404s the link in your own post:
+
+```bash
+uv run python -m pipeline build --planet "K2-18 b" --merge-into data/planets.json --no-cache
+scripts/release-data.sh                              # publishes the asset, writes data/RELEASE
+git add data/RELEASE && git commit -m "Data release …" && git push   # deploy webhook rebuilds
+```
+
+`--merge-into` replaces any record with the same id and re-runs the stellar-system pass, so
+the new planet links to its siblings and they link back to it. Everything else — curation
+ranks, palette ramps, tours — is re-derived at web-build time, so nothing else needs doing.
+
 ## Web app (static site)
 
 ```bash
@@ -348,8 +361,11 @@ Six things about it are deliberate:
   alert carries the verdict and the evidence for each. It reports; it doesn't act: a 1/4 story
   you happen to know is a big deal is still yours to jack.
 - **A planet in the news that is *not* in the catalogue is the most valuable line it prints.**
-  That is a data task, and it is the majority case on a "new planet discovered" story; the
-  briefing hands you the `--planet` fast-path command for it.
+  That is a data task, and it is the majority case on a "new planet discovered" story. The
+  alert hands you the `--merge-into` command — the one that actually reaches the site — and,
+  if a catalogue-refresh PR is already open, links it: the Thursday probe drafts its release
+  rather than publishing, so the planet may be built and waiting on a merge. That check is
+  best effort and never breaks an alert.
 
 The tool needs `data/planets.json`, which is not in the repo — run `python3 scripts/fetch_data.py`
 first. `poll` appends every surfaced item to a newsjack log so the tracking is a side effect of

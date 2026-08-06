@@ -339,11 +339,41 @@ def test_a_host_only_match_never_becomes_the_string_unknown(aliases, monkeypatch
 
 
 def test_a_missing_planet_alert_carries_a_runnable_fast_path(aliases, monkeypatch):
+    monkeypatch.setattr(nw, "data_pr_nudge", lambda **kw: "")
     it, t = _resolve("First image of TOI-700 d", aliases, monkeypatch)
     assert t.kind == "planet-missing"
     text = nw.alert_text(it, t, "https://example.test", now=datetime.now(UTC))
     assert 'build --planet "TOI-700 d"' in text
     assert "NOT IN OUR CATALOGUE" in text
+
+
+def test_the_missing_planet_path_merges_rather_than_writing_a_lone_file(aliases, monkeypatch):
+    """A briefing alone leaves the link in your own post 404ing — the site reads the merged
+    catalogue, so the command the alert hands you has to be the one that reaches it."""
+    monkeypatch.setattr(nw, "data_pr_nudge", lambda **kw: "")
+    it, t = _resolve("First image of TOI-700 d", aliases, monkeypatch)
+    text = nw.alert_text(it, t, "https://example.test", now=datetime.now(UTC))
+    assert "--merge-into data/planets.json" in text
+    assert "release-data.sh" in text
+
+
+def test_an_open_data_pr_is_surfaced_on_a_missing_planet(aliases, monkeypatch):
+    """The Thursday probe opens a PR and drafts the release; nothing reaches the site until a
+    human merges. A 'not in catalogue' alert is exactly when that matters."""
+    monkeypatch.setattr(nw, "data_pr_nudge",
+                        lambda **kw: "📦 <b>A data refresh PR is already open</b> — #99.")
+    it, t = _resolve("First image of TOI-700 d", aliases, monkeypatch)
+    text = nw.alert_text(it, t, "https://example.test", now=datetime.now(UTC))
+    assert "data refresh PR is already open" in text
+
+
+def test_the_nudge_never_breaks_an_alert(monkeypatch):
+    """Best effort by design: failing an alert about a breaking story over a missing nicety
+    would be the wrong trade."""
+    def boom(*a, **k):
+        raise OSError("network down")
+    monkeypatch.setattr(nw.urllib.request, "urlopen", boom)
+    assert nw.data_pr_nudge() == ""
 
 
 def test_press_is_act_now_and_a_preprint_is_pre_build():
