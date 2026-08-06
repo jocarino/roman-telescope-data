@@ -202,6 +202,10 @@ _SHORT_TO_LONG = {
 }
 _LONG_TO_SHORT = {**CONSTELLATION_LONG_TO_SHORT, **GREEK_LONG_TO_SHORT}
 
+FULL_HELP = ("Print the standing reference too — every copy scaffold, the where-to-post "
+             "tiering, the full checklist, the infrared answer, the tracking notes. Default "
+             "is the ~55 lines that are about this story.")
+
 MAX_ACT_PER_RUN = 3            # full message + attachment each; the real attention budget
 MAX_STOCK_PER_RUN = 5          # one line each inside a single digest, so cheaper to carry
 MAX_PLANETS_PER_ITEM = 3       # more than this and it's a catalogue paper, not a story
@@ -941,124 +945,118 @@ def brief_missing(name: str, out: list[str], base: str) -> None:
 
 
 def brief_planet(rec: dict, out: list[str], base: str, *, headline: str | None = None,
-                 source: str | None = None, link: str | None = None) -> None:
-    pid = rec["id"]
-    name = rec["name"]
-    params = rec["params"]
-    star = rec["host_star"]
-    tc = rec["true_colour"]
-    page = f"{site_url(base)}/planet/{pid}"
+                 source: str | None = None, link: str | None = None,
+                 full: bool = False, verdict: list[str] | None = None) -> None:
+    """The facts, in one screen.
+
+    This used to be five labelled sections — our numbers, the four to diff, assumptions,
+    habitability, system — each with its own heading and prose. Together they ran past a
+    screen before reaching anything actionable, and the honest reaction was that it was too
+    much to read. Same facts, one table: what we say the colour is, what to check it against,
+    and what we assumed. Everything conditional (a withheld Roman view, an out-of-gamut clamp,
+    a model-only planet) still gets its own line, because those are the ones that change what
+    you may publish.
+    """
+    verdict = verdict or []
+    pid, name = rec["id"], rec["name"]
+    params, star, tc = rec["params"], rec["host_star"], rec["true_colour"]
+    src = params.get("sources", {})
     stale, stale_why = roman_is_stale(rec)
     views = rec.get("instrument_views") or []
     roman = views[0] if views else None
 
     out.append(RULE)
-    out.append(f"  {name}   {tc['hex']}   {colour_name(tc['hex'])}")
+    out.append(f"  {name}   {tc['hex']}   {colour_name(tc['hex'])}   [{rec['provenance']}]")
     out.append(RULE)
     if headline:
         out.append("")
-        out.append("  WHY YOU ARE SEEING THIS")
-        out.append(_wrap(headline, "    "))
-        if source:
-            out.append(f"    source : {source}")
-        if link:
-            out.append(f"    link   : {link}")
+        out.append(_wrap(headline, "  "))
+        if source or link:
+            out.append(f"  {source or ''}  {link or ''}".rstrip())
+    # The verdict goes above the facts, not below them: it is the answer to "what do I look
+    # at", and an answer printed after the thing it triages is not an answer.
+    out.extend(verdict)
 
-    # -- our numbers ------------------------------------------------------
     out.append("")
-    built = rec["meta"]["generated_at"][:10]
-    out.append(f"  OUR NUMBERS   (release {release_tag()}, built {built})")
-    out.append(f"    page          {page}")
-    out.append(f"    true colour   {tc['hex']}  — {colour_name(tc['hex'])}"
-               f"  (confidence: {tc['confidence']})")
-    out.append(f"    palette       {' '.join(s['hex'] for s in tc['palette'])}")
-    out.append(f"    provenance    {rec['provenance']}"
-               + ("" if rec.get("is_light_isolable", True)
-                  else "   ⚠ MODEL-ONLY: no light from this planet has ever been received"))
-    out.append(f"    luminance     Y={tc['luminance_y']:.3f} as computed; every base swatch is "
-               f"normalised to Y=0.60 for display")
-    if tc.get("out_of_gamut"):
-        out.append("    ⚠ out of sRGB gamut — the swatch is a clamp, say so if you show it")
-
-    if roman:
+    out.append(f"  {site_url(base)}/planet/{pid}")
+    out.append(f"  palette  {' '.join(s['hex'] for s in tc['palette'])}"
+               f"   ·  confidence {tc['confidence']}"
+               f"   ·  release {release_tag()}")
+    if roman and not stale:
         de = roman["reconstruction_error"]["delta_e2000"]
-        bands = "/".join(s["band_id"] for s in roman["band_samples"]["samples"])
-        if stale:
-            out.append("")
-            out.append(f"    ⛔ ROMAN VIEW WITHHELD — {stale_why}")
-            out.append(_wrap(
-                "Do NOT publish an 'as Roman would see it' number from this release. Publishing "
-                "it against a wrong band model, to an audience that contains the CGI team, is "
-                "the one unrecoverable error available to this project. Re-emit the catalogue "
-                "with the corrected config first.", "       "))
-            out.append(f"       (for your eyes only: {roman['colour']['hex']}, ΔE2000 {de:.1f}, "
-                       f"bands {bands})")
-        else:
-            out.append(f"    roman view    {roman['colour']['hex']}  ΔE2000 {de:.1f}  "
-                       f"bands {bands}  ({roman['band_samples']['source']})")
+        out.append(f"  roman    {roman['colour']['hex']}   ΔE2000 {de:.1f}"
+                   f"   ({roman['band_samples']['source']})")
 
-    # -- the four numbers to diff ----------------------------------------
-    src = params.get("sources", {})
-    out.append("")
-    out.append("  THE FOUR NUMBERS TO DIFF AGAINST THE PAPER"
-               "   ← checklist step 2, 80% of the value")
-    out.append(f"    radius        {_fmt(params.get('radius_r_earth'), ' R⊕')}"
-               f"        [{src.get('radius_r_earth', '?')}]     tolerance ±10%")
-    out.append(f"    mass          {_fmt(params.get('mass_m_earth'), ' M⊕')}"
-               f"        [{src.get('mass_m_earth', '?')}]     tolerance ±10%")
-    out.append(f"    T_eq          {_fmt(params.get('equilibrium_temp_k'), ' K', 0)}"
-               f"          [{src.get('equilibrium_temp_k', '?')}]     tolerance ±100 K")
-    out.append(f"    host T_eff    {_fmt(star.get('teff_k'), ' K', 0)}"
-               f"          [{src.get('star_teff_k', '?')}]     tolerance ±100 K")
-    out.append(f"    (also: a = {_fmt(params.get('semi_major_axis_au'), ' AU', 4)},  "
-               f"d = {_fmt(params.get('distance_pc'), ' pc', 1)},  host {star.get('name')} "
-               f"{star.get('spectral_type') or ''})")
-    out.append("    Any one outside tolerance -> post the COLOUR CHANGE, not the swatch.")
+    # Conditional warnings: the lines that change what you are allowed to publish.
+    if roman and stale:
+        out.append("")
+        out.append(f"  ⛔ ROMAN VIEW WITHHELD — {stale_why}")
+        out.append("     Publishing it against a wrong band model is unrecoverable. Re-emit first.")
+    if tc.get("out_of_gamut"):
+        out.append("  ⚠ out of sRGB gamut — the swatch is a clamp; say so if you show it")
+    if not rec.get("is_light_isolable", True):
+        out.append("  ⚠ MODEL-ONLY — no light from this planet has ever been received")
 
-    # -- assumptions ------------------------------------------------------
+    # -- one table: the numbers to check, and what we assumed ---------------
     out.append("")
-    out.append("  ASSUMPTIONS   ← checklist step 5: name the one you trust least, in the post")
-    out.append(f"    cloud state   {params.get('assumed_cloud_state')}   "
-               f"[{src.get('cloud_state', '?')}]")
-    out.append(f"    metallicity   {_fmt(params.get('assumed_metallicity'), '× solar', 1)}   "
-               f"[{src.get('metallicity', '?')}]")
-    out.append(f"    phase angle   {_fmt(params.get('assumed_phase_angle_deg'), '°', 0)}   "
-               f"[{src.get('phase_angle_deg', '?')}]")
-    out.append(f"    spectrum      {params.get('spectrum_source')} engine")
-    assumed = [k for k, v in src.items() if v == "assumed"]
+    out.append("  CHECK AGAINST THE PAPER                 WE ASSUMED")
+    rows = [
+        (f"radius   {_fmt(params.get('radius_r_earth'), ' R⊕')} ±10% "
+         f"[{src.get('radius_r_earth', '?')}]",
+         f"cloud   {params.get('assumed_cloud_state')}"),
+        (f"mass     {_fmt(params.get('mass_m_earth'), ' M⊕')} ±10% "
+         f"[{src.get('mass_m_earth', '?')}]",
+         f"metal   {_fmt(params.get('assumed_metallicity'), '× solar', 1)}"),
+        (f"T_eq     {_fmt(params.get('equilibrium_temp_k'), ' K', 0)} ±100 K "
+         f"[{src.get('equilibrium_temp_k', '?')}]",
+         f"phase   {_fmt(params.get('assumed_phase_angle_deg'), '°', 0)}"),
+        (f"host     {_fmt(star.get('teff_k'), ' K', 0)} ±100 K "
+         f"[{src.get('star_teff_k', '?')}]",
+         f"engine  {params.get('spectrum_source')}"),
+    ]
+    for left, right in rows:
+        out.append(f"  {left:<38}  {right}")
+    assumed = [k.replace("_", " ") for k, v in src.items() if v == "assumed"]
     if assumed:
-        out.append(f"    -> the assumed (not measured) inputs here are: {', '.join(assumed)}")
+        out.append(f"  outside tolerance → post the CHANGE.   least sure: {', '.join(assumed)}")
+    else:
+        out.append("  outside tolerance → post the CHANGE, not the swatch.")
 
+    # -- context worth a line, never a section ------------------------------
+    extras: list[str] = []
     hab = rec.get("habitability")
     if hab and hab.get("is_candidate"):
+        extras.append(f"habitable-zone candidate ({hab['zone']}, {hab['surface']}, "
+                      f"{hab['insolation_earth']:.2f}× Earth insolation)")
+    obs = rec.get("real_observations") or []
+    if obs:
+        extras.append("real observations exist: "
+                      + "; ".join(f"{o.get('telescope')} {o.get('year')}" for o in obs[:2]))
+    sysd = rec.get("system") or {}
+    if sysd.get("member_count", 0) > 1:
+        sibs = ", ".join(s["name"] for s in sysd.get("siblings", [])[:5])
+        extras.append(f"{sysd['member_count']} planets at {sysd['hostname']}: {sibs}")
+    if extras:
         out.append("")
-        out.append(f"  HABITABLE-ZONE LENS   zone={hab['zone']}  surface={hab['surface']}  "
-                   f"insolation={hab['insolation_earth']:.2f}×Earth")
+        for line in extras:
+            out.append(_wrap(line, "  · "))
+
+    if full and hab and hab.get("is_candidate"):
         for c in hab.get("caveats", [])[:2]:
             out.append(_wrap(c, "    "))
 
-    obs = rec.get("real_observations") or []
-    if obs:
-        out.append("")
-        out.append("  REAL OBSERVATIONS EXIST FOR THIS ONE")
-        for o in obs[:3]:
-            out.append(f"    {o.get('telescope')} ({o.get('year')}): {o.get('band')} — "
-                       f"{o.get('credit')}")
 
-    sysd = rec.get("system") or {}
-    if sysd.get("member_count", 0) > 1:
-        sibs = ", ".join(s["name"] for s in sysd.get("siblings", [])[:6])
-        out.append("")
-        out.append(f"  SYSTEM   {sysd['hostname']} has {sysd['member_count']} "
-                   f"known planets: {sibs}")
-
-
-def brief_where(out: list[str], pb: Playbook | None, fields: dict) -> None:
+def brief_where(out: list[str], pb: Playbook | None, fields: dict, *,
+                full: bool = False) -> None:
     """Where to go, and in what order. The tactics are the playbook's; the SEARCH URLS stay
     here, because building a query string is mechanism, not editorial."""
-    if pb is None:
+    if pb is None or not full:
+        # Compact: the links themselves, which are the per-story part. The tiering advice is
+        # the same fourteen lines on every briefing — reference, so it lives in --full.
         out.append("")
-        out.append("  WHERE TO GO")
+        # Neutral wording on purpose: the tactics are the playbook's, and the no-marketing-
+        # copy guard is right to fail if an editorial phrase creeps into this file.
+        out.append("  SEARCH LINKS   (what to do with them: --full)")
         for label, key in (("Bluesky", "search_bluesky"), ("Reddit", "search_reddit"),
                            ("r/space", "search_reddit_space"), ("HN", "search_hn")):
             out.append(f"    {label:9} {fields[key]}")
@@ -1067,18 +1065,39 @@ def brief_where(out: list[str], pb: Playbook | None, fields: dict) -> None:
     out.extend(pb.render("where_to_go", fields))
 
 
-def brief_copy(out: list[str], pb: Playbook | None, fields: dict) -> None:
-    """Scaffolds, not copy — and not from this repository. See the playbook note above."""
+def brief_copy(out: list[str], pb: Playbook | None, fields: dict, *,
+               full: bool = False) -> None:
+    """Scaffolds, not copy — and not from this repository. See the playbook note above.
+
+    Only the ones with a clock. Seven scaffolds at once is a menu, and a menu at minute three
+    of a two-hour window is the same as no briefing: the Reddit comment, the dated page note
+    and the pre-written correction are all for *later*, so they are named rather than printed
+    unless you ask for the full version. A playbook block opts in with `"when": "now"`.
+    """
     if pb is None:
         return
+    blocks = pb.data.get("scaffolds", [])
+    if full:
+        shown, deferred = blocks, []
+    else:
+        shown = [b for b in blocks if b.get("when") == "now"] or blocks[:1]
+        deferred = [b for b in blocks if b not in shown]
+
     out.append("")
     out.extend(pb.render("copy_header", fields))
-    for block in pb.data.get("scaffolds", []):
+    for block in shown:
         title = str(block.get("title", "")).format_map(_Fields(fields))
         out.append("")
         out.append(f"  \u2500\u2500 {title} \u2500\u2500")
         for line in block.get("lines", []):
             out.append(line.format_map(_Fields(fields)))
+    if deferred:
+        names = ", ".join(
+            str(b.get("short") or b.get("title", "")).split("(")[0].strip().lower()
+            for b in deferred
+        )
+        out.append("")
+        out.append(_wrap(f"Later, in the full briefing (--full): {names}.", "  "))
 
 
 def brief_fields(rec: dict, name: str, base: str, pb: Playbook | None) -> dict:
@@ -1176,21 +1195,28 @@ def _diff_verdict(rec: dict, item: Item | None) -> tuple[str, str]:
 def render_brief(rec: dict | None, name: str, base: str, *, headline: str | None = None,
                  source: str | None = None, link: str | None = None,
                  with_checklist: bool = True, playbook: Playbook | None = None,
-                 item: Item | None = None) -> str:
+                 item: Item | None = None, full: bool = False) -> str:
     out: list[str] = []
     if rec is None:
         brief_missing(name, out, base)
         out.append(RULE)
         return "\n".join(out)
-    brief_planet(rec, out, base, headline=headline, source=source, link=link)
-    verdict_block(out, rec, item)
+    verdict: list[str] = []
+    verdict_block(verdict, rec, item)
+    brief_planet(rec, out, base, headline=headline, source=source, link=link, full=full,
+                 verdict=verdict)
     fields = brief_fields(rec, rec["name"], base, playbook)
-    brief_where(out, playbook, fields)
-    brief_copy(out, playbook, fields)
+    brief_where(out, playbook, fields, full=full)
+    brief_copy(out, playbook, fields, full=full)
     if playbook is None:
         _playbook_missing(out)
     elif with_checklist:
-        for key in ("checklist", "standing_infrared", "closing"):
+        # The checklist, the standing infrared answer and the closing notes are ~35 lines of
+        # standing text identical on every briefing. They are reference, not per-story, so
+        # they belong in the full version — the compact one carries a pointer instead.
+        keys = (("checklist", "standing_infrared", "closing") if full
+                else ("checklist_compact",))
+        for key in keys:
             lines = playbook.render(key, fields)
             if lines:
                 out.append("")
@@ -1552,7 +1578,7 @@ def alert_text(item: Item, target: Target, base: str, *, now: datetime,
 
 def notify_items(tg: Telegram, surfaced: list[Item], catalogue: Catalogue, base: str,
                  *, now: datetime, attach: bool = True,
-                 playbook: Playbook | None = None) -> int:
+                 playbook: Playbook | None = None, full: bool = False) -> int:
     """Two very different messages, because the two tiers are two different jobs.
 
     ACT NOW gets the full alert plus the briefing as an attachment: there is a clock, and you
@@ -1571,7 +1597,7 @@ def notify_items(tg: Telegram, surfaced: list[Item], catalogue: Catalogue, base:
         if attach:
             body = render_brief(target.record, target.name, base, headline=it.title,
                                 source=f"{it.feed.name} ({it.feed.kind})", link=it.link,
-                                playbook=playbook, item=it)
+                                playbook=playbook, item=it, full=full)
             fname = f"{slug(target.name) or 'briefing'}-{now:%Y%m%d}.md"
             caption = ("Full briefing — facts, checklist and copy scaffolds." if playbook
                        else "Full briefing — FACTS ONLY, no playbook loaded.")
@@ -1762,7 +1788,7 @@ def cmd_poll(args: argparse.Namespace) -> None:
                 target.record, target.name, args.base_url,
                 headline=f"{it.title}\n\n{why}",
                 source=f"{it.feed.name} ({it.feed.kind})",
-                link=it.link, playbook=playbook, item=it,
+                link=it.link, playbook=playbook, item=it, full=args.full,
             ))
             print()
 
@@ -1777,7 +1803,7 @@ def cmd_poll(args: argparse.Namespace) -> None:
             )
         if surfaced:
             n = notify_items(tg, surfaced, catalogue, args.base_url, now=now,
-                             attach=not args.no_attach, playbook=playbook)
+                             attach=not args.no_attach, playbook=playbook, full=args.full)
             state["last_alert"] = now.isoformat()
             print(f"Sent {n} message(s) to Telegram.")
         else:
@@ -1839,6 +1865,7 @@ def cmd_brief(args: argparse.Namespace) -> None:
             rec = catalogue.get(pl[0])
             name = pl[0]
     print(render_brief(rec, name, args.base_url, with_checklist=not args.no_checklist,
+                       full=args.full,
                        playbook=load_playbook(_playbook_arg(args))))
 
 
@@ -1880,7 +1907,8 @@ def cmd_bench(args: argparse.Namespace) -> None:
             f"Written in daylight, with the checklist done, so a jack is a five-minute\n"
             f"publish instead of a sixty-minute scramble. Re-generate after every data\n"
             f"release: `python3 tools/newswatch.py bench`\n\n```\n"
-            + render_brief(rec, rec["name"], args.base_url, playbook=playbook) + "\n```\n"
+            + render_brief(rec, rec["name"], args.base_url, playbook=playbook, full=True)
+            + "\n```\n"
         )
         written += 1
     print(f"Wrote {written} bench briefings to {outdir}")
@@ -1903,6 +1931,10 @@ def main() -> None:
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     base_default = os.environ.get("SITE_BASE_URL", "")
     sub = p.add_subparsers(required=True)
+    # A briefing is read in the two-hour window, so the default is the ~55 lines that are
+    # about THIS story. --full adds the standing material: all seven copy scaffolds, the
+    # where-to-post tiering, the eight-point checklist, the infrared answer, the tracking
+    # notes. Same content either way; the compact one just doesn't reprint the reference.
 
     def playbook_arg(sp: argparse.ArgumentParser) -> None:
         sp.add_argument(
@@ -1947,6 +1979,7 @@ def main() -> None:
                          "'sdk' uses the Anthropic API (needs a key + `uv sync --extra "
                          "paperdiff`) and is what CI has to use. Default: cli when the claude "
                          "binary exists, else sdk.")
+    po.add_argument("--full", action="store_true", help=FULL_HELP)
     po.add_argument("--quiet", action="store_true",
                     help="Print one line per item instead of the briefings. Use this in CI: "
                          "this repository is public and a workflow log is world-readable.")
@@ -1963,6 +1996,7 @@ def main() -> None:
     b.add_argument("--planets", metavar="PATH", help="Alternative planets.json (fast-path output)")
     b.add_argument("--base-url", default=base_default)
     b.add_argument("--no-checklist", action="store_true")
+    b.add_argument("--full", action="store_true", help=FULL_HELP)
     playbook_arg(b)
     b.set_defaults(func=cmd_brief)
 

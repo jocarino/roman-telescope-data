@@ -536,6 +536,36 @@ def playbook():
     return nw.load_playbook(PLAYBOOK_FIXTURE)
 
 
+def test_the_compact_brief_shows_only_the_scaffolds_with_a_clock(playbook):
+    """Seven scaffolds at minute three of a two-hour window is the same as no briefing.
+    The rest are named, not printed, so nothing is hidden — just deferred."""
+    rec = _rec("k2-18-b", "K2-18 b", "K2-18")
+    fields = nw.brief_fields(rec, rec["name"], "https://example.test", playbook)
+    compact: list[str] = []
+    nw.brief_copy(compact, playbook, fields)
+    full: list[str] = []
+    nw.brief_copy(full, playbook, fields, full=True)
+    assert len(compact) < len(full)
+    assert "--full" in "\n".join(compact)          # says where the rest went
+
+
+def test_the_compact_brief_is_short_enough_to_read(playbook):
+    """The whole point of the compact layout. A briefing nobody reads is a briefing that
+    does not exist, and the full one ran past 200 lines."""
+    rec = _rec("k2-18-b", "K2-18 b", "K2-18")
+    compact = nw.render_brief(rec, "K2-18 b", "https://example.test", playbook=playbook)
+    full = nw.render_brief(rec, "K2-18 b", "https://example.test", playbook=playbook, full=True)
+    assert len(compact.splitlines()) < 70
+    assert len(full.splitlines()) > len(compact.splitlines())
+
+
+def test_the_verdict_sits_above_the_facts_it_triages(playbook):
+    """An answer to 'what do I look at' printed after the thing it triages is not an answer."""
+    rec = _rec("k2-18-b", "K2-18 b", "K2-18")
+    text = nw.render_brief(rec, "K2-18 b", "https://example.test", playbook=playbook)
+    assert text.index("BEFORE YOU POST") < text.index("CHECK AGAINST THE PAPER")
+
+
 def test_copy_scaffolds_always_leave_the_physics_sentence_blank(playbook):
     """A ready-to-post caption is the thing 11-bluesky-mastodon.md says kills the account.
     If someone ever 'helpfully' fills this in, this test is what stops it shipping."""
@@ -616,7 +646,7 @@ def test_a_typo_in_the_playbook_does_not_crash_the_briefing(playbook):
     rec = _rec("k2-18-b", "K2-18 b", "K2-18")
     fields = nw.brief_fields(rec, rec["name"], "https://example.test", playbook)
     out: list[str] = []
-    nw.brief_copy(out, playbook, fields)
+    nw.brief_copy(out, playbook, fields, full=True)   # the typo block is a deferred scaffold
     assert "{not_a_real_field}" in "\n".join(out)
 
 
