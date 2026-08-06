@@ -40,6 +40,13 @@
   {% else %}
   <meta name="description" content="The colour scheme of every known exoplanet, derived from physics.">
   {% endif %}
+  {# Machine-readable identity (planet pages): one minimal schema.org block, built in
+     web/meta.py from the same record as everything above, so it cannot drift. #}
+  {# |safe: this is JSON, not HTML — web/meta.py already escapes the one sequence ("</")
+     that could end the script tag, and HTML-entity-escaping it here would corrupt it. #}
+  {% if jsonld %}
+  <script type="application/ld+json">{{ jsonld | safe }}</script>
+  {% endif %}
   <meta name="theme-color" content="#000000">
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <script>try{document.documentElement.setAttribute("data-accent",localStorage.getItem("accent")||"tron");}catch(e){}</script>
