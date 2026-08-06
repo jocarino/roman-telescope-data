@@ -140,7 +140,7 @@ the colour Roman measures**. Plus a live countdown to launch (30 Aug 2026).
   current `planets.json` on every build (`pipeline/roman_board.py`), exactly like guided tours.
   Nothing is frozen, so the board cannot go stale as the catalog changes.
 - **The join is by explicit `catalog_id`, never by slugging the published name.** The names do
-  not always match ours — the literature's `pi Men b` is `HD 39091 b` (`hd-39091-b`) here. This
+  not always match ours — the literature's `pi Men b` is `HD 39091 b` (`hd-39091-b`) here. This <!-- factcheck: ignore -->
   is the alias problem `docs/roman-measured-data.md` flags for ingestion day, solved up front.
 - **Targets we have no colour for stay on the board** as visibly empty rows saying why, rather
   than being dropped — an honest gap beats a tidy list.
@@ -364,6 +364,34 @@ should — enforced by `tests/test_sanity_gate.py`:
 | Cloudy Jupiter analog | `#d1cac6` (bright, warm) | warm off-white / cream |
 | Deep-methane Neptune | `#b2d1da` (blue-green) | blue-green |
 | Cloud-free hot Jupiter | saturated blue, `lumY≈0.07` | dark deep-blue (cobalt) |
+
+### Checking the prose (`tools/factcheck.py`)
+
+The catalogue is checked by tests; the *writing about* the catalogue was not, and that is where
+this project's worst errors have been. A draft said a planet rendered near-black when its shipped
+swatch is `#2fa1ff`; another listed a brown dwarf as a Roman target; a third quoted a planet count
+the data had moved past. Each one contradicted something already sitting in the repo.
+
+```bash
+uv run python tools/factcheck.py docs README.md          # the public docs
+uv run python tools/factcheck.py ../notes --repo .       # any prose, against this repo
+uv run python tools/factcheck.py --json docs             # for CI
+```
+
+It treats the source tree and `planets.json` as the ground truth and reports where prose disagrees:
+a **path or `CONSTANT` that doesn't exist** (with the file it probably moved to), an **object not in
+the catalogue** (or catalogued under a different label, so a reader's search fails), a **colour word
+that contradicts the planet's own swatch**, a **count** that has drifted, and — the one case it
+cannot decide — a **measurement stated with no citation, limit or hedge beside it**, listed so a
+human settles it deliberately. Exit status is 1 if any error survives.
+
+Two rules keep it usable. It is deliberately quiet about honest English: "about 5,700 worlds" is
+rounding, not error, and a hedged or wished-for colour is not a claim. And it never re-implements
+what the pipeline already knows — it imports `catalog._display_name` and `colour.family` rather
+than keeping a second copy of them, and says so when it can't (`uv run` matters here). Suppress a
+line with `<!-- factcheck: ignore -->`, a file with `<!-- factcheck: off -->`; use them when a
+sentence quotes an error on purpose. `tests/test_factcheck.py` pins one case per mistake actually
+published, so a fix that stops catching one fails the suite.
 
 ## Architecture (v1)
 
