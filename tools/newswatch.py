@@ -1129,15 +1129,61 @@ def brief_fields(rec: dict, name: str, base: str, pb: Playbook | None) -> dict:
     }
 
 
+def verdict_block(out: list[str], rec: dict, item: Item | None) -> None:
+    """Three lines at the top, before the wall of reference material.
+
+    The briefing is long because it is a reference document, but the first thing a person
+    needs is *what still needs a human*. Without this the honest reaction to a 200-line
+    briefing is "I don't know what to look at" — which is a design failure, not a reading
+    failure. So: what the tool already decided, and what is left for you.
+    """
+    out.append("")
+    out.append("  BEFORE YOU POST — what is done, and what is yours")
+
+    if item is not None:
+        passed, _ = travel_test(item)
+        n = sum(passed)
+        mark = "OK  " if n >= 2 else "STOP"
+        out.append(f"    [{mark}] 1. Will it travel?      {n}/4 — computed, detail below"
+                   + ("" if n >= 2 else "  (under 2/4: skipping is free)"))
+    else:
+        out.append("    [ -- ] 1. Will it travel?      not assessed (no news item)")
+
+    mark, text = _diff_verdict(rec, item)
+    out.append(f"    [{mark}] 2. Paper vs our numbers?  {text}")
+    out.append("    [YOU ] 3. The sentence of physics — nothing above writes this for you.")
+
+
+def _diff_verdict(rec: dict, item: Item | None) -> tuple[str, str]:
+    """(mark, text) for checklist step 2, always distinguishing the three outcomes that used
+    to look identical: never run, ran with nothing to compare, genuinely compared."""
+    if not DIFF_PAPER:
+        return "TODO", "not run — pass --diff-paper, or do it by hand"
+    if item is None:
+        return "TODO", "not run — no story to find a paper from"
+    result = _paper_diff_result(item, rec)
+    if result is None or result.get("status") != "checked":
+        reason = "the diff failed" if result is None else result.get("reason", "not checked")
+        return "TODO", f"{reason} — do it by hand"
+    moved = [c for c in result["comparisons"] if c.superseded]
+    if moved:
+        return "WARN", (f"MOVED: {', '.join(c.quantity for c in moved)} — "
+                        f"post the change, not the swatch")
+    compared = ", ".join(c.quantity for c in result["comparisons"])
+    return "OK  ", f"{compared} within tolerance — anything not listed is still yours"
+
+
 def render_brief(rec: dict | None, name: str, base: str, *, headline: str | None = None,
                  source: str | None = None, link: str | None = None,
-                 with_checklist: bool = True, playbook: Playbook | None = None) -> str:
+                 with_checklist: bool = True, playbook: Playbook | None = None,
+                 item: Item | None = None) -> str:
     out: list[str] = []
     if rec is None:
         brief_missing(name, out, base)
         out.append(RULE)
         return "\n".join(out)
     brief_planet(rec, out, base, headline=headline, source=source, link=link)
+    verdict_block(out, rec, item)
     fields = brief_fields(rec, rec["name"], base, playbook)
     brief_where(out, playbook, fields)
     brief_copy(out, playbook, fields)
@@ -1319,41 +1365,64 @@ def _age(published: datetime | None, now: datetime) -> str:
 # Whether to run the paper diff. Off unless --diff-paper is passed: it is the one part of
 # newswatch that needs a network call to a third party and an SDK the poll path doesn't have.
 DIFF_PAPER = False
+DIFF_BACKEND: str | None = None   # None = auto (Claude Code CLI if installed, else the SDK)
+
+
+_DIFF_CACHE: dict[str, dict | None] = {}
+
+
+def _paper_diff_result(item: Item, rec: dict) -> dict | None:
+    """Run the diff once per story. The verdict line and the detail block both want it, and
+    it is a network round trip plus a model call — doing it twice would double the cost and
+    could even disagree with itself."""
+    if item.uid in _DIFF_CACHE:
+        return _DIFF_CACHE[item.uid]
+    try:
+        from tools.paper_diff import diff_paper
+    except ImportError:
+        result: dict | None = {"status": "failed", "reason": "SDK missing: uv sync --extra "
+                                                             "paperdiff (or install claude)"}
+    else:
+        params, star = rec["params"], rec["host_star"]
+        ours = {
+            "radius": params.get("radius_r_earth"),
+            "mass": params.get("mass_m_earth"),
+            "equilibrium_temperature": params.get("equilibrium_temp_k"),
+            "host_teff": star.get("teff_k"),
+        }
+        try:
+            result = diff_paper(item.link, ours, backend=DIFF_BACKEND)
+        except Exception as e:  # noqa: BLE001 — an alert must survive a broken diff
+            result = {"status": "failed", "reason": f"{type(e).__name__} — do step 2 by hand"}
+    _DIFF_CACHE[item.uid] = result
+    return result
 
 
 def paper_diff_lines(item: Item, rec: dict) -> list[str]:
     """Checklist step 2, run for you — see tools/paper_diff.py for why a model only ever
     QUOTES here and Python does the comparing.
 
-    Best effort in every direction. No `--diff-paper`, no SDK installed, no API key, no paper
-    linked, no numbers in the abstract: the alert goes out unchanged. The one thing this must
-    never do is make a missing diff look like a clean one, so it stays silent rather than
-    reporting 'no differences found'.
+    Best effort in every direction — but it always SAYS which kind of nothing happened. An
+    earlier version stayed silent for every failure mode, on the reasoning that a missing diff
+    must never look like a clean one. That was half right: silence also made "it ran and
+    everything agreed" indistinguishable from "it never ran", so the honest reaction was
+    "did it even do any checks?".
     """
     if not DIFF_PAPER:
         return []
-    try:
-        from tools.paper_diff import diff_paper
-    except ImportError:
-        return ["", "<i>--diff-paper needs the SDK: uv sync --extra paperdiff</i>"]
-    params, star = rec["params"], rec["host_star"]
-    ours = {
-        "radius": params.get("radius_r_earth"),
-        "mass": params.get("mass_m_earth"),
-        "equilibrium_temperature": params.get("equilibrium_temp_k"),
-        "host_teff": star.get("teff_k"),
-    }
-    try:
-        result = diff_paper(item.link, ours)
-    except Exception as e:  # noqa: BLE001 — an alert must survive a broken diff
-        return ["", f"<i>paper diff failed ({type(e).__name__}) — do step 2 by hand</i>"]
-    if not result:
+    result = _paper_diff_result(item, rec)
+    if result is None:
         return []
+    if result.get("status") != "checked":
+        return ["", f"◻️ <b>Paper not compared</b> — {_esc(str(result.get('reason', '?')))}. "
+                    f"Do checklist step 2 by hand."]
 
     superseded = [c for c in result["comparisons"] if c.superseded]
     head = ("⚠️ <b>THE PAPER MOVED OUR NUMBERS</b>" if superseded
             else "📄 <b>Paper agrees within tolerance</b>")
-    lines = ["", head, f"<i>from the abstract of arXiv:{_esc(result['arxiv_id'])}</i>"]
+    lines = ["", head,
+             f"<i>from the abstract of arXiv:{_esc(result['arxiv_id'])} "
+             f"(via {_esc(result.get('backend', '?'))})</i>"]
     for c in result["comparisons"]:
         mark = "⚠️" if c.superseded else "·"
         ours_txt = "—" if c.ours is None else f"{c.ours:,.2f}"
@@ -1502,7 +1571,7 @@ def notify_items(tg: Telegram, surfaced: list[Item], catalogue: Catalogue, base:
         if attach:
             body = render_brief(target.record, target.name, base, headline=it.title,
                                 source=f"{it.feed.name} ({it.feed.kind})", link=it.link,
-                                playbook=playbook)
+                                playbook=playbook, item=it)
             fname = f"{slug(target.name) or 'briefing'}-{now:%Y%m%d}.md"
             caption = ("Full briefing — facts, checklist and copy scaffolds." if playbook
                        else "Full briefing — FACTS ONLY, no playbook loaded.")
@@ -1626,8 +1695,8 @@ def cmd_aliases(args: argparse.Namespace) -> None:
 
 
 def cmd_poll(args: argparse.Namespace) -> None:
-    global _ALIASES, DIFF_PAPER
-    DIFF_PAPER = args.diff_paper
+    global _ALIASES, DIFF_PAPER, DIFF_BACKEND
+    DIFF_PAPER, DIFF_BACKEND = args.diff_paper, args.diff_backend
     _ALIASES = load_aliases()
     _, catalogue = load_catalogue()
     playbook = load_playbook(_playbook_arg(args))
@@ -1693,7 +1762,7 @@ def cmd_poll(args: argparse.Namespace) -> None:
                 target.record, target.name, args.base_url,
                 headline=f"{it.title}\n\n{why}",
                 source=f"{it.feed.name} ({it.feed.kind})",
-                link=it.link, playbook=playbook,
+                link=it.link, playbook=playbook, item=it,
             ))
             print()
 
@@ -1871,8 +1940,13 @@ def main() -> None:
     po.add_argument("--diff-paper", action="store_true",
                     help="Run checklist step 2 for you: find the linked paper, quote its "
                          "stated radius/mass/T_eq/host T_eff, and diff them against ours. "
-                         "Needs ANTHROPIC_API_KEY and `uv sync --extra paperdiff`. Off by "
-                         "default — it is the only part that calls a third party.")
+                         "Off by default — it is the only part that calls a third party.")
+    po.add_argument("--diff-backend", choices=("cli", "sdk"), default=None,
+                    help="Who does the quoting. 'cli' shells out to `claude -p`, reusing your "
+                         "Claude Code login — on a subscription that costs nothing extra. "
+                         "'sdk' uses the Anthropic API (needs a key + `uv sync --extra "
+                         "paperdiff`) and is what CI has to use. Default: cli when the claude "
+                         "binary exists, else sdk.")
     po.add_argument("--quiet", action="store_true",
                     help="Print one line per item instead of the briefings. Use this in CI: "
                          "this repository is public and a workflow log is world-readable.")

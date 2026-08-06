@@ -22,6 +22,7 @@ newswatch is stdlib-only so the scheduled workflow runs on bare python3.
 
 from __future__ import annotations
 
+import json
 import re
 import urllib.parse
 import urllib.request
@@ -44,16 +45,32 @@ Quantity = Literal["radius", "mass", "equilibrium_temperature", "host_teff"]
 
 # Unit conversion is arithmetic, so it is ours. Asking the model to normalise units would put
 # a silent R_Jup -> R_Earth slip inside the one number the checklist is protecting.
-_TO_R_EARTH = {
-    "r_earth": 1.0, "rearth": 1.0, "re": 1.0, "r_e": 1.0, "r⊕": 1.0, "earthradii": 1.0,
-    "r_jup": 11.2089, "rjup": 11.2089, "rj": 11.2089, "r_j": 11.2089, "jupiterradii": 11.2089,
-    "r_sun": 109.076, "rsun": 109.076, "r_s": 109.076,
-}
-_TO_M_EARTH = {
-    "m_earth": 1.0, "mearth": 1.0, "me": 1.0, "m_e": 1.0, "m⊕": 1.0, "earthmasses": 1.0,
-    "m_jup": 317.828, "mjup": 317.828, "mj": 317.828, "m_j": 317.828, "jupitermasses": 317.828,
-    "m_sun": 332946.0, "msun": 332946.0, "m_s": 332946.0,
-}
+def _aliases(base: dict[str, float], words: dict[str, float]) -> dict[str, float]:
+    """Spelled-out forms, singular and plural. Abstracts write 'Jupiter-mass' and 'Earth radii'
+    as often as 'M_Jup' — an unrecognised unit means no comparison, so the long forms matter."""
+    out = dict(base)
+    for word, factor in words.items():
+        for form in (word, word + "s", word + "es"):
+            out[form] = factor
+    return out
+
+
+_TO_R_EARTH = _aliases(
+    {"r_earth": 1.0, "rearth": 1.0, "re": 1.0, "r_e": 1.0, "r⊕": 1.0,
+     "r_jup": 11.2089, "rjup": 11.2089, "rj": 11.2089, "r_j": 11.2089,
+     "r_sun": 109.076, "rsun": 109.076, "r_s": 109.076},
+    {"earthradius": 1.0, "earthradii": 1.0, "earth-radius": 1.0, "earth-radii": 1.0,
+     "jupiterradius": 11.2089, "jupiterradii": 11.2089, "jupiter-radius": 11.2089,
+     "jupiter-radii": 11.2089, "solarradius": 109.076, "solarradii": 109.076},
+)
+_TO_M_EARTH = _aliases(
+    {"m_earth": 1.0, "mearth": 1.0, "me": 1.0, "m_e": 1.0, "m⊕": 1.0,
+     "m_jup": 317.828, "mjup": 317.828, "mj": 317.828, "m_j": 317.828,
+     "m_sun": 332946.0, "msun": 332946.0, "m_s": 332946.0},
+    {"earthmass": 1.0, "earth-mass": 1.0,
+     "jupitermass": 317.828, "jupiter-mass": 317.828,
+     "solarmass": 332946.0, "solar-mass": 332946.0},
+)
 _TO_KELVIN = {"k": 1.0, "kelvin": 1.0}
 
 _UNIT_TABLES: dict[str, dict[str, float]] = {
@@ -215,9 +232,109 @@ def fetch_abstract(arxiv_id: str, *, timeout: int = 30) -> tuple[str, str] | Non
 
 
 # --- the model call --------------------------------------------------------
+#
+# Two backends, because a Claude subscription is not an API credential — they are separately
+# billed products, and there is no way to spend a Pro/Max plan through the API.
+#
+#   "cli" — shells out to `claude -p`, which reuses whatever Claude Code is already logged in
+#           with. On a subscription plan that means this feature costs nothing extra. It is
+#           the default wherever the `claude` binary exists, since that is the cheaper path.
+#   "sdk" — the Anthropic API via ANTHROPIC_API_KEY (or any credential the SDK resolves).
+#           Needed in CI, where there is no interactive Claude Code login to borrow.
+#
+# The CLI gives no schema guarantee, so its output is validated by the same pydantic model the
+# SDK path constrains against — an unparseable or off-schema answer becomes "no diff", never a
+# half-trusted one.
 
-def extract(abstract: str, *, title: str = "", model: str = MODEL) -> Extraction | None:
-    """Quote the stated parameters out of an abstract. None on refusal or a missing key."""
+_USER_PROMPT = (
+    "Title: {title}\n\nAbstract:\n{abstract}\n\n"
+    "Quote every stated value for: planet radius, planet mass, planet equilibrium "
+    "temperature, host star effective temperature."
+)
+
+
+def _validate(payload: dict) -> Extraction | None:
+    """Parse a raw JSON answer into an Extraction, discarding anything off-schema.
+
+    Quantities outside our four are dropped rather than raising: a model that answers
+    `"Teff"` instead of `"host_teff"` should cost us one row, not the whole diff.
+    """
+    quotes = []
+    for raw in payload.get("quotes") or []:
+        try:
+            quotes.append(Quote.model_validate(raw))
+        except Exception:  # noqa: BLE001, PERF203 — one bad row must not lose the rest
+            continue
+    if not quotes:
+        return None
+    return Extraction(
+        quotes=quotes,
+        planet=str(payload.get("planet") or ""),
+        note=str(payload.get("note") or ""),
+    )
+
+
+def _extract_via_cli(abstract: str, title: str, model: str,
+                     *, timeout: int = 180) -> Extraction | None:
+    """Use the logged-in Claude Code CLI, so a subscription covers this instead of API credit."""
+    import shutil
+    import subprocess
+
+    binary = shutil.which("claude")
+    if binary is None:
+        return None
+    schema = (
+        '{"quotes":[{"quantity":"radius|mass|equilibrium_temperature|host_teff",'
+        '"value":<number as printed>,"unit":"<unit as printed>",'
+        '"sentence":"<verbatim source sentence>"}],"planet":"<name>","note":"<one sentence>"}'
+    )
+    prompt = (
+        f"{SYSTEM}\n\n"
+        f"Reply with ONLY minified JSON in exactly this shape, no prose and no code fence:\n"
+        f"{schema}\n\n"
+        f"`quantity` must be one of radius, mass, equilibrium_temperature, host_teff — use "
+        f"host_teff for the star's effective temperature. Omit any parameter not stated.\n\n"
+        + _USER_PROMPT.format(title=title, abstract=abstract)
+    )
+    try:
+        proc = subprocess.run(  # noqa: S603 — fixed binary, prompt on stdin
+            [binary, "-p", "--model", model],
+            input=prompt, capture_output=True, text=True, timeout=timeout, check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if proc.returncode != 0:
+        return None
+    text = proc.stdout.strip()
+    # Be forgiving about a stray code fence; be strict about everything after parsing.
+    fence = re.search(r"```(?:json)?\s*(.+?)```", text, re.S)
+    if fence:
+        text = fence.group(1).strip()
+    start, end = text.find("{"), text.rfind("}")
+    if start == -1 or end <= start:
+        return None
+    try:
+        payload = json.loads(text[start:end + 1])
+    except json.JSONDecodeError:
+        return None
+    return _validate(payload) if isinstance(payload, dict) else None
+
+
+def choose_backend(explicit: str | None = None) -> str:
+    """`cli` when Claude Code is installed (cheapest — reuses its login), else `sdk`."""
+    if explicit in ("cli", "sdk"):
+        return explicit
+    import shutil
+
+    return "cli" if shutil.which("claude") else "sdk"
+
+
+def extract(abstract: str, *, title: str = "", model: str = MODEL,
+            backend: str | None = None) -> Extraction | None:
+    """Quote the stated parameters out of an abstract. None on refusal or missing credentials."""
+    if choose_backend(backend) == "cli":
+        return _extract_via_cli(abstract, title, model)
+
     import anthropic  # imported here so the stdlib-only poll path never needs the SDK
 
     try:
@@ -232,11 +349,7 @@ def extract(abstract: str, *, title: str = "", model: str = MODEL) -> Extraction
             output_config={"effort": "low"},
             messages=[{
                 "role": "user",
-                "content": (
-                    f"Title: {title}\n\nAbstract:\n{abstract}\n\n"
-                    "Quote every stated value for: planet radius, planet mass, planet "
-                    "equilibrium temperature, host star effective temperature."
-                ),
+                "content": _USER_PROMPT.format(title=title, abstract=abstract),
             }],
             output_format=Extraction,
         )
@@ -256,30 +369,48 @@ def extract(abstract: str, *, title: str = "", model: str = MODEL) -> Extraction
     return response.parsed_output
 
 
-def diff_paper(story_url: str, ours: dict[str, float | None]) -> dict | None:
+def diff_paper(story_url: str, ours: dict[str, float | None],
+               *, backend: str | None = None) -> dict:
     """The whole chain: story URL -> arXiv id -> abstract -> quotes -> Python's verdict.
 
-    Returns None whenever any link is missing — no paper linked, no abstract, no key, nothing
-    stated. A missing diff is a normal outcome and must never look like a clean diff.
+    ALWAYS returns a dict with a `status`, never None. That is the correction to an earlier
+    design that returned None for every kind of nothing: silence conflated "no paper was
+    linked", "the abstract states none of the four", and "it ran and everything agreed" — so
+    you could not tell whether any check had happened at all. Three very different facts, and
+    the middle one is the common case.
+
+        no_paper | no_abstract | no_numbers | failed | checked
+
+    Only `checked` carries `comparisons`. Nothing here ever implies agreement it didn't test.
     """
     # No ANTHROPIC_API_KEY check here on purpose: an unset key does NOT mean there are no
     # credentials — the SDK also resolves ANTHROPIC_AUTH_TOKEN, an `ant auth login` profile,
     # and workload identity. Gating on the env var would silently skip the diff for anyone
     # authenticated any other way. Let the SDK resolve and treat a failure as "no diff".
+    chosen = choose_backend(backend)
     arxiv_id = arxiv_id_from(story_url)
     if arxiv_id is None:
-        return None
+        return {"status": "no_paper", "backend": chosen,
+                "reason": "no arXiv paper linked from this story"}
     fetched = fetch_abstract(arxiv_id)
     if fetched is None:
-        return None
+        return {"status": "no_abstract", "backend": chosen, "arxiv_id": arxiv_id,
+                "reason": f"could not fetch the abstract of arXiv:{arxiv_id}"}
     title, abstract = fetched
-    extraction = extract(abstract, title=title)
-    if extraction is None or not extraction.quotes:
-        return None
+    extraction = extract(abstract, title=title, backend=backend)
+    if extraction is None:
+        return {"status": "failed", "backend": chosen, "arxiv_id": arxiv_id,
+                "reason": "the extraction step returned nothing (credentials? rate limit?)"}
+    if not extraction.quotes:
+        return {"status": "no_numbers", "backend": chosen, "arxiv_id": arxiv_id,
+                "reason": "the abstract states none of the four parameters",
+                "note": extraction.note}
     return {
+        "status": "checked",
         "arxiv_id": arxiv_id,
         "title": title,
         "planet": extraction.planet,
         "note": extraction.note,
+        "backend": chosen,
         "comparisons": compare(ours, extraction),
     }

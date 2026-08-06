@@ -154,12 +154,49 @@ def test_a_broken_diff_degrades_to_a_note_and_never_blocks_the_alert(monkeypatch
     assert any("by hand" in line for line in lines)
 
 
-def test_a_missing_diff_is_silent_rather_than_reassuring(monkeypatch):
-    """The worst possible output would be 'no differences found' when nothing was compared."""
+def test_a_diff_that_compared_nothing_says_so_and_never_implies_agreement(monkeypatch):
+    """Two failures are possible here and only one of them used to be guarded.
+
+    Claiming 'no differences found' when nothing was compared would be dangerous. But staying
+    *silent* was also wrong: it made "ran and everything agreed" indistinguishable from "never
+    ran", so the honest reaction to a briefing was "did it even do any checks?". State the
+    reason; never imply a comparison that didn't happen.
+    """
     monkeypatch.setattr(nw, "DIFF_PAPER", True)
+    nw._DIFF_CACHE.clear()
     import tools.paper_diff as pd
-    monkeypatch.setattr(pd, "diff_paper", lambda *a, **k: None)
+    monkeypatch.setattr(pd, "diff_paper", lambda *a, **k: {
+        "status": "no_numbers", "reason": "the abstract states none of the four parameters",
+    })
     rec = {"params": {"radius_r_earth": 1.0}, "host_star": {"teff_k": 5000.0}}
     lines = nw.paper_diff_lines(nw.Item(feed=nw.FEEDS[0], uid="u", title="t", link="l",
                                         summary="", published=None), rec)
-    assert lines == []
+    text = "\n".join(lines)
+    assert "none of the four parameters" in text
+    assert "by hand" in text
+    assert "agrees" not in text and "within tolerance" not in text
+
+
+def test_the_verdict_block_distinguishes_not_run_from_compared(monkeypatch):
+    """The three lines at the top are the answer to 'what am I supposed to look at'."""
+    rec = {"params": {"radius_r_earth": 1.0, "mass_m_earth": 1.0,
+                      "equilibrium_temp_k": 300.0}, "host_star": {"teff_k": 5000.0}}
+    item = nw.Item(feed=nw.FEEDS[0], uid="v1", title="Water on K2-18 b", link="l",
+                   summary="", published=None)
+
+    monkeypatch.setattr(nw, "DIFF_PAPER", False)
+    out: list[str] = []
+    nw.verdict_block(out, rec, item)
+    assert any("not run" in ln for ln in out)
+    assert any("[YOU ]" in ln for ln in out)
+
+    nw._DIFF_CACHE.clear()
+    monkeypatch.setattr(nw, "DIFF_PAPER", True)
+    import tools.paper_diff as pd
+    monkeypatch.setattr(pd, "diff_paper", lambda *a, **k: {
+        "status": "checked", "arxiv_id": "1", "backend": "cli",
+        "comparisons": [pd.Comparison("radius", 1.0, 1.0, "R_Earth", "s", False, "Δ 0%")],
+    })
+    out = []
+    nw.verdict_block(out, rec, item)
+    assert any("[OK  ] 2." in ln and "radius" in ln for ln in out)
