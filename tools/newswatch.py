@@ -1316,6 +1316,56 @@ def _age(published: datetime | None, now: datetime) -> str:
     return f"{int(hours // 24)} d ago"
 
 
+# Whether to run the paper diff. Off unless --diff-paper is passed: it is the one part of
+# newswatch that needs a network call to a third party and an SDK the poll path doesn't have.
+DIFF_PAPER = False
+
+
+def paper_diff_lines(item: Item, rec: dict) -> list[str]:
+    """Checklist step 2, run for you — see tools/paper_diff.py for why a model only ever
+    QUOTES here and Python does the comparing.
+
+    Best effort in every direction. No `--diff-paper`, no SDK installed, no API key, no paper
+    linked, no numbers in the abstract: the alert goes out unchanged. The one thing this must
+    never do is make a missing diff look like a clean one, so it stays silent rather than
+    reporting 'no differences found'.
+    """
+    if not DIFF_PAPER:
+        return []
+    try:
+        from tools.paper_diff import diff_paper
+    except ImportError:
+        return ["", "<i>--diff-paper needs the SDK: uv sync --extra paperdiff</i>"]
+    params, star = rec["params"], rec["host_star"]
+    ours = {
+        "radius": params.get("radius_r_earth"),
+        "mass": params.get("mass_m_earth"),
+        "equilibrium_temperature": params.get("equilibrium_temp_k"),
+        "host_teff": star.get("teff_k"),
+    }
+    try:
+        result = diff_paper(item.link, ours)
+    except Exception as e:  # noqa: BLE001 — an alert must survive a broken diff
+        return ["", f"<i>paper diff failed ({type(e).__name__}) — do step 2 by hand</i>"]
+    if not result:
+        return []
+
+    superseded = [c for c in result["comparisons"] if c.superseded]
+    head = ("⚠️ <b>THE PAPER MOVED OUR NUMBERS</b>" if superseded
+            else "📄 <b>Paper agrees within tolerance</b>")
+    lines = ["", head, f"<i>from the abstract of arXiv:{_esc(result['arxiv_id'])}</i>"]
+    for c in result["comparisons"]:
+        mark = "⚠️" if c.superseded else "·"
+        ours_txt = "—" if c.ours is None else f"{c.ours:,.2f}"
+        theirs_txt = "—" if c.theirs is None else f"{c.theirs:,.2f}"
+        lines.append(f"{mark} {c.quantity}: ours {ours_txt} vs paper {theirs_txt} "
+                     f"({_esc(c.unit_printed)}) — {_esc(c.detail)}")
+    if superseded:
+        lines.append("Post the <b>colour change</b>, not the swatch.")
+    lines.append("<i>Abstract only, not the parameter table — still open the paper.</i>")
+    return lines
+
+
 def alert_text(item: Item, target: Target, base: str, *, now: datetime,
                playbook: Playbook | None = None) -> str:
     """The message that lands on the phone. Its only job is to answer 'do I care right now',
@@ -1394,6 +1444,7 @@ def alert_text(item: Item, target: Target, base: str, *, now: datetime,
             f"host {_fmt(star.get('teff_k'), ' K', 0)}</pre>",
             ">10% on R/M or >100 K on either ⇒ post the <i>change</i>, not the swatch.",
         ]
+        lines += paper_diff_lines(item, rec)
 
     # Step 1 of the runbook, answered rather than asked. All four questions are answerable
     # from the feed item, so there is no reason to make a human do it at 60 seconds a time.
@@ -1575,7 +1626,8 @@ def cmd_aliases(args: argparse.Namespace) -> None:
 
 
 def cmd_poll(args: argparse.Namespace) -> None:
-    global _ALIASES
+    global _ALIASES, DIFF_PAPER
+    DIFF_PAPER = args.diff_paper
     _ALIASES = load_aliases()
     _, catalogue = load_catalogue()
     playbook = load_playbook(_playbook_arg(args))
@@ -1816,6 +1868,11 @@ def main() -> None:
                          "and NEWSWATCH_TELEGRAM_CHAT_ID). Exits non-zero if they are unset.")
     po.add_argument("--no-attach", action="store_true",
                     help="Alert only; don't attach the full briefing as a document")
+    po.add_argument("--diff-paper", action="store_true",
+                    help="Run checklist step 2 for you: find the linked paper, quote its "
+                         "stated radius/mass/T_eq/host T_eff, and diff them against ours. "
+                         "Needs ANTHROPIC_API_KEY and `uv sync --extra paperdiff`. Off by "
+                         "default — it is the only part that calls a third party.")
     po.add_argument("--quiet", action="store_true",
                     help="Print one line per item instead of the briefings. Use this in CI: "
                          "this repository is public and a workflow log is world-readable.")

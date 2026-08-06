@@ -360,6 +360,15 @@ Six things about it are deliberate:
   named planet rather than a population result — are answerable from the feed item, so the
   alert carries the verdict and the evidence for each. It reports; it doesn't act: a 1/4 story
   you happen to know is a big deal is still yours to jack.
+- **Checklist step 2 can run itself — and a model never decides the verdict.** `--diff-paper`
+  finds the paper linked from the story, has Claude **quote** its stated radius, mass, T_eq and
+  host T_eff — the number as printed, the unit as printed, and the sentence each came from —
+  then does the unit conversion and the ±10% / ±100 K comparison **in Python**. That split is
+  the whole safety argument: a bad extraction produces an unhelpful quote you can see is wrong
+  next to its source, never a confident wrong verdict in the one place the checklist exists to
+  protect. It reads the *abstract*, not the parameter table, so it front-loads step 2 rather
+  than retiring it, and says so on every alert. Off by default; needs `ANTHROPIC_API_KEY` and
+  `uv sync --extra paperdiff`. A missing diff is silent — never "no differences found".
 - **A planet in the news that is *not* in the catalogue is the most valuable line it prints.**
   That is a data task, and it is the majority case on a "new planet discovered" story. The
   alert hands you the `--merge-into` command — the one that actually reaches the site — and,
