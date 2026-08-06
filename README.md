@@ -5,11 +5,11 @@ The colour scheme of every known exoplanet, derived from physics.
 Each planet's visible colour is computed from its reflected-light spectrum
 (geometric albedo × host-star spectrum) via CIE 1931 colour matching, then presented as a
 designer palette. Every planet is shown two ways: its **true colour** (full model
-spectrum) and **as Roman would see it** (reconstructed from the four Roman Coronagraph
-bands, both computed at quadrature — a coronagraph never sees full phase) — the signature
-feature is how much colour identity survives that filter set.
+spectrum) and **as Roman would see it** (reconstructed from the three Roman Coronagraph
+flight bands, both computed at quadrature — a coronagraph never sees full phase) — the
+signature feature is how much colour identity survives that filter set.
 
-The production catalog models **5,764 planets** — every confirmed exoplanet in the NASA
+The production catalog models **5,773 planets** — every confirmed exoplanet in the NASA
 Exoplanet Archive that passes the data-completeness gate; the rest are excluded because no
 colour could honestly be derived from what the Archive knows about them.
 
@@ -67,7 +67,7 @@ sources and credits (`/credits` — see below),
 a phase slider with an automatic full
 lunar-cycle animation in the EXOSCOPE (per-planet random phases on the gallery), a "Seen in
 fiction" overlay, and clean extensionless URLs. No backend, no build toolchain beyond Python.
-`web.build` streams one planet at a time, so rendering all 5,764 pages takes ~13 s locally,
+`web.build` streams one planet at a time, so rendering all 5,773 pages takes ~13 s locally,
 plus ~1 min for the share cards across cores (`dist/` ≈ 0.56 GB, of which the cards are
 ~165 MB; the runtime gallery index ≈ 2.5 MB).
 
@@ -84,7 +84,7 @@ the site's honesty rule — a microlensing planet's card says its light is never
 
 `sitemap.xml` and `robots.txt` are emitted too. This matters more than usual here: the gallery
 grid is client-rendered from a fetched index, so a crawler that only follows links sees ~150
-planets out of 5,764.
+planets out of 5,773.
 
 **The canonical origin is a build input**, since the repo can't know it:
 
@@ -100,7 +100,7 @@ production ships relative `og:image` URLs and no sitemap.
 ### Visitor analytics (PostHog, off by default)
 
 The questions worth asking here aren't "how many hits" — they're *does anyone flip the Roman
-switch, does the phase slider get dragged, which of the 5,764 worlds do people actually open,
+switch, does the phase slider get dragged, which of the 5,773 worlds do people actually open,
 and do the Roman colours get copied as often as the true ones*. Those are events, so the site
 uses PostHog rather than a pageview counter.
 
@@ -248,7 +248,7 @@ globals set in `web/build._env()` from `pipeline.rights`, so the licence the foo
 the one stamped into `planets.json` are the same fact. `tests/test_footer.py` checks the built
 `dist/` — every hub page and planet page carries it, and every destination it names exists.
 
-One known limit: the gallery is an infinite scroll, so its own footer sits below 5,764 cards.
+One known limit: the gallery is an infinite scroll, so its own footer sits below 5,773 cards.
 That page has the Explore menu, which carries the same links.
 
 ### Previewing several worktrees at once (`tools/exohub.py`)
@@ -299,10 +299,10 @@ python3 tools/newswatch.py poll --fixture tests/fixtures/feeds --dry-run
 Five things about it are deliberate:
 
 - **It matches on an alias table, not a regex.** The press writes `TRAPPIST-1e`, `K2-18b`,
-  `HD189733b`, `Gliese 1214 b`, `51 Pegasi b`; the Archive writes `TRAPPIST-1 e`, `K2-18 b`,
-  `HD 189733 b`, `GJ 1214 b`, `51 Peg b`. Both sides are lowercased with spaces, hyphens and
+  `HD189733b`, `Gliese 1214 b`, `51 Pegasi b`; the Archive writes `TRAPPIST-1 e`, `K2-18 b`, <!-- factcheck: ignore -->
+  `HD 189733 b`, `GJ 1214 b`, `51 Peg b`. Both sides are lowercased with spaces, hyphens and <!-- factcheck: ignore -->
   apostrophes stripped, so they collapse to the same key, and every Archive name is expanded
-  into the long forms the press actually prints (`bet Pic b` → `beta Pictoris b`). The obvious
+  into the long forms the press actually prints (`bet Pic b` → `beta Pictoris b`). The obvious <!-- factcheck: ignore -->
   guard — *"a designation must contain a digit"* — silently discards every Greek-letter and
   variable-star planet, so the guard is a length floor plus a system-dictionary check instead.
 - **The Roman view is gated on the band configuration in the data.** Releases before the
@@ -328,6 +328,55 @@ Five things about it are deliberate:
 The tool needs `data/planets.json`, which is not in the repo — run `python3 scripts/fetch_data.py`
 first. `poll` appends every surfaced item to a newsjack log so the tracking is a side effect of
 running it rather than a discipline anyone has to maintain.
+
+#### Unattended: twice a day, to a phone
+
+`.github/workflows/newswatch.yml` polls at 07:00 and 17:00 UTC (08:00 / 18:00 Lisbon in summer)
+and pushes anything worth knowing to Telegram. The morning run catches arXiv (announced 20:00 ET
+Sun–Thu) plus overnight US press; the evening run catches the European press day, which is when
+ESO and ESA release.
+
+Two secrets and one variable, in **Settings → Secrets and variables → Actions**:
+
+| | name | where it comes from |
+|---|---|---|
+| secret | `NEWSWATCH_TELEGRAM_TOKEN` | [@BotFather](https://t.me/BotFather) → `/newbot` |
+| secret | `NEWSWATCH_TELEGRAM_CHAT_ID` | message the bot once, then `api.telegram.org/bot<TOKEN>/getUpdates` → `result[0].message.chat.id` |
+| variable | `SITE_BASE_URL` | your origin, so the alert links are clickable |
+
+Prove the channel before anything depends on it:
+
+```bash
+export NEWSWATCH_TELEGRAM_TOKEN=… NEWSWATCH_TELEGRAM_CHAT_ID=…
+python3 tools/newswatch.py notify --attach
+```
+
+Each alert is **one message** you can act on from a lock screen — tier, headline, source, age,
+the colour, the four numbers to diff against the paper, why it ranked, and the three search
+links — with the full briefing attached as a `.md`. Alerts come in two tiers, because *"popping
+off"* and *"about to"* need opposite responses:
+
+- 🔴 **ACT NOW** — a press/aggregator feed, so the general-audience cycle has started and the
+  reply window is about two hours wide.
+- 🔵 **PRE-BUILD** — arXiv only. No clock. The right move is to write the bench entry in
+  daylight, which is the plan's *stock beats speed*.
+
+Three things about the workflow are deliberate:
+
+- **`--quiet` is not optional.** This repository is public, so every workflow log is
+  world-readable, and the briefing is the private half — where to post, and half-written copy.
+  The job prints one line per item (tier, score, feed, planet); the substance goes to the chat
+  and nowhere else. To debug a run, use `workflow_dispatch` with `dry_run` and read the message
+  you get, rather than dropping `--quiet`.
+- **Silence is distinguishable from breakage.** A quiet news day is the common case, so a
+  broken watcher would look exactly like one. `poll` sends a heartbeat after
+  `--notify-quiet-days` (3) of nothing, and the workflow pings Telegram with `curl` on failure —
+  `curl` rather than the tool, because if the tool is what broke it can't report its own death.
+- **No `uv sync` anywhere.** `newswatch` and `scripts/fetch_data.py` are stdlib-only, so the job
+  is bare `python3` and takes seconds. State (seen ids, 30-day suppression, alias table) lives in
+  an Actions cache under a rolling key; the catalogue is cached on `hashFiles('data/RELEASE')` so
+  86 MB downloads only when the release moves. Losing the cache is survivable rather than silent:
+  the 7-day recency gate bounds a re-alert to at most a week, and the run logs a warning.
 
 ## Deploy (Dokploy / any static host)
 
@@ -469,8 +518,8 @@ published, so a fix that stops catching one fails the suite.
   380–780 nm / 5 nm grid, converts it to a colour + palette, integrates it through the
   Roman CGI bands, reconstructs a colour from just those bands, and emits
   `data/planets.json`. The albedo source is behind a `SpectrumProvider` protocol; a router
-  picks the best available engine per planet — the parametric engine (4,439 planets), the
-  Cahoy 2010 grid (1,320), or PICASO (selected targets, via a committed spectrum cache).
+  picks the best available engine per planet — the parametric engine (4,446 planets), the <!-- factcheck: ignore -->
+  Cahoy 2010 grid (1,322), or PICASO (selected targets, via a committed spectrum cache).
   See `docs/spectrum-engines.md`.
 - **The swap seam** (`pipeline/emit/build.py` → `pipeline/fetch/targets.py`): if a real
   measured file `data/cgi_measured/{id}.roman-cgi.json` exists it replaces the simulated

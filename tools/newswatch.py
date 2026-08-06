@@ -17,12 +17,16 @@ Subcommands
     poll      Poll the feeds, rank, and print at most 3 briefings. The daily driver.
     brief     Briefing for one named planet, on demand. The test path and the bench.
     bench     Pre-write briefings for the ~20 planets that generate the headlines.
+    notify    Send a test message, to prove the Telegram channel works.
     log       Show the newsjack log.
 
 Testing it without waiting for news
     python3 tools/newswatch.py brief "K2-18 b"          # the whole output, right now
     python3 tools/newswatch.py feeds --save-fixture tests/fixtures/feeds
     python3 tools/newswatch.py poll --fixture tests/fixtures/feeds --dry-run
+
+Unattended (see .github/workflows/newswatch.yml)
+    poll --notify --quiet     push to Telegram; keep the briefing OUT of the public log
 
 Stdlib only, so it runs under bare python3 with no venv.
 """
@@ -1082,6 +1086,245 @@ def render_brief(rec: dict | None, name: str, base: str, *, headline: str | None
 
 
 # --------------------------------------------------------------------------
+# notification — the alert that reaches a phone
+# --------------------------------------------------------------------------
+#
+# Why a push at all: the plan dies in week two if checking is something you have to
+# remember. Why Telegram specifically: the briefing is a *private* artifact. It carries
+# where-to-post tactics and half-written copy, and this repository is public, so it must
+# never reach a workflow log. The chat is the only place it goes.
+
+TELEGRAM_API = "https://api.telegram.org/bot{token}/{method}"
+TELEGRAM_LIMIT = 4096
+
+# Two tiers, because "popping off" and "about to" need opposite responses. A press feed means
+# the general-audience cycle has started and the reply window is ~2 hours wide. A preprint
+# means no clock at all — the right move is to write the bench entry in daylight, which is the
+# plan's "stock beats speed". Alerting both the same way would train you to ignore both.
+TIER_ACT = "ACT NOW"
+TIER_STOCK = "PRE-BUILD"
+
+
+def tier_of(item: Item) -> str:
+    return TIER_STOCK if item.feed.kind == "preprint" else TIER_ACT
+
+
+def _esc(text: str) -> str:
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+@dataclass
+class Telegram:
+    token: str
+    chat_id: str
+
+    @classmethod
+    def from_env(cls) -> Telegram | None:
+        token = os.environ.get("NEWSWATCH_TELEGRAM_TOKEN", "").strip()
+        chat = os.environ.get("NEWSWATCH_TELEGRAM_CHAT_ID", "").strip()
+        return cls(token, chat) if token and chat else None
+
+    def _post(self, method: str, body: bytes, content_type: str) -> dict:
+        req = urllib.request.Request(
+            TELEGRAM_API.format(token=self.token, method=method),
+            data=body, headers={"Content-Type": content_type, "User-Agent": UA},
+        )
+        with urllib.request.urlopen(req, timeout=45) as resp:  # noqa: S310 (telegram.org)
+            return json.loads(resp.read().decode())
+
+    def message(self, html: str) -> dict:
+        # Telegram hard-caps a message at 4096 characters. Truncate rather than split: the
+        # alert is a summary by design and the whole thing is attached as a file anyway.
+        if len(html) > TELEGRAM_LIMIT:
+            html = html[: TELEGRAM_LIMIT - 40] + "\n… (truncated; see attachment)"
+        body = urllib.parse.urlencode({
+            "chat_id": self.chat_id, "text": html, "parse_mode": "HTML",
+            "disable_web_page_preview": "true",
+        }).encode()
+        return self._post("sendMessage", body, "application/x-www-form-urlencoded")
+
+    def document(self, filename: str, content: str, caption: str = "") -> dict:
+        boundary = "----newswatch" + str(abs(hash(filename)) % 10**12)
+        parts: list[bytes] = []
+
+        def field(name: str, value: str) -> None:
+            parts.append(
+                f'--{boundary}\r\nContent-Disposition: form-data; name="{name}"\r\n\r\n'
+                f"{value}\r\n".encode()
+            )
+
+        field("chat_id", self.chat_id)
+        if caption:
+            field("caption", caption[:1024])
+        parts.append(
+            f'--{boundary}\r\nContent-Disposition: form-data; name="document"; '
+            f'filename="{filename}"\r\nContent-Type: text/markdown; charset=utf-8\r\n\r\n'
+            .encode() + content.encode() + b"\r\n"
+        )
+        parts.append(f"--{boundary}--\r\n".encode())
+        return self._post("sendDocument", b"".join(parts),
+                          f"multipart/form-data; boundary={boundary}")
+
+
+@dataclass
+class Target:
+    """What one news item is actually *about*, resolved once.
+
+    This lived inline in three places and they drifted: one branch fell through to the string
+    "unknown", which then rendered a Bluesky search for "unknown" and a fast-path command
+    reading `--planet "unknown"`. Resolving it once, with an explicit `kind`, is what stops
+    an alert from confidently telling you to build a planet that does not exist.
+    """
+
+    name: str            # what to SHOW — the display name when we have a record
+    record: dict | None
+    kind: str            # "planet" | "planet-missing" | "host" | "none"
+
+    @property
+    def archive_name(self) -> str:
+        """What to pass to `pipeline build --planet`, which wants the Archive spelling."""
+        return self.record["name"] if self.record else self.name
+
+
+def resolve_target(item: Item, catalogue: Catalogue) -> Target:
+    for p in item.planets:
+        rec = catalogue.get(p)
+        if rec is not None:
+            return Target(rec["name"], rec, "planet")
+    if item.planets:
+        return Target(item.planets[0], None, "planet-missing")
+    for h in item.hosts:
+        sib = catalogue.by_host(h)
+        if sib is not None:
+            return Target(h, sib, "host")
+        return Target(h, None, "host")
+    return Target("unknown", None, "none")
+
+
+def _age(published: datetime | None, now: datetime) -> str:
+    if published is None:
+        return "undated"
+    hours = (now - published).total_seconds() / 3600
+    if hours < 1:
+        return "just now"
+    if hours < 48:
+        return f"{int(hours)} h ago"
+    return f"{int(hours // 24)} d ago"
+
+
+def alert_text(item: Item, target: Target, base: str, *, now: datetime) -> str:
+    """The message that lands on the phone. Its only job is to answer 'do I care right now',
+    in the time it takes to read a notification. Everything else is in the attachment."""
+    tier = tier_of(item)
+    head = "🔴" if tier == TIER_ACT else "🔵"
+    name, rec = target.name, target.record
+    label = name if target.kind != "host" else f"{name} (system — no planet named)"
+    lines = [
+        f"{head} <b>{tier}</b> · {_esc(label)}",
+        f"<b>{_esc(item.title)}</b>",
+        f"{_esc(item.feed.name)} · {item.feed.kind} · {_age(item.published, now)}",
+        "",
+    ]
+
+    # Branch on `kind`, never on `rec is None`. Branching on the record is what produced
+    # `--planet "TRAPPIST-1"` — an instruction to build a *star* as a planet, in the one
+    # message you would act on without checking.
+    if target.kind == "host":
+        if rec is not None:
+            n = rec["system"]["member_count"] if rec.get("system") else 1
+            lines += [
+                f"The story names the <b>host</b>, not a planet. We have {n} planet(s) "
+                f"there — nearest match <code>{rec['true_colour']['hex']}</code> "
+                f"{_esc(rec['name'])}.",
+            ]
+        else:
+            lines.append(
+                "The story names a <b>host star</b> we have no planets for, and names no "
+                "planet. There is nothing to colour yet."
+            )
+        lines.append(
+            "Read the story first: a system story is often about a planet we lack, and the "
+            "planet's name may not be in the headline."
+        )
+    elif target.kind == "planet-missing":
+        lines += [
+            "⚠️ <b>NOT IN OUR CATALOGUE</b> — we cannot post a colour for this one yet.",
+            "This is the majority case on a 'new planet discovered' story. Fast path:",
+            "",
+            f"<pre>uv run python -m pipeline build --planet \"{_esc(target.archive_name)}\" \\\n"
+            f"    --out data/newsjack.json --no-cache</pre>",
+            "",
+            "If the gate rejects it, the missing number is itself the post.",
+        ]
+    else:
+        tc = rec["true_colour"]
+        stale, stale_why = roman_is_stale(rec)
+        params, star = rec["params"], rec["host_star"]
+        lines += [
+            f"<code>{tc['hex']}</code> — {colour_name(tc['hex'])} "
+            f"({rec['provenance']}, confidence {tc['confidence']})",
+        ]
+        if stale:
+            lines.append(f"⛔ Roman view withheld — {_esc(stale_why)}")
+        else:
+            view = rec["instrument_views"][0]
+            lines.append(
+                f"<code>{view['colour']['hex']}</code> — as Roman would see it, "
+                f"ΔE2000 {view['reconstruction_error']['delta_e2000']:.1f}"
+            )
+        lines += [
+            f"release {release_tag()} · {site_url(base)}/planet/{rec['id']}",
+            "",
+            "<b>Diff these four against the paper before you post</b>",
+            f"<pre>R {_fmt(params.get('radius_r_earth'), ' R⊕')}   "
+            f"M {_fmt(params.get('mass_m_earth'), ' M⊕')}\n"
+            f"T_eq {_fmt(params.get('equilibrium_temp_k'), ' K', 0)}   "
+            f"host {_fmt(star.get('teff_k'), ' K', 0)}</pre>",
+            ">10% on R/M or >100 K on either ⇒ post the <i>change</i>, not the swatch.",
+        ]
+
+    q = urllib.parse.quote(name)
+    lines += [
+        "",
+        f"<b>Why it ranked ({item.score})</b>: {_esc('; '.join(item.reasons))}",
+        "",
+    ]
+    if tier == TIER_ACT:
+        lines += [
+            "<b>Reply, don't post</b> — the researcher/journalist window is ~2 h.",
+            f'<a href="https://bsky.app/search?q={q}">Bluesky</a> · '
+            f'<a href="https://www.reddit.com/search/?q={q}&amp;sort=new">Reddit</a> · '
+            f'<a href="https://hn.algolia.com/?query={q}&amp;sort=byDate">HN</a>',
+            "Reddit/HN threads form 6–18 h later — check tonight, don't rush now.",
+        ]
+    else:
+        lines += [
+            "No clock on this one. It is <i>stock</i>: write the bench entry in daylight,",
+            "with the checklist done, so the press wave later is a 5-minute publish.",
+            f"<pre>python3 tools/newswatch.py brief \"{_esc(target.archive_name)}\"</pre>",
+        ]
+    if item.link:
+        lines += ["", f'<a href="{_esc(item.link)}">the story</a>']
+    return "\n".join(lines)
+
+
+def notify_items(tg: Telegram, surfaced: list[Item], catalogue: Catalogue, base: str,
+                 *, now: datetime, attach: bool = True) -> int:
+    sent = 0
+    for it in surfaced:
+        target = resolve_target(it, catalogue)
+        tg.message(alert_text(it, target, base, now=now))
+        if attach:
+            body = render_brief(target.record, target.name, base, headline=it.title,
+                                source=f"{it.feed.name} ({it.feed.kind})", link=it.link)
+            fname = f"{slug(target.name) or 'briefing'}-{now:%Y%m%d}.md"
+            tg.document(fname, f"```\n{body}\n```\n",
+                        caption="Full briefing — facts, checklist and copy scaffolds.")
+        sent += 1
+    return sent
+
+
+# --------------------------------------------------------------------------
 # log
 # --------------------------------------------------------------------------
 
@@ -1157,6 +1400,13 @@ def cmd_feeds(args: argparse.Namespace) -> None:
 
 
 def cmd_aliases(args: argparse.Namespace) -> None:
+    if args.if_older_than and ALIAS_FILE.exists():
+        built = json.loads(ALIAS_FILE.read_text()).get("built_at")
+        if built:
+            age = (datetime.now(UTC) - datetime.fromisoformat(built)).total_seconds() / 86400
+            if age < args.if_older_than:
+                print(f"Alias table is {age:.1f} d old (< {args.if_older_than}); not rebuilding.")
+                return
     t = build_aliases()
     for probe in ("K2-18b", "TRAPPIST-1e", "HD189733b", "Gliese 1214 b", "51 Pegasi b",
                   "beta Pictoris b", "Osiris", "TOI-700 d"):
@@ -1206,22 +1456,50 @@ def cmd_poll(args: argparse.Namespace) -> None:
         print(f"   valuable line this tool prints: {', '.join(sorted(set(misses))[:10])}")
         print()
 
-    for it in surfaced:
-        target = next((p for p in it.planets if p in catalogue), None) or \
-            (it.planets[0] if it.planets else None)
-        if target is None and it.hosts:
-            sibling = catalogue.by_host(it.hosts[0])
-            target = sibling["name"] if sibling else None
-        why = f"score {it.score}: " + "; ".join(it.reasons)
-        print(render_brief(
-            catalogue.get(target) if target else None,
-            target or (it.hosts[0] if it.hosts else "unknown"),
-            args.base_url,
-            headline=f"{it.title}\n\n{why}",
-            source=f"{it.feed.name} ({it.feed.kind})",
-            link=it.link,
-        ))
-        print()
+    if args.quiet:
+        # The briefing carries where-to-post tactics and half-written copy. This repository is
+        # public, so in CI it must never reach stdout — a workflow log is world-readable. One
+        # line per item is enough to see the run worked; the substance goes to the chat.
+        for it in surfaced:
+            where = it.planets[0] if it.planets else (it.hosts[0] if it.hosts else "?")
+            print(f"  {tier_of(it):9} {it.score:3}  {it.feed.id:14} {where}")
+    else:
+        for it in surfaced:
+            target = resolve_target(it, catalogue)
+            why = f"score {it.score}: " + "; ".join(it.reasons)
+            print(render_brief(
+                target.record, target.name, args.base_url,
+                headline=f"{it.title}\n\n{why}",
+                source=f"{it.feed.name} ({it.feed.kind})",
+                link=it.link,
+            ))
+            print()
+
+    if args.notify:
+        tg = Telegram.from_env()
+        if tg is None:
+            sys.exit(
+                "--notify was asked for but NEWSWATCH_TELEGRAM_TOKEN / "
+                "NEWSWATCH_TELEGRAM_CHAT_ID are not set.\n"
+                "Failing loudly on purpose: a notifier that quietly does nothing is worse "
+                "than no notifier — you would trust it and hear nothing."
+            )
+        if surfaced:
+            n = notify_items(tg, surfaced, catalogue, args.base_url, now=now,
+                             attach=not args.no_attach)
+            state["last_alert"] = now.isoformat()
+            print(f"Alerted {n} item(s) to Telegram.")
+        elif args.notify_quiet_days and _quiet_streak(state, now) >= args.notify_quiet_days:
+            # A heartbeat, so silence stays distinguishable from breakage. Without it you
+            # cannot tell "no exoplanet news" from "the workflow has been failing for a week".
+            tg.message(
+                f"🟢 <b>newswatch</b> — quiet for {args.notify_quiet_days} day(s). "
+                f"{len(items)} items polled, nothing worth jacking. Still running."
+            )
+            state["last_heartbeat"] = now.isoformat()
+            print("No items; sent a heartbeat.")
+        else:
+            print("No items to alert.")
 
     if not args.dry_run:
         for it in items:
@@ -1236,6 +1514,36 @@ def cmd_poll(args: argparse.Namespace) -> None:
         print(f"Logged {len(surfaced)} to {path}")
     else:
         print("--dry-run: state not advanced, nothing logged. Re-run gives the same answer.")
+
+
+def _quiet_streak(state: dict, now: datetime) -> float:
+    last = state.get("last_heartbeat") or state.get("last_alert")
+    if not last:
+        return 999.0
+    return (now - datetime.fromisoformat(last)).total_seconds() / 86400
+
+
+def cmd_notify(args: argparse.Namespace) -> None:
+    """Prove the channel works before anything depends on it."""
+    tg = Telegram.from_env()
+    if tg is None:
+        sys.exit(
+            "Set both:\n"
+            "  export NEWSWATCH_TELEGRAM_TOKEN=<from @BotFather>\n"
+            "  export NEWSWATCH_TELEGRAM_CHAT_ID=<your chat id>\n\n"
+            "To get the chat id: message your new bot once, then open\n"
+            "  https://api.telegram.org/bot<TOKEN>/getUpdates\n"
+            "and read result[0].message.chat.id (a personal chat id is a positive integer)."
+        )
+    resp = tg.message(
+        "🔭 <b>newswatch</b> — channel test.\n"
+        "If you can read this, the bot, the token and the chat id all work.\n"
+        f"<pre>release {release_tag()}</pre>"
+    )
+    if args.attach:
+        tg.document("newswatch-test.md", "# newswatch\n\nAttachment delivery works.\n",
+                    caption="Attachment test — full briefings arrive like this.")
+    print("ok" if resp.get("ok") else json.dumps(resp, indent=1))
 
 
 def cmd_brief(args: argparse.Namespace) -> None:
@@ -1312,6 +1620,9 @@ def main() -> None:
     f.set_defaults(func=cmd_feeds)
 
     a = sub.add_parser("aliases", help="Build the name lookup from the Archive (run weekly)")
+    a.add_argument("--if-older-than", type=float, default=0.0, metavar="DAYS",
+                   help="Only rebuild when the cached table is older than DAYS. For a cron "
+                        "that runs twice a day but should pull the Archive once a week.")
     a.set_defaults(func=cmd_aliases)
 
     po = sub.add_parser("poll", help="Poll, rank, print at most 3 briefings")
@@ -1319,6 +1630,18 @@ def main() -> None:
     po.add_argument("--dry-run", action="store_true",
                     help="Don't advance state or log — re-running gives the same answer")
     po.add_argument("--log", metavar="PATH", help="Newsjack log path")
+    po.add_argument("--notify", action="store_true",
+                    help="Push each surfaced item to Telegram (needs NEWSWATCH_TELEGRAM_TOKEN "
+                         "and NEWSWATCH_TELEGRAM_CHAT_ID). Exits non-zero if they are unset.")
+    po.add_argument("--no-attach", action="store_true",
+                    help="Alert only; don't attach the full briefing as a document")
+    po.add_argument("--notify-quiet-days", type=float, default=3.0, metavar="N",
+                    help="With --notify and nothing to report, send a heartbeat if it has been "
+                         "N days since the last message (default 3; 0 disables). Silence must "
+                         "stay distinguishable from breakage.")
+    po.add_argument("--quiet", action="store_true",
+                    help="Print one line per item instead of the briefings. Use this in CI: "
+                         "this repository is public and a workflow log is world-readable.")
     po.add_argument("--max-age-days", type=int, default=MAX_AGE_DAYS, metavar="N",
                     help=f"Ignore items published more than N days ago (default {MAX_AGE_DAYS}). "
                          f"Feeds move at very different speeds — ESO's holds ten items and can "
@@ -1337,6 +1660,10 @@ def main() -> None:
     be.add_argument("--out", default="docs/marketing/bench", metavar="DIR")
     be.add_argument("--base-url", default=base_default)
     be.set_defaults(func=cmd_bench)
+
+    nt = sub.add_parser("notify", help="Send a test message, to prove the channel works")
+    nt.add_argument("--attach", action="store_true", help="Also send a test attachment")
+    nt.set_defaults(func=cmd_notify)
 
     lg = sub.add_parser("log", help="Show the newsjack log")
     lg.add_argument("--log", metavar="PATH")

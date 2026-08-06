@@ -146,10 +146,29 @@ def test_min_alias_length_is_not_a_digit_requirement():
 
 # --- the catalogue join ----------------------------------------------------
 
+def _rec(pid, name, host, hex_="#8bd6f4"):
+    return {
+        "id": pid, "name": name, "host_star": {"name": host, "teff_k": 3457.0},
+        "provenance": "model",
+        "true_colour": {"hex": hex_, "palette": [], "confidence": "high",
+                        "luminance_y": 0.1, "out_of_gamut": False},
+        "params": {"radius_r_earth": 2.4, "mass_m_earth": 8.9,
+                   "equilibrium_temp_k": 284.0, "sources": {}},
+        "instrument_views": [{
+            "band_samples": {"samples": [{"band_id": b} for b in nw.FLIGHT_BANDS],
+                             "source": "simulated"},
+            "colour": {"hex": "#e0ca8c"},
+            "reconstruction_error": {"delta_e2000": 31.3},
+        }],
+        "system": {"member_count": 2},
+        "meta": {"generated_at": "2026-08-06T00:00:00+00:00"},
+    }
+
+
 def _cat():
     return nw.Catalogue([
-        {"id": "bet-pic-b", "name": "beta Pictoris b", "host_star": {"name": "beta Pictoris"}},
-        {"id": "k2-18-b", "name": "K2-18 b", "host_star": {"name": "K2-18"}},
+        _rec("bet-pic-b", "beta Pictoris b", "beta Pictoris"),
+        _rec("k2-18-b", "K2-18 b", "K2-18"),
     ])
 
 
@@ -291,6 +310,99 @@ def test_no_feed_exceeds_the_per_feed_cap():
     for feed in nw.FEEDS:
         items = nw.parse_feed(feed, nw.fetch_feed(feed, fixture=FIXTURES))
         assert len(items) <= nw.MAX_ITEMS_PER_FEED
+
+
+# --- the alert that reaches a phone ----------------------------------------
+
+def _resolve(title, aliases, monkeypatch, cat=None):
+    monkeypatch.setattr(nw, "_ALIASES", aliases)
+    it = _item(PRESS, title, "a1")
+    it.planets, it.hosts = nw.find_planets(title, aliases)
+    return it, nw.resolve_target(it, cat or _cat())
+
+
+def test_target_shows_the_display_name_not_the_archive_name(aliases, monkeypatch):
+    """The alert is read by a human and links to the site, so it must say what the site says."""
+    _, t = _resolve("New image of beta Pictoris b released", aliases, monkeypatch)
+    assert t.kind == "planet"
+    assert t.name == "beta Pictoris b"
+
+
+def test_a_host_only_match_never_becomes_the_string_unknown(aliases, monkeypatch):
+    """Regression: a story naming only a host fell through to 'unknown', which rendered a
+    Bluesky search for 'unknown' and a fast-path command reading --planet "unknown"."""
+    it, t = _resolve("The TRAPPIST-1 system at ten", aliases, monkeypatch)
+    assert t.kind == "host" and t.name == "TRAPPIST-1"
+    text = nw.alert_text(it, t, "https://example.test", now=datetime.now(UTC))
+    assert "unknown" not in text
+    assert "--planet" not in text        # never tell someone to build a planet we can't name
+
+
+def test_a_missing_planet_alert_carries_a_runnable_fast_path(aliases, monkeypatch):
+    it, t = _resolve("First image of TOI-700 d", aliases, monkeypatch)
+    assert t.kind == "planet-missing"
+    text = nw.alert_text(it, t, "https://example.test", now=datetime.now(UTC))
+    assert 'build --planet "TOI-700 d"' in text
+    assert "NOT IN OUR CATALOGUE" in text
+
+
+def test_press_is_act_now_and_a_preprint_is_pre_build():
+    """'Popping off' and 'about to' need opposite responses; alerting both the same way
+    trains you to ignore both."""
+    assert nw.tier_of(_item(PRESS, "t", "x")) == nw.TIER_ACT
+    assert nw.tier_of(_item(ARXIV, "t", "x")) == nw.TIER_STOCK
+
+
+def test_an_act_now_alert_pushes_the_reply_window_and_stock_does_not(aliases, monkeypatch):
+    monkeypatch.setattr(nw, "_ALIASES", aliases)
+    now = datetime.now(UTC)
+    for feed, expect_window in ((PRESS, True), (ARXIV, False)):
+        it = _item(feed, "Signs of water on K2-18 b", "x")
+        it.planets, it.hosts = nw.find_planets(it.title, aliases)
+        text = nw.alert_text(it, nw.resolve_target(it, _cat()), "https://example.test", now=now)
+        assert ("~2 h" in text) is expect_window
+        assert ("stock" in text) is not expect_window
+
+
+def test_every_alert_fits_in_one_telegram_message(aliases, monkeypatch):
+    """Telegram hard-caps at 4096 characters; the alert is a summary and must not be truncated
+    into uselessness. The full briefing goes as an attachment instead."""
+    now = datetime.now(UTC)
+    long_title = "Astronomers report " + "a very long headline " * 20
+    for feed in (PRESS, ARXIV):
+        it, t = _resolve(f"{long_title} about K2-18 b", aliases, monkeypatch)
+        it.feed = feed
+        assert len(nw.alert_text(it, t, "https://example.test", now=now)) < nw.TELEGRAM_LIMIT
+
+
+def test_alert_escapes_html_so_a_headline_cannot_break_the_message(aliases, monkeypatch):
+    it, t = _resolve("K2-18 b <b>hype</b> & 'quotes'", aliases, monkeypatch)
+    text = nw.alert_text(it, t, "https://example.test", now=datetime.now(UTC))
+    assert "&lt;b&gt;hype&lt;/b&gt;" in text and "&amp;" in text
+
+
+def test_a_stale_band_model_is_withheld_in_the_alert_too(aliases, monkeypatch):
+    """The gate must hold on the phone as well as in the terminal — the alert is the surface
+    someone actually posts from."""
+    stale_rec = _rec("k2-18-b", "K2-18 b", "K2-18")
+    stale_rec["instrument_views"][0]["band_samples"]["samples"] = [
+        {"band_id": b} for b in ("cgi-575", "cgi-660", "cgi-730", "cgi-835")
+    ]
+    cat = nw.Catalogue([stale_rec])
+    it, t = _resolve("Signs of water on K2-18 b", aliases, monkeypatch, cat=cat)
+    text = nw.alert_text(it, t, "https://example.test", now=datetime.now(UTC))
+    assert "withheld" in text
+    assert "as Roman would see it" not in text
+
+
+def test_telegram_is_absent_rather_than_silently_disabled(monkeypatch):
+    """A notifier that quietly does nothing is worse than none — you would trust it."""
+    monkeypatch.delenv("NEWSWATCH_TELEGRAM_TOKEN", raising=False)
+    monkeypatch.delenv("NEWSWATCH_TELEGRAM_CHAT_ID", raising=False)
+    assert nw.Telegram.from_env() is None
+    monkeypatch.setenv("NEWSWATCH_TELEGRAM_TOKEN", "t")
+    monkeypatch.setenv("NEWSWATCH_TELEGRAM_CHAT_ID", "c")
+    assert nw.Telegram.from_env() == nw.Telegram("t", "c")
 
 
 # --- colour naming (alt text depends on it being sane) ---------------------
