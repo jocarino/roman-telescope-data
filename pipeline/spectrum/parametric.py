@@ -64,38 +64,58 @@ def _sigmoid(x: float, x0: float, w: float) -> float:
 # The physical reason a cloud exists is not "it is cold enough" but "SOME condensate's
 # condensation curve crosses the temperature-pressure profile above the photosphere" — and each
 # species does that over its own narrow temperature range. Parmentier et al. 2016 (ApJ 828, 22,
-# arXiv:1602.03088) works the sequence through for hot Jupiters and states the consequence
-# directly: "each cloud species can produce an offset only over a narrow range of effective
-# temperatures", and, in the abstract, they "predict an increase in the planet geometric albedo
-# in the Kepler bandpass for planets with an equilibrium temperature between 1600 and 1700 K due
-# to the presence of silicate clouds and with an equilibrium temperature around 1200-1300 K due
-# to the presence of manganese sulfide clouds". Two separate albedo bumps at two temperatures:
-# an explicit, citable statement that albedo is non-monotonic in T_eq.
+# doi:10.3847/0004-637X/828/1/22, arXiv:1602.03088) works the sequence through for hot Jupiters.
+# Its ABSTRACT states the principle — "each cloud species can produce an offset only over a
+# narrow range of effective temperatures" — and its CONCLUSION states the observable consequence:
+# "We also predict an increase in the planet geometric albedo in the Kepler bandpass for planets
+# with an equilibrium temperature between 1600 and 1700 K due to the presence of silicate clouds
+# and with an equilibrium temperature around 1200-1300 K due to the presence of manganese sulfide
+# clouds". Two separate albedo bumps at two temperatures: an explicit, citable statement that
+# albedo is non-monotonic in T_eq.
+#
+# (Section/quote attribution here has been checked against the paper itself, because it matters
+# which sentence carries which claim. Abstract: the "narrow range" principle, the ~1900 K
+# reflected/thermal transition, and the partial-cloudiness prediction. Conclusion: the geometric
+# albedo bumps and the 1600 K silicate/MnS transition. Section 4.2: the iron/perovskite edge.
+# Section 3.1.2: Kepler-7 b and Kepler-8 b.)
 #
 # What this function encodes, and only this: the SILICATE window, from the same paper.
-#   rises 1,600-1,700 K  "silicate clouds are present in planets with an equilibrium
-#                         temperature larger than 1600 K but ... not present in cooler planets"
-#                         (below that the MgSiO3/Mg2SiO4 condensation curve crosses the profile
-#                         under the photosphere — a cold trap, not an absence of silicon), and
-#                         the predicted albedo rise runs "between 1600 and 1700 K". So the edge
-#                         is a sigmoid centred at 1,600 K, width 30 K: half-formed at 1,600,
-#                         96% formed by 1,700, matching both sentences. Consistent with the
-#                         condensation temperatures tabulated by Wakeford et al.,
-#                         doi:10.1093/mnras/stw2639, arXiv:1610.03325: forsterite ~1,592 K and
-#                         enstatite ~1,508 K at 0.1 bar.
-#   falls 1,800-1,900 K  Parmentier 2016 puts the "disappearance of iron and perovskite clouds
-#                         between 1800 K and 1900 K" and the reflected-to-thermal transition at
-#                         ~1900 K, so the closing edge is centred at 1,850 K, width 30 K. THIS
-#                         IS THE LEAST CONSTRAINED NUMBER HERE: the paper gives no upper
-#                         temperature for the silicates themselves, so the edge is placed where
-#                         the paper says the optical light stops being reflected light at all.
+#   rises 1,600-1,700 K  Abstract: "We suggest that a transition occurs between silicate and
+#                         manganese sulfide clouds at a temperature near 1600 K, analogous to the
+#                         L/T transition on brown dwarfs", with Table 1 listing "Lack of silicate
+#                         clouds for Teq<1600 K" — silicates are the HOTTER side of that
+#                         transition. Below it the MgSiO3/Mg2SiO4 condensation curve crosses the
+#                         profile under the photosphere ("the cold trapping of cloud species
+#                         below the photosphere naturally produces such a transition"), which is
+#                         a cold trap, not an absence of silicon. The predicted albedo rise runs
+#                         "between 1600 and 1700 K", so the edge is a sigmoid centred at 1,600 K,
+#                         width 30 K: half-formed at 1,600, 96% formed by 1,700, matching both.
+#                         (An earlier draft of this comment quoted a sentence about silicates
+#                         "present ... larger than 1600 K but not ... in cooler planets" that is
+#                         NOT in the paper. The wording above is what the paper actually says.)
+#   falls 1,800-1,900 K  Section 4.2: "We predict the disappearance of iron and perovskite clouds
+#                         between 1800 K and 1900 K"; Conclusion: "We predict that a change from
+#                         a reflected to a thermal dominated lightcurve should occur at an
+#                         equilibrium temperature of ~1900 K". The closing edge is centred at
+#                         1,850 K, width 30 K. THIS IS THE LEAST CONSTRAINED NUMBER HERE: the
+#                         paper gives no upper temperature for the silicates themselves, so the
+#                         edge is placed where the paper says the optical light stops being
+#                         reflected light at all.
+#
+#   NOT USED, because it could not be checked to the value: the per-species condensation
+#   temperatures in Wakeford et al. 2017 (MNRAS 464, 4247, doi:10.1093/mnras/stw2639,
+#   arXiv:1610.03325) would be the natural way to place these edges from first principles, but
+#   the specific figures a draft of this comment carried (forsterite ~1,592 K, enstatite
+#   ~1,508 K at 0.1 bar) were not verified against the paper's own table, so nothing here rests
+#   on them. The edges above come from Parmentier 2016 alone.
 #
 # Amplitude — one calibrated number, and say so. How bright a silicate-clouded planet gets is
 # set by two things this model cannot separate: how much of the dayside the deck covers, and how
-# reflective the deck is. Both are bounded above — Parmentier 2016 expects "partial cloudiness
-# ... at the limb and ... the dayside hot spot should often be cloud-free", and Demory et al.
-# 2013 find Kepler-7 b's reflecting region off-centre, "centered on the meridian located 41+-12
-# deg West of the substellar point" — but neither is separately measured. So the deck is given a
+# reflective the deck is. Both are bounded above — Parmentier 2016 (abstract) predicts "that
+# partial cloudiness should be common at the limb and that the dayside hot spot should often be
+# cloud-free", and Demory et al. 2013 resolve Kepler-7 b's reflecting region as off-centre, "high
+# altitude, optically reflective clouds located west from the substellar point" — but neither is
+# separately measured. So the deck is given a
 # grey reflectivity of 0.58 (a silicate deck, taken as slightly less reflective than the cold
 # ammonia/water deck's 0.62) and the PEAK COVERING FRACTION BELOW IS THE ONE FITTED NUMBER in
 # this function, chosen so Kepler-7 b reproduces its measured 0.32. One free parameter against
@@ -110,14 +130,25 @@ def _sigmoid(x: float, x0: float, w: float) -> float:
 # surface gravity is ~0.4 Earth g. So the window's amplitude is scaled down for high-gravity
 # planets, more strongly than the cool deck is.
 #
+# The one INDEPENDENT check available, i.e. a planet not used to fit anything: Parmentier 2016
+# section 3.1.2 concludes "Models with silicate or manganese sulfide clouds can match the albedo
+# and phase shift of Kepler-7b and Kepler-8b." Kepler-8 b (T_eq 1,680 K) falls inside the window
+# this function draws and comes out cloudy, which is the paper's own verdict on it.
+#
 # HONEST LIMITS, because they matter more than the fit:
-#   - The OBSERVED population trend is contested. Heng & Demory 2013 (ApJ 777, 100,
-#     arXiv:1309.5956) find "the geometric albedo and the incident stellar flux do not exhibit a
-#     clear correlation" and expect "considerable scatter"; Adams et al. 2022 (ApJ 926, 157,
+#   - The OBSERVED population trend is contested, and this is the biggest caveat on the whole
+#     idea. Heng & Demory 2013 (ApJ 777, 100, doi:10.1088/0004-637X/777/2/100, arXiv:1309.5956)
+#     find "the geometric albedo and the incident stellar flux do not exhibit a clear
+#     correlation, as revealed by our re-analysis of Q0 to Q14 Kepler data", and expect "any
+#     correlation between the geometric albedo and the stellar flux to be weak and characterized
+#     by considerable scatter". Adams et al. 2022 (ApJ, doi:10.3847/1538-4357/ac3d32,
 #     arXiv:2112.00041) find "a diverse set of geometric albedos for hot Jupiters with
-#     equilibrium temperatures between 1550-1700 K". This function predicts a population
-#     TENDENCY, not any individual planet: real cloudiness depends on the vertical mixing,
-#     grain size and metallicity of one atmosphere, none of which we hold for any planet here.
+#     equilibrium temperatures between 1550-1700 K" — i.e. real planets scatter across exactly
+#     the band this function brightens. So this predicts a population TENDENCY, not any
+#     individual planet: real cloudiness depends on the vertical mixing, grain size and
+#     metallicity of one atmosphere, none of which we hold for any planet in this catalogue.
+#     The gravity term below is the only thing giving two planets at one temperature different
+#     answers, and it is a proxy, not a measurement of their clouds.
 #   - We do NOT model the manganese-sulfide bump Parmentier also predicts at 1,200-1,300 K. The
 #     one planet in that range with a measured optical albedo argues against it being visible in
 #     an integrated colour: HD 189733 b (T_eq 1,209 K) is dark and blue, "Ag=0.40+-0.12 across
@@ -131,6 +162,14 @@ def _sigmoid(x: float, x0: float, w: float) -> float:
 #     clear gap between the two cloud windows. A model that could be cloudy AND dark-blue at
 #     once needs pressure-broadened alkali wings, which the analytic albedo (a 30 nm Na trough)
 #     does not have. Recorded as a known limitation, not fixed here.
+#   - The DARK end is still wrong, and this change does not improve it. TrES-2 b's measured
+#     Kepler-band albedo is "Ag = 0.0253 +/- 0.0072" (Kipping & Spiegel 2011, MNRAS 417, L88,
+#     doi:10.1111/j.1745-3933.2011.01127.x, arXiv:1108.2297), and the same paper notes the true
+#     albedo may be "<1%" once thermal emission is accounted for. This model floors out near
+#     0.09-0.10 for any cloud-free giant, because `deep_albedo` plus the Rayleigh slope never
+#     get darker than that — so the darkest known planet comes out roughly 4x too bright, before
+#     and after this change alike. Fixing that is a separate defect in the analytic albedo's
+#     floor, not in the cloud rule, and is deliberately not bundled in here.
 def _silicate_deck(t: float, grav_hi: float) -> float:
     """Covering fraction of a high silicate cloud deck at equilibrium temperature `t` (K).
 
