@@ -26,6 +26,8 @@
   "scaffolds": [
     {
       "title": "FIXTURE bluesky ({bluesky_budget} left)",
+      "short": "FIXTURE bluesky",
+      "when": "now",
       "lines": [
         "    {name} is {colour_name} ({hex}).",
         "    <ONE sentence of physics goes here>",
@@ -35,6 +37,7 @@
     },
     {
       "title": "FIXTURE typo block",
+      "short": "FIXTURE typo block",
       "lines": ["    a deliberate {not_a_real_field} that must survive rendering"]
     }
   ],

@@ -475,14 +475,58 @@ def test_an_alert_without_a_playbook_still_carries_the_links(aliases, monkeypatc
 
 
 def test_every_alert_fits_in_one_telegram_message(aliases, monkeypatch):
-    """Telegram hard-caps at 4096 characters; the alert is a summary and must not be truncated
-    into uselessness. The full briefing goes as an attachment instead."""
+    """The alert IS the briefing now, so the 4096 cap is a real constraint rather than a
+    formality. Telegram counts rendered text, not markup, which is why the search links are
+    anchors — four URLs are ~400 characters as text and ~30 as anchors."""
     now = datetime.now(UTC)
+    pb = nw.load_playbook(PLAYBOOK_FIXTURE)
     long_title = "Astronomers report " + "a very long headline " * 20
     for feed in (PRESS, ARXIV):
         it, t = _resolve(f"{long_title} about K2-18 b", aliases, monkeypatch)
         it.feed = feed
-        assert len(nw.alert_text(it, t, "https://example.test", now=now)) < nw.TELEGRAM_LIMIT
+        assert nw.alert_fits(nw.alert_text(it, t, "https://example.test", now=now, playbook=pb))
+
+
+def test_alert_fits_measures_rendered_text_not_markup():
+    """A message that is mostly anchors can exceed 4096 characters of HTML and still be well
+    inside the limit — measuring the markup would reject alerts Telegram accepts."""
+    anchors = "".join(f'<a href="https://example.test/{i:04d}/very/long/path">x</a>'
+                      for i in range(200))
+    assert len(anchors) > nw.TELEGRAM_LIMIT
+    assert nw.alert_fits(anchors)
+
+
+def test_the_alert_carries_the_facts_and_the_clocked_scaffolds(aliases, monkeypatch):
+    """The whole point of dropping the attachment: everything you need is in the message."""
+    monkeypatch.setattr(nw, "_ALIASES", aliases)
+    pb = nw.load_playbook(PLAYBOOK_FIXTURE)
+    it = _item(PRESS, "Signs of water on K2-18 b", "m1")
+    it.planets, it.hosts = nw.find_planets(it.title, aliases)
+    text = nw.alert_text(it, nw.resolve_target(it, _cat()), "https://example.test",
+                         now=datetime.now(UTC), playbook=pb)
+    assert "CHECK vs PAPER" in text            # the four numbers
+    assert "travels" in text                   # the verdict
+    assert "FIXTURE bluesky" in text           # the scaffold with a clock
+    assert "FIXTURE typo block" not in text    # the ones without
+
+
+def test_no_attachment_is_sent_unless_asked(aliases, monkeypatch):
+    """A document you must tap into is worse than text you can read, for the same content."""
+    monkeypatch.setattr(nw, "_ALIASES", aliases)
+    sent = {"messages": 0, "documents": 0}
+
+    class FakeTG:
+        def message(self, html):
+            sent["messages"] += 1
+        def document(self, *a, **k):
+            sent["documents"] += 1
+
+    it = _item(PRESS, "Signs of water on K2-18 b", "m2")
+    it.planets, it.hosts = nw.find_planets(it.title, aliases)
+    nw.notify_items(FakeTG(), [it], _cat(), "https://example.test",
+                    now=datetime.now(UTC), attach=False,
+                    playbook=nw.load_playbook(PLAYBOOK_FIXTURE))
+    assert sent == {"messages": 1, "documents": 0}
 
 
 def test_alert_escapes_html_so_a_headline_cannot_break_the_message(aliases, monkeypatch):

@@ -1463,8 +1463,16 @@ def paper_diff_lines(item: Item, rec: dict) -> list[str]:
 
 def alert_text(item: Item, target: Target, base: str, *, now: datetime,
                playbook: Playbook | None = None) -> str:
-    """The message that lands on the phone. Its only job is to answer 'do I care right now',
-    in the time it takes to read a notification. Everything else is in the attachment."""
+    """The whole briefing, in one message. No attachment.
+
+    This used to be a summary plus a .md file, on the theory that the message answers "do I
+    care" and the document carries the detail. Once the briefing was compressed to one screen
+    the two overlapped almost entirely — the same colour, the same four numbers, twice — and a
+    document you have to tap into is worse than a message you can read, for the same content.
+
+    It fits because Telegram counts *rendered* text, not markup: four search URLs are ~400
+    characters as text and ~30 as anchors. `alert_fits` pins the headroom.
+    """
     tier = tier_of(item)
     head = "🔴" if tier == TIER_ACT else "🔵"
     name, rec = target.name, target.record
@@ -1473,97 +1481,43 @@ def alert_text(item: Item, target: Target, base: str, *, now: datetime,
         f"{head} <b>{tier}</b> · {_esc(label)}",
         f"<b>{_esc(item.title)}</b>",
         f"{_esc(item.feed.name)} · {item.feed.kind} · {_age(item.published, now)}",
-        "",
     ]
 
-    # Branch on `kind`, never on `rec is None`. Branching on the record is what produced
-    # `--planet "TRAPPIST-1"` — an instruction to build a *star* as a planet, in the one
-    # message you would act on without checking.
     if target.kind == "host":
         if rec is not None:
             n = rec["system"]["member_count"] if rec.get("system") else 1
-            lines += [
-                f"The story names the <b>host</b>, not a planet. We have {n} planet(s) "
-                f"there — nearest match <code>{rec['true_colour']['hex']}</code> "
-                f"{_esc(rec['name'])}.",
-            ]
+            lines += ["", f"Names the <b>host</b>, not a planet. We have {n} there — nearest "
+                          f"<code>{rec['true_colour']['hex']}</code> {_esc(rec['name'])}."]
         else:
-            lines.append(
-                "The story names a <b>host star</b> we have no planets for, and names no "
-                "planet. There is nothing to colour yet."
-            )
-        lines.append(
-            "Read the story first: a system story is often about a planet we lack, and the "
-            "planet's name may not be in the headline."
-        )
+            lines += ["", "Names a <b>host star</b> we have no planets for. Nothing to colour."]
+        lines.append("Read the story first — the planet may not be in the headline.")
     elif target.kind == "planet-missing":
         lines += [
-            "⚠️ <b>NOT IN OUR CATALOGUE</b> — we cannot post a colour for this one yet.",
-            "This is the majority case on a 'new planet discovered' story.",
-            "",
-            "<b>Build it and put it on the site</b> — merging is what the site actually",
-            "reads; a briefing alone leaves your own link 404ing:",
+            "", "⚠️ <b>NOT IN OUR CATALOGUE</b> — no colour for this one yet.",
             f"<pre>uv run python -m pipeline build --planet \"{_esc(target.archive_name)}\" \\\n"
             f"    --merge-into data/planets.json --no-cache\n"
-            f"scripts/release-data.sh\n"
-            "git add data/RELEASE &amp;&amp; git commit -m 'Data release' "
-            "&amp;&amp; git push</pre>",
+            f"scripts/release-data.sh</pre>",
             "If the gate rejects it, the missing number is itself the post.",
         ]
         nudge = data_pr_nudge()
         if nudge:
             lines += ["", nudge]
     else:
-        tc = rec["true_colour"]
-        stale, stale_why = roman_is_stale(rec)
-        params, star = rec["params"], rec["host_star"]
-        lines += [
-            f"<code>{tc['hex']}</code> — {colour_name(tc['hex'])} "
-            f"({rec['provenance']}, confidence {tc['confidence']})",
-        ]
-        if stale:
-            lines.append(f"⛔ Roman view withheld — {_esc(stale_why)}")
-        else:
-            view = rec["instrument_views"][0]
-            lines.append(
-                f"<code>{view['colour']['hex']}</code> — as Roman would see it, "
-                f"ΔE2000 {view['reconstruction_error']['delta_e2000']:.1f}"
-            )
-        lines += [
-            f"release {release_tag()} · {site_url(base)}/planet/{rec['id']}",
-            "",
-            "<b>Diff these four against the paper before you post</b>",
-            f"<pre>R {_fmt(params.get('radius_r_earth'), ' R⊕')}   "
-            f"M {_fmt(params.get('mass_m_earth'), ' M⊕')}\n"
-            f"T_eq {_fmt(params.get('equilibrium_temp_k'), ' K', 0)}   "
-            f"host {_fmt(star.get('teff_k'), ' K', 0)}</pre>",
-            ">10% on R/M or >100 K on either ⇒ post the <i>change</i>, not the swatch.",
-        ]
+        lines += ["", *_alert_verdict(item, rec), *_alert_facts(rec, base)]
         lines += paper_diff_lines(item, rec)
-
-    # Step 1 of the runbook, answered rather than asked. All four questions are answerable
-    # from the feed item, so there is no reason to make a human do it at 60 seconds a time.
-    passed, evidence = travel_test(item)
-    marks = "".join("✅" if p else "▫️" for p in passed)
-    lines += [
-        "",
-        f"<b>Will it travel? {marks} {sum(passed)}/4</b>",
-        *[f"  {'✅' if p else '▫️'} {label} — {_esc(ev)}"
-          for (label, _), p, ev in zip(TRAVEL_TESTS, passed, evidence, strict=True)],
-    ]
-    if sum(passed) < 2:
-        lines.append("<i>Under 2/4 — stories travel on nouns and pictures, not results. "
-                     "Skipping this is free.</i>")
 
     q = urllib.parse.quote(name)
     lines += [
         "",
         f'<a href="https://bsky.app/search?q={q}">Bluesky</a> · '
         f'<a href="https://www.reddit.com/search/?q={q}&amp;sort=new">Reddit</a> · '
-        f'<a href="https://hn.algolia.com/?query={q}&amp;sort=byDate">HN</a>',
+        f'<a href="https://hn.algolia.com/?query={q}&amp;sort=byDate">HN</a>'
+        + (f' · <a href="{_esc(item.link)}">the story</a>' if item.link else ""),
     ]
-    # What to DO with those links is editorial, so it comes from the playbook. Without one
-    # the alert is still complete and actionable — it just doesn't tell you the tactics.
+
+    # What to DO with those links, the copy scaffolds and what is still yours are all
+    # editorial, so they come from the playbook. Without one the alert is still complete and
+    # actionable — it just doesn't carry the tactics.
     if playbook is not None:
         advice = playbook.render(
             "alert_act_now" if tier == TIER_ACT else "alert_stock",
@@ -1571,21 +1525,99 @@ def alert_text(item: Item, target: Target, base: str, *, now: datetime,
         )
         if advice:
             lines += ["", *advice]
-    if item.link:
-        lines += ["", f'<a href="{_esc(item.link)}">the story</a>']
+        if rec is not None and tier == TIER_ACT:
+            lines += _alert_scaffolds(rec, base, playbook)
     return "\n".join(lines)
+
+
+def _alert_verdict(item: Item, rec: dict) -> list[str]:
+    """The three lines that say what is done and what is yours."""
+    passed, _ = travel_test(item)
+    n = sum(passed)
+    mark, text = _diff_verdict(rec, item)
+    return [
+        f"{'✅' if n >= 2 else '▫️'} <b>travels</b> {n}/4"
+        + ("" if n >= 2 else " — under 2/4, skipping is free"),
+        f"{'✅' if mark == 'OK  ' else ('⚠️' if mark == 'WARN' else '▫️')} "
+        f"<b>paper</b> {_esc(text)}",
+        "✍️ <b>the sentence of physics is yours</b>",
+    ]
+
+
+def _alert_facts(rec: dict, base: str) -> list[str]:
+    """Colour, the four numbers, and what we assumed — the table, in one <pre>."""
+    tc, params, star = rec["true_colour"], rec["params"], rec["host_star"]
+    src = params.get("sources", {})
+    stale, stale_why = roman_is_stale(rec)
+    out = ["",
+           f"<code>{tc['hex']}</code> {colour_name(tc['hex'])} · {rec['provenance']} · "
+           f"confidence {tc['confidence']}"]
+    if stale:
+        out.append(f"⛔ Roman view withheld — {_esc(stale_why)}")
+    elif rec.get("instrument_views"):
+        v = rec["instrument_views"][0]
+        out.append(f"<code>{v['colour']['hex']}</code> as Roman would see it · "
+                   f"ΔE2000 {v['reconstruction_error']['delta_e2000']:.1f}")
+    if tc.get("out_of_gamut"):
+        out.append("⚠️ out of sRGB gamut — the swatch is a clamp")
+    if not rec.get("is_light_isolable", True):
+        out.append("⚠️ MODEL-ONLY — no light from this planet has ever been received")
+    out += [
+        f'<a href="{site_url(base)}/planet/{rec["id"]}">planet page</a> · '
+        f"release {release_tag()}",
+        "",
+        "<pre>CHECK vs PAPER              WE ASSUMED\n"
+        f"radius {_fmt(params.get('radius_r_earth'), ' R⊕'):<12} ±10%   "
+        f"cloud {params.get('assumed_cloud_state')}\n"
+        f"mass   {_fmt(params.get('mass_m_earth'), ' M⊕'):<12} ±10%   "
+        f"metal {_fmt(params.get('assumed_metallicity'), 'x solar', 1)}\n"
+        f"T_eq   {_fmt(params.get('equilibrium_temp_k'), ' K', 0):<12} ±100K  "
+        f"phase {_fmt(params.get('assumed_phase_angle_deg'), ' deg', 0)}\n"
+        f"host   {_fmt(star.get('teff_k'), ' K', 0):<12} ±100K  "
+        f"engine {params.get('spectrum_source')}</pre>",
+    ]
+    assumed = [k.replace("_", " ") for k, v in src.items() if v == "assumed"]
+    out.append("Outside tolerance ⇒ post the <i>change</i>, not the swatch."
+               + (f" Least sure: {_esc(', '.join(assumed))}." if assumed else ""))
+    return out
+
+
+def _alert_scaffolds(rec: dict, base: str, pb: Playbook) -> list[str]:
+    """Only the scaffolds with a clock, and only their filled lines — the standing preamble
+    about not templating is reference, and reference does not belong in a notification."""
+    fields = brief_fields(rec, rec["name"], base, pb)
+    out: list[str] = []
+    for block in pb.data.get("scaffolds", []):
+        if block.get("when") != "now":
+            continue
+        title = str(block.get("short") or block.get("title", "")).format_map(_Fields(fields))
+        body = "\n".join(line.strip() for line in block.get("lines", []))
+        out += ["", f"<b>{_esc(title)}</b>",
+                f"<pre>{_esc(body.format_map(_Fields(fields)))}</pre>"]
+    still = pb.render("checklist_compact", fields)
+    if still:
+        out += ["", *[_esc(line.strip()) for line in still]]
+    return out
+
+
+def alert_fits(text: str) -> bool:
+    """Telegram counts the RENDERED text, so strip the markup before measuring."""
+    return len(re.sub(r"<[^>]+>", "", text)) <= TELEGRAM_LIMIT
 
 
 def notify_items(tg: Telegram, surfaced: list[Item], catalogue: Catalogue, base: str,
                  *, now: datetime, attach: bool = True,
                  playbook: Playbook | None = None, full: bool = False) -> int:
-    """Two very different messages, because the two tiers are two different jobs.
+    """One message per ACT NOW item, one digest for the preprints. No attachment by default.
 
-    ACT NOW gets the full alert plus the briefing as an attachment: there is a clock, and you
-    need everything to hand. PRE-BUILD gets ONE line inside ONE digest for the whole run, and
-    no attachment at all — a preprint has no clock, so a briefing you didn't ask for is just
-    noise, and noise is what makes a person mute the channel. The briefing is a command away
-    on the rare occasion you want it.
+    The attachment is gone because it stopped earning its place: once the briefing fitted in a
+    message, the message and the document said the same thing twice, and a file you must tap
+    into is strictly worse than text you can read. `--attach-full` brings it back with the
+    standing reference (every scaffold, the tiering, the eight-point checklist) for the rare
+    story you want everything on.
+
+    PRE-BUILD stays one line inside one digest: a preprint has no clock, so anything more is
+    noise, and noise is what makes a person mute the channel.
     """
     act = [it for it in surfaced if tier_of(it) == TIER_ACT]
     stock = [it for it in surfaced if tier_of(it) != TIER_ACT]
@@ -1593,14 +1625,17 @@ def notify_items(tg: Telegram, surfaced: list[Item], catalogue: Catalogue, base:
 
     for it in act:
         target = resolve_target(it, catalogue)
-        tg.message(alert_text(it, target, base, now=now, playbook=playbook))
-        if attach:
+        text = alert_text(it, target, base, now=now, playbook=playbook)
+        tg.message(text)
+        # An alert that overflows is truncated by Telegram, which would silently cut the
+        # scaffolds off the end. Attach the full briefing in that case whether asked or not.
+        if attach or not alert_fits(text):
             body = render_brief(target.record, target.name, base, headline=it.title,
                                 source=f"{it.feed.name} ({it.feed.kind})", link=it.link,
                                 playbook=playbook, item=it, full=full)
             fname = f"{slug(target.name) or 'briefing'}-{now:%Y%m%d}.md"
-            caption = ("Full briefing — facts, checklist and copy scaffolds." if playbook
-                       else "Full briefing — FACTS ONLY, no playbook loaded.")
+            caption = ("Full briefing." if attach
+                       else "The alert overflowed Telegram's limit — full briefing attached.")
             tg.document(fname, f"```\n{body}\n```\n", caption=caption)
         sent += 1
 
@@ -1803,7 +1838,7 @@ def cmd_poll(args: argparse.Namespace) -> None:
             )
         if surfaced:
             n = notify_items(tg, surfaced, catalogue, args.base_url, now=now,
-                             attach=not args.no_attach, playbook=playbook, full=args.full)
+                             attach=args.attach_full, playbook=playbook, full=True)
             state["last_alert"] = now.isoformat()
             print(f"Sent {n} message(s) to Telegram.")
         else:
@@ -1967,8 +2002,11 @@ def main() -> None:
     po.add_argument("--notify", action="store_true",
                     help="Push each surfaced item to Telegram (needs NEWSWATCH_TELEGRAM_TOKEN "
                          "and NEWSWATCH_TELEGRAM_CHAT_ID). Exits non-zero if they are unset.")
-    po.add_argument("--no-attach", action="store_true",
-                    help="Alert only; don't attach the full briefing as a document")
+    po.add_argument("--attach-full", action="store_true",
+                    help="Also attach the full briefing as a .md — every scaffold, the "
+                         "where-to-post tiering, the eight-point checklist. The alert alone "
+                         "is the whole compact briefing, so this is for the rare story you "
+                         "want everything on. Attached automatically if an alert overflows.")
     po.add_argument("--diff-paper", action="store_true",
                     help="Run checklist step 2 for you: find the linked paper, quote its "
                          "stated radius/mass/T_eq/host T_eff, and diff them against ours. "
