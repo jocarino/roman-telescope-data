@@ -168,7 +168,7 @@ def caption_draft(rec: dict, site_url: str, campaign: str = "potd") -> str:
     if note and note.contradiction:
         warnings = f"\n⚠ CHECK BEFORE POSTING: {note.contradiction}.\n"
     return (
-        "DRAFT — rewrite the physics sentence in your own voice before posting; a templated\n"
+        "DRAFT: rewrite the physics sentence in your own voice before posting; a templated\n"
         "caption is what kills the account. Facts behind it, checkable on the planet page:\n"
         + "\n".join(f"  · {line}" for line in (note.lines() if note else []))
         + warnings
@@ -211,11 +211,11 @@ def main() -> None:
         post_image(rec).save(d / "post.png", optimize=True)
         (d / "caption.txt").write_text(caption_draft(rec, args.site_url, args.campaign))
         (d / "alt.txt").write_text(alt_text(rec) + "\n")
-        index.append(f"- **{n:02d} · {rec['name']}** — `{d.name}/` — {_honesty_clause(rec)}")
+        index.append(f"- **{n:02d} {rec['name']}** (`{d.name}/`): {_honesty_clause(rec)}")
         print(f"  {d}/  (post.png, caption.txt, alt.txt)")
 
     (args.out / "QUEUE.md").write_text(
-        "# Post queue — drafts, not posts\n\n"
+        "# Post queue: drafts, not posts\n\n"
         "Rewrite every caption in your own voice, then post by hand (or via your own\n"
         "send step). One per day is the ceiling; if the queue empties, post nothing.\n\n"
         + "\n".join(index)

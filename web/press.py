@@ -240,7 +240,7 @@ def _band1_only(rec: PlanetRecord) -> Image.Image:
         _spec_for(rec, ramp, grey, view.colour.luminance_y),
         w // 2, 760, 480,
         f"THE GUARANTEED MEASUREMENT: BAND 1 · {b1.center_nm:.0f} nm",
-        "one brightness, no colour — everything else is best-effort",
+        "one brightness, no colour · the rest is best-effort",
     )
     _stamp(draw, w, h, "MODELLED · NOT A PHOTOGRAPH")
     return img
@@ -255,14 +255,14 @@ def _credit_txt(assets: list[PressAsset]) -> str:
         "Credit, print: Exoplanet Palette, CC BY 4.0",
         "Crops and colour-space conversions are fine and need no separate note.",
         "",
-        "Every image here is built from this site's own computed colours only — no",
-        "third-party imagery — so the licence above is the whole story. All colours are",
+        "Every image here is built from this site's own computed colours only, with no",
+        "third-party imagery, so the licence above is the whole story. All colours are",
         "computed from physical models, never photographed. Please describe them as",
         '"computed colours".',
         "",
     ]
     for a in assets:
-        lines += [f"{a.slug}.png ({a.width}x{a.height}) — {a.title}", f"  Caption: {a.caption}", ""]
+        lines += [f"{a.slug}.png ({a.width}x{a.height}): {a.title}", f"  Caption: {a.caption}", ""]
     return "\n".join(lines)
 
 
@@ -290,7 +290,7 @@ def write_press_assets(records: list[PlanetRecord], out: Path) -> list[PressAsse
         "colour-wall": (
             "The wall: every exoplanet's computed colour on one sheet",
             f"The computed colour of {n:,} known exoplanets, hue-sorted, one square per "
-            "planet. Not photographs — no exoplanet has ever been photographed in visible "
+            "planet. Not photographs: no exoplanet has ever been photographed in visible "
             f"colour. {credit}",
             f"A dense grid of {n:,} coloured squares sweeping from blue through green, gold "
             "and red to a block of dark near-neutrals, one square per exoplanet.",
@@ -299,14 +299,14 @@ def write_press_assets(records: list[PlanetRecord], out: Path) -> list[PressAsse
             "The Roman comparison: full spectrum beside the three-band reconstruction",
             f"Computed colour of {exemplar.name} from its full modelled spectrum, beside the "
             f"same planet rebuilt from the Roman Coronagraph's {n_bands} visible bands. Both "
-            f"are models — neither is a photograph. {credit}",
+            f"are models; neither is a photograph. {credit}",
             f"Two rendered discs of {exemplar.name} side by side, labelled full spectrum and "
             "as Roman would see it; the two colours are close but not identical.",
         ),
         "band1-only": (
             "The Band 1 still: the one measurement Roman guarantees",
             f"{exemplar.name} as the Roman Coronagraph's only guaranteed measurement would "
-            "record it: one brightness through the 575 nm band — a grey, because one number "
+            "record it: one brightness through the 575 nm band, a grey, because one number "
             f"carries no colour. A model, not a photograph. {credit}",
             f"A single grey rendered disc of {exemplar.name} on a dark background, labelled "
             "as Band 1 at 575 nanometres: one brightness, no colour.",
