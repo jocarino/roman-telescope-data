@@ -21,7 +21,7 @@ _DIST = _ROOT / "dist"
 _TEMPLATES = _ROOT / "web" / "templates"
 
 # Where the footer says you can go. Root-relative, extensionless, as the site serves them.
-FOOTER_LINKS = ("/", "/how", "/credits", "/glossary")
+FOOTER_LINKS = ("/", "/how", "/credits", "/glossary", "/about")
 
 pytestmark = pytest.mark.skipif(
     not (_DIST / "index.html").exists(),

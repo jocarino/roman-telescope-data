@@ -82,6 +82,10 @@ class Site:
     posthog_key: str = ""
     posthog_api_host: str = "https://eu.i.posthog.com"
     posthog_assets_host: str = "https://eu-assets.i.posthog.com"
+    # Contact address, shown in the footer and on /about and /press. Defaults per build from
+    # web.build.CONTACT_EMAIL (the project's dedicated public address); overridable via
+    # $CONTACT_EMAIL. Empty means the pages fall back to the repo's issue tracker.
+    contact_email: str = ""
 
     def absolute(self, path: str) -> str:
         if not path.startswith("/"):
@@ -221,6 +225,25 @@ def static_pages(n_planets: int) -> list[PageMeta]:
             # has to be the form the links use or the two disagree about which URL the page is.
             path="/tours",
             priority="0.7",
+        ),
+        PageMeta(
+            title=f"About · {SITE_NAME}",
+            description=(
+                "What this site is, who makes it, and how to reach them: every exoplanet's "
+                "colour computed from physics, by one person, on evenings and weekends."
+            ),
+            path="/about",
+            priority="0.6",
+        ),
+        PageMeta(
+            title=f"Images and information for writing about this site · {SITE_NAME}",
+            description=(
+                "Press assets for Exoplanet Palette: ready-to-publish images with captions, "
+                "credit lines and licences, copy in three lengths, the facts and figures, "
+                "and how to describe computed colours honestly."
+            ),
+            path="/press",
+            priority="0.5",
         ),
         PageMeta(
             title=f"Sources and credits · {SITE_NAME}",
