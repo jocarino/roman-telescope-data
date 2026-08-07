@@ -240,6 +240,10 @@ class Rights:
     republished_fields: tuple[str, ...] = REPUBLISHED_FIELDS
     attribution: str = "Exoplanet Palette (jocarino), CC BY 4.0"
     holder: str = "Copyright (c) 2026 jocarino"
+    # One address for anyone who needs a human: the site footer renders it and the data
+    # header carries it, so a journalist on the site and a consumer of a released file
+    # reach the same place.
+    contact: str = "joaogveloso.contact@gmail.com"
     warranty: str = (
         "Provided without warranties of any kind; see section 5 of the CC BY 4.0 licence."
     )

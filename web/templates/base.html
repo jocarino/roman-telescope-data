@@ -114,8 +114,8 @@
       {# The address itself, when the build carries one — the enquiry neither /about nor
          /press will catch arrives on some other page, and this line is what catches it. #}
       <p class="foot-meta">Exoplanet Palette ·
-        {% if site and site.contact_email %}<a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a> ·
-        {% endif %}<a href="{{ licence_url }}" rel="license noopener" target="_blank">CC BY 4.0</a> ·
+        <a href="mailto:{{ contact_email }}">{{ contact_email }}</a> ·
+        <a href="{{ licence_url }}" rel="license noopener" target="_blank">CC BY 4.0</a> ·
         <a href="{{ repo_url }}" rel="noopener" target="_blank">GitHub ↗</a></p>
     </footer>
   </div>
