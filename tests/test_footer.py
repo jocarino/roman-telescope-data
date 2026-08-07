@@ -21,7 +21,20 @@ _DIST = _ROOT / "dist"
 _TEMPLATES = _ROOT / "web" / "templates"
 
 # Where the footer says you can go. Root-relative, extensionless, as the site serves them.
-FOOTER_LINKS = ("/", "/how", "/credits", "/glossary", "/about")
+# The complete chart: every destination the gallery's Explore menu knows, plus the reference
+# pages — the footer is the console now, and a console with missing keys reads as broken.
+FOOTER_LINKS = (
+    "/",
+    "/tours",
+    "/compare",
+    "/census",
+    "/sky",
+    "/roman",
+    "/how",
+    "/glossary",
+    "/credits",
+    "/about",
+)
 
 pytestmark = pytest.mark.skipif(
     not (_DIST / "index.html").exists(),
@@ -79,8 +92,12 @@ def test_the_footer_states_the_honesty_line():
 def test_footer_destinations_exist_in_the_build():
     """A footer link to a 404 is worse than no footer."""
     for href in FOOTER_LINKS:
-        rel = "index.html" if href == "/" else href.lstrip("/") + ".html"
-        assert (_DIST / rel).exists(), f"footer links to {href}, which this build did not write"
+        stem = href.lstrip("/")
+        # nginx serves /x from x.html OR x/index.html (try_files); accept what the build wrote.
+        candidates = ("index.html",) if href == "/" else (f"{stem}.html", f"{stem}/index.html")
+        assert any((_DIST / rel).exists() for rel in candidates), (
+            f"footer links to {href}, which this build did not write"
+        )
 
 
 def test_licence_and_repo_come_from_the_rights_block():
