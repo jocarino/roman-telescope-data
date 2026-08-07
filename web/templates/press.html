@@ -57,7 +57,7 @@
         two shows how much colour identity survives a real instrument.</p>
       <p>These are computed colours, not photographs, and the site says so on every page.
         Five solar-system planets are included as a check: their computed colours can be
-        compared against real images. Built by one person, in Portugal, on evenings and
+        compared against real images. Built by one person, on evenings and
         weekends.</p>
     </div>
   </section>
@@ -205,11 +205,7 @@
   <section class="pr-sec" id="contact">
     <h2 class="pr-h">Contact</h2>
     {% if site.contact_email %}
-    <p>Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>.
-      Answered within a few hours in European daytime (Portugal, UTC+1 in summer; languages:
-      Portuguese and English). Available for a recorded call with about a day's notice. For
-      anything Roman-related in launch week, put <code>URGENT</code> in the subject line and
-      it reaches my phone.</p>
+    <p>Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>.</p>
     {% else %}
     <p>Open an issue on <a href="{{ repo_url }}/issues" rel="noopener" target="_blank">the
       project's GitHub</a>, and it will be answered quickly.</p>

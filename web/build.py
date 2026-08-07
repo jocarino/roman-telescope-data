@@ -789,7 +789,7 @@ def build(
     # /about (the human page) and /press (the asset shelf). Press assets first: the template
     # renders captions, alt text and dimensions from the same objects that made the PNGs.
     # Assets are built from re-derived palettes (above), so the discs match the site's own.
-    press_assets = write_press_assets(records, out)
+    press_assets = write_press_assets(records, out, site_url=site.base_url)
     stats = _stats(records)
     # "Exoplanets" and "worlds" are different counts: the catalogue carries the five
     # solar-system anchors, and press copy that counts Jupiter among exoplanets is a
