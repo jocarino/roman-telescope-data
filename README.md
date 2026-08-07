@@ -517,6 +517,21 @@ Three things about it are deliberate and easy to break:
 - **The baseline is the last release, so there's no state to keep.** `manifest.json` ships beside
   `planets.json`, which means once a release is published the probe goes quiet by itself.
   `scripts/release-data.sh` writes it too, so a manual release doesn't break the chain.
+- **Publishing the draft is a separate act from merging the PR, and forgetting it breaks the
+  deploy silently.** `data/RELEASE` pins a *specific* tag rather than tracking "latest" on
+  purpose: latest would let publishing a release change production with no review, and — because
+  GitHub's "latest" skips drafts — would quietly build against stale data whenever the newest
+  release was still a draft. The cost of pinning is that the pin can name a draft, whose asset
+  404s for the tokenless `fetch_data.py`, so every deploy fails while the live site keeps serving
+  the last good build and nothing looks wrong. On 2026-08-07 that is exactly what happened.
+  `.github/workflows/data-release-check.yml` now fails the pull request instead, and pings
+  Telegram when it does. It runs on every PR, not only ones that touch `data/RELEASE`: the file
+  can be untouched and still be wrong if the release it names is later unpublished. The decisive
+  step is an unauthenticated `HEAD` for the asset — `gh` speaks with a token and would happily
+  describe a release the deploy cannot reach.
+  The ping needs repo secrets `TELEGRAM_TOKEN` and `TELEGRAM_CHAT_ID` — the same @BotFather bot
+  newswatch uses is fine. Without them the check still fails the PR, it just fails quietly.
+  Nothing is sent on success: a green run is silent, for the reason given under newswatch.
 
 `pipeline build` reuses `data/cache/records` for planets whose inputs are unchanged, so a refresh
 only recomputes what moved. That cache keys on the **full** instrument definition, not just its

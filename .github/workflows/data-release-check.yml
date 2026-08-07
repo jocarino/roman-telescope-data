@@ -1,0 +1,116 @@
+name: Data release check
+
+# Does `data/RELEASE` name a release the deploy can actually fetch?
+#
+# The deploy pins its data: `scripts/fetch_data.py` downloads the asset from the release named
+# in `data/RELEASE`, with no token, because the repo is public. That pin is deliberate — tracking
+# "latest" would let publishing a release change production with no review, and would silently
+# build against stale data whenever the newest release was still a draft. But the pin has one
+# failure mode, and on 2026-08-07 it happened: the catalogue-refresh PR was merged while its
+# release was still a DRAFT. Draft assets 404 for a tokenless client, so every deploy failed —
+# and nothing said so, because the live site keeps serving the last good build.
+#
+# This check moves that discovery from "the next deploy" to "this pull request". It runs on
+# every PR rather than only when `data/RELEASE` changes: the file can be perfectly untouched and
+# still be wrong, if the release it names is later unpublished or deleted.
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  fetchable:
+    name: data/RELEASE names a fetchable release
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Is the pinned release published and downloadable?
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+
+          if [ ! -s data/RELEASE ]; then
+            echo "reason=data/RELEASE is missing or empty" >> "$GITHUB_OUTPUT"
+            echo "::error::data/RELEASE is missing or empty — the deploy has no tag to fetch."
+            exit 1
+          fi
+
+          tag="$(tr -d '[:space:]' < data/RELEASE)"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "Pinned release: ${tag}"
+
+          draft="$(gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft 2>/dev/null || echo missing)"
+          if [ "$draft" = "missing" ]; then
+            echo "reason=no release tagged ${tag} exists" >> "$GITHUB_OUTPUT"
+            echo "::error::data/RELEASE names ${tag}, but no such release exists."
+            exit 1
+          fi
+          if [ "$draft" = "true" ]; then
+            echo "reason=${tag} is still a DRAFT" >> "$GITHUB_OUTPUT"
+            echo "::error::${tag} is still a draft. Publish it (gh release edit ${tag} --draft=false) before merging, or the deploy will 404."
+            exit 1
+          fi
+
+          # The decisive test, and the only one that reproduces what Dokploy actually does:
+          # an unauthenticated request for the asset. `gh` above speaks with a token and would
+          # happily describe a release the deploy cannot reach. HEAD is enough — GitHub answers
+          # 200 for a published asset and 404 otherwise, so this costs no bandwidth.
+          url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${tag}/planets.json"
+          code="$(curl -sIL -o /dev/null -w '%{http_code}' --max-time 60 "$url" || echo 000)"
+          echo "Tokenless HEAD ${url} -> ${code}"
+          if [ "$code" != "200" ]; then
+            echo "reason=planets.json is not downloadable from ${tag} (HTTP ${code})" >> "$GITHUB_OUTPUT"
+            echo "::error::planets.json is not fetchable from ${tag} without a token (HTTP ${code})."
+            exit 1
+          fi
+
+          echo "OK: ${tag} is published and planets.json is fetchable without a token."
+
+      # Only ever fires on failure. This repository's notification discipline (see the newswatch
+      # section of the README) is that a quiet run sends nothing at all — a periodic "still fine"
+      # message is one you can do nothing with, and those are what train a person to stop reading
+      # the ones they can. `curl` rather than any tool of ours, so a ping still goes out when the
+      # thing that broke is ours.
+      - name: Tell Telegram
+        if: failure()
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+          REASON: ${{ steps.check.outputs.reason }}
+          TAG: ${{ steps.check.outputs.tag }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -u
+          if [ -z "${TG_TOKEN}" ] || [ -z "${TG_CHAT}" ]; then
+            echo "::warning::TELEGRAM_TOKEN / TELEGRAM_CHAT_ID are not set — no ping sent."
+            exit 0
+          fi
+          text="$(printf '%s\n' \
+            "🔴 <b>Do not merge #${PR_NUM}</b>" \
+            "" \
+            "$(printf '%s' "${PR_TITLE}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')" \
+            "" \
+            "<b>data/RELEASE is not fetchable:</b> ${REASON:-check failed}" \
+            "" \
+            "The deploy downloads this release with no token. Merging now points main at data it cannot get, and every deploy fails while the live site keeps serving the old build, so nothing looks wrong." \
+            "" \
+            "Fix: <code>gh release edit ${TAG} --draft=false</code>" \
+            "" \
+            "${PR_URL}")"
+          curl -sS --max-time 30 -X POST \
+            "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
+            -d chat_id="${TG_CHAT}" \
+            -d parse_mode=HTML \
+            -d disable_web_page_preview=true \
+            --data-urlencode text="${text}" >/dev/null \
+            && echo "Pinged Telegram." \
+            || echo "::warning::Telegram ping failed (the check result above still stands)."
