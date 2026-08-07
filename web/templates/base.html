@@ -109,9 +109,13 @@
         <a href="/how"><i class="foot-gl" aria-hidden="true">λ</i>How the colours work</a>
         <a href="/credits"><i class="foot-gl" aria-hidden="true">§</i>Sources &amp; credits</a>
         <a href="/glossary"><i class="foot-gl" aria-hidden="true">A–Z</i>Glossary</a>
+        <a href="/about"><i class="foot-gl" aria-hidden="true">☺</i>About &amp; contact</a>
       </nav>
+      {# The address itself, when the build carries one — the enquiry neither /about nor
+         /press will catch arrives on some other page, and this line is what catches it. #}
       <p class="foot-meta">Exoplanet Palette ·
-        <a href="{{ licence_url }}" rel="license noopener" target="_blank">CC BY 4.0</a> ·
+        {% if site and site.contact_email %}<a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a> ·
+        {% endif %}<a href="{{ licence_url }}" rel="license noopener" target="_blank">CC BY 4.0</a> ·
         <a href="{{ repo_url }}" rel="noopener" target="_blank">GitHub ↗</a></p>
     </footer>
   </div>

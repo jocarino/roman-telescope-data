@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% from "macros.html" import back_link %}
+{% block content %}
+{# The thin asset page: downloads, specs, captions, credit lines, facts. A writer with
+   ninety minutes to file needs an image at the right size, a paragraph they can quote and a
+   line about what is honest — if they have to email for any of it, they cover something
+   else. Plain language throughout: this is a utility page a person is judged by, not a
+   "Media Centre", and it never speaks in the third person.
+
+   Nothing numeric is typed here. Counts come from the catalogue, band figures from
+   pipeline.config, captions and dimensions from the same objects that rendered the PNGs
+   (web/press.py) — the page and the pixels cannot disagree. tests/test_press.py pins the
+   wording that must never appear (a fourth Roman band, "disclaimer", "caveat"). #}
+<div class="pr">
+  <div class="site-head">
+    {{ back_link() }}
+    <h1>Images &amp; information for writing about this</h1>
+    <span class="tagline">everything a piece needs: pictures, captions, facts, credit lines</span>
+  </div>
+
+  <p class="subhead lede">This page is for anyone writing or making something about
+    <strong>Exoplanet Palette</strong>. Take what you need — the images are ready to publish,
+    the captions are written, the licence is one line. Who makes this and why is on
+    <a href="/about">the about page</a>; questions and caption-checks are welcome,
+    <a href="#contact">contact below</a>.</p>
+
+  {# ── describe it ──────────────────────────────────────────────────────────────────── #}
+  <section class="pr-sec">
+    <h2 class="pr-h">Describe it in one paragraph</h2>
+    <p class="pr-intro">Three lengths, ready to paste. They agree with each other and with
+      the site; trimming ours beats writing fresh ones, because these are checked.</p>
+
+    <div class="pr-copy panel">
+      <h3 class="pr-copy-len">~15 words</h3>
+      <p>The colour of every known exoplanet, computed from physics rather than imagined by
+        an artist.</p>
+    </div>
+    <div class="pr-copy panel">
+      <h3 class="pr-copy-len">~40 words</h3>
+      <p>Exoplanet Palette computes the visible colour of {{ "{:,}".format(n_planets) }}
+        exoplanets from physics: each planet's modelled reflected light, multiplied by its
+        star's light, converted to the colour a human eye would see. Every planet is also
+        shown as the Roman Space Telescope's coronagraph would record it.</p>
+    </div>
+    <div class="pr-copy panel">
+      <h3 class="pr-copy-len">~150 words</h3>
+      <p>Exoplanet Palette shows the colour of every known exoplanet —
+        {{ "{:,}".format(n_planets) }} of them — computed rather than imagined. For each
+        planet it models the light reflected from its atmosphere, multiplies that by its host
+        star's spectrum, and runs the result through the CIE 1931 colour-matching functions
+        to get the colour a human eye would actually see. Methane makes a world blue-green;
+        thick cloud pushes it toward white; a cloud-free hot Jupiter comes out nearly
+        black.</p>
+      <p>Every planet is also shown "as Roman would see it" — the same colour reconstructed
+        from the {{ bands|length }} visible bandpasses of the Nancy Grace Roman Space
+        Telescope's coronagraph, and from the single {{ "%.0f"|format(bands[0].center_nm) }}
+        nm band that is the instrument's only guaranteed measurement — so you can see how
+        much colour identity survives a real instrument.</p>
+      <p>These are computed colours, not photographs, and the site says so on every page.
+        Five solar-system planets are included as a check: their computed colours can be
+        compared against real images. Built by one person, in Portugal, on evenings and
+        weekends.</p>
+    </div>
+  </section>
+
+  {# ── images ───────────────────────────────────────────────────────────────────────── #}
+  <section class="pr-sec" id="images">
+    <h2 class="pr-h">Images, ready to publish</h2>
+    <p class="pr-intro">Each comes as a 3000&nbsp;px master (print) and a 1200&nbsp;px web
+      copy, sRGB profile embedded, with the credit and the description written inside the
+      file's own metadata. Every image below is built purely from this site's rendered
+      swatches — no telescope imagery, so the licence is entirely ours to give:
+      <a href="{{ licence_url }}" rel="license noopener" target="_blank">CC&nbsp;BY&nbsp;4.0</a>.
+      Or take everything at once:
+      <a href="/press-kit/press.zip" download>press.zip</a>.</p>
+
+    {% for a in assets %}
+    <div class="pr-asset panel">
+      <a href="{{ a.master }}" target="_blank" rel="noopener">
+        <img class="pr-asset-img" src="{{ a.web }}" alt="{{ a.alt }}" loading="lazy"
+          width="1200" height="{{ (a.height * 1200 / a.width)|round|int }}">
+      </a>
+      <div class="pr-asset-meta">
+        <h3 class="pr-asset-title">{{ a.title }}</h3>
+        <p class="pr-asset-links">
+          <a href="{{ a.master }}" download>Master ({{ a.width }}×{{ a.height }})</a> ·
+          <a href="{{ a.web }}" download>Web copy (1200&nbsp;px)</a> ·
+          CC&nbsp;BY&nbsp;4.0</p>
+        <p class="pr-asset-cap"><span class="pr-lbl">Caption, ready to paste</span>
+          {{ a.caption }}</p>
+        <p class="pr-asset-cap"><span class="pr-lbl">Alt text</span> {{ a.alt }}</p>
+      </div>
+    </div>
+    {% endfor %}
+
+    <p class="pr-note">Credit line, online:
+      <code>{{ attribution }}</code> · in print: <code>Exoplanet Palette, CC BY 4.0</code>.
+      Using either exactly satisfies the licence. Crops and colour-space conversions are fine
+      and need no separate note. Screenshots of the site itself are a different case: planet
+      pages can contain third-party telescope imagery with its own credit, listed per image
+      on <a href="/credits">Sources &amp; credits</a> — check before licensing a screenshot
+      onward.</p>
+  </section>
+
+  {# ── how to describe ──────────────────────────────────────────────────────────────── #}
+  <section class="pr-sec">
+    <h2 class="pr-h">How to describe these images</h2>
+    <p class="pr-intro">Not conditions — a service, so the piece survives its own edit. The
+      one phrase that matters: these are <b>computed colours</b>. Nobody has ever photographed
+      the colour of a planet around another star: alongside its
+      {{ "{:,}".format(n_planets) }} exoplanets this site carries just
+      {{ stats.n_measured }} worlds with genuinely measured colours, and all
+      {{ stats.n_measured }} are in our own solar system.</p>
+    <div class="pr-writethis panel">
+      <div class="pr-wt-col pr-wt-no">
+        <h3>Please not this</h3>
+        <ul>
+          <li>"photograph of an exoplanet"</li>
+          <li>"NASA image"</li>
+          <li>"what the planet looks like"</li>
+          <li>"scientists have revealed the colour of…"</li>
+        </ul>
+      </div>
+      <div class="pr-wt-col pr-wt-yes">
+        <h3>This instead</h3>
+        <ul>
+          <li>"computed colour"</li>
+          <li>"independent project using NASA data"</li>
+          <li>"the colour physics predicts"</li>
+          <li>"one person modelled the colour of…"</li>
+        </ul>
+      </div>
+    </div>
+    <p class="pr-note">Send me your caption before it runs and I'll check it within the hour
+      — no approval, no changes to your copy, just the physics.</p>
+  </section>
+
+  {# ── facts ────────────────────────────────────────────────────────────────────────── #}
+  <section class="pr-sec">
+    <h2 class="pr-h">Facts &amp; figures</h2>
+    <p class="pr-intro">Generated from the live catalogue at build time, so they cannot go
+      stale against the site. Figures current as of the {{ snapshot }} data release.</p>
+    <ul class="pr-facts">
+      <li><b>{{ "{:,}".format(n_planets) }}</b> exoplanets modelled, of roughly
+        {{ "{:,}".format(known_total) }} confirmed — plus our own
+        {{ stats.n_measured }} best-measured solar-system planets as calibration
+        anchors.</li>
+      <li>Colour computed over <b>380–780&nbsp;nm</b> (visible light): modelled geometric
+        albedo spectrum × host-star spectrum, convolved with the CIE 1931 2° colour-matching
+        functions, converted to sRGB.</li>
+      <li>The Roman Coronagraph flies <b>{{ bands|length }} visible bandpasses</b>:
+        {% for b in bands %}{{ "%.0f"|format(b.center_nm) }}&nbsp;nm
+        ({{ "%.0f"|format(b.bandwidth_frac * 100) }}%, {{ b.role }}){{ ", " if not loop.last }}{% endfor %}.
+        Only the {{ "%.0f"|format(bands[0].center_nm) }}&nbsp;nm imaging band is a formal
+        mission requirement; the rest are best-effort. (A 660&nbsp;nm filter is installed but
+        was never ground-tested, so it is not a supported observing mode.)</li>
+      <li>Reconstructed from those {{ bands|length }} bands, <b>{{ stats.family_shift_pct }}%</b>
+        of planets shift to a different colour family — the site's headline question is how
+        much colour identity survives a real filter set.</li>
+      <li><b>{{ stats.n_measured }} solar-system planets</b> are computed from measured
+        spectra as calibration anchors; <b>{{ "{:,}".format(stats.microlensing) }}</b>
+        microlensing-discovered planets are flagged model-only, because their light can never
+        be isolated again.</li>
+      <li>Planet and star parameters: the NASA Exoplanet Archive. Albedo models: published
+        grids and NASA's open-source PICASO — every input credited on
+        <a href="/credits">Sources &amp; credits</a>.</li>
+      <li>The site is static, open-source, ad-free, and uses only cookieless analytics.</li>
+    </ul>
+  </section>
+
+  {# ── limitations ──────────────────────────────────────────────────────────────────── #}
+  <section class="pr-sec">
+    <h2 class="pr-h">Known limitations</h2>
+    <p class="pr-intro">Published here on purpose — checking these is what a fact-checker
+      would spend the week doing, so here is the week saved:</p>
+    <ul class="pr-facts">
+      <li>Host stars are treated as blackbodies of their measured temperature, not full
+        stellar atmosphere models.</li>
+      <li>Most planets run through a parametric engine that blends archetype spectra by
+        temperature and size; it is a physically-motivated interpolation, not a full
+        radiative-transfer solution per planet. Each page's data card names its engine.</li>
+      <li>Cloud state and metallicity are assumed where unmeasured, and stated per planet.</li>
+      <li>Swatches are brightness-normalised so dark worlds stay visible on screen — the
+        darkest planets are far blacker than any display could show. Each page states the
+        planet's true reflectivity.</li>
+      <li>Roman's filters are modelled as ideal top-hats at the Primer's nominal widths;
+        as-built filter profiles run slightly wider.</li>
+      <li>No phase-curve validation against real photometry yet — that is exactly what Roman
+        could one day provide.</li>
+    </ul>
+  </section>
+
+  {# ── second sources + contact ─────────────────────────────────────────────────────── #}
+  <section class="pr-sec">
+    <h2 class="pr-h">Who to check with, who isn't me</h2>
+    <p>Every science desk needs an independent voice. The models this site runs on are
+      published, so their authors can speak to what the models can and cannot say: the
+      reflected-light albedo grids (Cahoy, Marley &amp; Fortney), the PICASO code (Batalha
+      et al.), and the NASA Exoplanet Archive team behind every planet's parameters. Full
+      citations with links for all of them are on <a href="/credits">Sources &amp;
+      credits</a>. For the Roman Coronagraph itself, the mission's science support centre at
+      IPAC is the authoritative contact — and if I have any instrument number wrong, they
+      should outrank me.</p>
+  </section>
+
+  <section class="pr-sec" id="contact">
+    <h2 class="pr-h">Contact</h2>
+    {% if site.contact_email %}
+    <p>Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a> —
+      answered within a few hours in European daytime (Portugal, UTC+1 in summer; languages:
+      Portuguese and English). Available for a recorded call with about a day's notice. For
+      anything Roman-related in launch week, put <code>URGENT</code> in the subject line and
+      it reaches my phone.</p>
+    {% else %}
+    <p>Open an issue on <a href="{{ repo_url }}/issues" rel="noopener" target="_blank">the
+      project's GitHub</a>, and it will be answered quickly.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

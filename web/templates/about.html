@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% from "macros.html" import back_link %}
+{% block content %}
+{# The human page. A curator, a scientist or a reader who asks "who made this and can I
+   trust it / reach them" lands HERE; /press is the thin asset shelf for someone writing a
+   piece. Two audiences, two pages — this one is a person, not a press office, so it is
+   written in the first person and contains no downloads, only the answer and the address.
+
+   The contact address is a build input (site.contact_email), not typed here: the repo is
+   public and deliberately carries no personal address. Without it the page still offers the
+   repo's issue tracker, so contact never renders as an empty slot. #}
+<div class="ab">
+  <div class="site-head">
+    {{ back_link() }}
+    <h1>About this site</h1>
+    <span class="tagline">what it is, who makes it, how to reach them</span>
+  </div>
+
+  <p class="subhead lede">Almost every picture of an exoplanet you have ever seen is an
+    artist's guess. This site shows what we can actually say: the colour physics predicts
+    for each of <strong>{{ "{:,}".format(n_planets) }}</strong> real exoplanets — computed,
+    never photographed, and labelled with exactly where the model ends.</p>
+
+  <section class="ab-sec">
+    <h2 class="ab-h">What this is</h2>
+    <p>For every known exoplanet, this site models the light the planet reflects, multiplies
+      it by its host star's light, and passes the result through the same colour-matching
+      maths your eye performs — out comes the colour a human would see. Methane makes a world
+      blue-green; thick cloud pushes it toward white; a cloud-free hot Jupiter comes out
+      nearly black. Each planet is also shown as the
+      <a href="/roman">Nancy Grace Roman Space Telescope's coronagraph</a> would record it,
+      so you can see how much colour identity survives a real instrument.</p>
+    <p>These are <b>computed colours</b> — models, not photographs — and every page says so.
+      Five solar-system planets run through the identical pipeline from <em>measured</em>
+      spectra as a calibration check: if Jupiter came out wrong, everything else would be
+      wrong too. The full method is on <a href="/how">How we get the colours</a>, and every
+      scientific input is credited on <a href="/credits">Sources &amp; credits</a>.</p>
+  </section>
+
+  <section class="ab-sec">
+    <h2 class="ab-h">Who makes it</h2>
+    <p>I'm João — <a href="{{ repo_url }}" rel="noopener" target="_blank">jocarino on
+      GitHub</a> — a software engineer in Portugal. This is a one-person project, built on
+      evenings and weekends, with no funding and no astronomy affiliation: everything here
+      stands on the published work of the scientists <a href="/credits">credited here</a>,
+      and every claim is checkable against it. I made it because the honest version of an
+      exoplanet's colour — the one with its assumptions attached — turned out to be more
+      interesting than the artist's impression.</p>
+  </section>
+
+  <section class="ab-sec" id="contact">
+    <h2 class="ab-h">Contact</h2>
+    {% if site.contact_email %}
+    <p>Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a> — it is
+      answered within a few hours in European daytime (Portugal, UTC+1 in summer). Corrections
+      are especially welcome: if anything here misstates your work or your instrument, I would
+      rather be told than be polite about it.</p>
+    {% else %}
+    <p>Open an issue on <a href="{{ repo_url }}/issues" rel="noopener" target="_blank">the
+      project's GitHub</a> — corrections especially welcome: if anything here misstates your
+      work or your instrument, I would rather be told than be polite about it.</p>
+    {% endif %}
+  </section>
+
+  <section class="ab-sec">
+    <h2 class="ab-h">Using these images</h2>
+    <p>Writing about this site? <a href="/press">Images and information for writing about
+      this</a> has ready-to-publish pictures with captions, credit lines and licences, plus
+      copy you can paste and the facts checked. The short version: the site's own renders are
+      <a href="{{ licence_url }}" rel="license noopener" target="_blank">CC BY 4.0</a> — use
+      them, credit them, and please call the colours what they are: computed, not
+      photographed.</p>
+  </section>
+</div>
+{% endblock %}
