@@ -27,7 +27,7 @@ from pipeline.config import ROMAN_CGI
 from pipeline.rights import RIGHTS
 from web.build import _env
 from web.meta import Site, static_pages
-from web.press import PressAsset
+from web.press import PressAsset, PressStyle
 
 _ROOT = Path(__file__).resolve().parents[1]
 _DIST = _ROOT / "dist"
@@ -36,7 +36,12 @@ _FAKE_ASSETS = [
     PressAsset(
         slug="colour-wall", title="The wall", width=3000, height=3100,
         caption="The computed colour of 5,768 known exoplanets. Not photographs.",
-        alt="A dense grid of coloured squares.",
+        styles=(
+            PressStyle(key="pixel", label="Pixel art", stem="colour-wall",
+                       alt="A dense grid of coloured squares."),
+            PressStyle(key="smooth", label="Smooth sphere", stem="colour-wall-smooth",
+                       alt="A dense grid of coloured squares."),
+        ),
     )
 ]
 _FAKE_STATS = {"family_shift_pct": 37, "n_measured": 5, "microlensing": 2}
@@ -134,16 +139,22 @@ def test_built_pages_exist_and_carry_the_footer():
 
 @pytestmark_dist
 def test_flagship_assets_exist_at_both_sizes_and_bundle():
+    """Every style variant ships at both sizes: the pixel default owns the bare filename,
+    the smooth sphere is the offered choice, and press.zip carries the lot."""
     kit = _DIST / "press-kit"
-    slugs = ("colour-wall", "roman-comparison", "band1-only")
-    for slug in slugs:
-        assert (kit / f"{slug}.png").exists()
-        assert (kit / f"{slug}-1200.png").exists()
+    stems = (
+        "colour-wall",
+        "roman-comparison", "roman-comparison-smooth",
+        "band1-only", "band1-only-smooth",
+    )
+    for stem in stems:
+        assert (kit / f"{stem}.png").exists(), f"{stem}.png missing"
+        assert (kit / f"{stem}-1200.png").exists(), f"{stem}-1200.png missing"
     with zipfile.ZipFile(kit / "press.zip") as z:
         names = set(z.namelist())
     assert "CREDITS.txt" in names
-    for slug in slugs:
-        assert {f"{slug}.png", f"{slug}-1200.png"} <= names
+    for stem in stems:
+        assert {f"{stem}.png", f"{stem}-1200.png"} <= names
 
 
 @pytestmark_dist

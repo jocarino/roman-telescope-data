@@ -3113,3 +3113,17 @@ a.rtb-name:hover { color: var(--accent); }
   .ab-sec, .pr-sec { margin-bottom: 26px; }
   .pr-writethis { gap: 12px; }
 }
+
+/* Render-style toggle on a press asset: pixel art is the default (the site's own look),
+   the smooth sphere is the offered choice. Accent marks the active choice, per the site's
+   standing rule that only interactive things carry the accent. */
+.pr-style-row { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; }
+.pr-style-lbl { display: inline; margin: 0 6px 0 0; }
+.pr-style-btn {
+  font-family: var(--pixel); font-size: 9px; letter-spacing: .5px; text-transform: uppercase;
+  color: var(--fg-dim); background: var(--bg-3); border: 1px solid var(--line);
+  padding: 6px 10px; cursor: pointer;
+}
+.pr-style-btn:hover { border-color: var(--accent); color: var(--fg); }
+.pr-style-btn.on { border-color: var(--accent); color: var(--accent); }
+.pr-style-btn:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }

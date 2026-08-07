@@ -74,20 +74,38 @@
       <a href="/press-kit/press.zip" download>press.zip</a>.</p>
 
     {% for a in assets %}
-    <div class="pr-asset panel">
-      <a href="{{ a.master }}" target="_blank" rel="noopener">
-        <img class="pr-asset-img" src="{{ a.web }}" alt="{{ a.alt }}" loading="lazy"
-          width="1200" height="{{ (a.height * 1200 / a.width)|round|int }}">
-      </a>
+    {# Two render styles where it applies, pixel art first: it is the site's own look, so
+       it is the default — the smooth sphere is a choice a desk can make, not a fallback.
+       Each style is its own file at both sizes; without JS the default alone shows. #}
+    <div class="pr-asset panel"{% if a.styles|length > 1 %} x-data="{ s: 0 }"{% endif %}>
+      {% if a.styles|length > 1 %}
+      <div class="pr-style-row" role="group" aria-label="Render style">
+        <span class="pr-lbl pr-style-lbl">Render style</span>
+        {% for st in a.styles %}
+        <button type="button" class="pr-style-btn{{ ' on' if loop.first }}"
+          :class="{ on: s === {{ loop.index0 }} }"
+          @click="s = {{ loop.index0 }}">{{ st.label }}</button>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% for st in a.styles %}
+      <div{% if a.styles|length > 1 %} x-show="s === {{ loop.index0 }}"
+        {%- if not loop.first %} style="display:none"{% endif %}{% endif %}>
+        <a href="{{ st.master }}" target="_blank" rel="noopener">
+          <img class="pr-asset-img" src="{{ st.web }}" alt="{{ st.alt }}" loading="lazy"
+            width="1200" height="{{ (a.height * 1200 / a.width)|round|int }}">
+        </a>
+        <p class="pr-asset-links">
+          <a href="{{ st.master }}" download>Master ({{ a.width }}×{{ a.height }})</a> ·
+          <a href="{{ st.web }}" download>Web copy (1200&nbsp;px)</a> ·
+          CC&nbsp;BY&nbsp;4.0</p>
+        <p class="pr-asset-cap"><span class="pr-lbl">Alt text</span> {{ st.alt }}</p>
+      </div>
+      {% endfor %}
       <div class="pr-asset-meta">
         <h3 class="pr-asset-title">{{ a.title }}</h3>
-        <p class="pr-asset-links">
-          <a href="{{ a.master }}" download>Master ({{ a.width }}×{{ a.height }})</a> ·
-          <a href="{{ a.web }}" download>Web copy (1200&nbsp;px)</a> ·
-          CC&nbsp;BY&nbsp;4.0</p>
         <p class="pr-asset-cap"><span class="pr-lbl">Caption, ready to paste</span>
           {{ a.caption }}</p>
-        <p class="pr-asset-cap"><span class="pr-lbl">Alt text</span> {{ a.alt }}</p>
       </div>
     </div>
     {% endfor %}
