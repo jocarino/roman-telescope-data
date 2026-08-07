@@ -228,6 +228,14 @@
         <button class="desc-toggle" @click="descOpen = !descOpen" :class="descOpen ? 'on' : ''"
           :aria-expanded="descOpen">more <span x-text="descOpen ? '▴' : '▾'"></span></button>
         <div class="desc-body" :class="descOpen ? 'open' : ''">
+          {# The direct answer, static in the markup: the one sentence someone who searched
+             "what colour is <planet>" came for, readable with no JS. The colour word, hex
+             and reason come from the build context (one source with the <title> and the
+             meta description), never retyped here. #}
+          <p class="answer">{{ rec.name }}’s {{ ctx.colour_verb }} colour is
+            <i class="answer-chip" style="background: {{ tc.hex }}" aria-hidden="true"></i>
+            <b>{{ ctx.colour_phrase }}</b> <code class="answer-hex">{{ tc.hex }}</code>:
+            {{ ctx.colour_reason }}.</p>
           <div class="title-badges">{{ provenance_badge(rec) }}
             <span class="badge{{ ' gloss-chip' if DISC_TERMS.get(rec.discovery.method) }}"
               {%- if DISC_TERMS.get(rec.discovery.method) %} data-term="{{ DISC_TERMS[rec.discovery.method] }}"{% endif %}>{{ rec.discovery.method }}</span></div>
@@ -607,10 +615,10 @@
       {# Swapped, the panel is no longer showing the host star at all, so the heading stops
          claiming it is: "Host star ▸ THE LAMP" becomes "Light source ▸ SWAPPED FOR THE SUN".
          Server-rendered in the native state, which is now what a fresh arrival always gets. #}
-      <h3><span x-show="!sunlit()">{{ g('host-star', 'Host star') }}</span><span
+      <h2><span x-show="!sunlit()">{{ g('host-star', 'Host star') }}</span><span
         x-show="sunlit()" x-cloak>Light source</span> <span class="lamp-tag"
         x-show="!sunlit()">{{ g('the-lamp', 'THE LAMP') }}</span><span
-        class="lamp-tag swapped" x-show="sunlit()" x-cloak>SWAPPED FOR THE SUN</span></h3>
+        class="lamp-tag swapped" x-show="sunlit()" x-cloak>SWAPPED FOR THE SUN</span></h2>
       <button class="info-btn" @click="lh = !lh" :class="lh ? 'on' : ''" :aria-expanded="lh"
         title="Why show the star's colour?" aria-label="Why show the star's colour?">i</button>
     </div>
@@ -712,7 +720,7 @@
   {%- set sky = rec.sky -%}
   <div class="panel skypanel" id="sec-sky" x-data="skyhorizon()">
     <div class="dossier-head">
-      <h3>Where in the sky</h3>
+      <h2>Where in the sky</h2>
       <button class="info-btn" @click="sh = !sh" :class="sh ? 'on' : ''" :aria-expanded="sh"
         title="How to read this chart" aria-label="How to read this chart">i</button>
     </div>
@@ -812,7 +820,7 @@
 
     <div class="panel movepanel" id="sec-move">
       <div class="dossier-head">
-        <h3>Move this planet <span class="ms-tag">What if it orbited somewhere else?</span></h3>
+        <h2>Move this planet <span class="ms-tag">What if it orbited somewhere else?</span></h2>
         <button class="info-btn" @click="toggleInfo('move')" :class="info === 'move' ? 'on' : ''"
           :aria-expanded="info === 'move'" title="How can we know this?"
           aria-label="How can we know what it would look like elsewhere?">i</button>
@@ -949,8 +957,8 @@
     {# ── What-if: the assumptions, as knobs rather than as a disclaimer. ── #}
     <div class="panel whatifpanel" id="sec-opinion">
       <div class="dossier-head">
-        <h3>How much of this colour is the model's opinion?
-          <span class="ms-tag">Change one assumption</span></h3>
+        <h2>How much of this colour is the model's opinion?
+          <span class="ms-tag">Change one assumption</span></h2>
         <button class="info-btn" @click="toggleInfo('whatif')" :class="info === 'whatif' ? 'on' : ''"
           :aria-expanded="info === 'whatif'" title="Why does this matter?"
           aria-label="Why do the model assumptions matter?">i</button>
@@ -1009,9 +1017,9 @@
   {# ── Planet data card: colour + planet stats; provenance & model assumptions on the ℹ ── #}
   <div class="panel dossier" id="sec-data">
     <div class="dossier-head">
-      <h3>Planet data <span class="h3-qual"
+      <h2>Planet data <span class="h3-qual"
         style="color:var(--fg-faint);text-transform:none;font-weight:400">(<span
-        x-text="viewName()"></span>)</span></h3>
+        x-text="viewName()"></span>)</span></h2>
       <button class="info-btn" @click="help = !help" :class="help ? 'on' : ''"
         :aria-expanded="help" title="Data source & model assumptions"
         aria-label="Data source & model assumptions">i</button>
@@ -1127,7 +1135,7 @@
   {%- set media = {'book': '📖 book', 'film': '🎬 film', 'tv': '📺 TV', 'game': '🎮 game'} -%}
   <div class="panel fiction" id="sec-fiction">
     <div class="fiction-head">
-      <h3>Seen in fiction</h3>
+      <h2>Seen in fiction</h2>
       <span class="fiction-tag">POP CULTURE</span>
     </div>
     <p class="fiction-intro"><strong>{{ ctx.fiction.system }}</strong> is a real star system —
@@ -1161,7 +1169,7 @@
   {%- set hab = rec.habitability -%}
   <div class="panel hzpanel" id="sec-water" x-data="{ sh: false }">
     <div class="dossier-head">
-      <h3>Could it hold liquid water?</h3>
+      <h2>Could it hold liquid water?</h2>
       <button class="info-btn" @click="sh = !sh" :class="sh ? 'on' : ''" :aria-expanded="sh"
         title="How the habitable zone is worked out"
         aria-label="How the habitable zone is worked out">i</button>
@@ -1241,7 +1249,7 @@
   {% if ctx.related %}
   <div class="panel next" id="sec-next">
     <div class="next-head">
-      <h3>Where to next</h3>
+      <h2>Where to next</h2>
       <span class="next-tag">RELATED WORLDS</span>
     </div>
     <p class="next-intro">Each of these shares one stated fact with {{ rec.name }} — a colour,
@@ -1261,7 +1269,7 @@
   <style>
     .panel.next { margin-top: 16px; padding: 14px; }
     .next-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-    .next-head h3 { margin: 0; }
+    .next-head h2 { margin: 0; }
     .next-tag {
       font-family: var(--mono); font-size: 9.5px; letter-spacing: .7px; color: var(--fg-faint);
     }

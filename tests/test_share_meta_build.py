@@ -141,13 +141,59 @@ def test_planet_descriptions_carry_the_planets_own_colour():
     for path, html in _planet_pages():
         desc = _name_meta(html, "description")
         assert re.search(r"#[0-9a-f]{6}", desc), f"{path.name}: {desc}"
-        assert "Modelled reflected-light colour" in desc
+        # "Measured" is the five solar-system anchors, whose swatch comes from a real
+        # reflected-light spectrum; everything else is honest about being a model.
+        assert re.search(r"(Modelled|Measured) reflected-light colour", desc), path.name
+
+
+def test_planet_titles_answer_the_colour_question():
+    """`<name> — <verb> <colour word> <hex> · Exoplanet Palette`, one pattern everywhere: the
+    honest verb and the actual answer in the string a SERP shows and a tab bar truncates."""
+    for path, html in _planet_pages():
+        title = _tag(html, r"<title>([^<]*)</title>")
+        assert re.search(r" — (modelled|measured) \S+.* #[0-9a-f]{6} · ", title), (
+            f"{path.name}: {title}"
+        )
 
 
 def test_planet_image_alt_is_not_the_generic_fallback():
     for path, html in _planet_pages():
         alt = _og(html, "image:alt")
         assert alt and alt != "Exoplanet Palette", path.name
+
+
+def test_planet_pages_carry_one_valid_jsonld_block():
+    """Exactly one, valid, agreeing with the visible page: url == canonical, image == og:image.
+    A block that drifts from the page it sits on is worse than none — it hands machines a
+    second version of the truth."""
+    for path, html in _planet_pages():
+        blocks = re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)
+        assert len(blocks) == 1, f"{path.name}: {len(blocks)} JSON-LD blocks"
+        data = json.loads(blocks[0].replace("<\\/", "</"))
+        assert data["url"] == _tag(html, r'<link rel="canonical" href="([^"]*)">'), path.name
+        assert data["image"] == _og(html, "image"), path.name
+        assert data["license"].startswith("https://creativecommons.org/licenses/by/4.0")
+
+
+def test_planet_pages_answer_in_static_text_before_any_js():
+    """The direct answer — "<name>'s modelled colour is <word> <hex>: <reason>" — must be
+    real markup, not an Alpine binding: it is what a crawler, an AI answer surface, and a
+    reader with JS off get. The planet's own hex appearing in visible text (not just in
+    x-data) is the check."""
+    for path, html in _planet_pages():
+        m = re.search(r'<p class="answer">(.*?)</p>', html, re.S)
+        assert m, f"{path.name} has no static answer line"
+        answer = m.group(1)
+        assert re.search(r"’s (modelled|measured) colour is", answer), path.name
+        assert re.search(r'<code class="answer-hex">#[0-9a-f]{6}</code>', answer), path.name
+
+
+def test_planet_pages_have_a_real_heading_outline():
+    """One h1 (the name), and the sections under it are h2s — a document outline rather than
+    a bare name followed by an interface. The h3s these were would leave the outline empty."""
+    for path, html in _planet_pages():
+        assert len(re.findall(r"<h1[\s>]", html)) == 1, path.name
+        assert len(re.findall(r"<h2[\s>]", html)) >= 3, f"{path.name}: fewer than 3 h2s"
 
 
 # ── crawlability ────────────────────────────────────────────────────────────────────────
@@ -273,6 +319,34 @@ def test_descriptions_are_unique_across_the_whole_catalogue():
     counts = collections.Counter(planet_description(r) for r in doc.planets)
     dupes = [d for d, n in counts.items() if n > 1]
     assert not dupes, f"{len(dupes)} duplicated descriptions, e.g. {dupes[:1]}"
+
+
+def test_every_shipped_record_clears_the_worth_indexing_bar():
+    """ "Decide what not to index" (marketing 03, item 9), resolved by measurement: the feared
+    thousands of three-facts-and-a-swatch records do not exist in a shipped release, because
+    the pipeline's completeness gate already refuses them. Every record here has a measured
+    equilibrium temperature, distance and host-star Teff, and a measured radius or mass — so
+    a noindex predicate would fire on nothing, and every planet page earns its sitemap slot.
+
+    This is the tripwire that keeps that decision true: if a catalogue refresh ever weakens
+    the gate and filler records arrive, this goes red and the noindex question reopens —
+    PageMeta already carries `noindex` / `in_sitemap` for exactly that day."""
+    from pipeline.models import PlanetsFile
+
+    doc = PlanetsFile.model_validate_json(PLANETS_JSON.read_text())
+    thin = [
+        r.id
+        for r in doc.planets
+        if (s := r.params.sources) is None
+        or s.equilibrium_temp_k != "measured"
+        or s.distance_pc != "measured"
+        or s.star_teff_k != "measured"
+        or (s.radius_r_earth != "measured" and s.mass_m_earth != "measured")
+    ]
+    assert not thin, (
+        f"{len(thin)} records below the indexing bar (e.g. {thin[:3]}) — "
+        "time to wire a noindex predicate into planet_meta()"
+    )
 
 
 def test_every_planet_description_fits_an_unfurl():

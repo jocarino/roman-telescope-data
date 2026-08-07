@@ -17,6 +17,7 @@ The canonical origin is not knowable from the repo, so it is a build input (`--b
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
 from xml.sax.saxutils import escape
 
@@ -119,6 +120,21 @@ def _type_phrase(rec: PlanetRecord) -> str:
     return _TYPE_PHRASE.get(key, "a planet")
 
 
+def colour_phrase(rec: PlanetRecord) -> str:
+    """The colour family as it reads in a sentence ("azure", "near-black"). One source for
+    the title, the description and the on-page answer line, so they cannot disagree about
+    what colour word a planet gets."""
+    return _FAMILY_PHRASE.get(colour_family(tuple(rec.true_colour.srgb)), "distinctive")
+
+
+def colour_verb(rec: PlanetRecord) -> str:
+    """ "modelled" for the catalogue, "measured" for the five solar-system anchors whose
+    swatch comes from a real reflected-light spectrum. The honesty rule cuts both ways:
+    calling Earth's measured colour "modelled" understates the one place we have ground
+    truth."""
+    return "measured" if rec.provenance == "measured-albedo" else "modelled"
+
+
 def planet_description(rec: PlanetRecord) -> str:
     """One honest sentence-pair, ~150-200 chars: what it is, where it is, what colour we
     model it as, and the fact that the colour is modelled.
@@ -129,7 +145,7 @@ def planet_description(rec: PlanetRecord) -> str:
     duplicate-description problem this module exists to fix, one level down.
     """
     colour = rec.true_colour
-    family = _FAMILY_PHRASE.get(colour_family(tuple(colour.srgb)), "distinctive")
+    family = colour_phrase(rec)
     ly = _light_years(rec.params.distance_pc)
     # Solar-system anchors orbit "Sun" in the archive's naming; in prose it takes the article.
     host = "the Sun" if rec.host_star.name == "Sun" else rec.host_star.name
@@ -138,7 +154,7 @@ def planet_description(rec: PlanetRecord) -> str:
         where += f", {ly:,} light-year{'s' if ly != 1 else ''} away"
 
     lead = f"{rec.name} is {_type_phrase(rec)} {where}."
-    colour_bit = f" Modelled reflected-light colour: {family}, {colour.hex}."
+    colour_bit = f" {colour_verb(rec).capitalize()} reflected-light colour: {family}, {colour.hex}."
     if not rec.is_light_isolable:
         tail = (
             " Found by microlensing — no telescope can ever isolate its light, so this"
@@ -150,17 +166,52 @@ def planet_description(rec: PlanetRecord) -> str:
 
 
 def planet_meta(rec: PlanetRecord) -> PageMeta:
+    # One title pattern for all ~5.8k pages, decided once: name, honest verb, colour word,
+    # hex. "HD 189733 b — modelled azure #2fa1ff · Exoplanet Palette" answers "what colour
+    # is X" in the tab and the SERP without a question-mark gimmick, and the verb keeps the
+    # honesty rule where it is most visible. Titles are a modest CTR lever, not a ranking
+    # one — do not run a second pattern beside this.
     return PageMeta(
-        title=f"{rec.name} · {SITE_NAME}",
+        title=(
+            f"{rec.name} — {colour_verb(rec)} {colour_phrase(rec)}"
+            f" {rec.true_colour.hex} · {SITE_NAME}"
+        ),
         description=planet_description(rec),
         path=f"/planet/{rec.id}",
         image=f"/og/{rec.id}.png",
         image_alt=(
-            f"{rec.name} rendered in its modelled colour {rec.true_colour.hex}, "
+            f"{rec.name} rendered in its {colour_verb(rec)} colour {rec.true_colour.hex}, "
             f"beside its five-stop palette"
         ),
         priority="0.6",
     )
+
+
+def planet_jsonld(rec: PlanetRecord, site: Site) -> str:
+    """One minimal schema.org block per planet page, for machines that read pages rather
+    than render them. Deliberately small: `CreativeWork` will never produce a rich result
+    for this content, so the value is being parsed cleanly by AI answer surfaces, and a
+    licence a machine can read. No `BreadcrumbList` — there is no breadcrumb UI to describe.
+
+    The name and description restate the honest verb ("modelled"/"measured"); everything
+    here is derived from the same record as the visible page, so the two cannot disagree.
+    """
+    data = {
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        "name": f"{rec.name} — {colour_verb(rec)} reflected-light colour",
+        "description": planet_description(rec),
+        "url": site.absolute(f"/planet/{rec.id}"),
+        "image": site.absolute(f"/og/{rec.id}.png"),
+        # The derived colour is CC BY 4.0 (LICENSE-DATA); the licence is the one field an
+        # automated reuser actually acts on.
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "isPartOf": {"@type": "WebSite", "name": SITE_NAME, "url": site.absolute("/")},
+        "about": {"@type": "Thing", "name": rec.name},
+    }
+    # "</" never appears in this data today, but a description containing "</script>" would
+    # end the tag mid-JSON; the escaped form parses identically.
+    return json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
 
 
 def static_pages(n_planets: int) -> list[PageMeta]:
@@ -307,7 +358,12 @@ def not_found_meta() -> PageMeta:
 
 def sitemap_xml(site: Site, lastmod: str | None = None) -> str:
     """One urlset for the whole site. ~5.8k URLs is an order of magnitude inside the 50,000
-    URL / 50 MB limit, so it stays a single uncompressed file with no index."""
+    URL / 50 MB limit, so it stays a single uncompressed file with no index.
+
+    Pages with a card image also get an `<image:image>` entry — image search is the one
+    surface where 5.8k distinct planet renders can compete, and the card PNG is never an
+    `<img>` on the page, so the sitemap is the only way a crawler learns it exists. Bare
+    `<image:loc>` only: Google dropped `title`/`caption` support in 2022."""
     rows = []
     for page in site.pages:
         if not page.in_sitemap or page.noindex:
@@ -317,10 +373,17 @@ def sitemap_xml(site: Site, lastmod: str | None = None) -> str:
             row.append(f"    <lastmod>{escape(lastmod)}</lastmod>")
         row.append(f"    <changefreq>{page.changefreq}</changefreq>")
         row.append(f"    <priority>{page.priority}</priority>")
+        if page.image:
+            row.append(
+                "    <image:image>"
+                f"<image:loc>{escape(site.absolute(page.image))}</image:loc>"
+                "</image:image>"
+            )
         rows.append("  <url>\n" + "\n".join(row) + "\n  </url>")
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n'
+        '        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n'
         + "\n".join(rows)
         + "\n</urlset>\n"
     )

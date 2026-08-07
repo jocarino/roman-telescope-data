@@ -29,6 +29,7 @@ from web.meta import (
     PageMeta,
     Site,
     planet_description,
+    planet_jsonld,
     planet_meta,
     robots_txt,
     sitemap_xml,
@@ -122,6 +123,55 @@ def test_descriptions_fit_an_unfurl():
         assert len(page.description) <= 300
 
 
+# ── the planet title answers the question ───────────────────────────────────────────────
+
+
+def test_planet_title_carries_name_verb_colour_word_and_hex():
+    """One pattern, decided once: `<name> — <verb> <colour word> <hex> · <site>`. The verb is
+    the honesty rule in the most visible string the site emits; the colour word and hex are
+    what someone who searched "what colour is X" came for."""
+    title = planet_meta(_record()).title
+    assert title.startswith("Test b — modelled ")
+    assert "#3b5aa8" in title
+    assert title.endswith(" · Exoplanet Palette")
+
+
+def test_measured_albedo_planets_say_measured_not_modelled():
+    """Earth's swatch comes from a real reflected-light spectrum; calling it "modelled" would
+    understate the one place we have ground truth. The honesty rule cuts both ways."""
+    rec = _record(provenance="measured-albedo")
+    assert " measured " in planet_meta(rec).title
+    assert "Measured reflected-light colour" in planet_description(rec)
+    assert "modelled" not in planet_meta(rec).title
+
+
+# ── JSON-LD ─────────────────────────────────────────────────────────────────────────────
+
+
+def test_planet_jsonld_is_minimal_valid_and_honest():
+    import json
+
+    data = json.loads(planet_jsonld(_record(), Site(base_url="https://x.test")))
+    assert data["@type"] == "CreativeWork"
+    assert data["url"] == "https://x.test/planet/test-b"
+    assert data["image"] == "https://x.test/og/test-b.png"
+    assert data["license"].startswith("https://creativecommons.org/licenses/by/4.0")
+    assert "modelled" in data["name"]
+    # Minimal means minimal: no BreadcrumbList ceremony sneaks back in.
+    assert "BreadcrumbList" not in planet_jsonld(_record(), Site())
+
+
+def test_planet_jsonld_cannot_break_out_of_its_script_tag():
+    """The block is inlined into `<script type="application/ld+json">`; a `</script>` anywhere
+    in the JSON would end the tag mid-payload. The escaped form `<\\/` parses identically."""
+    import json
+
+    rec = _record(name="Test </script> b")
+    out = planet_jsonld(rec, Site())
+    assert "</" not in out
+    assert json.loads(out)["about"]["name"] == "Test </script> b"
+
+
 # ── one title, one place ────────────────────────────────────────────────────────────────
 
 
@@ -184,6 +234,17 @@ def test_sitemap_excludes_noindex_and_opted_out_pages():
         PageMeta(title="x", description="d", path="/hidden.html", in_sitemap=False),
     ]
     assert len(_sitemap_locs(Site(base_url="https://x.test", pages=pages))) == 1
+
+
+def test_sitemap_carries_the_planet_card_image():
+    """The card PNG is never an `<img>` on the page, so the sitemap's image extension is the
+    only way image search learns 5.8k distinct planet renders exist. Bare `<image:loc>` only —
+    Google dropped title/caption support in 2022."""
+    ns = "{http://www.google.com/schemas/sitemap-image/1.1}"
+    site = Site(base_url="https://x.test", pages=[planet_meta(_record()), *static_pages(10)])
+    root = ET.fromstring(sitemap_xml(site))
+    imgs = [loc.text for loc in root.iter(f"{ns}loc")]
+    assert imgs == ["https://x.test/og/test-b.png"]
 
 
 def test_sitemap_escapes_urls():

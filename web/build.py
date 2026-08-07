@@ -49,14 +49,17 @@ from pipeline.palette.export import ase_bytes
 from pipeline.rights import RIGHTS
 from pipeline.roman_board import resolve as resolve_board
 from pipeline.sky import format_dec, format_ra
-from pipeline.tours import Tour, TourStop
+from pipeline.tours import Tour, TourStop, colour_reason
 from pipeline.tours import resolve as resolve_tours
 from web.credits import credits_context
 from web.hz import hz_strip_svg
 from web.meta import (
     PageMeta,
     Site,
+    colour_phrase,
+    colour_verb,
     not_found_meta,
+    planet_jsonld,
     planet_meta,
     robots_txt,
     roman_meta,
@@ -338,6 +341,13 @@ def _planet_ctx(
     # Two scope faces: wide for desktop, near-square for phones (CSS picks one).
     return {
         "record": rec,
+        # The answer line under the h1: colour word + one-clause physics reason, static in
+        # the HTML so it reads without JS — for a crawler, an AI answer surface, and anyone
+        # who bounced in from a search asking exactly this question. Same sources as the
+        # title and description (web/meta.py, pipeline/tours.py), so all three agree.
+        "colour_phrase": colour_phrase(rec),
+        "colour_verb": colour_verb(rec),
+        "colour_reason": colour_reason(rec),
         # The lamp: the host star's own blackbody colour (and the Sun's, for the sun-swap
         # knob to switch the lamp display to). Derived from Teff at build time — see module
         # docstring.
@@ -744,7 +754,8 @@ def build(
     # drift out of step with what the gallery does once the full index lands.
     boot_planets = sorted(index_entries, key=lambda e: e["c"])[:150]
     gallery_html = env.get_template("gallery.html").render(
-        meta=hub["/"], site=site,
+        meta=hub["/"],
+        site=site,
         stats=_stats(records),
         # The five anchors' real maps, so their cards show geography, not schematic bands.
         surface_maps=surface_maps_js(),
@@ -764,7 +775,8 @@ def build(
     # deep-linkable via ?a=&b=.
     (out / "compare.html").write_text(
         env.get_template("compare.html").render(
-            meta=hub["/compare"], site=site,
+            meta=hub["/compare"],
+            site=site,
             index_url=f"/planets.index.{build_id}.json",
             extra_url=extra_url,
             build_id=build_id,
@@ -774,8 +786,11 @@ def build(
     # the nav — it is reachable at /glossary, and by hovering any marked term anywhere.
     (out / "glossary.html").write_text(
         env.get_template("glossary.html").render(
-            meta=hub["/glossary"], site=site,
-            categories=glossary["categories"], terms=glossary["terms"], build_id=build_id
+            meta=hub["/glossary"],
+            site=site,
+            categories=glossary["categories"],
+            terms=glossary["terms"],
+            build_id=build_id,
         )
     )
     # Sources & credits: every scientific input, rendered from pipeline.rights — the same
@@ -783,7 +798,9 @@ def build(
     # that page is typed into the template, so a new source cannot ship uncredited.
     (out / "credits.html").write_text(
         env.get_template("credits.html").render(
-            meta=hub["/credits"], site=site, build_id=build_id,
+            meta=hub["/credits"],
+            site=site,
+            build_id=build_id,
             **credits_context({r.id: r.name for r in records}),
         )
     )
@@ -816,8 +833,10 @@ def build(
     # Colour census: the whole catalog as one dataset (same fetched index).
     (out / "census.html").write_text(
         env.get_template("census.html").render(
-            meta=hub["/census"], site=site,
-            index_url=f"/planets.index.{build_id}.json", build_id=build_id
+            meta=hub["/census"],
+            site=site,
+            index_url=f"/planets.index.{build_id}.json",
+            build_id=build_id,
         )
     )
     # 404: served by nginx's `error_page 404 /404.html`. Needs the index URL because its
@@ -826,7 +845,8 @@ def build(
     # and one real reflected-light spectrum for the signal trace.
     (out / "404.html").write_text(
         env.get_template("404.html").render(
-            meta=not_found_meta(), site=site,
+            meta=not_found_meta(),
+            site=site,
             index_url=f"/planets.index.{build_id}.json",
             n_modelled=len(records),
             build_id=build_id,
@@ -837,7 +857,8 @@ def build(
     # plus the extras — the RA/Dec/magnitude it plots live there).
     (out / "sky.html").write_text(
         env.get_template("sky.html").render(
-            meta=hub["/sky"], site=site,
+            meta=hub["/sky"],
+            site=site,
             index_url=f"/planets.index.{build_id}.json",
             extra_url=extra_url,
             build_id=build_id,
@@ -853,7 +874,8 @@ def build(
         hole_left, hole_width = board.dark_hole_span
         (out / "roman.html").write_text(
             env.get_template("roman.html").render(
-                meta=board_metas[0], site=site,
+                meta=board_metas[0],
+                site=site,
                 board=board,
                 mission=board.mission,
                 instrument=board.instrument,
@@ -906,7 +928,13 @@ def build(
         )
         pid = rec.id
         (out / "planet" / f"{pid}.html").write_text(
-            page_tpl.render(ctx=ctx, meta=planet_meta(rec), site=site, build_id=build_id)
+            page_tpl.render(
+                ctx=ctx,
+                meta=planet_meta(rec),
+                jsonld=planet_jsonld(rec, site),
+                site=site,
+                build_id=build_id,
+            )
         )
         (out / "fragments" / "peek" / f"{pid}.html").write_text(peek_tpl.render(ctx=ctx))
 
@@ -921,7 +949,9 @@ def build(
     site = replace(
         site,
         pages=[
-            *hub.values(), *board_metas, *tour_metas,
+            *hub.values(),
+            *board_metas,
+            *tour_metas,
             *(planet_meta(r) for r in records),
         ],
     )
