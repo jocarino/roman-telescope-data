@@ -281,6 +281,7 @@ def _env() -> Environment:
     # footer offers and the licence stamped into planets.json are then the same fact.
     env.globals["licence_url"] = RIGHTS.derived_licence
     env.globals["repo_url"] = RIGHTS.full_text.split("/blob/")[0]
+    env.globals["contact_email"] = RIGHTS.contact
     return env
 
 

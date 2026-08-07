@@ -89,3 +89,14 @@ def test_licence_and_repo_come_from_the_rights_block():
     foot = _page("credits.html")
     assert RIGHTS.derived_licence in foot
     assert RIGHTS.full_text.split("/blob/")[0] in foot
+
+
+def test_the_footer_offers_a_way_to_reach_a_human():
+    """A journalist on deadline could not contact the site's author at all, because no page
+    carried an address. It is RIGHTS.contact — the same one stamped into released data
+    files — and it must be visible text, not just a href, so it survives readers who
+    never click."""
+    html = _page("credits.html")
+    foot = html[html.index('<footer class="site-foot">') :]
+    assert f'href="mailto:{RIGHTS.contact}"' in foot
+    assert f">{RIGHTS.contact}</a>" in foot
