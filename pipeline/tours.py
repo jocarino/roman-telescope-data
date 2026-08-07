@@ -101,6 +101,12 @@ def colour_reason(rec: PlanetRecord, *, brief: bool = False) -> str:
             "it is too hot for clouds to survive, so almost nothing comes back; the little that "
             "does is blue light scattered off bare hydrogen, the way our own sky is blue"
         )
+    elif "silicate" in cloud:
+        base = (
+            "it is hot enough to have clouds again — not water, but rock: at these temperatures "
+            "vaporised silicate condenses into a bright, glassy haze that throws the starlight "
+            "back"
+        )
     elif "alkali" in cloud or "sodium" in cloud:
         base = "sodium vapour in its cloud-free air swallows the yellow out of the reflected light"
     elif "methane" in cloud:

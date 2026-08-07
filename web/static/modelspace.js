@@ -46,9 +46,16 @@
   }
 
   /* Plain-English regime name for a temperature. The slider's whole point is that the planet
-   * crosses these, so naming them is what turns a moving swatch into an explanation. */
+   * crosses these, so naming them is what turns a moving swatch into an explanation.
+   *
+   * These labels must agree with pipeline/spectrum/parametric.py, which is what actually
+   * computed the swatches the slider steps through — including the silicate-cloud window
+   * between ~1,600 and ~1,900 K, where the planet gets BRIGHTER again as it heats up. If that
+   * band were missing here, the caption would read "cloud-free, very dark" over a swatch that
+   * had just turned pale, which is the one thing this control must never do. */
   function regime(k) {
-    if (k >= 1600) return "ultra-hot — cloud-free, very dark";
+    if (k >= 1900) return "ultra-hot — cloud-free, very dark";
+    if (k >= 1600) return "hot — rock vapour condenses into bright silicate cloud";
     if (k >= 900) return "hot — clouds gone, sodium eats the yellow";
     if (k >= 500) return "warm — methane breaking up, hazy";
     if (k >= 220) return "temperate — water and ammonia clouds";

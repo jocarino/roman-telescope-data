@@ -128,6 +128,42 @@ SOURCES: tuple[Source, ...] = (
         "colour here.",
     ),
     Source(
+        name="Parmentier et al. (2016)",
+        role="the cloud-condensation sequence that decides which hot planets are cloudy in the "
+        "parametric engine",
+        url="https://iopscience.iop.org/article/10.3847/0004-637X/828/1/22",
+        licence="published result; citation as courtesy",
+        citation="Parmentier, Fortney, Showman, Morley & Marley (2016), ApJ 828, 22, "
+        "doi:10.3847/0004-637X/828/1/22",
+        note="Clouds are not simply burned off as a planet gets hotter: each condensate is "
+        "stable over its own narrow temperature range, so the sky clears and then clouds over "
+        "again. This paper predicts the silicate-cloud brightening between roughly 1,600 and "
+        "1,900 K that gives planets like Kepler-7 b their high measured albedo.",
+    ),
+    Source(
+        name="Demory et al. (2011, 2013)",
+        role="the measured albedo the parametric engine's silicate-cloud window is calibrated "
+        "against",
+        url="https://iopscience.iop.org/article/10.1088/2041-8205/735/1/L12",
+        licence="published result; citation as courtesy",
+        citation="Demory, Seager, Madhusudhan et al. (2011), ApJL 735, L12, "
+        "doi:10.1088/2041-8205/735/1/L12; Demory, de Wit, Lewis et al. (2013), ApJL 776, L25, "
+        "doi:10.1088/2041-8205/776/2/L25",
+        note="Kepler-7 b's geometric albedo of 0.32 +/- 0.03 is the one measurement the hot-"
+        "cloud model here is fitted to; the 2013 paper resolves the cloud as high-altitude, "
+        "off-centre and probably silicate.",
+    ),
+    Source(
+        name="Ackerman & Marley (2001)",
+        role="the cloud-sedimentation picture behind the parametric engine's gravity term",
+        url="https://iopscience.iop.org/article/10.1086/321540",
+        licence="published result; citation as courtesy",
+        citation="Ackerman & Marley (2001), ApJ 556, 872, doi:10.1086/321540",
+        note="Whether a cloud deck reaches the visible atmosphere or rains out below it is a "
+        "contest between settling and mixing, which is why low-gravity planets here end up "
+        "cloudier than high-gravity ones at the same temperature.",
+    ),
+    Source(
         name="Kopparapu et al. (2014)",
         role="the habitable-zone edges behind the 'could there be liquid water' lens",
         url="https://iopscience.iop.org/article/10.1088/2041-8205/787/2/L29",
