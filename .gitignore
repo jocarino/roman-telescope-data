@@ -37,3 +37,6 @@ mprocs.yaml
 docs/notes
 docs/marketing/
 docs/DEFECTS.md
+
+# Draft social posts (tools/social_drafts.py) — never committed; the real queue lives in the notes repo.
+social-queue/

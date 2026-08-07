@@ -132,6 +132,83 @@ def _smoothstep(edge0: float, edge1: float, x: np.ndarray) -> np.ndarray:
     return t * t * (3.0 - 2.0 * t)
 
 
+# ── the pixel-art disc ──────────────────────────────────────────────────────────────────
+# A port of the shader's OTHER path: style "retro" (pixel=1, classic fidelity, phase < 0).
+# The look is made by the resolution, not despite it: the shader renders the globe at 80 px
+# and lets CSS upscale with image-rendering:pixelated, so the port renders the same 80 px
+# grid and upscales with NEAREST. Constants follow planet-render.js exactly: 5 posterization
+# levels, dither amplitude 0.9/levels, outline ring darkening the rim to 0.35 (keepLit is 0
+# whenever there is no phase control, so the classic outline is always fully present).
+
+_PIXEL_RES = 80
+_PIXEL_LEVELS = 5.0
+
+# The shader's 4x4 Bayer matrix, row-major, as gl_FragCoord indexes it.
+_BAYER4 = (
+    np.array(
+        [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]], dtype=np.float32
+    )
+    / 16.0
+    - 0.5
+)
+
+
+def disc_pixel(spec: CardSpec, size: int, rot: float = 0.0) -> Image.Image:
+    """The retro pixel-art globe at `size` px (rendered at 80 px, upscaled NEAREST).
+
+    `size` is snapped down to a whole multiple of the 80 px grid so every fat pixel is the
+    same number of device pixels wide — a fractional upscale is exactly the jank the site's
+    own renderer works to avoid.
+    """
+    d = _derive(spec.radius_r_earth, spec.cloud_state, spec.base_hex, spec.luminance_y)
+    pal = np.array([_hex_to_rgb01(h) for h in spec.palette], dtype=np.float32)
+
+    n = _PIXEL_RES
+    ax = ((np.arange(n, dtype=np.float32) + 0.5) / n * 2.0 - 1.0).astype(np.float32)
+    ux = ax[None, :]
+    uy = -ax[:, None]
+    r2 = ux * ux + uy * uy
+    inside = r2 <= 1.0
+    z = np.sqrt(np.clip(1.0 - r2, 0.0, None))
+
+    lvec = np.array([math.cos(_LIGHT) * 0.55, 0.28, 0.90], dtype=np.float32)
+    lvec = lvec / np.linalg.norm(lvec)
+    ndotl = ux * lvec[0] + uy * lvec[1] + z * lvec[2]
+    lit = _smoothstep(-0.08, 0.42, ndotl)
+    limb = np.power(np.clip(z, 0.0, None), 0.30)
+    shade = (_NIGHT_F + (1.0 - _NIGHT_F) * lit) * limb
+
+    bf, bc = d["bandFreq"], d["bandContrast"]
+    lat = np.arcsin(np.clip(uy, -1.0, 1.0))
+    band = 0.5 + 0.5 * np.sin(lat * bf + np.sin(lat * bf * 0.5) * 0.6)
+    band = 0.5 + (band - 0.5) * bc
+    lon = np.arctan2(np.broadcast_to(ux, r2.shape), z) + rot
+    band = band + 0.12 * bc * np.sin(lon * 3.0 + lat * bf * 0.5)
+
+    rim = _smoothstep(0.74, 1.0, r2)
+    tone = shade * (0.60 + _BAND_GAIN * band) * d["brightness"] + rim * d["haze"] * 0.28
+
+    # Pixel path: dither THEN posterize — flat colour bands with dithered pixel-art edges.
+    # gl_FragCoord.y counts from the bottom of the buffer; our rows count from the top.
+    cols_idx = np.arange(n) % 4
+    rows_idx = (n - 1 - np.arange(n)) % 4
+    bayer = _BAYER4[rows_idx[:, None], cols_idx[None, :]]
+    dither = 0.9 / _PIXEL_LEVELS
+    tone = np.clip(tone, 0.0, 1.0) + bayer * dither
+    tone = np.floor(tone * _PIXEL_LEVELS + 0.5) / _PIXEL_LEVELS
+
+    idx = (np.clip(tone, 0.0, 1.0) * (_RAMP_STEPS - 1) + 0.5).astype(np.int32)
+    col = _ramp_lut(pal)[idx]
+    # Retro outline ring (keepLit = 0 with no phase control -> constant 0.35 factor).
+    col = np.where((r2 > 0.90)[..., None], col * 0.35, col)
+
+    rgb = np.clip(col * 255.0 + 0.5, 0, 255).astype(np.uint8)
+    alpha = np.where(inside, 255, 0).astype(np.uint8)  # hard edge: pixel art has no AA
+    img = Image.fromarray(np.dstack([rgb, alpha]), mode="RGBA")
+    k = max(1, size // n)
+    return img.resize((n * k, n * k), Image.NEAREST)
+
+
 def _disc(spec: CardSpec, size: int, rot: float = 0.0) -> Image.Image:
     """Render the lit sphere to an RGBA image of `size` px, transparent outside the limb."""
     d = _derive(spec.radius_r_earth, spec.cloud_state, spec.base_hex, spec.luminance_y)

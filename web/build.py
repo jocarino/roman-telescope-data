@@ -40,6 +40,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from pipeline.classify import TYPE_LABELS, planet_type
 from pipeline.colour.family import colour_family
 from pipeline.colour.star import star_swatch
+from pipeline.config import ROMAN_CGI
 from pipeline.curate import curated_ranks
 from pipeline.illuminant.blackbody import SUN
 from pipeline.models import PaletteStopModel, PlanetRecord, PlanetsFile
@@ -65,6 +66,7 @@ from web.meta import (
 )
 from web.modelspace import modelspace_ctx
 from web.og import CardSpec, card_png
+from web.press import write_press_assets
 from web.related import build_related, rail_stats
 from web.sky import sky_chart_svg, sky_field_svg
 from web.svg import spectrum_svg
@@ -293,6 +295,12 @@ _PH_ASSETS_HOST = "https://eu-assets.i.posthog.com"
 # Approximate count of confirmed exoplanets, for the honest "modelling N of ~M" line. Rounded
 # so it doesn't go stale precisely; refresh occasionally from the Archive's pscomppars count.
 KNOWN_TOTAL_APPROX = 6300
+
+# The project's public contact address: the footer, /about and /press all render it. A
+# dedicated account, so committing it here is publishing exactly what it is for. Overridable
+# per build (--contact-email / $CONTACT_EMAIL); set it to empty to fall back to the issue
+# tracker instead.
+CONTACT_EMAIL = "joaogveloso.contact@gmail.com"
 
 # Distance is stored in parsecs but shown in light-years everywhere (friendlier to non-astronomers).
 _LY_PER_PC = 3.26156
@@ -545,6 +553,9 @@ def _stats(records: list[PlanetRecord]) -> dict:
         "cgi_targets": sum(1 for r in records if r.provenance == "simulated-cgi"),
         "microlensing": sum(1 for r in records if not r.is_light_isolable),
         "family_shift_pct": round(100 * shifted / len(records)) if records else 0,
+        # The measured-colour exceptions — the five solar-system anchors. /press quotes this
+        # as "of N worlds, the n with measured colours are all in our own solar system".
+        "n_measured": sum(1 for r in records if r.provenance == "measured-albedo"),
     }
 
 
@@ -647,6 +658,7 @@ def build(
     posthog_key: str = "",
     posthog_api_host: str = _PH_API_HOST,
     posthog_assets_host: str = _PH_ASSETS_HOST,
+    contact_email: str = CONTACT_EMAIL,
 ) -> Path:
     doc = PlanetsFile.model_validate_json(planets_json.read_text())
     records = doc.planets
@@ -661,6 +673,7 @@ def build(
         posthog_key=posthog_key,
         posthog_api_host=posthog_api_host.rstrip("/"),
         posthog_assets_host=posthog_assets_host.rstrip("/"),
+        contact_email=contact_email.strip(),
     )
     hub = {p.path: p for p in static_pages(len(records))}
 
@@ -772,6 +785,32 @@ def build(
         env.get_template("credits.html").render(
             meta=hub["/credits"], site=site, build_id=build_id,
             **credits_context({r.id: r.name for r in records}),
+        )
+    )
+    # /about (the human page) and /press (the asset shelf). Press assets first: the template
+    # renders captions, alt text and dimensions from the same objects that made the PNGs.
+    # Assets are built from re-derived palettes (above), so the discs match the site's own.
+    press_assets = write_press_assets(records, out, site_url=site.base_url)
+    stats = _stats(records)
+    # "Exoplanets" and "worlds" are different counts: the catalogue carries the five
+    # solar-system anchors, and press copy that counts Jupiter among exoplanets is a
+    # published correction waiting to happen.
+    n_exo = stats["total"] - stats["n_measured"]
+    (out / "about.html").write_text(
+        env.get_template("about.html").render(
+            meta=hub["/about"], site=site, n_planets=n_exo, build_id=build_id
+        )
+    )
+    (out / "press.html").write_text(
+        env.get_template("press.html").render(
+            meta=hub["/press"], site=site, build_id=build_id,
+            assets=press_assets,
+            bands=ROMAN_CGI.bands,
+            stats=stats,
+            n_planets=n_exo,
+            known_total=KNOWN_TOTAL_APPROX,
+            attribution=RIGHTS.attribution,
+            snapshot=doc.generated_at[:10],
         )
     )
     # Colour census: the whole catalog as one dataset (same fetched index).
@@ -913,6 +952,14 @@ def main() -> None:
         "local iteration only — deploys should always build them.",
     )
     parser.add_argument(
+        "--contact-email",
+        default=os.environ.get("CONTACT_EMAIL", CONTACT_EMAIL),
+        help="Contact address shown in the footer and on /about and /press. Defaults to "
+        "the project's dedicated public address (web.build.CONTACT_EMAIL); $CONTACT_EMAIL "
+        "overrides it per environment, and an empty value makes the pages point at the "
+        "GitHub issue tracker instead.",
+    )
+    parser.add_argument(
         "--posthog-key",
         default=os.environ.get("POSTHOG_KEY", ""),
         help="PostHog project token (phc_...) to enable visitor analytics. Omitted or empty "
@@ -939,6 +986,7 @@ def main() -> None:
         posthog_key=args.posthog_key,
         posthog_api_host=args.posthog_api_host,
         posthog_assets_host=args.posthog_assets_host,
+        contact_email=args.contact_email,
     )
     n = len(list((out / "planet").glob("*.html")))
     cards = len(list((out / "og").glob("*.png"))) if (out / "og").exists() else 0
@@ -947,6 +995,12 @@ def main() -> None:
         print(
             "  note: no --base-url / $SITE_BASE_URL, so og:image and canonical URLs are "
             "root-relative and sitemap.xml was skipped. Set it for the production build."
+        )
+    if not args.contact_email:
+        print(
+            "  note: no --contact-email / $CONTACT_EMAIL, so the footer, /about and /press "
+            "point at the GitHub issue tracker instead of an address. Set it for the "
+            "production build — an unreachable press page is the gap it exists to close."
         )
     print(
         f"  analytics: PostHog -> {args.posthog_api_host}"
