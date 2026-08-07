@@ -295,6 +295,12 @@ _PH_ASSETS_HOST = "https://eu-assets.i.posthog.com"
 # so it doesn't go stale precisely; refresh occasionally from the Archive's pscomppars count.
 KNOWN_TOTAL_APPROX = 6300
 
+# The project's public contact address: the footer, /about and /press all render it. A
+# dedicated account, so committing it here is publishing exactly what it is for. Overridable
+# per build (--contact-email / $CONTACT_EMAIL); set it to empty to fall back to the issue
+# tracker instead.
+CONTACT_EMAIL = "joaogveloso.contact@gmail.com"
+
 # Distance is stored in parsecs but shown in light-years everywhere (friendlier to non-astronomers).
 _LY_PER_PC = 3.26156
 
@@ -651,7 +657,7 @@ def build(
     posthog_key: str = "",
     posthog_api_host: str = _PH_API_HOST,
     posthog_assets_host: str = _PH_ASSETS_HOST,
-    contact_email: str = "",
+    contact_email: str = CONTACT_EMAIL,
 ) -> Path:
     doc = PlanetsFile.model_validate_json(planets_json.read_text())
     records = doc.planets
@@ -946,11 +952,11 @@ def main() -> None:
     )
     parser.add_argument(
         "--contact-email",
-        default=os.environ.get("CONTACT_EMAIL", ""),
-        help="Contact address shown in the footer and on /about and /press. A build input "
-        "for the same reason as --posthog-key: the repo is public and deliberately carries "
-        "no personal address. Empty means those pages point at the GitHub issue tracker "
-        "instead. Defaults to $CONTACT_EMAIL, so only the deploy environment sets it.",
+        default=os.environ.get("CONTACT_EMAIL", CONTACT_EMAIL),
+        help="Contact address shown in the footer and on /about and /press. Defaults to "
+        "the project's dedicated public address (web.build.CONTACT_EMAIL); $CONTACT_EMAIL "
+        "overrides it per environment, and an empty value makes the pages point at the "
+        "GitHub issue tracker instead.",
     )
     parser.add_argument(
         "--posthog-key",

@@ -27,7 +27,7 @@ from pipeline.config import ROMAN_CGI
 from pipeline.rights import RIGHTS
 from web.build import _env
 from web.meta import Site, static_pages
-from web.press import STAMP, PressAsset
+from web.press import PressAsset
 
 _ROOT = Path(__file__).resolve().parents[1]
 _DIST = _ROOT / "dist"
@@ -168,9 +168,3 @@ def test_masters_are_print_sized():
         w, _ = Image.open(_DIST / "press-kit" / f"{slug}.png").size
         assert w >= 2900, f"{slug}: master is {w}px wide, below print size"
 
-
-def test_the_stamp_is_the_projects_own_phrase():
-    """The burned-in margin line must carry the computed-colour vocabulary, not a synonym
-    that drifts."""
-    assert "COMPUTED COLOUR" in STAMP
-    assert "NOT A PHOTOGRAPH" in STAMP

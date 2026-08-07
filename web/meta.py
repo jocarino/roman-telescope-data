@@ -82,10 +82,9 @@ class Site:
     posthog_key: str = ""
     posthog_api_host: str = "https://eu.i.posthog.com"
     posthog_assets_host: str = "https://eu-assets.i.posthog.com"
-    # Contact address, shown in the footer and on /about and /press. A build input like
-    # `base_url` above, and for the same reason: the repo is public and deliberately carries
-    # no personal address, so the address lives in the deploy environment (`CONTACT_EMAIL`),
-    # not in git. Empty means the pages fall back to the repo's issue tracker.
+    # Contact address, shown in the footer and on /about and /press. Defaults per build from
+    # web.build.CONTACT_EMAIL (the project's dedicated public address); overridable via
+    # $CONTACT_EMAIL. Empty means the pages fall back to the repo's issue tracker.
     contact_email: str = ""
 
     def absolute(self, path: str) -> str:

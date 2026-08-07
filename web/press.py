@@ -12,10 +12,10 @@ our own computed colours, so the CC BY 4.0 grant on them is a licence we actuall
     formally guarantees: a single 575 nm brightness, which carries no colour at all.
 
 Honesty travels inside the file, not only in the caption a sub-editor can cut: every asset
-has "COMPUTED COLOUR · NOT A PHOTOGRAPH" burned into its margin, and ships with an embedded
-sRGB profile (a colour project whose press images get colour-shifted downstream has failed at
-its own subject) plus PNG text metadata carrying the credit, licence and description — so the
-attribution survives the picture being pulled off the page and re-shared with no caption.
+ships with an embedded sRGB profile (a colour project whose press images get colour-shifted
+downstream has failed at its own subject) plus PNG text metadata carrying the credit, licence
+and a description that states the colours are computed — so the attribution survives the
+picture being pulled off the page and re-shared with no caption.
 
 Each asset is written as a 3000 px master and a 1200 px web copy, and the lot is bundled as
 press.zip with a CREDITS.txt. The generator returns the asset table so the /press template
@@ -37,11 +37,7 @@ from pipeline.config import ROMAN_CGI
 from pipeline.models import PlanetRecord
 from pipeline.palette.derive import derive_palette_from_hex
 from pipeline.rights import RIGHTS
-from web.og import ACCENT, BG, FG, FG_DIM, FG_FAINT, GRID, CardSpec, _disc, _font, _hex_to_rgb
-
-# The margin line burned into every asset. The one phrase the whole project rests on; it is
-# the only part of the image that survives a crop, a screenshot, or a repost with no caption.
-STAMP = "COMPUTED COLOUR · NOT A PHOTOGRAPH"
+from web.og import ACCENT, BG, FG, FG_DIM, CardSpec, _disc, _font, _hex_to_rgb
 
 # Master and web widths. 3000 px ≈ 300 dpi at print column width; 1200 px is what most web
 # desks actually run.
@@ -90,13 +86,6 @@ def _png_bytes(img: Image.Image, asset: PressAsset) -> bytes:
     return buf.getvalue()
 
 
-def _stamp(draw: ImageDraw.ImageDraw, w: int, h: int, text: str = STAMP) -> None:
-    """The honesty line, bottom-right, in the safe margin."""
-    font = _font(False, 32)
-    tw = int(draw.textbbox((0, 0), text, font=font)[2])
-    draw.text((w - tw - 48, h - 72), text, font=font, fill=FG_FAINT)
-
-
 def _hue_key(hexcode: str) -> tuple:
     """Sort key for the wall: saturated colours sweep the hue wheel, near-neutrals gather at
     the end ordered by brightness — a grey column in the middle of the rainbow reads as a
@@ -131,7 +120,7 @@ def _wall(records: list[PlanetRecord]) -> Image.Image:
     for i, hexcode in enumerate(hexes):
         x, y = (i % cols) * cell, (i // cols) * cell
         draw.rectangle([x, y, x + cell - 1, y + cell - 1], fill=_hex_to_rgb(hexcode))
-    # The strip: accent rule, title, and the stamp — same grammar as the share cards.
+    # The strip: accent rule and title — same grammar as the share cards.
     draw.rectangle([0, cell * rows, w, cell * rows + 4], fill=ACCENT)
     draw.text((48, cell * rows + 60), "EXOPLANET PALETTE", font=_font(False, 40), fill=FG)
     draw.text(
@@ -140,7 +129,6 @@ def _wall(records: list[PlanetRecord]) -> Image.Image:
         font=_font(False, 32),
         fill=FG_DIM,
     )
-    _stamp(draw, w, h)
     return img
 
 
@@ -174,12 +162,10 @@ def _labelled_disc(img: Image.Image, spec: CardSpec, cx: int, cy: int, r: int,
         draw.text((cx - tw // 2, cy + r + dy), text, font=font, fill=fill)
 
 
-def _graticule(img: Image.Image) -> ImageDraw.ImageDraw:
+def _canvas(img: Image.Image) -> ImageDraw.ImageDraw:
+    """Plain black field with the site's accent hairline along the top. No graticule: on a
+    press image the discs are the subject, and a background grid reads as a mockup."""
     draw = ImageDraw.Draw(img)
-    for x in range(0, img.width + 1, 150):
-        draw.line([(x, 0), (x, img.height)], fill=GRID)
-    for y in range(0, img.height + 1, 150):
-        draw.line([(0, y), (img.width, y)], fill=GRID)
     draw.rectangle([0, 0, img.width, 6], fill=ACCENT)
     return draw
 
@@ -188,7 +174,7 @@ def _comparison(rec: PlanetRecord) -> Image.Image:
     """Two discs: the full-spectrum colour beside the three-band reconstruction."""
     w, h = MASTER_W, 1688
     img = Image.new("RGB", (w, h), BG)
-    draw = _graticule(img)
+    draw = _canvas(img)
     view = rec.instrument_views[0]
     n_bands = len(ROMAN_CGI.bands)
 
@@ -211,7 +197,6 @@ def _comparison(rec: PlanetRecord) -> Image.Image:
         f"AS ROMAN WOULD SEE IT · {n_bands} BANDS",
         " · ".join(f"{b.center_nm:.0f} nm" for b in ROMAN_CGI.bands) + f" · {rc.hex.upper()}",
     )
-    _stamp(draw, w, h, "BOTH MODELLED · NEITHER IS A PHOTOGRAPH")
     return img
 
 
@@ -224,7 +209,7 @@ def _band1_only(rec: PlanetRecord) -> Image.Image:
     """
     w, h = MASTER_W, 1688
     img = Image.new("RGB", (w, h), BG)
-    draw = _graticule(img)
+    draw = _canvas(img)
     view = rec.instrument_views[0]
 
     # The Roman-view luminance, gamma-encoded to the grey a screen shows for it.
@@ -242,7 +227,6 @@ def _band1_only(rec: PlanetRecord) -> Image.Image:
         f"THE GUARANTEED MEASUREMENT: BAND 1 · {b1.center_nm:.0f} nm",
         "one brightness, no colour · the rest is best-effort",
     )
-    _stamp(draw, w, h, "MODELLED · NOT A PHOTOGRAPH")
     return img
 
 
