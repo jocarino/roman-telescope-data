@@ -1868,12 +1868,21 @@ document.addEventListener("alpine:init", () => {
   });
 })();
 
-// Hover-to-spin on gallery cards (desktop with a real pointer only, avoids mobile churn
-// and keeps the site light: only the hovered planet animates). The hovered planet also
-// runs the same full lunar cycle as the planet page — waning through dark, waxing back
-// from the left — picking up from the card's dealt phase. Un-hovering restores it.
+// Motion on gallery cards. A planet that is animating runs the same full lunar cycle as the
+// planet page — waning through dark, waxing back from the left — picking up from the card's
+// dealt phase. Two things start it, and at most one card is ever running:
+//
+//   - the pointer, on a device that has one (hovering is the whole interaction, and it keeps
+//     the site light: only the planet under the cursor moves);
+//   - failing that, the first card in the grid, so the page is never completely still.
 (function () {
-  if (!window.matchMedia || !window.matchMedia("(hover: hover)").matches) return;
+  var canHover = !!(window.matchMedia && window.matchMedia("(hover: hover)").matches);
+  // Automatic motion — motion the visitor did not ask for by pointing at something — is what
+  // "reduce motion" is about, so it is the lead card that yields here, not hover.
+  var reduced = !!(window.matchMedia
+    && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  if (!canHover && reduced) return;
+
   var hovered = null;
   function optsFor(cv) {
     var list = window.PLANETS || [];
@@ -1893,24 +1902,78 @@ document.addEventListener("alpine:init", () => {
       phase: window.PlanetRender.hashPhase(p.id),
     };
   }
-  // Per-hover animator: the same cycle the hero and the tour stops run, from `startRad`. A
-  // card has no per-phase colours to tint with, so only the geometry is used here.
+  // The animator: the same cycle the hero and the tour stops run, from `startRad`. A card has
+  // no per-phase colours to tint with, so only the geometry is used here.
   function phaseAnimator(startRad) {
     var step = window.PlanetRender.phaseCycle((startRad * 180) / Math.PI);
     return function (t) { return { phase: step(t).rad }; };
   }
+  function moving(card) {
+    if (!card || !window.PlanetRender) return;
+    var cv = card.querySelector(".card-planet");
+    var o = cv && optsFor(cv);
+    if (o) window.PlanetRender.spin(cv, Object.assign({}, o, { frame: phaseAnimator(o.phase) }));
+  }
+  // Back to the still card, at the phase it was dealt.
+  function still(card) {
+    if (!card || !window.PlanetRender) return;
+    var cv = card.querySelector(".card-planet");
+    if (!cv) return;
+    window.PlanetRender.stop(cv);
+    var o = optsFor(cv);
+    if (o) window.PlanetRender.render(cv, o);
+  }
+
+  // ── the lead card ───────────────────────────────────────────────────────────────────────
+  // Landing on a wall of perfectly still globes reads as a screenshot of the site rather than
+  // the site: nothing says these are live renders until you happen to put the cursor on one.
+  // So the first card animates on its own — but only while it is actually on screen, and only
+  // while the pointer has not picked a planet of its own, which it always outranks.
+  var lead = null;
+  var leadSeen = false;
+  var watch = window.IntersectionObserver
+    ? new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.target === lead) leadSeen = e.isIntersecting; });
+        syncLead();
+      })
+    : null;
+
+  function syncLead() {
+    if (!lead) return;
+    if (leadSeen && !hovered && !reduced) moving(lead); else still(lead);
+  }
+  // Re-pick after anything that rebuilds the grid — a filter, a sort, an infinite-scroll batch.
+  // Stopping the outgoing card matters as much as starting the new one: its rAF loop would
+  // otherwise keep rendering a canvas that is no longer in the document.
+  function pickLead() {
+    var first = document.querySelector(".grid a.card");
+    if (first === lead) return;
+    if (lead) { still(lead); if (watch) watch.unobserve(lead); }
+    lead = first;
+    leadSeen = !watch;                       // no IntersectionObserver: assume it is in view
+    if (lead && watch) watch.observe(lead);
+    else syncLead();
+  }
+  function watchGrid() {
+    var grid = document.querySelector(".grid");
+    if (!grid) return;
+    pickLead();
+    if (window.MutationObserver) new MutationObserver(pickLead).observe(grid, { childList: true });
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", watchGrid);
+  } else {
+    watchGrid();
+  }
+
+  // ── hover ───────────────────────────────────────────────────────────────────────────────
+  if (!canHover) return;
   document.addEventListener("mouseover", function (e) {
     var card = e.target.closest && e.target.closest("a.card");
     if (card === hovered) return;
-    if (hovered && window.PlanetRender) {
-      var pc = hovered.querySelector(".card-planet");
-      if (pc) { window.PlanetRender.stop(pc); var o0 = optsFor(pc); if (o0) window.PlanetRender.render(pc, o0); }
-    }
+    if (hovered) still(hovered);
     hovered = card;
-    if (card && window.PlanetRender) {
-      var cv = card.querySelector(".card-planet");
-      var o = cv && optsFor(cv);
-      if (o) window.PlanetRender.spin(cv, Object.assign({}, o, { frame: phaseAnimator(o.phase) }));
-    }
+    syncLead();          // the lead stands down while the pointer is on a planet, and resumes
+    if (card) moving(card);
   });
 })();
