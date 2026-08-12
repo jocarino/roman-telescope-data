@@ -153,35 +153,6 @@ a:hover { text-decoration: underline; }
 .card:hover { border-color: var(--line); text-decoration: none; }
 .card-planet { width: 160px; height: 160px; display: block; margin: 0 auto 12px; }
 .card-planet.pixel { image-rendering: pixelated; image-rendering: crisp-edges; }
-/* Saturn. Keeping a ring system inside a square card meant shrinking the globe to ~43% of it,
-   which put the one planet everybody recognises at half the size of its neighbours. Instead the
-   canvas takes the width its rings need and hangs out over the gutters — sized so the ring tips
-   stop in the gap rather than crossing the planets either side.
-
-   That width has to follow the column, not be a number: at 238px it cleared its neighbours on a
-   desktop grid and sat on top of Uranus on a phone. Neighbouring planets are 160px wide with
-   their centres one column + one gap apart, so the widest the rings can reach without touching
-   one is 2C - 140 for a column of C; `200% - 130px` is that with air to spare, measured off
-   .card-art at 100% of the card's content box. The 340px cap is the globe reaching parity with
-   its neighbours (340 = 160 x the renderer's 2.125:1 ringed frame, pinned by
-   tests/test_surface_maps.py) and only binds on columns wide enough for it to still clear them.
-
-   The canvas is taken OUT of the layout: an item wider than its grid track blows the track out
-   and pushes the whole grid past the edge of the screen. .card-art holds exactly the space a
-   normal card planet occupies and the rings overhang it. z-index puts them over BOTH neighbours
-   rather than under the later one and over the earlier one, which reads as a bug; and with
-   pointer-events off, any band that does overhang still hovers and clicks as the card
-   underneath, while Saturn's own card picks up events through its parent <a>. */
-.card-art { display: block; position: relative; width: 100%; height: 160px; margin: 0 auto 12px; }
-.card-planet.ringed {
-  position: absolute; left: 50%; top: 50%; margin: 0;
-  width: calc(200% - 130px); max-width: 340px; height: auto;
-  /* The phone rule below pins card canvases to `aspect-ratio: 1 / 1`, which would square this
-     one back up — a different property, so the higher specificity here doesn't cover it. Hand
-     the shape back to the canvas's own 2.125:1. */
-  aspect-ratio: auto;
-  transform: translate(-50%, -50%); z-index: 1; pointer-events: none;
-}
 /* Planet names in the list use the pixel-art font (liked here); other labels stay mono. */
 .card-name {
   font-family: var(--pixel); -webkit-font-smoothing: none; font-smooth: never;
@@ -1860,11 +1831,6 @@ button.back.rand { cursor: pointer; display: inline-flex; align-items: center; g
      column (fixed width made the cards overflow right, so nothing looked centred). */
   .card { padding: 12px 6px; }
   .card-planet { width: min(160px, 100%); height: auto; aspect-ratio: 1 / 1; }
-  /* Two phone columns are ~145px wide, and a ring system is 2.3 globe radii across — squeezed
-     between two neighbours Saturn came out a third of their size, which is the problem this
-     whole treatment exists to fix. So on a phone it takes the row to itself: nothing to collide
-     with, the globe at full size, and the rings with room to be the reason it got the row. */
-  .card-ringed { grid-column: 1 / -1; }
 
   /* Detail header: tighter; the long caption collapses behind a toggle. */
   .detail-head { gap: 14px; margin: 8px 0 16px; }

@@ -59,7 +59,6 @@
    can show actual geography rather than schematic bands. Inlined here rather than shipped as
    a shared file: it is a few hundred bytes, and the gallery is the only page that draws cards
    (a planet page carries its own copy, for the one planet it is about). #}
-<script>window.SURFACE_MAPS = {{ surface_maps | tojson }};</script>
 
 <div x-data="gallery({ indexUrl: '{{ index_url }}' })"
   @scroll.window.passive="scrolled = window.scrollY > 160">
@@ -321,9 +320,10 @@
         <div class="dd-sec-body" x-show="secOpen('sort')">
           {# "Curated" is the one option whose meaning isn't in its own name, and it is the
              default — so it gets said plainly here rather than left to be guessed. #}
-          <div class="dd-note"><b>Curated</b> is the order the gallery opens in: the five
-            solar-system worlds whose colours can be checked against real measurements, then one
-            planet of every colour family in turn. <b>Name</b> is A–Z, for looking one up.</div>
+          <div class="dd-note"><b>Curated</b> is the order the gallery opens in: one planet of
+            every colour family in turn, the clearest example of each first, so the opening
+            screens hold every colour the catalogue has. <b>Name</b> is A–Z, for looking one
+            up.</div>
           <template x-for="[val, label] in Object.entries(sortLabels)" :key="val">
             <button :class="sort === val && !nearId ? 'on' : ''" @click="setSort(val)"
               x-text="label.replace('Sort: ', '')"></button>

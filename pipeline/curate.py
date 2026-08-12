@@ -7,21 +7,25 @@ scrolls two thousand pixels to find out that it gets better.
 
 So the default order is dealt, not sorted:
 
-1. **The solar-system anchors first.** Five worlds whose reflected-light spectra were really
-   measured rather than modelled, run through exactly the same maths as every exoplanet here,
-   coming out the colours we already know they are. That agreement is the reason to trust the
-   rest of the catalogue — and until now it was invisible, buried thousands of cards deep.
-   Ordered outward from the Sun, matching the "start here" tour.
-2. **Then a hue-diverse deal.** Every remaining planet is grouped by colour family and the
-   families are dealt from round-robin in hue order, best example of each first. The opening
-   screens become one card of every colour the catalogue contains instead of nine hundred
-   creams, and the rare families (21 golds, 3 reds, 2 pinks) are visible from the start rather
-   than being statistically impossible to stumble on.
-3. **And diverse *within* each family too.** Ordering a family by "best" alone deals its top
+1. **A hue-diverse deal.** Every planet is grouped by colour family and the families are dealt
+   from round-robin in hue order, best example of each first. The opening screens become one
+   card of every colour the catalogue contains instead of nine hundred creams, and the rare
+   families (21 golds, 3 reds, 2 pinks) are visible from the start rather than being
+   statistically impossible to stumble on.
+2. **And diverse *within* each family too.** Ordering a family by "best" alone deals its top
    three in a row as visual triplets — TRAPPIST-1 h, g and f are the same #ffaa56 to the eye,
    and three rounds of that look like a stuck grid, not a spread. So each family is walked
    farthest-point: after the best example, every next card is the one most unlike the cards
    already dealt from it. Any prefix of the gallery is then a spread of the whole catalogue.
+3. **Then the solar-system anchors**, once the catalogue has introduced itself. Five worlds
+   whose reflected-light spectra were really measured rather than modelled, run through exactly
+   the same maths as every exoplanet here, coming out the colours we already know they are.
+   They used to open the gallery, on the argument that this agreement is the reason to trust
+   the other several thousand. The argument holds — but it is an argument, and made silently by
+   five unlabelled cards it just reads as a site about the solar system. This one is about
+   exoplanets, so the deal introduces those first and brings the anchors in a few rows down,
+   as one run, still ordered outward from the Sun. The argument itself is made where it can
+   be made in words: the "Start here: five worlds we can check" tour, linked from the grid.
 
 The ordering is computed here, at build time, and shipped as one small integer per planet
 (`c` in the gallery index). The browser only ever sorts by that integer, so there is exactly one
@@ -41,8 +45,17 @@ from pipeline.colour.family import FAMILY_ORDER, colour_family
 from pipeline.models import PlanetRecord
 
 #: Planets whose spectrum is a real measurement, not a model. These are the five solar-system
-#: anchors, and they lead the default order — see the module docstring.
+#: anchors — dealt in as a block partway down the order, not at the head of it. See the module
+#: docstring for why they no longer lead.
 ANCHOR_PROVENANCE = "measured-albedo"
+
+# How many exoplanets are dealt before the anchors. The grid is `minmax(188px, 1fr)` tracks, so
+# 24 cards is four full rows on a laptop and rather more on a phone: past the opening screen
+# everywhere, which is the whole requirement — the site introduces itself with the planets it is
+# actually about before showing anyone a world they could have looked up in an atlas. A count
+# rather than "N rounds of the deal", because rounds scale with how many colour families happen
+# to be populated and would quietly mean something different on a smaller catalogue.
+_ANCHOR_AFTER_CARDS = 24
 
 # How the "best example of this colour family" score is weighted. Chroma dominates: within a
 # family, the vivid member is the one that shows what that family IS, and the washed-out one
@@ -121,7 +134,8 @@ def _spread(records: list[PlanetRecord], scores: dict[str, float]) -> list[Plane
 def curated_order(
     records: Sequence[PlanetRecord], *, boost: Iterable[str] = ()
 ) -> list[PlanetRecord]:
-    """The records in gallery-default order: anchors first, then a hue-diverse deal.
+    """The records in gallery-default order: a hue-diverse deal, with the anchors dealt in
+    after the first `_ANCHOR_AFTER_CARDS` of it.
 
     `boost` names planet ids that deserve to lead their colour family where the physics leaves
     the choice open — the ones the site already tells stories about (a fiction reference, one of
@@ -147,7 +161,7 @@ def curated_order(
     # skipping families that have run out. Rare families are exhausted early and the tail
     # necessarily thins out to the big ones — but the opening screens, which are the whole point,
     # hold every colour the catalogue has.
-    order = list(anchors)
+    dealt: list[PlanetRecord] = []
     cursors = dict.fromkeys(FAMILY_ORDER, 0)
     remaining = sum(len(v) for v in by_family.values())
     while remaining:
@@ -157,10 +171,14 @@ def curated_order(
                 continue
             i = cursors[name]
             if i < len(bucket):
-                order.append(bucket[i])
+                dealt.append(bucket[i])
                 cursors[name] = i + 1
                 remaining -= 1
-    return order
+
+    # Slot the anchors in as one run. A catalogue smaller than the offset — every test fixture,
+    # and nothing that ever ships — puts them last rather than back at the front.
+    at = min(_ANCHOR_AFTER_CARDS, len(dealt))
+    return [*dealt[:at], *anchors, *dealt[at:]]
 
 
 def curated_ranks(records: Sequence[PlanetRecord], *, boost: Iterable[str] = ()) -> dict[str, int]:

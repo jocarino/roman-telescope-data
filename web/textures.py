@@ -132,29 +132,3 @@ def surface_map_for(record_id: str) -> SurfaceMap | None:
     """This planet's real map, or None (which is every planet but the five anchors)."""
     return SURFACE_MAPS.get(record_id)
 
-
-def surface_maps_js() -> dict[str, dict]:
-    """The maps as the renderer wants them, keyed by record id, for the gallery.
-
-    Only the fields the shader needs plus the credit the card's peek can show — the long
-    `body` copy belongs on the planet page, not in every visitor's first payload.
-    """
-    return {
-        pid: {
-            "file": f"/static/{sm.file}",
-            "mean": list(sm.mean),
-            "credit": sm.credit,
-            "license": sm.license,
-            "ring": (
-                {
-                    "file": f"/static/{sm.rings.file}",
-                    "inner": sm.rings.inner,
-                    "outer": sm.rings.outer,
-                    "tilt": sm.rings.tilt_deg,
-                }
-                if sm.rings
-                else None
-            ),
-        }
-        for pid, sm in SURFACE_MAPS.items()
-    }
