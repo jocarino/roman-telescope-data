@@ -1536,19 +1536,43 @@ document.addEventListener("alpine:init", () => {
       if (p.idx !== this.phaseIdx) this.phaseIdx = p.idx;
       return {
         phase: p.rad,
-        palette: this._phaseTint(this.curPalette(), p.idx),
-        baseHex: this._phaseTint([this.curHex()], p.idx)[0],
+        // The continuous angle, not p.idx: the readout and the slider snap to named stops,
+        // but the colour has no reason to, and stepping it 19 times a cycle is visible.
+        palette: this._phaseTint(this.curPalette(), p.raw),
+        baseHex: this._phaseTint([this.curHex()], p.raw)[0],
       };
+    },
+    // The modelled phase colour at ANY angle, not just the 10° stops the model ships: linear
+    // between the two stops either side. The last entry is the fully-backlit disc (#000000,
+    // no light at all) and is never interpolated towards — the geometry draws darkness, the
+    // tint only carries hue. That is the same entry phaseIndex() already refuses to land on.
+    _phaseHexAt(deg) {
+      const ph = this.phases;
+      const lit = ph.length - 2;                    // last stop that still has light in it
+      if (lit < 0) return null;
+      const d = Math.max(0, Math.min(ph[lit].d, deg));
+      let i = 0;
+      while (i < lit && ph[i + 1].d <= d) i++;
+      const a = ph[i], b = ph[Math.min(i + 1, lit)];
+      const span = b.d - a.d;
+      const t = span > 0 ? (d - a.d) / span : 0;
+      const rgb = (h) => [1, 3, 5].map((k) => parseInt(h.slice(k, k + 2), 16));
+      const ca = rgb(a.h), cb = rgb(b.h);
+      return ca.map((v, k) => v + (cb[k] - v) * t);
     },
     // Retint a palette by the per-channel drift of the phase colour vs full phase, so the
     // render carries the modelled colour shift (subtle blueing/reddening) as it wanes.
-    _phaseTint(palette, idx) {
-      const ph = this.phases[idx == null ? this.phaseIdx : idx];
-      if (!ph || !ph.d || !this.phases.length) return palette;
-      const base = this.phases[0].h;
+    // `deg` is an angle, not a stop index — pass the cycle's continuous one and the drift
+    // arrives smoothly instead of in 19 jumps. Omit it for whatever the slider is pinned to.
+    _phaseTint(palette, deg) {
+      if (!this.phases.length) return palette;
+      const d = deg == null ? this.phase().d : deg;
+      if (!d) return palette;                       // full phase is the reference: no drift
+      const drifted = this._phaseHexAt(d);
+      if (!drifted) return palette;
       const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-      const [br, bg, bb] = rgb(base), [pr, pg, pb] = rgb(ph.h);
-      const ratio = [pr / (br || 1), pg / (bg || 1), pb / (bb || 1)];
+      const [br, bg, bb] = rgb(this.phases[0].h);
+      const ratio = [drifted[0] / (br || 1), drifted[1] / (bg || 1), drifted[2] / (bb || 1)];
       return palette.map((hex) => {
         const c = rgb(hex).map((v, i) => Math.max(0, Math.min(255, Math.round(v * ratio[i]))));
         return "#" + c.map((v) => v.toString(16).padStart(2, "0")).join("");
