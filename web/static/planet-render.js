@@ -600,7 +600,10 @@
 
   // A stateful stepper: hand it the frame timestamp, get back where the cycle now stands.
   // `deg` is the geometry (0-360), `eff` the illumination the readout should name (0-170),
-  // `idx` the phase-colour entry to tint with.
+  // `idx` the phase-colour entry to tint with, and `raw` the same illumination NOT snapped to
+  // a stop — what a colour should follow. The model only knows 10° stops, so `idx`/`eff` step
+  // 19 times around the cycle; anything that steps with them reads as stutter against geometry
+  // that is moving every frame.
   function phaseCycle(startDeg, nPhases) {
     var deg = startDeg || 0, last = null;
     return function (t) {
@@ -610,7 +613,10 @@
       if (deg >= 360) deg -= 360;
       var raw = deg <= 180 ? deg : 360 - deg;
       var idx = phaseIndex(raw, nPhases);
-      return { deg: deg, rad: (deg * Math.PI) / 180, eff: Math.min(raw, idx * 10), idx: idx };
+      return {
+        deg: deg, rad: (deg * Math.PI) / 180, raw: raw,
+        eff: Math.min(raw, idx * 10), idx: idx,
+      };
     };
   }
 
