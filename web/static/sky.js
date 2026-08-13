@@ -685,10 +685,12 @@
     });
 
     // Dismissing the arrived-at star drops the crosshair and the ?planet= from the URL, so a
-    // reload doesn't drag it back.
+    // reload doesn't drag it back. Any campaign tag on that deep link survives the dismissal —
+    // /sky?planet=<id> is the most-shared link on the site, and it must not be the one that
+    // loses its attribution. See ExoCampaign in app.js.
     $("skp-focus-x").addEventListener("click", function () {
       focus = null; focusWorld = null; focusBand = null;
-      if (history.replaceState) history.replaceState(null, "", location.pathname);
+      if (history.replaceState) history.replaceState(null, "", window.ExoCampaign.only());
       render();
     });
 

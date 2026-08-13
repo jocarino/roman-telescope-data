@@ -56,6 +56,64 @@ window.ExoSky = {
   },
 };
 
+// Campaign tags: ?utm_source=reddit and the ad-network click ids. They say which post or
+// channel sent a visitor, and they live ONLY in the query string — PostHog reads them off the
+// URL when it captures the pageview.
+//
+// Two things follow, and they pull in opposite directions:
+//   * Nothing may delete them BEFORE that pageview. PostHog does not capture it inside
+//     init(): its loader schedules the call a tick later (`setTimeout(…, 1)` in array.js), so
+//     any load-time URL rewrite is racing it. Both rewrites on this site are exactly that
+//     shape — the compare page rebuilding ?a=&b=, /sky dropping ?planet= — and a tag lost to
+//     the race files a launch post as direct traffic, silently and unrecoverably. So those
+//     rewrites carry the tags through with `keep`.
+//   * They should not outlive it. Address-bar URLs get copied and re-posted; a second-hand
+//     link must not credit its new audience to the channel that carried the first. So
+//     analytics.js calls `strip` once the pageview is banked.
+// `keep` then costs nothing after the strip has run: there is nothing left in the URL to
+// carry, and it copies nothing.
+const CAMPAIGN_CLICK_IDS = [
+  "gclid", "gad_source", "gbraid", "wbraid", "gclsrc", "dclid",
+  "fbclid", "msclkid", "twclid", "ttclid", "li_fat_id", "igshid",
+  "rdt_cid", "mc_cid", "mc_eid",
+];
+
+window.ExoCampaign = {
+  // utm_* by prefix (utm_id and any future one included), the click ids by name.
+  isTag(k) { return k.indexOf("utm_") === 0 || CAMPAIGN_CLICK_IDS.includes(k); },
+
+  // Copy whatever tags the current URL carries into a query string being rebuilt from
+  // scratch. Never overwrites a value the caller set itself.
+  keep(params) {
+    new URLSearchParams(location.search).forEach((v, k) => {
+      if (this.isTag(k) && !params.has(k)) params.set(k, v);
+    });
+    return params;
+  },
+
+  // What to hand replaceState for a rebuilt query: "?a=b", or the bare path when it came out
+  // empty. The fragment rides along — secnav and the tours write section anchors there, and
+  // dropping one would re-jump the page.
+  href(params) {
+    const q = params.toString();
+    return (q ? "?" + q : location.pathname) + location.hash;
+  },
+
+  // For a rewrite that clears the query outright (/sky dropping ?planet=): the same URL minus
+  // everything except the tags.
+  only() { return this.href(this.keep(new URLSearchParams())); },
+
+  // Drop the tags, keep every other parameter. Returns whether the URL changed.
+  strip() {
+    const u = new URLSearchParams(location.search);
+    const tags = [...u.keys()].filter((k) => this.isTag(k));
+    if (!tags.length || !window.history || !history.replaceState) return false;
+    tags.forEach((k) => u.delete(k));
+    history.replaceState(null, "", this.href(u));
+    return true;
+  },
+};
+
 // Keyboard shortcut: R rolls a random planet on pages that registered a handler
 // (gallery + planet detail). Ignored while typing in a field.
 document.addEventListener("keydown", (e) => {
@@ -1132,7 +1190,9 @@ document.addEventListener("alpine:init", () => {
       const u = new URLSearchParams();
       if (this.aId) u.set("a", this.aId);
       if (this.bId) u.set("b", this.bId);
-      history.replaceState(null, "", u.toString() ? "?" + u.toString() : location.pathname);
+      // This runs on load, right after init()'s fetch resolves — i.e. in a footrace with the
+      // pageview. Rebuilding the query from scratch would drop the campaign tags; keep them.
+      history.replaceState(null, "", window.ExoCampaign.href(window.ExoCampaign.keep(u)));
       this.$nextTick(() => {
         [["cA", this.a()], ["cB", this.b()]].forEach(([ref, p]) => {
           const cv = this.$refs[ref];
