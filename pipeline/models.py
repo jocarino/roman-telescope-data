@@ -324,4 +324,9 @@ class PlanetsFile(BaseModel):
     # licence nobody who downloaded the JSON ever sees, and the Archive acknowledgement we owe
     # is inherited by anything built on this data. See pipeline/rights.py.
     rights: dict = Field(default_factory=dict)
+    # What code ran, against which Archive snapshot. The version numbers above describe the
+    # record shape and nothing else -- `pscomppars` is a live table, so a file with an
+    # unchanged schema_version can still be built from different upstream data. See
+    # pipeline/provenance.py.
+    provenance: dict = Field(default_factory=dict)
     planets: list[PlanetRecord]

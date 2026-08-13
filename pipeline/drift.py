@@ -145,8 +145,10 @@ def fetch_gated_names(*, use_cache: bool = False) -> list[str]:
 def build_manifest(planets_json: Path, *, use_cache: bool = False) -> dict:
     """The release's self-description: what we built, and the Archive snapshot we built it from.
 
-    Also closes a gap of its own — a downloaded `planets.json` currently says nothing about its
-    provenance beyond a schema version and a timestamp.
+    Distinct from the `provenance` header inside `planets.json` (`pipeline/provenance.py`), and
+    the two answer different questions. That one says what THIS file was built from — the commit,
+    the queries, their timestamps. This one is a *comparable* fingerprint of the gated Archive
+    set, which is what lets the next probe run decide whether anything moved.
     """
     data = json.loads(planets_json.read_text())
     fp = fetch_fingerprint(use_cache=use_cache)
