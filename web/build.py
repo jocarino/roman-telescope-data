@@ -672,8 +672,12 @@ def build(
 ) -> Path:
     doc = PlanetsFile.model_validate_json(planets_json.read_text())
     records = doc.planets
+    n_worlds = len(records)
     _rederive_palettes(records)
     env = _env()
+    # A global like the rights facts below it: the footer's "on the chart" readout renders on
+    # every page, and the count must be this build's, not a number typed into the template.
+    env.globals["n_worlds"] = n_worlds
 
     # Share identity. `base_url` is the canonical origin; without it the tags still emit with
     # root-relative paths and the sitemap is skipped rather than published pointing nowhere.
