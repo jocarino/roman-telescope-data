@@ -115,8 +115,11 @@ def _pipeline_engine_ids() -> set[str]:
         ids |= set(re.findall(r'\bsource\s*=\s*"([a-z0-9]+)"', text))
         # router.py picks engines by label: ("cahoy", make_cahoy)
         ids |= set(re.findall(r'\(\s*"([a-z0-9]+)"\s*,\s*make_', text))
-    # `source` on a BandSampleSet is "simulated"/"measured" — a state, not an engine.
-    return ids - {"simulated", "measured"}
+    # The `source` regex is deliberately broad, so it also catches kwargs named `source` that
+    # have nothing to do with spectra. Two such carve-outs, both provenance rather than engine:
+    # on a BandSampleSet it is "simulated"/"measured" — a state; on provenance.CodeVersion it is
+    # "git"/"env" — where the commit SHA was read from.
+    return ids - {"simulated", "measured", "git", "env"}
 
 
 def test_every_spectrum_engine_names_a_credited_source():
