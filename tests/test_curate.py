@@ -1,9 +1,11 @@
-"""The gallery's default order: solar-system anchors first, then a hue-diverse deal.
+"""The gallery's default order: a hue-diverse deal, with the solar-system anchors dealt in
+after it has run for a couple of rounds.
 
 This is the front door of the site, so the properties worth pinning are the ones a visitor
-actually experiences: the calibration planets are the first thing seen, the opening screens hold
-every colour the catalogue has rather than a run of one, and nothing is lost or duplicated on the
-way. The exact positions further down are an implementation detail and deliberately not asserted.
+actually experiences: the opening cards are exoplanets rather than the solar system, the opening
+screens hold every colour the catalogue has rather than a run of one, and nothing is lost or
+duplicated on the way. The exact positions further down are an implementation detail and
+deliberately not asserted.
 """
 
 from __future__ import annotations
@@ -50,21 +52,36 @@ def families(records) -> list[str]:
     return [colour_family(tuple(r.true_colour.srgb)) for r in records]
 
 
-def test_measured_worlds_lead_the_gallery_outward_from_the_sun():
-    """The five worlds whose colours can be checked against a real measurement open the site —
-    that agreement is the reason to trust the other several thousand."""
-    recs = [planet(f"model-{i}", "azure") for i in range(6)]
+def test_the_gallery_does_not_open_on_the_solar_system():
+    """The site is about exoplanets. Whatever else the deal does, the cards a visitor meets
+    first are not the five worlds they could have looked up in an atlas."""
+    recs = [planet(f"model-{i}", "azure") for i in range(40)]
+    recs += [planet(f"gold-{i}", "gold") for i in range(40)]
     recs += [anchor("neptune", 30.1), anchor("earth", 1.0), anchor("jupiter", 5.2)]
-    order = curated_order(recs)
-    assert [r.id for r in order[:3]] == ["earth", "jupiter", "neptune"]
+    opening = [r.id for r in curated_order(recs)[:12]]
+    assert not ({"earth", "jupiter", "neptune"} & set(opening)), opening
 
 
-def test_anchors_without_an_orbit_still_lead_and_stay_deterministic():
-    recs = [planet("model-1", "azure")]
+def test_the_anchors_are_dealt_as_one_block_outward_from_the_sun():
+    """They still arrive together and still read outward from the Sun — the run is what lets
+    the calibration story be told about them as a group rather than one stray card."""
+    recs = [planet(f"model-{i}", "azure") for i in range(40)]
+    recs += [planet(f"gold-{i}", "gold") for i in range(40)]
+    recs += [anchor("neptune", 30.1), anchor("earth", 1.0), anchor("jupiter", 5.2)]
+    ids = [r.id for r in curated_order(recs)]
+    at = [ids.index(x) for x in ("earth", "jupiter", "neptune")]
+    assert at == sorted(at), at                      # outward from the Sun
+    assert at[-1] - at[0] == 2, at                   # contiguous
+    assert at[0] > 3, at                             # and not at the front
+
+
+def test_anchors_without_an_orbit_sort_last_and_stay_deterministic():
+    recs = [planet(f"model-{i}", "azure") for i in range(40)]
     no_orbit = anchor("mystery", 1.0)
     no_orbit.params.semi_major_axis_au = None
     recs += [no_orbit, anchor("earth", 1.0)]
-    assert [r.id for r in curated_order(recs)[:2]] == ["earth", "mystery"]
+    ids = [r.id for r in curated_order(recs)]
+    assert ids.index("earth") + 1 == ids.index("mystery")
 
 
 def test_the_opening_screens_hold_every_colour_not_the_biggest_one():

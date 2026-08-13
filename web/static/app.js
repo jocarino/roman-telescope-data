@@ -67,32 +67,16 @@ document.addEventListener("keydown", (e) => {
 });
 
 // The five solar-system anchors' real spacecraft maps, injected by the gallery template
-// (web/textures.py). Every other planet gets null and renders schematic bands, because for
-// every other planet a map would be invention. On by default: where ground truth exists,
-// showing it is the honest thing — the colour is still the computed one either way.
-window.exoMap = function (id) {
-  var t = window.SURFACE_MAPS;
-  return (t && t[id]) || null;
-};
-
-// The phase a card is drawn at. Cards normally take the full 10-140 deg spread, which is what
-// gives the grid its variety — but a real map is the entire point of the five that have one,
-// and past ~55 deg the crescent has eaten the geography: Earth becomes a sliver of ocean with
-// no continent on it. So a mapped card is dealt from the lit end of the same range. Hovering
-// still runs the whole wax/wane cycle; this is only where it rests.
-window.exoCardPhase = function (id) {
-  var ph = window.PlanetRender.hashPhase(id);
-  return window.exoMap(id) ? Math.min(ph, 0.96) : ph;   // 0.96 rad ~ 55 deg
-};
-
-// How wide this planet's card frame is, relative to its height. A ringed planet renders wide
-// and overflows its card (see .card-planet.ringed) rather than shrinking its globe to ~43% to
-// keep the rings inside a square: Saturn then sits the same size as every other planet in the
-// grid, with its rings reaching across the gutters. 1 for everyone else.
-window.exoCardAspect = function (id) {
-  var m = window.exoMap(id);
-  return m && m.ring ? window.PlanetRender.ringAspect(m.ring) : 1;
-};
+// (web/textures.py) — but only on the planet page, where there is room to make something of it
+// and the Source knob to explain it. In the grid every card renders the same schematic globe,
+// the five anchors included.
+//
+// They used to draw their real map here too, and it quietly cost more than it bought. At 160px
+// the Great Red Spot is a smudge; what actually read was that five cards had real geography and
+// the other 5,759 had shader bands, so the site's own subject matter looked like the placeholder
+// version of itself. The colour was never the problem — a map is rescaled to its planet's
+// derived hex either way — but the grid is where a visitor decides what this site is, and it
+// should decide that on the exoplanets.
 
 document.addEventListener("alpine:init", () => {
 
@@ -455,17 +439,6 @@ document.addEventListener("alpine:init", () => {
         entries.forEach((e) => { if (e.isIntersecting) this._draw(e.target); });
       }, { rootMargin: "100% 0px" });
 
-      // A card is painted once and then left alone, so an anchor whose map is still decoding
-      // would keep its schematic bands for the rest of the visit. Start the maps downloading
-      // now, and repaint just those five when one lands — never the whole grid, which on a
-      // 5,700-card page would be a visible hitch for the sake of five planets.
-      if (window.PlanetRender && window.SURFACE_MAPS) {
-        Object.keys(window.SURFACE_MAPS).forEach((id) => {
-          window.PlanetRender.preload(window.SURFACE_MAPS[id]);
-        });
-        window.PlanetRender.onTexture(() => this._redrawMapped());
-      }
-
       // Any filter/sort change re-renders the grid from the top, and is remembered.
       // Typing is the exception: "q" changes on every keystroke, and a rerender re-filters and
       // re-sorts the whole catalogue, then tears the grid down and rebuilds it. Coalesce a
@@ -575,9 +548,8 @@ document.addEventListener("alpine:init", () => {
       const fresh = [];
       next.forEach((p) => {
         const card = this._makeCard(p);
-        // Query for it rather than assuming a position: a ringed planet's canvas sits inside a
-        // .card-art wrapper, and taking firstChild handed the observer the wrapper — so Saturn
-        // was never drawn at all.
+        // Query for it rather than assuming a position — the card's shape is _makeCard's
+        // business, and firstChild has silently handed the observer the wrong node before.
         fresh.push(card.querySelector(".card-planet"));
         frag.appendChild(card);
       });
@@ -609,30 +581,16 @@ document.addEventListener("alpine:init", () => {
     },
     _makeCard(p) {
       const a = document.createElement("a");
-      // .card-ringed is only for the phone layout, where the card takes the whole row —
-      // see the note on .card-planet.ringed.
-      a.className = "card" + (window.exoCardAspect(p.id) !== 1 ? " card-ringed" : "");
+      a.className = "card";
       a.href = "/planet/" + p.id;
       a.setAttribute("data-peek", "/fragments/peek/" + p.id + ".html");
       const cv = document.createElement("canvas");
-      const aspect = window.exoCardAspect(p.id);
-      cv.className = "card-planet" + (this.style === "retro" ? " pixel" : "")
-        + (aspect !== 1 ? " ringed" : "");
-      // Intrinsic size, i.e. what lays the card out before the first frame is drawn — square
-      // here and a ringed card would load as a tall box and snap when the render lands.
-      cv.width = Math.round(256 * aspect); cv.height = 256; cv.dataset.id = p.id;
+      cv.className = "card-planet" + (this.style === "retro" ? " pixel" : "");
+      // Intrinsic size, i.e. what lays the card out before the first frame is drawn. Every card
+      // is square now that none of them draws rings — Saturn included.
+      cv.width = 256; cv.height = 256; cv.dataset.id = p.id;
       cv.setAttribute("aria-label", p.name + " render");
-      // A ringed canvas is wider than its grid track, so it hangs inside a wrapper that holds
-      // exactly the space a normal card planet would — see .card-art. Put it straight in the
-      // card otherwise; there is no reason to add a box for the other 5,759 planets.
-      if (aspect !== 1) {
-        const art = document.createElement("span");
-        art.className = "card-art";
-        art.appendChild(cv);
-        a.appendChild(art);
-      } else {
-        a.appendChild(cv);
-      }
+      a.appendChild(cv);
       const name = document.createElement("div");
       name.className = "card-name"; name.textContent = p.name;
       a.appendChild(name);
@@ -718,17 +676,7 @@ document.addEventListener("alpine:init", () => {
       window.PlanetRender.render(cv, {
         palette: this.palOf(p), baseHex: this.hexOf(p), radius: p.radius, cloudState: p.cloud,
         lumY: this.lumOf(p), style: this.style, fidelity: this.fidelity,
-        phase: window.exoCardPhase(p.id),
-        map: window.exoMap(p.id), aspect: window.exoCardAspect(p.id),
-      });
-    },
-    // Repaint only the cards that have a real map — see the onTexture hook in init().
-    _redrawMapped() {
-      if (!this.$refs.grid || !window.SURFACE_MAPS) return;
-      Object.keys(window.SURFACE_MAPS).forEach((id) => {
-        const cv = this.$refs.grid.querySelector('.card-planet[data-id="' + id + '"]');
-        if (!cv || !cv.dataset.drawn) return;
-        this._drawCanvas(cv);
+        phase: window.PlanetRender.hashPhase(p.id),
       });
     },
     _redrawAll() {
@@ -1855,8 +1803,7 @@ document.addEventListener("alpine:init", () => {
           palette: window.PlanetRender.ramp(base), baseHex: base,
           radius: pl.radius, cloudState: pl.cloud, lumY: roman ? pl.rlum : pl.lum,
           style: style, fidelity: localStorage.getItem("renderFidelity") || "classic",
-          phase: window.exoCardPhase(pl.id),
-          map: window.exoMap(pl.id), aspect: window.exoCardAspect(pl.id),
+          phase: window.PlanetRender.hashPhase(pl.id),
         });
       }
       peek.classList.add("on");
@@ -1921,12 +1868,21 @@ document.addEventListener("alpine:init", () => {
   });
 })();
 
-// Hover-to-spin on gallery cards (desktop with a real pointer only, avoids mobile churn
-// and keeps the site light: only the hovered planet animates). The hovered planet also
-// runs the same full lunar cycle as the planet page — waning through dark, waxing back
-// from the left — picking up from the card's dealt phase. Un-hovering restores it.
+// Motion on gallery cards. A planet that is animating runs the same full lunar cycle as the
+// planet page — waning through dark, waxing back from the left — picking up from the card's
+// dealt phase. Two things start it, and at most one card is ever running:
+//
+//   - the pointer, on a device that has one (hovering is the whole interaction, and it keeps
+//     the site light: only the planet under the cursor moves);
+//   - failing that, the first card in the grid, so the page is never completely still.
 (function () {
-  if (!window.matchMedia || !window.matchMedia("(hover: hover)").matches) return;
+  var canHover = !!(window.matchMedia && window.matchMedia("(hover: hover)").matches);
+  // Automatic motion — motion the visitor did not ask for by pointing at something — is what
+  // "reduce motion" is about, so it is the lead card that yields here, not hover.
+  var reduced = !!(window.matchMedia
+    && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  if (!canHover && reduced) return;
+
   var hovered = null;
   function optsFor(cv) {
     var list = window.PLANETS || [];
@@ -1943,28 +1899,81 @@ document.addEventListener("alpine:init", () => {
       radius: p.radius, cloudState: p.cloud, lumY: roman ? p.rlum : p.lum,
       style: localStorage.getItem("planetStyle") || "retro",
       fidelity: localStorage.getItem("renderFidelity") || "classic",
-      phase: window.exoCardPhase(p.id),
-      map: window.exoMap(p.id), aspect: window.exoCardAspect(p.id),
+      phase: window.PlanetRender.hashPhase(p.id),
     };
   }
-  // Per-hover animator: the same cycle the hero and the tour stops run, from `startRad`. A
-  // card has no per-phase colours to tint with, so only the geometry is used here.
+  // The animator: the same cycle the hero and the tour stops run, from `startRad`. A card has
+  // no per-phase colours to tint with, so only the geometry is used here.
   function phaseAnimator(startRad) {
     var step = window.PlanetRender.phaseCycle((startRad * 180) / Math.PI);
     return function (t) { return { phase: step(t).rad }; };
   }
+  function moving(card) {
+    if (!card || !window.PlanetRender) return;
+    var cv = card.querySelector(".card-planet");
+    var o = cv && optsFor(cv);
+    if (o) window.PlanetRender.spin(cv, Object.assign({}, o, { frame: phaseAnimator(o.phase) }));
+  }
+  // Back to the still card, at the phase it was dealt.
+  function still(card) {
+    if (!card || !window.PlanetRender) return;
+    var cv = card.querySelector(".card-planet");
+    if (!cv) return;
+    window.PlanetRender.stop(cv);
+    var o = optsFor(cv);
+    if (o) window.PlanetRender.render(cv, o);
+  }
+
+  // ── the lead card ───────────────────────────────────────────────────────────────────────
+  // Landing on a wall of perfectly still globes reads as a screenshot of the site rather than
+  // the site: nothing says these are live renders until you happen to put the cursor on one.
+  // So the first card animates on its own — but only while it is actually on screen, and only
+  // while the pointer has not picked a planet of its own, which it always outranks.
+  var lead = null;
+  var leadSeen = false;
+  var watch = window.IntersectionObserver
+    ? new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.target === lead) leadSeen = e.isIntersecting; });
+        syncLead();
+      })
+    : null;
+
+  function syncLead() {
+    if (!lead) return;
+    if (leadSeen && !hovered && !reduced) moving(lead); else still(lead);
+  }
+  // Re-pick after anything that rebuilds the grid — a filter, a sort, an infinite-scroll batch.
+  // Stopping the outgoing card matters as much as starting the new one: its rAF loop would
+  // otherwise keep rendering a canvas that is no longer in the document.
+  function pickLead() {
+    var first = document.querySelector(".grid a.card");
+    if (first === lead) return;
+    if (lead) { still(lead); if (watch) watch.unobserve(lead); }
+    lead = first;
+    leadSeen = !watch;                       // no IntersectionObserver: assume it is in view
+    if (lead && watch) watch.observe(lead);
+    else syncLead();
+  }
+  function watchGrid() {
+    var grid = document.querySelector(".grid");
+    if (!grid) return;
+    pickLead();
+    if (window.MutationObserver) new MutationObserver(pickLead).observe(grid, { childList: true });
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", watchGrid);
+  } else {
+    watchGrid();
+  }
+
+  // ── hover ───────────────────────────────────────────────────────────────────────────────
+  if (!canHover) return;
   document.addEventListener("mouseover", function (e) {
     var card = e.target.closest && e.target.closest("a.card");
     if (card === hovered) return;
-    if (hovered && window.PlanetRender) {
-      var pc = hovered.querySelector(".card-planet");
-      if (pc) { window.PlanetRender.stop(pc); var o0 = optsFor(pc); if (o0) window.PlanetRender.render(pc, o0); }
-    }
+    if (hovered) still(hovered);
     hovered = card;
-    if (card && window.PlanetRender) {
-      var cv = card.querySelector(".card-planet");
-      var o = cv && optsFor(cv);
-      if (o) window.PlanetRender.spin(cv, Object.assign({}, o, { frame: phaseAnimator(o.phase) }));
-    }
+    syncLead();          // the lead stands down while the pointer is on a planet, and resumes
+    if (card) moving(card);
   });
 })();
