@@ -114,6 +114,28 @@ window.ExoCampaign = {
   },
 };
 
+// Shareable view state. The gallery's filters and the planet page's scope knobs are part of
+// what a visitor is looking at, and "look at this" only works if the link carries them. Both
+// pages keep their non-default state in the query string (so the address bar is always the
+// link), and offer a one-press COPY LINK for the same URL made absolute.
+window.ExoShare = {
+  // Mirror a page's current state into the address bar. Campaign tags ride along untouched —
+  // the pageview may not have been banked yet (see ExoCampaign).
+  sync(params) {
+    if (!window.history || !history.replaceState) return;
+    const next = window.ExoCampaign.href(window.ExoCampaign.keep(params));
+    if (next === (location.search || location.pathname) + location.hash) return;  // already there
+    history.replaceState(null, "", next);  // via ExoCampaign: the tags survive the rewrite
+  },
+  // The absolute URL for the state, minus the campaign tags: a forwarded link is a new visit,
+  // not a second click on the original post. The fragment is dropped too — a shared view
+  // should open at the top, not wherever the sender had scrolled to.
+  url(params) {
+    const q = params.toString();
+    return location.origin + location.pathname + (q ? "?" + q : "");
+  },
+};
+
 // Keyboard shortcut: R rolls a random planet on pages that registered a handler
 // (gallery + planet detail). Ignored while typing in a field.
 document.addEventListener("keydown", (e) => {
@@ -432,14 +454,47 @@ document.addEventListener("alpine:init", () => {
         else localStorage.removeItem("galleryFilters");
       } catch (e) { /* ignore */ }
     },
-    // Restored BEFORE the query string is read, so an explicit deep link (?family=, ?near=,
-    // ?hz=, ?fiction=1) always beats whatever happened to be on screen last time.
-    _restoreFilters() {
-      let saved = null;
-      try { saved = JSON.parse(localStorage.getItem("galleryFilters") || "null"); }
-      catch (e) { return; }
-      if (!saved || typeof saved !== "object") return;
-      const ok = {
+    // ---- Share the view ----
+    // Which filter lives under which query parameter. The names are the ones the site has
+    // always linked with (?near=, ?family=, ?fiction=1, ?hz=) plus plain words for the rest,
+    // so a URL reads as what it shows: /?type=hot-jupiter&obs=photo&sort=brightest.
+    _urlKeys: {
+      q: "q", obs: "obs", roman: "roman", ptype: "type", disc: "disc", distBand: "dist",
+      hz: "hz", family: "family", fic: "fiction", sort: "sort", nearId: "near",
+    },
+    // The grid's state as a query string, defaults omitted so the front door stays "/".
+    shareParams() {
+      const u = new URLSearchParams();
+      this._filterKeys.forEach((k) => {
+        const v = this[k];
+        if (v === this._filterDefaults[k]) return;
+        u.set(this._urlKeys[k], v === true ? "1" : String(v));
+      });
+      if (this.view === "roman") u.set("view", "roman");
+      return u;
+    },
+    // Read the same parameters back, each checked the way a stored filter is. Returns whether
+    // the URL named any filter at all (the Roman view is read separately: it is not a filter).
+    _applyShareParams(u) {
+      const ok = this._validators();
+      let any = false;
+      this._filterKeys.forEach((k) => {
+        const raw = u.get(this._urlKeys[k]);
+        if (raw === null) return;
+        any = true;
+        const v = k === "fic" ? raw === "1" : raw;
+        if (ok[k](v)) this[k] = v;
+      });
+      return any;
+    },
+    _syncUrl() { window.ExoShare && window.ExoShare.sync(this.shareParams()); },
+    copyLink() {
+      navigator.clipboard?.writeText(window.ExoShare.url(this.shareParams()));
+      window.exoToast && window.exoToast("copied link to this view");
+      window.exoTrack && window.exoTrack("link_copied", { surface: "gallery", view: this.view });
+    },
+    _validators() {
+      return {
         obs: (v) => v in this.obsLabels,
         roman: (v) => v in this.romanLabels,
         ptype: (v) => v in this.typeLabels,
@@ -455,6 +510,15 @@ document.addEventListener("alpine:init", () => {
         disc: (v) => typeof v === "string",
         nearId: (v) => typeof v === "string",
       };
+    },
+    // Only runs when the query string named no filter, so an explicit deep link always beats
+    // whatever happened to be on screen last time.
+    _restoreFilters() {
+      let saved = null;
+      try { saved = JSON.parse(localStorage.getItem("galleryFilters") || "null"); }
+      catch (e) { return; }
+      if (!saved || typeof saved !== "object") return;
+      const ok = this._validators();
       this._filterKeys.forEach((k) => {
         if (this._sessionOnly.includes(k)) return;   // and a blob from an older build may hold one
         if (k in saved && ok[k] && ok[k](saved[k])) this[k] = saved[k];
@@ -462,19 +526,11 @@ document.addEventListener("alpine:init", () => {
     },
     async init() {
       const params = new URLSearchParams(location.search);
-      // A URL that names a view (?near=, ?family=, ?fiction=, ?hz=) is someone asking for
-      // that exact view — a shared or bookmarked link has to look the same for everybody, so
-      // it starts from the defaults. Only an unqualified visit to "/" restores what you last
+      // A URL that names a view (?near=, ?family=, ?q=, ?sort=…) is someone asking for that
+      // exact view — a shared or bookmarked link has to look the same for everybody, so it
+      // starts from the defaults. Only an unqualified visit to "/" restores what you last
       // had on screen; that is the case the back button hits.
-      const linked = ["near", "family", "fiction", "hz"].some((k) => params.has(k));
-      if (!linked) this._restoreFilters();
-      const near = params.get("near");
-      if (near) this.nearId = near;
-      const fam = params.get("family");
-      if (fam && this.familyMeta[fam]) this.family = fam;
-      if (params.get("fiction") === "1") this.fic = true;
-      const hz = params.get("hz");
-      if (hz && this.hzLabels[hz]) this.hz = hz;
+      if (!this._applyShareParams(params)) this._restoreFilters();
       // The Roman view always starts OFF. It is deliberately not restored from anywhere: not
       // from the planet pages' scope (flipping one planet to the Roman view must not silently repaint
       // the whole catalogue on the way back) and not from a previous session. The one way in
@@ -482,6 +538,7 @@ document.addEventListener("alpine:init", () => {
       const qview = params.get("view");
       if (qview === "roman") this.view = "roman";
       this._publishView();
+      this._syncUrl();
 
       // Append the next batch as the sentinel nears the viewport (infinite scroll).
       this._loadIO = new IntersectionObserver((entries) => {
@@ -503,17 +560,18 @@ document.addEventListener("alpine:init", () => {
       // burst of typing into a single pass instead of doing that per character.
       this._filterKeys.forEach((k) => {
         if (k === "q") return;
-        this.$watch(k, () => { this._saveFilters(); this._rerender(); });
+        this.$watch(k, () => { this._saveFilters(); this._syncUrl(); this._rerender(); });
       });
       this.$watch("q", () => {
         clearTimeout(this._qT);
-        this._qT = setTimeout(() => { this._saveFilters(); this._rerender(); }, 140);
+        this._qT = setTimeout(() => { this._saveFilters(); this._syncUrl(); this._rerender(); }, 140);
       });
       // The Roman view is watched separately and deliberately NOT a filter key: it is session
       // state that always starts off, so it must not be written into the remembered filter
       // blob. It still forces a full rerender — it can reorder results (brightest,
-      // similar-colour) and every card's swatch is rebuilt from scratch.
-      this.$watch("view", () => this._rerender());
+      // similar-colour) and every card's swatch is rebuilt from scratch. It IS in the URL:
+      // that is the one door in, and a copied link must open on the same colours.
+      this.$watch("view", () => { this._syncUrl(); this._rerender(); });
 
       window.__randomGo = () => this.randomGo();  // wire the R shortcut to this gallery
 
@@ -1357,6 +1415,10 @@ document.addEventListener("alpine:init", () => {
       const v = localStorage.getItem("scopeView");
       if (v === "full" || v === "roman") this.view = v;
       const fromPlanet = document.referrer.includes("/planet/");
+      // A link that names a scope setting (?view=roman&phase=90…) is someone asking for that
+      // exact view, so it beats every remembered knob below — the same rule as the gallery's
+      // deep links. Applied after the stored preferences so it always has the last word.
+      const params = new URLSearchParams(location.search);
       // The Light-source knob carries only across planet-to-planet hops, never onto a page
       // you arrived at fresh or from the gallery. Every other knob is a rendering
       // preference; this one restates the physics — a sticky "sun" would silently re-light
@@ -1381,6 +1443,8 @@ document.addEventListener("alpine:init", () => {
         src === "telescope" && fromPlanet && this.obs.length ? "telescope"
         : src === "model" ? "model"
         : this._defaultSource();
+      this._applyShareParams(params);   // the link's settings win over all of the above
+      this._syncUrl();
       // Fetch the map up front so flipping the knob is instant, not a beat of schematic globe.
       if (this.map && window.PlanetRender) PlanetRender.preload(this.map);
       window.__randomGo = () => this.randomGo();  // wire the R shortcut to this page
@@ -1408,6 +1472,7 @@ document.addEventListener("alpine:init", () => {
     setView(v) {
       this.view = v;
       this._persist("scopeView", v);
+      this._syncUrl();
       window.exoTrack && window.exoTrack("roman_view_toggled", { view: v, surface: "planet" });
       this.blink();
       this._sweep();
@@ -1421,6 +1486,63 @@ document.addEventListener("alpine:init", () => {
     _SCOPE_DEFAULTS: {
       view: "full", fidelity: "classic", heroStyle: "retro", illum: "native",
       obsIdx: 0, phaseIdx: 2, phasePlay: true,
+    },
+    // ---- Share the view ----
+    // The scope's state as a query string, defaults omitted so the plain planet URL stays the
+    // plain planet URL. Plain words, not the internal names: ?view=roman&light=sun&
+    // style=stylised&shape=sphere&source=map&phase=90. A phase is only written when the
+    // slider is pinned — a playing cycle has no single phase to name, and the link reopens
+    // cycling like a fresh visit would.
+    shareParams() {
+      const u = new URLSearchParams();
+      if (this.view === "roman") u.set("view", "roman");
+      if (this.sunSet()) u.set("light", "sun");
+      if (this.fidelity === "stylised") u.set("style", "stylised");
+      if (this.heroStyle === "smooth") u.set("shape", "sphere");
+      if (this.heroSource !== this._defaultSource()) u.set("source", this.heroSource);
+      if (this.heroSource === "telescope" && this.obs.length > 1 && this.curObs().telescope) {
+        u.set("telescope", this.curObs().telescope);
+      }
+      if (!this.phasePlay && this.phases.length) u.set("phase", String(this.phase().d));
+      return u;
+    },
+    // Read the same parameters back. Every value is checked against what THIS planet can show
+    // (no Sun-swap data, no real map, no photo: the parameter is ignored, not half-applied).
+    // Returns whether the URL carried any scope setting at all.
+    _applyShareParams(u) {
+      const keys = ["view", "light", "style", "shape", "source", "telescope", "phase"];
+      if (!keys.some((k) => u.has(k))) return false;
+      if (u.get("view") === "roman") this.view = "roman";
+      else if (u.get("view") === "full") this.view = "full";
+      if (u.get("light") === "sun" && this.hasSun) this.illum = "sun";
+      else if (u.get("light") === "star") this.illum = "native";
+      if (u.get("style") === "stylised" || u.get("style") === "classic") this.fidelity = u.get("style");
+      if (u.get("shape") === "sphere") this.heroStyle = "smooth";
+      else if (u.get("shape") === "pixel") this.heroStyle = "retro";
+      const src = u.get("source");
+      if (src && this.sourceSteps().includes(src)) this.heroSource = src;
+      const tel = u.get("telescope");
+      if (tel) { const j = this.obs.findIndex((o) => o.telescope === tel); if (j >= 0) this.obsIdx = j; }
+      const ph = u.get("phase");
+      if (ph !== null && this.phases.length) {
+        const d = Number(ph);
+        // Nearest stop the model ships, never the unlit last one (the slider can't land there either).
+        let best = -1, gap = Infinity;
+        this.phases.slice(0, Math.max(1, this.phases.length - 1)).forEach((c, i) => {
+          const g = Math.abs(c.d - d);
+          if (Number.isFinite(d) && g < gap) { gap = g; best = i; }
+        });
+        if (best >= 0) { this.phaseIdx = best; this.phasePlay = false; this._anim = null; }
+      }
+      return true;
+    },
+    // Keep the address bar equal to the view, so copying it by hand works as well as the button.
+    _syncUrl() { window.ExoShare && window.ExoShare.sync(this.shareParams()); },
+    copyLink() {
+      const url = window.ExoShare.url(this.shareParams());
+      navigator.clipboard?.writeText(url);
+      this.flash(this.scopeDirty() ? "copied link to this view" : "copied link");
+      window.exoTrack && window.exoTrack("link_copied", { surface: "planet", view: this.viewName() });
     },
     // The Source knob's default is the one setting that depends on the planet: the five
     // anchors we have actually mapped open on their real map, matching the card you clicked
@@ -1438,6 +1560,7 @@ document.addEventListener("alpine:init", () => {
         .forEach((k) => { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } });
       this.blink();
       this._sweep();
+      this._syncUrl();
       this.renderAll();
     },
     // Restart the CRT sweep animation (drop the class for a frame so CSS re-triggers it).
@@ -1449,20 +1572,21 @@ document.addEventListener("alpine:init", () => {
         this._st = setTimeout(() => (this.sweep = false), 550);
       });
     },
-    selectObs(i) { this.obsIdx = i; this._persist("obsTelescope", this.curObs().telescope || ""); },
+    selectObs(i) { this.obsIdx = i; this._persist("obsTelescope", this.curObs().telescope || ""); this._syncUrl(); },
     // Style/Shape act on the modelled render. If the real photo is showing, the first click
     // simply brings the model back (no value change) so the knobs never feel "locked out";
     // a further click then toggles. This is why turning to Telescope doesn't trap you there.
     toggleFidelity() {
       // Classic/Stylised restyles the SCHEMATIC bands, so it has nothing to say about a real
       // map either — both non-model sources bounce back to the render the knob acts on.
-      if (this.heroSource !== "model") { this.heroSource = "model"; this._persist("heroSource", "model"); this.blink(); this.renderAll(); return; }
+      if (this.heroSource !== "model") { this.heroSource = "model"; this._persist("heroSource", "model"); this.blink(); this._syncUrl(); this.renderAll(); return; }
       this.setFidelity(this.fidelity === "classic" ? "stylised" : "classic");
     },
     toggleHeroStyle() {
-      if (this.heroSource === "telescope") { this.heroSource = "model"; this._persist("heroSource", "model"); this.blink(); this.renderAll(); return; }
+      if (this.heroSource === "telescope") { this.heroSource = "model"; this._persist("heroSource", "model"); this.blink(); this._syncUrl(); this.renderAll(); return; }
       this.heroStyle = this.heroStyle === "retro" ? "smooth" : "retro";
       this._persist("planetStyle", this.heroStyle);
+      this._syncUrl();
       this.renderAll();
     },
     // The currently-selected real image (safe when none exist).
@@ -1491,6 +1615,7 @@ document.addEventListener("alpine:init", () => {
       this.heroSource = "map";
       this._persist("heroSource", "map");
       this.blink();
+      this._syncUrl();
       this.renderAll();
     },
     // Step the hero to the next source, wrapping back to the modelled render.
@@ -1500,6 +1625,7 @@ document.addEventListener("alpine:init", () => {
       this.heroSource = st[(st.indexOf(this.heroSource) + 1) % st.length];
       this._persist("heroSource", this.heroSource);
       this.blink();
+      this._syncUrl();
       this.renderAll();
     },
     toggleInfo(k) { this.info = this.info === k ? null : k; },
@@ -1547,6 +1673,7 @@ document.addEventListener("alpine:init", () => {
       if (this.view === "roman") { this.setView("full"); return; }
       this.illum = this.illum === "native" ? "sun" : "native";
       this._persist("scopeIllum", this.illum);
+      this._syncUrl();
       window.exoTrack && window.exoTrack("light_source_swapped", { source: this.illum });
       this.blink();
       this._sweep();
@@ -1569,12 +1696,14 @@ document.addEventListener("alpine:init", () => {
       // Debounced: a drag steps through every stop, and one event per drag is the signal.
       window.exoTrack &&
         window.exoTrack("phase_changed", { degrees: this.phase().d }, { debounce: 800 });
+      this._syncUrl();
       this.renderAll();
     },
     _phaseLoop() { this.renderAll(); },  // (re)issue the spin with/without the animator
     togglePhasePlay() {
       this.phasePlay = !this.phasePlay;
       this._anim = null;  // restart the sweep from the current slider phase
+      this._syncUrl();
       this.renderAll();
     },
     _pinPhase() {
@@ -1641,6 +1770,7 @@ document.addEventListener("alpine:init", () => {
     setFidelity(f) {
       this.fidelity = f;
       try { localStorage.setItem("renderFidelity", f); } catch (e) { /* ignore */ }
+      this._syncUrl();
       this.renderAll();
     },
     // Confirmation goes to the shared overlay toast (toast.js), never into the button row —

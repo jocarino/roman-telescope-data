@@ -598,6 +598,10 @@
           title="Copy all five palette colours, comma-separated">COPY ALL</button>
         <button class="badge hex" @click="copyCssVars($event)">CSS VARS</button>
         <a class="badge hex" href="/palettes/{{ rec.id }}.ase" download>.ASE</a>
+        {# The link carries the scope as set: channel, light source, style, shape, source and a
+           pinned phase (see shareParams in app.js), so what the recipient opens is what you saw. #}
+        <button class="badge hex" @click="copyLink()"
+          title="Copy a link to this planet with the scope set exactly as it is now">⧉ COPY LINK</button>
         <a class="badge hex similar" href="/?near={{ rec.id }}"
           title="Find planets closest in colour to this one">◎ SIMILAR COLOURS</a>
         <a class="badge hex similar" href="/compare?a={{ rec.id }}"
