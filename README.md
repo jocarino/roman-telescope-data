@@ -384,8 +384,8 @@ Six things about it are deliberate:
 - **A planet in the news that is *not* in the catalogue is the most valuable line it prints.**
   That is a data task, and it is the majority case on a "new planet discovered" story. The
   alert hands you the `--merge-into` command — the one that actually reaches the site — and,
-  if a catalogue-refresh PR is already open, links it: the Thursday probe drafts its release
-  rather than publishing, so the planet may be built and waiting on a merge. That check is
+  if a catalogue-refresh PR is already open, links it: the Thursday probe's release ships only
+  when its PR is merged, so the planet may be built and waiting on a merge. That check is
   best effort and never breaks an alert.
 
 The tool needs `data/planets.json`, which is not in the repo — run `python3 scripts/fetch_data.py`
@@ -518,8 +518,9 @@ version number matching. The block records what actually pins a build down:
 
 You don't have to remember any of that. `.github/workflows/catalogue.yml` probes the Archive
 through Thursday (when new confirmations are published) and on Friday morning, and opens a pull
-request when there is something to rebuild for. Nothing publishes itself: the release is created
-as a **draft** and the `data/RELEASE` bump arrives as a PR, so merging stays the human step.
+request when there is something to rebuild for. The release is published, but nothing reaches the
+site by itself: `data/RELEASE` pins a tag, and the bump to the new one arrives as a PR, so merging
+stays the human step. Telegram gets a ping when the PR opens (and if the rebuild fails).
 
 ```bash
 uv run python -m pipeline drift                       # has the Archive moved since the last release?
@@ -542,15 +543,18 @@ Three things about it are deliberate and easy to break:
 - **The baseline is the last release, so there's no state to keep.** `manifest.json` ships beside
   `planets.json`, which means once a release is published the probe goes quiet by itself.
   `scripts/release-data.sh` writes it too, so a manual release doesn't break the chain.
-- **Publishing the draft is a separate act from merging the PR, and forgetting it breaks the
-  deploy silently.** `data/RELEASE` pins a *specific* tag rather than tracking "latest" on
-  purpose: latest would let publishing a release change production with no review, and — because
-  GitHub's "latest" skips drafts — would quietly build against stale data whenever the newest
-  release was still a draft. The cost of pinning is that the pin can name a draft, whose asset
-  404s for the tokenless `fetch_data.py`, so every deploy fails while the live site keeps serving
-  the last good build and nothing looks wrong. On 2026-08-07 that is exactly what happened.
-  `.github/workflows/data-release-check.yml` now fails the pull request instead, and pings
-  Telegram when it does. It runs on every PR, not only ones that touch `data/RELEASE`: the file
+- **The release is published outright; the PR is the gate.** `data/RELEASE` pins a *specific*
+  tag rather than tracking "latest" on purpose: latest would let publishing a release change
+  production with no review. Pinning is also why auto-publishing is safe — a published release
+  nobody has merged is inert. The workflow used to create a *draft* as a second gate, and that
+  gate failed silently in the wrong direction: a pin naming a draft 404s for the tokenless
+  `fetch_data.py`, so every deploy fails while the live site keeps serving the last good build
+  and nothing looks wrong. On 2026-08-07 that is exactly what happened. A build that should not
+  ship is handled the other way round now — close the PR and `gh release delete <tag>
+  --cleanup-tag`, so the probe's baseline stays the last release that did ship.
+  `.github/workflows/data-release-check.yml` still fails the pull request if the pinned release
+  is unfetchable for any reason (a manual draft, an unpublished release), and pings Telegram
+  when it does. It runs on every PR, not only ones that touch `data/RELEASE`: the file
   can be untouched and still be wrong if the release it names is later unpublished. The decisive
   step is an unauthenticated `HEAD` for the asset — `gh` speaks with a token and would happily
   describe a release the deploy cannot reach.
