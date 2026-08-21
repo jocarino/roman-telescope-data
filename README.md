@@ -147,6 +147,7 @@ What the install does and doesn't do (`web/static/analytics.js`):
 - A fixed vocabulary: `$pageview`, `planet_viewed` (id + name), `roman_view_toggled`,
   `palette_copied` (format + which colour was on screen), `palette_downloaded`,
   `light_source_swapped`, `phase_changed` (debounced — a drag is one event, not forty),
+  `link_copied` (surface: planet or gallery — the COPY LINK buttons that share a view as set),
   `peek_opened` (planet + view + `pointer`, so hold-to-peek can be told apart on touch from
   mouse), and the guided-tour funnel: `tour_started` (`tour_id`, `stops`, `entry_stop`),
   `tour_stop_viewed` (`stop`) and `tour_completed` (`stops_seen`). A tour page's pageview says

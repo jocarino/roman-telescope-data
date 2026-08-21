@@ -386,6 +386,10 @@
       </template>
       <button type="button" class="fchip fchip-clear" @click="clearFilters()"
         x-show="activeFilters().length > 1">Clear all</button>
+      {# The address bar already carries every filter (and the Roman view); this copies it, so
+         "look at these" is one press rather than a trip to the URL. #}
+      <button type="button" class="fchip fchip-clear fchip-share" @click="copyLink()"
+        title="Copy a link that opens the gallery filtered exactly like this">⧉ Copy link</button>
     </div>
   </div>
 

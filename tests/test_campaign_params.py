@@ -31,7 +31,8 @@ _APP_JS = _STATIC / "app.js"
 # outside a browser. `location`/`history` are read at call time, so each case can swap them.
 _SHIM = """
 global.window = {};
-global.document = { addEventListener: () => {}, createElement: () => ({ getContext: () => null }) };
+global.document = { addEventListener: () => {}, createElement: () => ({ getContext: () => null }),
+  querySelector: () => null, readyState: "complete" };
 global.requestAnimationFrame = () => 0;
 global.cancelAnimationFrame = () => {};
 require(%s);
