@@ -286,6 +286,8 @@ def _env() -> Environment:
     # footer offers and the licence stamped into planets.json are then the same fact.
     env.globals["licence_url"] = RIGHTS.derived_licence
     env.globals["repo_url"] = RIGHTS.full_text.split("/blob/")[0]
+    # The contact address too: RIGHTS.contact is the one place it is written, so the footer,
+    # /about, /press and the planets.json header can never drift apart.
     env.globals["contact_email"] = RIGHTS.contact
     return env
 
@@ -298,12 +300,6 @@ _PH_ASSETS_HOST = "https://eu-assets.i.posthog.com"
 # Approximate count of confirmed exoplanets, for the honest "modelling N of ~M" line. Rounded
 # so it doesn't go stale precisely; refresh occasionally from the Archive's pscomppars count.
 KNOWN_TOTAL_APPROX = 6300
-
-# The project's public contact address: the footer, /about and /press all render it. A
-# dedicated account, so committing it here is publishing exactly what it is for. Overridable
-# per build (--contact-email / $CONTACT_EMAIL); set it to empty to fall back to the issue
-# tracker instead.
-CONTACT_EMAIL = "joaogveloso.contact@gmail.com"
 
 # Distance is stored in parsecs but shown in light-years everywhere (friendlier to non-astronomers).
 _LY_PER_PC = 3.26156
@@ -668,7 +664,6 @@ def build(
     posthog_key: str = "",
     posthog_api_host: str = _PH_API_HOST,
     posthog_assets_host: str = _PH_ASSETS_HOST,
-    contact_email: str = CONTACT_EMAIL,
 ) -> Path:
     doc = PlanetsFile.model_validate_json(planets_json.read_text())
     records = doc.planets
@@ -683,7 +678,6 @@ def build(
         posthog_key=posthog_key,
         posthog_api_host=posthog_api_host.rstrip("/"),
         posthog_assets_host=posthog_assets_host.rstrip("/"),
-        contact_email=contact_email.strip(),
     )
     hub = {p.path: p for p in static_pages(len(records))}
 
@@ -980,14 +974,6 @@ def main() -> None:
         "local iteration only — deploys should always build them.",
     )
     parser.add_argument(
-        "--contact-email",
-        default=os.environ.get("CONTACT_EMAIL", CONTACT_EMAIL),
-        help="Contact address shown in the footer and on /about and /press. Defaults to "
-        "the project's dedicated public address (web.build.CONTACT_EMAIL); $CONTACT_EMAIL "
-        "overrides it per environment, and an empty value makes the pages point at the "
-        "GitHub issue tracker instead.",
-    )
-    parser.add_argument(
         "--posthog-key",
         default=os.environ.get("POSTHOG_KEY", ""),
         help="PostHog project token (phc_...) to enable visitor analytics. Omitted or empty "
@@ -1014,7 +1000,6 @@ def main() -> None:
         posthog_key=args.posthog_key,
         posthog_api_host=args.posthog_api_host,
         posthog_assets_host=args.posthog_assets_host,
-        contact_email=args.contact_email,
     )
     n = len(list((out / "planet").glob("*.html")))
     cards = len(list((out / "og").glob("*.png"))) if (out / "og").exists() else 0
@@ -1023,12 +1008,6 @@ def main() -> None:
         print(
             "  note: no --base-url / $SITE_BASE_URL, so og:image and canonical URLs are "
             "root-relative and sitemap.xml was skipped. Set it for the production build."
-        )
-    if not args.contact_email:
-        print(
-            "  note: no --contact-email / $CONTACT_EMAIL, so the footer, /about and /press "
-            "point at the GitHub issue tracker instead of an address. Set it for the "
-            "production build — an unreachable press page is the gap it exists to close."
         )
     print(
         f"  analytics: PostHog -> {args.posthog_api_host}"

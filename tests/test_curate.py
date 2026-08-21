@@ -169,6 +169,9 @@ _GALLERY_HTML = Path(__file__).resolve().parents[1] / "web" / "templates" / "gal
 
 def test_the_gallery_opens_in_the_curated_order():
     found = set(re.findall(r'\bsort: "([a-z]+)"', _APP_JS.read_text()))
+    # The share-link layer maps each knob to its URL parameter name (`sort: "sort"`); that is
+    # a key, not a default, so it is not one of the places that has to agree.
+    found.discard("sort")
     assert found == {"curated"}, f"app.js disagrees with itself about the default sort: {found}"
     assert "sort !== 'curated'" in _GALLERY_HTML.read_text()
 

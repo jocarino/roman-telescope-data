@@ -7,9 +7,9 @@ wants as allies. So the wording pins here are not style: the band figures on /pr
 the ones in pipeline.config, and the retired four-band configuration (660/835, "6%") must
 never reappear in prose.
 
-Second failure: an unreachable press page. The contact address is a build input
-(CONTACT_EMAIL), so the templates are tested in both states — with an address, and falling
-back to the issue tracker rather than rendering an empty slot.
+Second failure: an unreachable press page. The contact address is RIGHTS.contact, written
+in exactly one place, so the tests pin that /about, /press and the footer all render that
+value and that no template or build module carries a literal copy of it.
 
 Asset checks run against dist/ when present, like tests/test_footer.py: the flagship images
 must exist at both sizes, carry the credit inside the file (PNG text + sRGB profile), and
@@ -99,22 +99,24 @@ def test_press_words_that_must_and_must_not_appear():
 
 
 @pytest.mark.parametrize("render", [_press_html, _about_html])
-def test_contact_email_renders_when_the_build_carries_one(render):
-    html = render(Site(contact_email="x@example.test"))
-    assert 'href="mailto:x@example.test"' in html
-
-
-@pytest.mark.parametrize("render", [_press_html, _about_html])
-def test_contact_falls_back_to_the_issue_tracker_not_an_empty_slot(render):
+def test_contact_is_rights_contact_and_the_issue_tracker(render):
     html = render(Site())
-    assert "mailto:" not in html
+    assert f'href="mailto:{RIGHTS.contact}"' in html
     assert "/issues" in html
 
 
-def test_footer_offers_about_and_the_email_when_set():
+def test_the_address_is_written_in_exactly_one_place():
+    """Changing RIGHTS.contact must change every surface; a literal copy anywhere else is
+    the drift this test exists to catch."""
+    for rel in ("web/build.py", "web/meta.py", "web/templates/base.html",
+                "web/templates/about.html", "web/templates/press.html"):
+        assert RIGHTS.contact not in (_ROOT / rel).read_text(), rel
+
+
+def test_footer_offers_about_and_the_email():
     base = (_ROOT / "web" / "templates" / "base.html").read_text()
     assert 'href="/about"' in base
-    assert "site.contact_email" in base
+    assert "contact_email" in base
 
 
 def test_about_and_press_are_registered_pages():
