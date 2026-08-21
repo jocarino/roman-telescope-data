@@ -358,7 +358,7 @@ def test_the_missing_planet_path_merges_rather_than_writing_a_lone_file(aliases,
 
 
 def test_an_open_data_pr_is_surfaced_on_a_missing_planet(aliases, monkeypatch):
-    """The Thursday probe opens a PR and drafts the release; nothing reaches the site until a
+    """The Thursday probe opens a PR and publishes the release; nothing reaches the site until a
     human merges. A 'not in catalogue' alert is exactly when that matters."""
     monkeypatch.setattr(nw, "data_pr_nudge",
                         lambda **kw: "📦 <b>A data refresh PR is already open</b> — #99.")

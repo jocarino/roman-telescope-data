@@ -3,9 +3,13 @@ name: Catalogue refresh
 # Ask the Exoplanet Archive whether anything changed; rebuild and open a PR when it has.
 #
 # Two jobs, deliberately: the probe is one HTTP request and runs often, the rebuild takes minutes
-# and runs only when there is something to rebuild for. Nothing here publishes anything — the
-# release is created as a DRAFT and the data/RELEASE bump arrives as a pull request, so merging
-# stays a human act. That is the only gate, and it is not duplicated by also gating the trigger.
+# and runs only when there is something to rebuild for. The release is published outright, but
+# publishing a release changes nothing on the site: data/RELEASE pins a specific tag, and the bump
+# to it arrives as a pull request, so merging stays the human act. That is the only gate, and it is
+# not duplicated by also gating the trigger. (The release used to be a draft as a second gate; it
+# was a gate that failed silently in the wrong direction — forgetting to publish broke every
+# deploy — so it went. A release that should not ship is deleted: `gh release delete <tag>`.)
+# Telegram gets a ping when the PR opens, and another if the rebuild fails.
 #
 # NOTE: GitHub disables scheduled workflows after 60 days with no repository activity. It emails
 # the owner when it does, but re-enabling is manual — so a long quiet spell is the one way this
@@ -171,7 +175,7 @@ jobs:
       - name: Write the manifest
         run: uv run python -m pipeline drift --emit-manifest data/manifest.json
 
-      - name: Publish a DRAFT release
+      - name: Publish the release
         id: release
         run: |
           tag="data-$(date -u +%Y%m%d-%H%M)"
@@ -182,12 +186,12 @@ jobs:
           size=$(python3 -c "import os;print(f'{os.path.getsize(\"data/planets.json\")/1e6:.1f}')")
           snapshot=$(python3 -c "import json;p=json.load(open('data/planets.json')).get('provenance',{});print(p.get('upstream',{}).get('snapshot_at') or 'unknown')")
           gh release create "$tag" data/planets.json data/manifest.json \
-            --draft \
             --title "Planet data $tag" \
-            --notes "planets.json: ${PLANET_COUNT} planets, schema v${schema}, ${size} MB. Built by the catalogue-refresh workflow at commit \`${GITHUB_SHA:0:12}\` from an Exoplanet Archive snapshot of ${snapshot} — \`pscomppars\` is a live table, so that timestamp, not the schema version, is what makes two releases comparable. The same values travel inside the file, under \`provenance\`. Consumed by the deploy build via scripts/fetch_data.py. manifest.json is the drift probe's next baseline. **Draft — publish it when you merge the data/RELEASE PR, or the deploy cannot fetch the data.**"
+            --notes "planets.json: ${PLANET_COUNT} planets, schema v${schema}, ${size} MB. Built by the catalogue-refresh workflow at commit \`${GITHUB_SHA:0:12}\` from an Exoplanet Archive snapshot of ${snapshot} — \`pscomppars\` is a live table, so that timestamp, not the schema version, is what makes two releases comparable. The same values travel inside the file, under \`provenance\`. Consumed by the deploy build via scripts/fetch_data.py. manifest.json is the drift probe's next baseline. Nothing uses this release until the data/RELEASE PR naming it is merged."
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Open the data/RELEASE PR
+        id: pr
         env:
           TAG: ${{ steps.release.outputs.tag }}
           HEADLINE: ${{ needs.probe.outputs.headline }}
@@ -207,14 +211,67 @@ jobs:
             echo "- **${HEADLINE}**"
             echo "- Planets built: **${PLANET_COUNT}**"
             echo "- What moved: **${MOVED}**"
-            echo "- Release: \`${TAG}\` — **draft**"
+            echo "- Release: [\`${TAG}\`](https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG})"
             echo
             echo "The probe names planets that joined or left, and proves whether ones already"
             echo "present were *also* revised. It deliberately does not guess how many were,"
             echo "because it cannot; the colour counts above are measured by diffing this build"
             echo "against the previous release."
             echo
-            echo "**Publish the draft release before merging**, or the deploy build has nothing"
-            echo "to fetch."
+            echo "The release is already published; nothing fetches it until this PR is merged."
+            echo "Merge to ship it. If this build should not ship, close the PR and delete the"
+            echo "release (\`gh release delete ${TAG} --cleanup-tag\`) so the probe's baseline"
+            echo "stays the last release that did."
           } > pr-body.md
-          gh pr create --title "${HEADLINE} (${TAG})" --body-file pr-body.md
+          url=$(gh pr create --title "${HEADLINE} (${TAG})" --body-file pr-body.md)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      # One message when there is something to approve, another when the rebuild broke; the
+      # schedule runs unattended, so without these a stalled chain is only visible by going to
+      # look. `curl` rather than any tool of ours, so a ping still goes out when ours is what broke.
+      - name: Tell Telegram
+        if: always()
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+          OUTCOME: ${{ job.status }}
+          TAG: ${{ steps.release.outputs.tag }}
+          PR_URL: ${{ steps.pr.outputs.url }}
+          HEADLINE: ${{ needs.probe.outputs.headline }}
+          MOVED: ${{ steps.diff.outputs.summary }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -u
+          if [ -z "${TG_TOKEN}" ] || [ -z "${TG_CHAT}" ]; then
+            echo "::warning::TELEGRAM_TOKEN / TELEGRAM_CHAT_ID are not set — no ping sent."
+            exit 0
+          fi
+          esc() { printf '%s' "$1" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g'; }
+          if [ "${OUTCOME}" = "success" ]; then
+            text="$(printf '%s\n' \
+              "🪐 <b>Catalogue refresh ready to approve</b>" \
+              "" \
+              "$(esc "${HEADLINE}")" \
+              "$(esc "${MOVED}")" \
+              "" \
+              "Release <code>${TAG}</code> is published; nothing ships until the PR is merged." \
+              "" \
+              "${PR_URL}")"
+          else
+            text="$(printf '%s\n' \
+              "🔴 <b>Catalogue refresh failed</b> (${OUTCOME})" \
+              "" \
+              "$(esc "${HEADLINE}")" \
+              "" \
+              "No PR was opened. The Archive has moved, so the probe will keep finding the same drift until this is fixed." \
+              "" \
+              "${RUN_URL}")"
+          fi
+          curl -sS --max-time 30 -X POST \
+            "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
+            -d chat_id="${TG_CHAT}" \
+            -d parse_mode=HTML \
+            -d disable_web_page_preview=true \
+            --data-urlencode text="${text}" >/dev/null \
+            && echo "Pinged Telegram." \
+            || echo "::warning::Telegram ping failed (the job result above still stands)."
