@@ -222,12 +222,9 @@
 
   <section class="pr-sec" id="contact">
     <h2 class="pr-h">Contact</h2>
-    {% if site.contact_email %}
-    <p>Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>.</p>
-    {% else %}
-    <p>Open an issue on <a href="{{ repo_url }}/issues" rel="noopener" target="_blank">the
-      project's GitHub</a>, and it will be answered quickly.</p>
-    {% endif %}
+    <p>Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>, or open
+      an issue on <a href="{{ repo_url }}/issues" rel="noopener" target="_blank">the project's
+      GitHub</a>; either is answered quickly.</p>
   </section>
 </div>
 {% endblock %}

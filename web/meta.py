@@ -24,6 +24,7 @@ from xml.sax.saxutils import escape
 from pipeline.classify import planet_type
 from pipeline.colour.family import colour_family
 from pipeline.models import PlanetRecord
+from pipeline.rights import RIGHTS
 
 SITE_NAME = "Exoplanet Palette"
 TAGLINE = "The colour scheme of every known exoplanet, derived from physics."
@@ -83,10 +84,10 @@ class Site:
     posthog_key: str = ""
     posthog_api_host: str = "https://eu.i.posthog.com"
     posthog_assets_host: str = "https://eu-assets.i.posthog.com"
-    # Contact address, shown in the footer and on /about and /press. Defaults per build from
-    # web.build.CONTACT_EMAIL (the project's dedicated public address); overridable via
-    # $CONTACT_EMAIL. Empty means the pages fall back to the repo's issue tracker.
-    contact_email: str = ""
+    # Contact address, shown in the footer and on /about and /press. Not a build input:
+    # RIGHTS.contact is the single place the address is written (the planets.json header
+    # carries the same field), so changing it there changes it everywhere.
+    contact_email: str = RIGHTS.contact
 
     def absolute(self, path: str) -> str:
         if not path.startswith("/"):

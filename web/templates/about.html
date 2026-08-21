@@ -51,16 +51,11 @@
 
   <section class="ab-sec" id="contact">
     <h2 class="ab-h">Contact</h2>
-    {% if site.contact_email %}
-    <p>Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>. It is
-      answered within a few hours in European daytime (Portugal, UTC+1 in summer). Corrections
-      are especially welcome: if anything here misstates your work or your instrument, I would
-      rather be told than be polite about it.</p>
-    {% else %}
-    <p>Open an issue on <a href="{{ repo_url }}/issues" rel="noopener" target="_blank">the
-      project's GitHub</a>. Corrections are especially welcome: if anything here misstates
-      your work or your instrument, I would rather be told than be polite about it.</p>
-    {% endif %}
+    <p>Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>, or open
+      an issue on <a href="{{ repo_url }}/issues" rel="noopener" target="_blank">the project's
+      GitHub</a>. Email is answered within a few hours in European daytime (Portugal, UTC+1 in
+      summer). Corrections are especially welcome: if anything here misstates your work or
+      your instrument, I would rather be told than be polite about it.</p>
   </section>
 
   <section class="ab-sec">
