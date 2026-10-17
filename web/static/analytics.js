@@ -36,6 +36,53 @@
     if (window.ExoCampaign) window.ExoCampaign.strip();
   }
 
+  // ── The owner's own visits ───────────────────────────────────────────────────────────────
+  // Cookieless cuts both ways: PostHog cannot tell the person who built the site from any
+  // other visitor — no cookie, no login, and a distinct id that is a server-side hash thrown
+  // away daily. So the browser does the telling. Open any page once with `?internal` and this
+  // browser remembers (localStorage, beside the accent and render-style preferences); every
+  // event it sends from then on carries `$internal_or_test_user: true` as an EVENT property,
+  // which the PostHog project's "filter out internal and test users" setting matches on.
+  // `?internal=off` forgets. The switch itself is dropped from the address bar straight away,
+  // so a link copied afterwards doesn't hand the mark to whoever it is sent to.
+  //
+  // Not PostHog's own `setInternalOrTestUser()`, deliberately. That sets a PERSON property,
+  // which (a) switches on person processing for the visitor — the one thing this install
+  // promises never to do — and (b) lands on a person the daily salt discards tomorrow, so it
+  // would have to be re-sent on every page load anyway. A super property rides on every event
+  // of this page load, before the pageview, with nothing to persist on PostHog's side.
+  var INTERNAL_KEY = "exoInternal";
+
+  function internalVisit() {
+    var flag = null;
+    try {
+      var q = new URLSearchParams(location.search);
+      if (q.has("internal")) {
+        var v = (q.get("internal") || "").toLowerCase();
+        flag = !(v === "off" || v === "0" || v === "no" || v === "false");
+        try {
+          if (flag) localStorage.setItem(INTERNAL_KEY, "1");
+          else localStorage.removeItem(INTERNAL_KEY);
+        } catch (e) { /* private mode: the mark lasts this page load only */ }
+        q.delete("internal");
+        if (window.ExoCampaign && window.history && history.replaceState) {
+          history.replaceState(null, "", window.ExoCampaign.href(q));  // tags stay; only ?internal goes
+        }
+        if (window.exoToast) {
+          window.exoToast(flag
+            ? "marked internal: this browser's visits are left out of the site's analytics"
+            : "internal mark removed: this browser counts as a visitor again");
+        }
+      }
+      if (flag === null) flag = localStorage.getItem(INTERNAL_KEY) === "1";
+    } catch (e) {
+      flag = !!flag;
+    }
+    return flag;
+  }
+
+  var internal = internalVisit();
+
   // No key, or the library was blocked (ad blockers take it out routinely, which is fine and
   // must stay silent). Leaving window.exoTrack undefined makes every call site a no-op.
   if (!cfg || !cfg.key || !ph || typeof ph.init !== "function") { stripCampaign(); return; }
@@ -50,6 +97,13 @@
       disable_surveys: true,
       // Nobody is ever identified here, so no person profiles are created either.
       person_profiles: "identified_only",
+      // Runs before the pageview is captured (PostHog schedules that a tick after `loaded`),
+      // so the mark is on the very first event of the page, not just the later ones.
+      loaded: function (p) {
+        if (internal && typeof p.register === "function") {
+          p.register({ $internal_or_test_user: true });
+        }
+      },
     });
   } catch (e) {
     stripCampaign();

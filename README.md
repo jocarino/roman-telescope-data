@@ -159,6 +159,21 @@ so an unkeyed build (or an ad blocker, which removes PostHog routinely) changes 
 how the page behaves. Adding an event is one guarded line at the call site plus a line in the
 list above; keep the names readable a year out.
 
+**Keeping your own visits out.** Cookieless means PostHog cannot tell the site's owner from
+any other visitor, so the browser has to say so. Open any page of the deployed site once with
+`?internal` on the URL (`https://<your domain>/?internal`): a toast confirms it, the switch is
+dropped from the address bar, and that browser remembers (`localStorage`, like the accent
+preference). From then on every event it sends carries `$internal_or_test_user: true` as an
+*event* property, and the PostHog project's **Filter out internal and test users** setting
+(Settings → Project → Product analytics) excludes events where that property is set — tick
+the filter on an insight, or on the web analytics page, and you are gone from the numbers.
+`?internal=off` forgets. Do it once per browser and device; a private window starts clean. It
+is a property, not a kill switch: your events still arrive, labelled, so you can see your own
+test of a new feature by flipping the filter off. (PostHog's own `setInternalOrTestUser()` is
+deliberately not used: it sets a *person* property, which turns on person processing — the one
+thing this install never does — and lands on a person the daily cookieless salt discards
+tomorrow anyway.)
+
 ### The Roman target board (`/roman`)
 
 The namesake page: the shortlist of exoplanets Roman's coronagraph could plausibly catch in
