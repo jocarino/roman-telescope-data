@@ -97,33 +97,90 @@
   <div class="wrap">
     {% block content %}{% endblock %}
 
-    {# The site wrapper. It lives HERE rather than in a macro each page opts into, because the
-       problem it fixes is pages forgetting: before this, every page except the tour end-card
-       and the 404 ended in a dead stop, and the only way out was "← ALL PLANETS".
+    {# The site wrapper: the 404's cockpit console, miniaturised. It lives HERE rather than in
+       a macro each page opts into, because the problem it fixes is pages forgetting: before
+       this, every page except the tour end-card and the 404 ended in a dead stop, and the
+       only way out was "← ALL PLANETS".
 
-       Four destinations, no cleverness. The honesty line comes first because it is the one
-       sentence that should be on every page of this site whether or not anyone scrolls to it,
-       and the licence sits beside the repo because someone who scrolled this far is the person
-       most likely to want to reuse a colour.
+       Same rule as the cockpit — the costume never invents data. The keys are the complete
+       chart (every destination the gallery's Explore menu knows), the readout above them is
+       the honesty line, the worlds counter is this build's real count, and the etched plate
+       line is who made it and under what licence. EXO·NAV joins the instrument family
+       (EXOSCOPE, EXO·RX) — and per the standing rule, the brand name is never the only
+       signpost: the plain-English subtitle sits right beside it.
 
        One known limit: the gallery is an infinite scroll, so its own footer is a long way
        down — which is why the same links also live in that page's Explore menu. #}
     <footer class="site-foot">
-      <p class="foot-honest">Every colour here is <b>modelled</b>, not photographed —
-        computed from physics, never a picture of the planet.</p>
-      <nav class="foot-nav" aria-label="Site">
-        <a href="/"><i class="foot-gl" aria-hidden="true">◧</i>All planets</a>
-        <a href="/how"><i class="foot-gl" aria-hidden="true">λ</i>How the colours work</a>
-        <a href="/credits"><i class="foot-gl" aria-hidden="true">§</i>Sources &amp; credits</a>
-        <a href="/glossary"><i class="foot-gl" aria-hidden="true">A–Z</i>Glossary</a>
-        <a href="/about"><i class="foot-gl" aria-hidden="true">☺</i>About &amp; contact</a>
-      </nav>
-      {# The address itself, when the build carries one — the enquiry neither /about nor
-         /press will catch arrives on some other page, and this line is what catches it. #}
-      <p class="foot-meta">Exoplanet Palette ·
-        <a href="mailto:{{ contact_email }}">{{ contact_email }}</a> ·
-        <a href="{{ licence_url }}" rel="license noopener" target="_blank">CC BY 4.0</a> ·
-        <a href="{{ repo_url }}" rel="noopener" target="_blank">GitHub ↗</a></p>
+      {# The cowl: the console rises out of the page floor, like the 404 dash's crest. #}
+      <div class="foot-crest" aria-hidden="true"></div>
+      <div class="foot-plate">
+        <div class="foot-head">
+          <span class="foot-brand">EXO·NAV</span>
+          <span class="foot-brand-sub">ship's console · every heading on the chart</span>
+          {# Guarded: tests render single templates through _env() without build()'s globals,
+             and a console that invents a count would break the cockpit rule anyway. #}
+          {% if n_worlds is defined %}
+          <span class="foot-tel"><span class="foot-tel-k">On the chart</span>
+            <span class="foot-tel-v">{{ '{:,}'.format(n_worlds) }} worlds</span></span>
+          {% endif %}
+        </div>
+        {# The one sentence that belongs on every page, styled as the console's readout — a
+           recessed screen, not a paragraph — but still a full plain-English sentence. #}
+        <p class="foot-honest">Every colour here is <b>modelled</b>, not photographed —
+          computed from physics, never a picture of the planet.</p>
+        <nav class="foot-keys" aria-label="Site">
+          <a class="fkey" href="/">
+            <span class="fkey-glyph" aria-hidden="true">◧</span>
+            <span class="fkey-txt"><span class="fkey-lbl">All planets</span>
+              <span class="fkey-sub">the full gallery</span></span>
+          </a>
+          <a class="fkey" href="/tours">
+            <span class="fkey-glyph" aria-hidden="true">▶</span>
+            <span class="fkey-txt"><span class="fkey-lbl">Guided tours</span>
+              <span class="fkey-sub">short curated walks</span></span>
+          </a>
+          <a class="fkey" href="/compare">
+            <span class="fkey-glyph" aria-hidden="true">⇄</span>
+            <span class="fkey-txt"><span class="fkey-lbl">Compare</span>
+              <span class="fkey-sub">two worlds side by side</span></span>
+          </a>
+          <a class="fkey" href="/census">
+            <span class="fkey-glyph" aria-hidden="true">▤</span>
+            <span class="fkey-txt"><span class="fkey-lbl">Colour census</span>
+              <span class="fkey-sub">the catalogue as one dataset</span></span>
+          </a>
+          <a class="fkey" href="/sky">
+            <span class="fkey-glyph" aria-hidden="true">✦</span>
+            <span class="fkey-txt"><span class="fkey-lbl">Your sky tonight</span>
+              <span class="fkey-sub">host stars over your head</span></span>
+          </a>
+          <a class="fkey" href="/roman">
+            <span class="fkey-glyph" aria-hidden="true">◎</span>
+            <span class="fkey-txt"><span class="fkey-lbl">Roman board</span>
+              <span class="fkey-sub">the planets Roman could measure</span></span>
+          </a>
+          <a class="fkey" href="/how">
+            <span class="fkey-glyph" aria-hidden="true">λ</span>
+            <span class="fkey-txt"><span class="fkey-lbl">How it works</span>
+              <span class="fkey-sub">starlight to hex, in four steps</span></span>
+          </a>
+          <a class="fkey" href="/glossary">
+            <span class="fkey-glyph" aria-hidden="true">A–Z</span>
+            <span class="fkey-txt"><span class="fkey-lbl">Glossary</span>
+              <span class="fkey-sub">every term in plain English</span></span>
+          </a>
+        </nav>
+        {# The etched plate line: maker, address, licence. The address itself is visible text,
+           because the enquiry neither /about nor /press will catch arrives on some other
+           page, and this line is what catches it. #}
+        <p class="foot-meta">Exoplanet Palette ·
+          <a href="/about">About &amp; contact</a> ·
+          <a href="/credits">Sources &amp; credits</a> ·
+          <a href="mailto:{{ contact_email }}">{{ contact_email }}</a> ·
+          <a href="{{ licence_url }}" rel="license noopener" target="_blank">CC BY 4.0</a> ·
+          <a href="{{ repo_url }}" rel="noopener" target="_blank">GitHub ↗</a></p>
+      </div>
     </footer>
   </div>
 </body>
