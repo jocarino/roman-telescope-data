@@ -16,12 +16,6 @@ gh auth status >/dev/null 2>&1 || { echo "error: gh not authenticated — run: g
 
 TAG="${1:-data-$(date +%Y%m%d-%H%M)}"
 
-# The tag is picked here, after the build, so the pipeline could not have known it. Stamp it
-# into the provenance header before uploading — otherwise a downloaded planets.json can be
-# matched to its release only by whoever still has the URL. Rewrites in place, so the local
-# copy and the published asset are identical.
-python3 scripts/stamp_release_tag.py "$DATA" "$TAG"
-
 N=$(python3 -c "import json;d=json.load(open('$DATA'));print(len(d['planets']))")
 SCHEMA=$(python3 -c "import json;print(json.load(open('$DATA'))['schema_version'])")
 SIZE=$(python3 -c "import os;print(f'{os.path.getsize(\"$DATA\")/1e6:.1f}')")
@@ -30,12 +24,13 @@ SIZE=$(python3 -c "import os;print(f'{os.path.getsize(\"$DATA\")/1e6:.1f}')")
 SNAPSHOT=$(python3 -c "import json;p=json.load(open('$DATA')).get('provenance',{});print(p.get('upstream',{}).get('snapshot_at') or 'unknown')")
 COMMIT=$(python3 -c "import json;p=json.load(open('$DATA')).get('provenance',{});print(p.get('code',{}).get('short') or 'unknown')")
 
-# The manifest is the drift probe's baseline (pipeline/drift.py). Publishing a release without
-# it leaves the probe with nothing to compare against, so it reports drift on every run until
-# the next release carries one — hence generating it here rather than leaving it to CI.
+# Reuse the build's input snapshot; publishing must never acknowledge newer Archive data.
 MANIFEST=data/manifest.json
-echo "Writing $MANIFEST (queries the Archive for the fingerprint)..."
+echo "Writing $MANIFEST from the saved build inputs..."
 uv run python -m pipeline drift --emit-manifest "$MANIFEST" --planets "$DATA"
+
+# Validate the snapshot before modifying the artifact's release identity.
+python3 scripts/stamp_release_tag.py "$DATA" "$TAG"
 
 gh release create "$TAG" "$DATA" "$MANIFEST" \
   --title "Planet data $TAG" \

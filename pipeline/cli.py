@@ -30,6 +30,7 @@ def _now_iso() -> str:
 
 def cmd_build(args: argparse.Namespace) -> None:
     generated_at = _now_iso()
+    archive_snapshot = None
     instruments = [ROMAN_CGI] if args.targets_only is False else list(INSTRUMENTS.values())
     if args.source == "demo":
         inputs = demo_planets()
@@ -47,11 +48,16 @@ def cmd_build(args: argparse.Namespace) -> None:
             )
             return
     elif args.bulk is not None:
-        inputs = solar_system_planets() + catalog_bulk(args.bulk, use_cache=not args.no_cache)
+        from pipeline.drift import fingerprint_rows
+
+        catalog, rows = catalog_bulk(args.bulk, use_cache=not args.no_cache)
+        inputs = solar_system_planets() + catalog
+        archive_snapshot = asdict(fingerprint_rows([asdict(row) for row in rows]))
     else:
         inputs = solar_system_planets() + catalog_planets(use_cache=not args.no_cache)
     if args.limit is not None:
         inputs = inputs[: args.limit]
+        archive_snapshot = None
 
     records = []
     hits = 0
@@ -97,7 +103,10 @@ def cmd_build(args: argparse.Namespace) -> None:
         existing, added, replaced = merged_into
         # Keep the file's own generated_at: this is the same catalogue with a planet spliced
         # in, not a fresh build, and the drift manifest is keyed off the release it belongs to.
-        out = write_planets(records, existing.generated_at, args.merge_into)
+        out = write_planets(
+            records, existing.generated_at, args.merge_into,
+            archive_snapshot=(existing.provenance or {}).get("archive_snapshot"),
+        )
         print(f"\nMerged into {out}: {len(added)} added, {len(replaced)} replaced, "
               f"{len(records)} planets total.")
         if added:
@@ -108,7 +117,7 @@ def cmd_build(args: argparse.Namespace) -> None:
         print("  (the deploy webhook rebuilds from the new tag)")
         return
 
-    out = write_planets(records, generated_at, args.out)
+    out = write_planets(records, generated_at, args.out, archive_snapshot=archive_snapshot)
     n = len(records)
     print(f"\nWrote {n} planet(s) -> {out}  ({hits} from cache, {n - hits} rebuilt)")
 
@@ -219,7 +228,7 @@ def main() -> None:
         type=Path,
         default=None,
         metavar="PATH",
-        help="Manifest to compare against. Omit to fetch manifest.json from the latest release.",
+        help="Manifest to compare against. Omit to fetch the release pinned in data/RELEASE.",
     )
     p_drift.add_argument(
         "--emit-manifest",

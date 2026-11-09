@@ -520,29 +520,36 @@ You don't have to remember any of that. `.github/workflows/catalogue.yml` probes
 through Thursday (when new confirmations are published) and on Friday morning, and opens a pull
 request when there is something to rebuild for. The release is published, but nothing reaches the
 site by itself: `data/RELEASE` pins a tag, and the bump to the new one arrives as a PR, so merging
-stays the human step. Telegram gets a ping when the PR opens (and if the rebuild fails).
+stays the human step. Telegram gets a ping when the PR opens or either the probe or rebuild fails.
 
 ```bash
-uv run python -m pipeline drift                       # has the Archive moved since the last release?
+uv run python -m pipeline drift                       # has the Archive moved since the pinned release?
 uv run python -m pipeline drift --baseline m.json     # …compared to a specific manifest
 uv run python -m pipeline drift --emit-manifest data/manifest.json
 uv run python -m pipeline drift --diff-against prev/planets.json   # what actually changed colour
 ```
 
-Three things about it are deliberate and easy to break:
+These rules keep the refresh safe:
 
 - **It fingerprints, it doesn't count.** `pscomppars` is a *composite* table that continuously
   re-derives each planet's best-available parameters, so a revision rewrites a row while the row
-  count sits still. The probe sums the columns the pipeline consumes, so additions, removals and
-  revisions all move it — for the same single query a bare count would have cost.
+  count sits still. The probe hashes every input column for each eligible planet, so metadata
+  corrections are visible and opposite revisions cannot cancel. Surviving planets' hashes
+  distinguish real revisions from additions or removals without guessing departed rows' values.
 - **The gated set is defined once.** `catalog.GATE_CLAUSES` carries each completeness requirement
   as both a Python predicate *and* its ADQL equivalent, and `gate_adql()` composes the remote
   query from it. A hand-written mirror of the gate is how an earlier attempt concluded the
   catalogue was "560 planets behind" when the difference was the gate correctly excluding planets
   with no measurable host star. Don't retype it; `tests/test_drift.py` guards this.
-- **The baseline is the last release, so there's no state to keep.** `manifest.json` ships beside
-  `planets.json`, which means once a release is published the probe goes quiet by itself.
-  `scripts/release-data.sh` writes it too, so a manual release doesn't break the chain.
+- **The baseline is the pinned release.** Both the probe and the rebuild download the tag in
+  `data/RELEASE`, never the latest published release. A release whose PR failed to open cannot
+  hide unshipped updates. Failed baseline downloads stop the run and leave the shrink guard intact.
+- **The manifest describes the build's inputs.** A bulk build saves hashes of the actual Archive
+  rows it used inside `planets.json` provenance. Manifest generation and `scripts/release-data.sh`
+  reuse that snapshot without querying the live Archive. An arrival during the build remains
+  detectable on the next probe. Older artifacts need a fresh bulk build before publishing; an
+  older manifest with column sums triggers one rebuild to migrate to row hashes. A one-planet
+  merge retains the previous bulk snapshot so it cannot acknowledge revisions to untouched rows.
 - **The release is published outright; the PR is the gate.** `data/RELEASE` pins a *specific*
   tag rather than tracking "latest" on purpose: latest would let publishing a release change
   production with no review. Pinning is also why auto-publishing is safe — a published release
@@ -551,7 +558,7 @@ Three things about it are deliberate and easy to break:
   `fetch_data.py`, so every deploy fails while the live site keeps serving the last good build
   and nothing looks wrong. On 2026-08-07 that is exactly what happened. A build that should not
   ship is handled the other way round now — close the PR and `gh release delete <tag>
-  --cleanup-tag`, so the probe's baseline stays the last release that did ship.
+  --cleanup-tag`. The probe's baseline stays pinned regardless of unmerged releases.
   `.github/workflows/data-release-check.yml` still fails the pull request if the pinned release
   is unfetchable for any reason (a manual draft, an unpublished release), and pings Telegram
   when it does. It runs on every PR, not only ones that touch `data/RELEASE`: the file
@@ -561,6 +568,8 @@ Three things about it are deliberate and easy to break:
   The ping needs repo secrets `TELEGRAM_TOKEN` and `TELEGRAM_CHAT_ID` — the same @BotFather bot
   newswatch uses is fine. Without them the check still fails the PR, it just fails quietly.
   Nothing is sent on success: a green run is silent, for the reason given under newswatch.
+  Both workflows use `scripts/send_telegram.py`, which fails on HTTP errors and validates the
+  API's success response before logging delivery. Healthy probe runs stay silent too.
 
 `pipeline build` reuses `data/cache/records` for planets whose inputs are unchanged, so a refresh
 only recomputes what moved. That cache keys on the **full** instrument definition, not just its

@@ -36,16 +36,20 @@ def _instrument_header(inst: Instrument) -> InstrumentHeader:
     )
 
 
-def write_planets(records: list[PlanetRecord], generated_at: str, out: Path = DEFAULT_OUT) -> Path:
+def write_planets(
+    records: list[PlanetRecord], generated_at: str, out: Path = DEFAULT_OUT,
+    *, archive_snapshot: dict | None = None,
+) -> Path:
+    provenance = build_provenance(planet_count=len(records), generated_at=generated_at).as_dict()
+    if archive_snapshot is not None:
+        provenance["archive_snapshot"] = archive_snapshot
     doc = PlanetsFile(
         schema_version=SCHEMA_VERSION,
         grid=GRID_ID,
         generated_at=generated_at,
         instruments=[_instrument_header(i) for i in INSTRUMENTS.values()],
         rights=RIGHTS.as_dict(),
-        provenance=build_provenance(
-            planet_count=len(records), generated_at=generated_at
-        ).as_dict(),
+        provenance=provenance,
         planets=records,
     )
     out.parent.mkdir(parents=True, exist_ok=True)

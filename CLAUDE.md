@@ -141,11 +141,12 @@ divergence and merge churn. To avoid it:
   it lives on disk locally and is published to GitHub Releases via `scripts/release-data.sh`;
   the committed `data/RELEASE` names the tag and deploy builds fetch it
   (`scripts/fetch_data.py`). **Staying current is automated** — `.github/workflows/catalogue.yml`
-  probes the Archive on Thursdays/Friday and opens a PR with a *draft* release when it has moved;
+  probes the Archive on Thursdays/Friday and opens a PR with a published release when it has moved;
   see `pipeline/drift.py` and the README. Two rules that keep it honest: the gated set is defined
   once in `catalog.GATE_CLAUSES` (Python predicate + ADQL together — never retype the gate for a
-  remote query, that produced a phantom "560 planets behind"), and the probe fingerprints sums
-  rather than counting rows, because `pscomppars` revises existing rows silently.
+  remote query, that produced a phantom "560 planets behind"), and the probe compares per-planet
+  hashes of all consumed inputs against the release pinned in `data/RELEASE`. Bulk builds save
+  their original input hashes in provenance; manifests must not query a newer live snapshot.
   Regenerate with `pipeline build --bulk N`; `dist/` is gitignored
   and built at deploy. Regenerating/releasing data is a "data side" change — don't do it from
   a UI-side session.

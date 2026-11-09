@@ -305,9 +305,11 @@ def catalog_planets(names: list[str] | None = None, *, use_cache: bool = True) -
     return _apply_gate(records)
 
 
-def catalog_bulk(limit: int, *, use_cache: bool = True) -> list[PlanetInput]:
+def catalog_bulk(
+    limit: int, *, use_cache: bool = True,
+) -> tuple[list[PlanetInput], list[ArchiveRecord]]:
     """A scaled catalog: the curated planets (always pinned) plus the nearest well-characterised
-    planets from the Archive, up to `limit` total, de-duplicated by planet id and gate-checked."""
+    planets from the Archive, de-duplicated and gate-checked, plus their original input rows."""
     curated = fetch_by_names(CURATED_NAMES, use_cache=use_cache)
     bulk = fetch_bulk(limit, use_cache=use_cache)
     seen: set[str] = set()
@@ -320,4 +322,4 @@ def catalog_bulk(limit: int, *, use_cache: bool = True) -> list[PlanetInput]:
         merged.append(rec)
     kept = _apply_gate(merged)
     print(f"Scaled catalog: {len(kept)} planets kept (curated pinned + nearest {limit}).")
-    return kept
+    return kept, [r for r in merged if completeness_gate(r)[0]]
