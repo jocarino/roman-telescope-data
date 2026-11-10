@@ -22,7 +22,7 @@ _TAP_URL = "https://exoplanetarchive.ipac.caltech.edu/TAP/sync"
 _CACHE_DIR = Path("data/cache")
 
 # Columns we pull for every planet.
-_COLUMNS = (
+COLUMNS = (
     "pl_name",
     "hostname",
     "pl_eqt",
@@ -96,7 +96,7 @@ class ArchiveRecord:
 
 def _adql_in_clause(names: list[str]) -> str:
     quoted = ",".join("'" + n.replace("'", "''") + "'" for n in names)
-    cols = ",".join(_COLUMNS)
+    cols = ",".join(COLUMNS)
     return f"select {cols} from pscomppars where pl_name in ({quoted})"
 
 
@@ -113,7 +113,7 @@ def _adql_bulk(limit: int) -> str:
     a size measurement (radius or mass) and a known distance to order by. Everything else — a
     real host-star temperature, a usable planet temperature — is left to the completeness gate
     downstream, so the gate does the real filtering and its keep/exclude ratio is meaningful."""
-    cols = ",".join(_COLUMNS)
+    cols = ",".join(COLUMNS)
     return (
         f"select top {int(limit)} {cols} from {TABLE} "
         f"where {BULK_PREFILTER_ADQL} "
