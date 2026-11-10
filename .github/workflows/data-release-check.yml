@@ -32,6 +32,10 @@ jobs:
     name: data/RELEASE names a fetchable release
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+      checks: write
     steps:
       - uses: actions/checkout@v4
 
@@ -43,6 +47,20 @@ jobs:
           HEAD_SHA: ${{ github.sha }}
         run: |
           python3 scripts/check_data_pr.py "$PR_REF" "$HEAD_SHA"
+
+      # Dispatch job checks are not eligible for rulesets; publish a Checks API result instead.
+      - name: Start required data check
+        id: required
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          id=$(gh api --method POST "repos/$GITHUB_REPOSITORY/check-runs" \
+            -f name='data/RELEASE names a fetchable release' -f head_sha="$HEAD_SHA" \
+            -f status=in_progress -f details_url="$RUN_URL" --jq .id)
+          echo "id=$id" >> "$GITHUB_OUTPUT"
 
       - name: Is the pinned release published and downloadable?
         id: check
@@ -97,6 +115,16 @@ jobs:
           uv sync --frozen
           uv run python scripts/fetch_data.py
           uv run pytest -q
+
+      - name: Complete required data check
+        if: always() && github.event_name == 'workflow_dispatch' && steps.required.outputs.id != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHECK_ID: ${{ steps.required.outputs.id }}
+          OUTCOME: ${{ job.status }}
+        run: |
+          gh api --method PATCH "repos/$GITHUB_REPOSITORY/check-runs/$CHECK_ID" \
+            -f status=completed -f conclusion="$OUTCOME" >/dev/null
 
       # Only ever fires on failure. This repository's notification discipline (see the newswatch
       # section of the README) is that a quiet run sends nothing at all — a periodic "still fine"
