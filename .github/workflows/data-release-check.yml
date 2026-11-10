@@ -17,17 +17,32 @@ name: Data release check
 on:
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
+  pull-requests: read
+
+concurrency:
+  group: data-release-check-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   fetchable:
     name: data/RELEASE names a fetchable release
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+
+      - name: Verify automatic data PR
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_REF: ${{ github.ref_name }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          python3 scripts/check_data_pr.py "$PR_REF" "$HEAD_SHA"
 
       - name: Is the pinned release published and downloadable?
         id: check
@@ -73,6 +88,16 @@ jobs:
 
           echo "OK: ${tag} is published and planets.json is fetchable without a token."
 
+      - name: Test the published catalogue
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          uv sync --frozen
+          uv run python scripts/fetch_data.py
+          uv run pytest -q
+
       # Only ever fires on failure. This repository's notification discipline (see the newswatch
       # section of the README) is that a quiet run sends nothing at all — a periodic "still fine"
       # message is one you can do nothing with, and those are what train a person to stop reading
@@ -85,8 +110,9 @@ jobs:
           REASON: ${{ steps.check.outputs.reason }}
           TAG: ${{ steps.check.outputs.tag }}
           PR_URL: ${{ github.event.pull_request.html_url }}
-          PR_NUM: ${{ github.event.pull_request.number }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUM: ${{ github.event.pull_request.number || 'data update' }}
+          PR_TITLE: ${{ github.event.pull_request.title || 'Automated catalogue validation' }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -u
           text="$(printf '%s\n' \
@@ -94,11 +120,45 @@ jobs:
             "" \
             "$(printf '%s' "${PR_TITLE}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')" \
             "" \
-            "<b>data/RELEASE is not fetchable:</b> ${REASON:-check failed}" \
+            "<b>Catalogue validation failed:</b> ${REASON:-check or tests failed}" \
             "" \
-            "The deploy downloads this release with no token. Merging now points main at data it cannot get, and every deploy fails while the live site keeps serving the old build, so nothing looks wrong." \
+            "Automatic merge is blocked. Inspect the failed check or tests before retrying." \
             "" \
-            "Fix: <code>gh release edit ${TAG} --draft=false</code>" \
-            "" \
-            "${PR_URL}")"
+            "${PR_URL}" \
+            "${RUN_URL}")"
           printf '%s' "$text" | python3 scripts/send_telegram.py
+
+  merge:
+    name: Merge tested catalogue data
+    needs: fetchable
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Merge the tested data PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_REF: ${{ github.ref_name }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          url=$(python3 scripts/check_data_pr.py "$PR_REF" "$HEAD_SHA")
+          gh pr merge "$url" --merge --match-head-commit "$HEAD_SHA"
+
+      - name: Alert on merge failure
+        if: failure()
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          printf '%s\n' \
+            '🔴 <b>Catalogue automatic merge failed</b>' \
+            '' \
+            'The catalogue checks passed, but GitHub refused the merge. Inspect this run; the next probe will retry.' \
+            '' \
+            "$RUN_URL" | python3 scripts/send_telegram.py

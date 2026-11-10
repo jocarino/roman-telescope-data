@@ -152,7 +152,6 @@ def test_missing_telegram_credentials_never_claim_delivery(monkeypatch, capsys):
 
 
 @pytest.mark.parametrize("workflow,outcome,expected", [
-    (WORKFLOW, "success", "ready to approve"),
     (WORKFLOW, "failure", "Refresh did not complete"),
     (ROOT / ".github/workflows/data-release-check.yml", "failure", "Do not merge #71"),
 ])

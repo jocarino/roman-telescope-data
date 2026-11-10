@@ -1,15 +1,8 @@
 name: Catalogue refresh
 
-# Ask the Exoplanet Archive whether anything changed; rebuild and open a PR when it has.
-#
-# Two jobs: the probe hashes the Archive inputs, the rebuild takes minutes
-# and runs only when there is something to rebuild for. The release is published outright, but
-# publishing a release changes nothing on the site: data/RELEASE pins a specific tag, and the bump
-# to it arrives as a pull request, so merging stays the human act. That is the only gate, and it is
-# not duplicated by also gating the trigger. (The release used to be a draft as a second gate; it
-# was a gate that failed silently in the wrong direction — forgetting to publish broke every
-# deploy — so it went. A release that should not ship is deleted: `gh release delete <tag>`.)
-# Telegram gets a ping when the PR opens, or if either job fails.
+# Probe the Archive, test a fresh catalogue, publish its data, and dispatch the data PR check.
+# The required check tests the published asset before a separate job merges its exact head.
+# Only bot PRs changing data/RELEASE qualify. Telegram is silent unless a job fails.
 #
 # NOTE: GitHub disables scheduled workflows after 60 days with no repository activity. It emails
 # the owner when it does, but re-enabling is manual — so a long quiet spell is the one way this
@@ -33,6 +26,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write
 
 concurrency:
   group: catalogue-refresh
@@ -76,13 +70,18 @@ jobs:
 
       - name: Is a data PR already open?
         id: existing
-        # The real reason to back off. Five probe runs on a Thursday would otherwise rebuild five
-        # times against the same drift and open five pull requests.
+        # Retry pending data PRs instead of opening duplicate releases.
         run: |
-          n=$(gh pr list --state open --search "head:data/refresh-" --json number --jq 'length')
-          if [ "$n" -gt 0 ]; then
+          branches=$(gh pr list --state open --search "head:data/refresh-" --json headRefName --jq '.[].headRefName')
+          if [ -n "$branches" ]; then
+            while IFS= read -r branch; do
+              python3 scripts/check_data_pr.py "$branch" >/dev/null
+              gh pr update-branch "$branch"
+              python3 scripts/check_data_pr.py "$branch" >/dev/null
+              gh workflow run data-release-check.yml --ref "$branch"
+            done <<< "$branches"
             echo "pr_open=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::A data refresh PR is already open; skipping the rebuild."
+            echo "::notice::Pending data PR validation dispatched; skipping a duplicate rebuild."
           else
             echo "pr_open=false" >> "$GITHUB_OUTPUT"
           fi
@@ -112,7 +111,7 @@ jobs:
             "$RUN_URL" | python3 scripts/send_telegram.py
 
   rebuild:
-    name: Rebuild and open a PR
+    name: Rebuild and queue automatic merge
     needs: probe
     if: >-
       needs.probe.outputs.pr_open == 'false' &&
@@ -230,49 +229,27 @@ jobs:
             echo "because it cannot; the colour counts above are measured by diffing this build"
             echo "against the previous release."
             echo
-            echo "The release is already published; nothing fetches it until this PR is merged."
-            echo "Merge to ship it. If this build should not ship, close the PR and delete the"
-            echo "release (\`gh release delete ${TAG} --cleanup-tag\`). The probe always compares"
-            echo "against the release pinned on main, so an unmerged release cannot hide drift."
+            echo "The release is published. The data-release workflow tests the published asset"
+            echo "and merges this exact data-only PR automatically after the required check passes."
+            echo "On failure it stays unmerged and Telegram receives the failing run link."
           } > pr-body.md
           url=$(gh pr create --title "${HEADLINE} (${TAG})" --body-file pr-body.md)
           echo "url=$url" >> "$GITHUB_OUTPUT"
+          python3 scripts/check_data_pr.py "$url" >/dev/null
+          gh pr update-branch "$url"
+          python3 scripts/check_data_pr.py "$url" >/dev/null
+          gh workflow run data-release-check.yml --ref "$branch"
 
-      # One message when there is something to approve, another when the rebuild broke; the
-      # schedule runs unattended, so without these a stalled chain is only visible by going to
-      # look. The sender uses only the standard library and validates API acceptance.
       - name: Tell Telegram
-        if: always()
+        if: failure()
         env:
           TG_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
-          OUTCOME: ${{ job.status }}
-          TAG: ${{ steps.release.outputs.tag }}
-          PR_URL: ${{ steps.pr.outputs.url }}
-          HEADLINE: ${{ needs.probe.outputs.headline }}
-          MOVED: ${{ steps.diff.outputs.summary }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          set -u
-          esc() { printf '%s' "$1" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g'; }
-          if [ "${OUTCOME}" = "success" ]; then
-            text="$(printf '%s\n' \
-              "🪐 <b>Catalogue refresh ready to approve</b>" \
-              "" \
-              "$(esc "${HEADLINE}")" \
-              "$(esc "${MOVED}")" \
-              "" \
-              "Release <code>${TAG}</code> is published; nothing ships until the PR is merged." \
-              "" \
-              "${PR_URL}")"
-          else
-            text="$(printf '%s\n' \
-              "🔴 <b>Catalogue refresh failed</b> (${OUTCOME})" \
-              "" \
-              "$(esc "${HEADLINE}")" \
-              "" \
-              "Refresh did not complete. The probe compares against the release pinned on main, so an unshipped update remains detectable on the next run." \
-              "" \
-              "${RUN_URL}")"
-          fi
-          printf '%s' "$text" | python3 scripts/send_telegram.py
+          printf '%s\n' \
+            '🔴 <b>Catalogue refresh failed</b>' \
+            '' \
+            'Refresh did not complete. No untested data was merged; the pinned release remains the baseline.' \
+            '' \
+            "$RUN_URL" | python3 scripts/send_telegram.py
