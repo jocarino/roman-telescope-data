@@ -17,7 +17,7 @@ notifications, workflow dispatches, dataset publication, or pushes to main.
   ordering, additions, removals, and genuine revisions through the emitted TAP query.
 - [x] Retain a bulk build's fetched input snapshot through
   manifest generation and manual publishing. Test late arrivals and refuse to invent
-  a snapshot for older artifacts; preserve the old snapshot when merging one planet.
+  a snapshot for older artifacts; update only rebuilt rows' hashes during partial merges.
 - [x] Pin both workflow downloads and CLI baseline loading to `data/RELEASE`, and fail
   on download or missing-baseline errors. Exercise workflow shell blocks with fake `gh`.
 - [x] Cover probe failures with an alert and validate Telegram HTTP/JSON responses in
@@ -42,8 +42,14 @@ no-change/open-PR runs must stay silent. Failed alerts must never log delivery s
 - Ruff, Actionlint, YAML parsing and release-script syntax checks passed. README
   fact-checking has the same one error and two warnings as the unchanged baseline.
 
-- Full suite: 825 passed, 24 skipped, 7 existing colour-library warnings. The 51 new
+- Full suite: 829 passed, 24 skipped, 7 existing colour-library warnings. The 55 new
   regression cases cover the seven fixes and their callers. Ruff and Actionlint passed.
-- Independent final review found no issues. Existing open-PR suppression and the
-  10,000-row build cap remain; partial merges retain the previous bulk snapshot.
+- The initial independent final review found no issues. Two subsequent independent
+  reviews reproduced a partial-merge false negative when the Archive reverts a value.
+  The fix updates rebuilt rows' hashes and preserves all others, including with `--limit`.
+  Existing open-PR suppression and the 10,000-row build cap remain.
 - Changes stay on the local branch; no publication, live notification, or deployment.
+
+- Follow-up: the 5000 → 5100 → 5000 correction regression failed before the fix and
+  passed after updating consumed rows' hashes. Coverage includes new planets, untouched
+  rows, `--limit`, and refusal to invent a missing bulk snapshot. Full suite and Ruff pass.

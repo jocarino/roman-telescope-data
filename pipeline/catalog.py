@@ -299,10 +299,12 @@ def _apply_gate(records: list[ArchiveRecord], *, verbose: bool = True) -> list[P
     return kept
 
 
-def catalog_planets(names: list[str] | None = None, *, use_cache: bool = True) -> list[PlanetInput]:
-    """The curated set (or an explicit name list), passed through the completeness gate."""
+def catalog_planets(
+    names: list[str] | None = None, *, use_cache: bool = True,
+) -> tuple[list[PlanetInput], list[ArchiveRecord]]:
+    """The gated curated set (or explicit names), plus the original input rows."""
     records = fetch_by_names(names or CURATED_NAMES, use_cache=use_cache)
-    return _apply_gate(records)
+    return _apply_gate(records), [r for r in records if completeness_gate(r)[0]]
 
 
 def catalog_bulk(

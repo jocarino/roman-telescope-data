@@ -12,7 +12,6 @@ from dataclasses import asdict, fields
 import pytest
 
 from pipeline import catalog, cli, drift
-from pipeline.demo_planets import demo_planets
 from pipeline.fetch.archive import ArchiveRecord
 
 
@@ -160,21 +159,82 @@ def test_manifest_refuses_to_invent_snapshot_for_old_artifact(archive, tmp_path)
         drift.build_manifest(out)
 
 
-def test_one_planet_merge_preserves_previous_bulk_snapshot(archive, monkeypatch, tmp_path):
-    monkeypatch.setattr(catalog, "fetch_bulk", lambda *a, **kw: [ArchiveRecord(**_row())])
-    monkeypatch.setattr(catalog, "fetch_by_names", lambda *a, **kw: [])
+@pytest.fixture
+def partial_merge(monkeypatch, tmp_path):
     monkeypatch.setattr(cli, "solar_system_planets", lambda: [])
-    out = tmp_path / "planets.json"
-    args = argparse.Namespace(source="catalog", bulk=10000, planet=None,
-        targets_only=False, no_cache=True, limit=None, merge_into=None, out=out)
-    cli.cmd_build(args)
-    previous = json.loads(out.read_text())["provenance"]["archive_snapshot"]
-    monkeypatch.setattr(cli, "catalog_planets", lambda *a, **kw: demo_planets()[:1])
-    args.bulk, args.planet, args.merge_into = None, ["New b"], out
-    cli.cmd_build(args)
+
+    def build(initial, selected, *, limit=None):
+        fetched = []
+        monkeypatch.setattr(catalog, "fetch_bulk", lambda *a, **kw: [
+            ArchiveRecord(**row) for row in initial
+        ])
+        monkeypatch.setattr(catalog, "fetch_by_names", lambda *a, **kw: [
+            ArchiveRecord(**row) for row in fetched
+        ])
+        out = tmp_path / "planets.json"
+        args = argparse.Namespace(source="catalog", bulk=10000, planet=None,
+            targets_only=False, no_cache=True, limit=None, merge_into=None, out=out)
+        cli.cmd_build(args)
+        previous = json.loads(out.read_text())["provenance"]["archive_snapshot"]
+        fetched = selected
+        args.bulk, args.planet, args.merge_into = None, [r["pl_name"] for r in selected], out
+        args.limit = limit
+        cli.cmd_build(args)
+        return out, previous
+
+    return build
+
+
+def test_partial_merge_detects_archive_reverting_to_premerge_value(archive, partial_merge):
+    out, _ = partial_merge([_row(st_teff=5000.0)], [_row(st_teff=5100.0)])
+    data = json.loads(out.read_text())
+    assert data["planets"][0]["host_star"]["teff_k"] == 5100.0
+    archive(_row(st_teff=5100.0))
+    assert not drift.compare(drift.build_manifest(out)).drift
+    archive(_row(st_teff=5000.0))
+    report = drift.compare(drift.build_manifest(out))
+    assert report.drift and report.revisions
+
+
+def test_partial_merge_keeps_untouched_planets_hashes(archive, partial_merge):
+    out, previous = partial_merge([_row(), _row("B b")], [_row(st_teff=5100.0)])
+    snapshot = json.loads(out.read_text())["provenance"]["archive_snapshot"]
+    assert snapshot["rows"]["B b"] == previous["rows"]["B b"]
+    archive(_row(st_teff=5100.0), _row("B b", st_teff=5200.0))
+    report = drift.compare(drift.build_manifest(out))
+    assert report.drift and report.revisions
+
+
+def test_partial_merge_adds_new_planet_hash(archive, partial_merge):
+    out, _ = partial_merge([_row()], [_row("B b", st_teff=5100.0)])
+    archive(_row(), _row("B b", st_teff=5100.0))
     data = json.loads(out.read_text())
     assert len(data["planets"]) == 2
-    assert data["provenance"]["archive_snapshot"] == previous
+    assert data["provenance"]["archive_snapshot"]["n"] == 2
+    assert not drift.compare(drift.build_manifest(out)).drift
+
+
+def test_limited_partial_merge_does_not_acknowledge_unbuilt_inputs(archive, partial_merge):
+    out, previous = partial_merge(
+        [_row(), _row("B b")], [_row(st_teff=5100.0), _row("B b", st_teff=5200.0)], limit=1,
+    )
+    data = json.loads(out.read_text())
+    assert data["planets"][1]["host_star"]["teff_k"] == 5000.0
+    snapshot = data["provenance"]["archive_snapshot"]
+    assert snapshot["rows"]["B b"] == previous["rows"]["B b"]
+    archive(_row(st_teff=5100.0), _row("B b", st_teff=5200.0))
+    assert drift.compare(drift.build_manifest(out)).revisions
+
+
+def test_partial_merge_cannot_invent_missing_bulk_snapshot(partial_merge):
+    out, _ = partial_merge([_row()], [_row(st_teff=5100.0)])
+    data = json.loads(out.read_text())
+    del data["provenance"]["archive_snapshot"]
+    out.write_text(json.dumps(data))
+    cli.cmd_build(argparse.Namespace(source="catalog", bulk=None, planet=["A b"],
+        targets_only=False, no_cache=True, limit=None, merge_into=out, out=out))
+    with pytest.raises(ValueError, match="snapshot"):
+        drift.build_manifest(out)
 
 
 def test_truncated_build_cannot_publish_full_catalog_snapshot(archive, monkeypatch, tmp_path):

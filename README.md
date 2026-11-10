@@ -549,7 +549,7 @@ These rules keep the refresh safe:
   reuse that snapshot without querying the live Archive. An arrival during the build remains
   detectable on the next probe. Older artifacts need a fresh bulk build before publishing; an
   older manifest with column sums triggers one rebuild to migrate to row hashes. A one-planet
-  merge retains the previous bulk snapshot so it cannot acknowledge revisions to untouched rows.
+  merge updates hashes only for the rows actually rebuilt, retaining untouched planets' hashes.
 - **The release is published outright; the PR is the gate.** `data/RELEASE` pins a *specific*
   tag rather than tracking "latest" on purpose: latest would let publishing a release change
   production with no review. Pinning is also why auto-publishing is safe — a published release
