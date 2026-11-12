@@ -14,9 +14,10 @@ from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
 
-from pipeline.catalog import catalog_bulk, catalog_planets
+from pipeline.catalog import _slug, catalog_bulk, catalog_planets
 from pipeline.config import INSTRUMENTS, ROMAN_CGI
 from pipeline.demo_planets import demo_planets
+from pipeline.drift import fingerprint_rows
 from pipeline.emit.cache import cached_build_record
 from pipeline.emit.writer import DEFAULT_OUT, write_planets
 from pipeline.models import PlanetsFile
@@ -30,6 +31,8 @@ def _now_iso() -> str:
 
 def cmd_build(args: argparse.Namespace) -> None:
     generated_at = _now_iso()
+    archive_snapshot = None
+    archive_rows = []
     instruments = [ROMAN_CGI] if args.targets_only is False else list(INSTRUMENTS.values())
     if args.source == "demo":
         inputs = demo_planets()
@@ -38,7 +41,7 @@ def cmd_build(args: argparse.Namespace) -> None:
         # commonest newsjackable story ("new planet discovered") is the one we cannot answer
         # from data/planets.json. This pulls that single row live and builds it in seconds.
         # It writes to --out, never over the release file, so nothing else is disturbed.
-        inputs = catalog_planets(list(args.planet), use_cache=not args.no_cache)
+        inputs, archive_rows = catalog_planets(list(args.planet), use_cache=not args.no_cache)
         if not inputs:
             print(
                 f"\nNo colour for {', '.join(args.planet)}: the completeness gate rejected it "
@@ -47,11 +50,15 @@ def cmd_build(args: argparse.Namespace) -> None:
             )
             return
     elif args.bulk is not None:
-        inputs = solar_system_planets() + catalog_bulk(args.bulk, use_cache=not args.no_cache)
+        catalog, archive_rows = catalog_bulk(args.bulk, use_cache=not args.no_cache)
+        inputs = solar_system_planets() + catalog
+        archive_snapshot = asdict(fingerprint_rows([asdict(row) for row in archive_rows]))
     else:
-        inputs = solar_system_planets() + catalog_planets(use_cache=not args.no_cache)
+        catalog, archive_rows = catalog_planets(use_cache=not args.no_cache)
+        inputs = solar_system_planets() + catalog
     if args.limit is not None:
         inputs = inputs[: args.limit]
+        archive_snapshot = None
 
     records = []
     hits = 0
@@ -82,6 +89,17 @@ def cmd_build(args: argparse.Namespace) -> None:
         # is re-run below over the whole set so the new planet links to its siblings and they
         # link back to it.
         existing = PlanetsFile.model_validate_json(args.merge_into.read_text())
+        archive_snapshot = (existing.provenance or {}).get("archive_snapshot")
+        if archive_snapshot is not None:
+            # Only acknowledge Archive rows whose records were actually rebuilt.
+            built_ids = {r.id for r in records}
+            hashes = fingerprint_rows([
+                asdict(row) for row in archive_rows if _slug(row.pl_name) in built_ids
+            ]).rows
+            archive_snapshot = {
+                **archive_snapshot, "rows": {**archive_snapshot["rows"], **hashes},
+            }
+            archive_snapshot["n"] = len(archive_snapshot["rows"])
         by_id = {r.id: r for r in existing.planets}
         added = [r.id for r in records if r.id not in by_id]
         replaced = [r.id for r in records if r.id in by_id]
@@ -97,7 +115,10 @@ def cmd_build(args: argparse.Namespace) -> None:
         existing, added, replaced = merged_into
         # Keep the file's own generated_at: this is the same catalogue with a planet spliced
         # in, not a fresh build, and the drift manifest is keyed off the release it belongs to.
-        out = write_planets(records, existing.generated_at, args.merge_into)
+        out = write_planets(
+            records, existing.generated_at, args.merge_into,
+            archive_snapshot=archive_snapshot,
+        )
         print(f"\nMerged into {out}: {len(added)} added, {len(replaced)} replaced, "
               f"{len(records)} planets total.")
         if added:
@@ -108,7 +129,7 @@ def cmd_build(args: argparse.Namespace) -> None:
         print("  (the deploy webhook rebuilds from the new tag)")
         return
 
-    out = write_planets(records, generated_at, args.out)
+    out = write_planets(records, generated_at, args.out, archive_snapshot=archive_snapshot)
     n = len(records)
     print(f"\nWrote {n} planet(s) -> {out}  ({hits} from cache, {n - hits} rebuilt)")
 
@@ -219,7 +240,7 @@ def main() -> None:
         type=Path,
         default=None,
         metavar="PATH",
-        help="Manifest to compare against. Omit to fetch manifest.json from the latest release.",
+        help="Manifest to compare against. Omit to fetch the release pinned in data/RELEASE.",
     )
     p_drift.add_argument(
         "--emit-manifest",
