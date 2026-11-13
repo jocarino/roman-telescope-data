@@ -81,8 +81,13 @@ pathlib.Path('command').write_text(json.dumps(sys.argv[1:]))
     ]
 
 
-@pytest.mark.parametrize("outcome", ["success", "failure"])
-def test_dispatched_validation_reports_required_check_through_api(tmp_path, monkeypatch, outcome):
+@pytest.mark.parametrize("outcome,state", [
+    ("success", "success"), ("failure", "failure"), ("cancelled", "error"),
+])
+def test_dispatched_validation_reports_required_context_as_commit_status(
+    tmp_path, monkeypatch, outcome, state,
+):
+    # A Checks API run from a dispatch lands in a suite GitHub never attaches to the PR (#71).
     workflow = ROOT / ".github/workflows/data-release-check.yml"
     monkeypatch.setenv("GITHUB_REPOSITORY", "example/repo")
     monkeypatch.setenv("HEAD_SHA", "tested-head")
@@ -91,19 +96,44 @@ def test_dispatched_validation_reports_required_check_through_api(tmp_path, monk
     fake = """import json, pathlib, sys
 with pathlib.Path('commands').open('a') as out:
     out.write(json.dumps(sys.argv[1:]) + '\\n')
-print('314')
 """
     started = _run(_script("Start required data check", workflow), tmp_path, monkeypatch, fake)
     assert started.returncode == 0, started.stderr
-    assert "id=314" in (tmp_path / "output").read_text()
-    monkeypatch.setenv("CHECK_ID", "314")
+    assert "started=true" in (tmp_path / "output").read_text()
     monkeypatch.setenv("OUTCOME", outcome)
     completed = _run(_script("Complete required data check", workflow), tmp_path, monkeypatch, fake)
     assert completed.returncode == 0, completed.stderr
     commands = [json.loads(line) for line in (tmp_path / "commands").read_text().splitlines()]
-    assert commands[0][:4] == ["api", "--method", "POST", "repos/example/repo/check-runs"]
-    assert "head_sha=tested-head" in commands[0]
-    assert "name=data/RELEASE names a fetchable release" in commands[0]
-    assert "status=in_progress" in commands[0]
-    assert commands[1][:4] == ["api", "--method", "PATCH", "repos/example/repo/check-runs/314"]
-    assert "status=completed" in commands[1] and f"conclusion={outcome}" in commands[1]
+    for command, expected in zip(commands, ["pending", state], strict=True):
+        assert command[:4] == ["api", "--method", "POST", "repos/example/repo/statuses/tested-head"]
+        assert "context=data/RELEASE names a fetchable release" in command
+        assert f"state={expected}" in command
+    assert "checks: write" not in workflow.read_text()
+
+
+@pytest.mark.parametrize("age_hours,stuck", [(2, False), (30, True)])
+def test_overdue_data_pr_fails_probe_and_alerts(tmp_path, monkeypatch, age_hours, stuck):
+    import datetime as dt
+
+    created = dt.datetime.now(dt.UTC) - dt.timedelta(hours=age_hours)
+    created = created.strftime("%Y-%m-%dT%H:%M:%SZ")
+    prs = [{"url": "https://example.com/pull/71", "createdAt": created}]
+    (tmp_path / "scripts").mkdir()
+    (tmp_path / "scripts/send_telegram.py").write_text(
+        "import pathlib, sys\npathlib.Path('message').write_text(sys.stdin.read())\n"
+    )
+    monkeypatch.setenv("RUN_URL", "https://example.com/run/123")
+    # The fake gh runs the workflow's real --jq filter through jq.
+    fake = f"""import subprocess, sys
+args = sys.argv[1:]
+assert args[:2] == ['pr', 'list'], args
+jq = ['jq', '-r', args[args.index('--jq') + 1]]
+print(subprocess.run(jq, input={json.dumps(json.dumps(prs))},
+                     capture_output=True, text=True, check=True).stdout, end='')
+"""
+    result = _run(_script("Is a data PR overdue?"), tmp_path, monkeypatch, fake)
+    assert (result.returncode != 0) is stuck, result.stderr
+    message = tmp_path / "message"
+    assert message.exists() is stuck
+    if stuck:
+        assert "https://example.com/pull/71" in message.read_text()

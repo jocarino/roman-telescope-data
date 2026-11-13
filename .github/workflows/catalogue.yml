@@ -86,6 +86,29 @@ jobs:
             echo "pr_open=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Is a data PR overdue?
+        id: overdue
+        # Bot data PRs merge minutes after opening. One that outlives a day of retries is stuck
+        # (blocked merge, missing check, disabled workflow): say so instead of retrying quietly.
+        if: always()
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          overdue=$(gh pr list --state open --search "head:data/refresh-" --json url,createdAt \
+            --jq '[.[] | select(.createdAt | fromdateiso8601 < now - 86400) | .url] | join(" ")')
+          if [ -n "$overdue" ]; then
+            printf '%s\n' \
+              '🔴 <b>Catalogue data PR stuck</b>' \
+              '' \
+              "Open for over a day without merging: ${overdue}" \
+              '' \
+              "$RUN_URL" | python3 scripts/send_telegram.py
+            echo "::error::Data PR unmerged for over a day: ${overdue}"
+            exit 1
+          fi
+
       - name: Summary
         run: |
           {
@@ -97,7 +120,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Alert on probe failure
-        if: failure()
+        if: failure() && steps.overdue.outcome != 'failure'
         env:
           TG_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
