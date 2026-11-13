@@ -565,10 +565,14 @@ These rules keep the refresh safe:
   on a `data/refresh-` branch, changing **only** `data/RELEASE`. The merge job waits for the
   required check and matches its commit SHA; it never bypasses branch protection. Dispatching
   the check explicitly avoids GitHub's human-approval requirement for bot-triggered PR events.
-  Since dispatched job checks do not satisfy rulesets, validation publishes an explicit Checks
-  API result for the tested SHA using the same GitHub Actions app required by branch protection.
+  Checks from a dispatched run (even ones posted through the Checks API) live in a
+  `workflow_dispatch` check suite that GitHub never attaches to the PR, so rulesets ignore them —
+  PR #71 sat BLOCKED for a week behind a green check. Validation therefore posts the required
+  context as a **commit status** on the tested SHA, which belongs to the commit rather than a
+  suite and carries the GitHub Actions app identity branch protection requires.
   Each probe updates and re-dispatches a pending data PR, so a failed or older refresh can retry
-  without creating duplicate releases. Successful refreshes and no-change runs stay silent.
+  without creating duplicate releases, and fails with a Telegram alert if any data PR has been
+  open for over a day. Successful refreshes and no-change runs stay silent.
   `.github/workflows/data-release-check.yml` still fails the pull request if the pinned release
   is unfetchable for any reason (a manual draft, an unpublished release), and pings Telegram
   when it does. It runs on every PR, not only ones that touch `data/RELEASE`: the file
