@@ -2987,46 +2987,140 @@ a.rtb-name:hover { color: var(--accent); }
 }
 
 /* ---- SITE FOOTER (every page, from base.html) -------------------------------------------
-   The site had no footer at all: every page but the 404 and the tour end-card stopped dead,
-   and the only way onward was "← ALL PLANETS". This is the smallest thing that fixes that —
-   a rule, the honesty line, four destinations and the licence.
+   The 404's cockpit console, miniaturised into the site wrapper: the site ends every page the
+   way getting lost looks — at the ship's console, with every heading on the chart one key
+   away. Hull plate, recessed honesty readout, a key per destination, etched maker's line.
 
-   Deliberately quiet: dim text, no panel, no shadow. It is the end of the page, not another
-   instrument, and the retro chrome is already doing plenty of talking above it. Only the
-   links carry the accent, which is the site's standing rule for "this is interactive". */
+   Everything on it is real, per the standing cockpit rule: the worlds counter is this build's
+   count, the keys are the complete Explore map, the licence is pipeline.rights' fact. */
 .site-foot {
-  margin: 64px 0 0; padding: 18px 0 4px; border-top: 1px solid var(--line);
-  font-size: 12px; color: var(--fg-faint); line-height: 1.6;
+  /* The 404 cockpit's hull palette, restated locally: same ship, but the footer must render
+     on every page, not just under `.cockpit`. Keep the two in step if the hull is repainted. */
+  --hull: #171b25; --hull-lt: #1e242f; --hull-dk: #0b0e15; --hull-edge: #05070b;
+  --hull-hi: #39414f;
+  margin: 72px 0 0;
 }
-.foot-honest { margin: 0 0 14px; max-width: 62ch; }
-/* The one word this site exists to insist on. */
+/* The cowl: a raised crest with clipped corners, so the console rises out of the page floor
+   (cf. .dash::before on the 404) instead of starting at a flat rule. */
+.foot-crest {
+  height: 13px; background: var(--hull-lt);
+  clip-path: polygon(0 100%, 0 64%, 2.5% 64%, 4.5% 0, 95.5% 0, 97.5% 64%, 100% 64%, 100% 100%);
+  filter: drop-shadow(0 -2px 0 var(--hull-hi));
+}
+.foot-plate {
+  padding: 12px 16px 12px; background: #12151d; border: 1px solid var(--hull-edge);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, .4), inset 0 1px 0 rgba(255, 255, 255, .05);
+}
+/* Brand plate. EXO·NAV joins EXOSCOPE and EXO·RX — same pixel face, same glow — and the
+   plain-English subtitle rides beside it so the name is never the only signpost. */
+.foot-head {
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 10px;
+}
+.foot-brand {
+  font-family: var(--pixel); -webkit-font-smoothing: none; font-smooth: never;
+  font-size: 12px; letter-spacing: 1px; color: var(--accent);
+  text-shadow: 0 0 7px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.foot-brand-sub {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--fg-faint);
+}
+/* Telemetry chip: a recessed screen (cf. .dscr), holding the one live number. */
+.foot-tel {
+  margin-left: auto; display: inline-flex; align-items: baseline; gap: 8px;
+  padding: 4px 10px 5px; background: #060b10; border: 1px solid var(--hull-edge);
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, .8), inset 0 -1px 0 rgba(255, 255, 255, .04);
+}
+.foot-tel-k {
+  font-family: var(--mono); font-size: 8.5px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--fg-faint);
+}
+.foot-tel-v {
+  font-family: var(--mono); font-size: 11px;
+  color: color-mix(in srgb, var(--accent) 55%, #dfe3ea);
+  text-shadow: 0 0 6px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+/* The honesty line as the console's readout: a full-width recessed screen with a terminal
+   cursor. Still a complete plain-English sentence — the screen is a costume, not a cut. */
+.foot-honest {
+  margin: 0 0 12px; padding: 8px 12px 9px; background: #060b10;
+  border: 1px solid var(--hull-edge);
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, .8), inset 0 -1px 0 rgba(255, 255, 255, .04);
+  font-family: var(--mono); font-size: 11px; line-height: 1.6; color: var(--fg-dim);
+  letter-spacing: .2px;
+}
+/* The one word this site exists to insist on, lit like a readout value. */
 .foot-honest b {
-  color: var(--fg); font-weight: 600; text-transform: uppercase; letter-spacing: .4px;
-  font-size: 11px;
+  font-weight: 400; text-transform: uppercase; letter-spacing: .6px;
+  color: color-mix(in srgb, var(--accent) 55%, #dfe3ea);
+  text-shadow: 0 0 6px color-mix(in srgb, var(--accent) 35%, transparent);
 }
-.foot-nav { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-bottom: 14px; }
-.foot-nav a {
-  display: inline-flex; align-items: baseline; gap: 7px; font-size: 12.5px;
-  border-bottom: 1px solid transparent;
+.foot-honest::after {
+  content: "▮"; margin-left: 5px; color: var(--accent);
+  animation: foot-cursor 1.2s steps(1) infinite;
 }
-.foot-nav a:hover { border-bottom-color: var(--accent); }
-.foot-nav a:focus-visible { outline: 1px solid var(--accent); outline-offset: 3px; }
-.foot-gl {
-  display: inline-block; font-style: normal; font-size: 10px;
-  color: var(--fg-faint); letter-spacing: .5px;
+@keyframes foot-cursor { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .foot-honest::after { animation: none; } }
+/* The chart: one physical key per destination (the .ckey grammar, shallower throw). */
+.foot-keys {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 9px;
+  margin-bottom: 12px;
 }
-.foot-nav a:hover .foot-gl { color: var(--accent); }
-.foot-meta { margin: 0; font-family: var(--mono); font-size: 10.5px; letter-spacing: .3px; }
+/* Eight keys want two even banks of four; auto-fill at full width deals them 5 + 3, which
+   reads as a console with a missing key. */
+@media (min-width: 980px) { .foot-keys { grid-template-columns: repeat(4, 1fr); } }
+.fkey {
+  display: flex; align-items: center; gap: 9px; padding: 8px 10px 9px; cursor: pointer;
+  border-radius: 4px; border: 1px solid #05070b; border-top-color: #5a6478;
+  background: linear-gradient(180deg, #2a3140 0%, #1c212c 45%, #141821 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, .14), inset 0 -2px 3px rgba(0, 0, 0, .45),
+    0 3px 0 #04060a;
+  color: var(--fg-dim);
+  transition: border-color .12s, color .12s;
+}
+.fkey:hover { text-decoration: none; border-top-color: var(--accent); color: var(--fg); }
+.fkey:hover .fkey-lbl { text-shadow: 0 0 7px color-mix(in srgb, var(--accent) 45%, transparent); }
+.fkey:hover .fkey-glyph { color: var(--accent); }
+.fkey:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 3px 5px rgba(0, 0, 0, .55),
+    0 0 0 #04060a;
+}
+.fkey:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+.fkey-glyph {
+  /* Accent like the 404's key glyphs: on this site colour means "this is interactive". */
+  flex: none; min-width: 16px; text-align: center; color: var(--accent);
+  font-family: var(--mono); font-size: 12px; line-height: 1; letter-spacing: -.5px;
+}
+.fkey-txt { min-width: 0; }
+.fkey-lbl {
+  display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .7px;
+  text-transform: uppercase; color: var(--fg);
+}
+.fkey-sub {
+  display: block; margin-top: 2px; font-size: 10.5px; line-height: 1.35;
+  color: var(--fg-faint);
+}
+/* The etched maker's line: engraved on the hull, not on a screen. */
+.foot-meta {
+  margin: 0; font-family: var(--mono); font-size: 10px; letter-spacing: .3px;
+  color: var(--fg-faint); line-height: 1.8;
+}
+.foot-meta a { color: var(--fg-dim); border-bottom: 1px dotted var(--fg-faint); }
+.foot-meta a:hover { color: var(--accent); border-bottom-color: var(--accent); text-decoration: none; }
 
 @media (max-width: 720px) {
-  /* One destination per line: at 390px the four labels wrap mid-phrase into an unreadable
-     block, and vertical space spent on a legible footer is space well spent. */
-  .site-foot { margin-top: 44px; }
-  .foot-nav { flex-direction: column; gap: 10px; }
-  /* Stacked, the glyphs form a column, so they need a fixed width or the four labels start at
-     four different x positions — "A–Z" is three characters where the others are one. */
-  .foot-gl { min-width: 26px; }
-  .foot-honest { margin-bottom: 12px; }
+  .site-foot { margin-top: 48px; }
+  /* Two keys a row: at 390px auto-fill would go single-column and the eight keys become a
+     tower; two compact columns keep the whole chart on one screen. */
+  .foot-keys { grid-template-columns: 1fr 1fr; gap: 7px; }
+  .fkey { padding: 7px 8px 8px; gap: 7px; }
+  .fkey-sub { font-size: 9.5px; }
+  /* The counter chip drops under the brand rather than crushing the subtitle off the row. */
+  .foot-head { row-gap: 6px; }
+  .foot-tel { margin-left: 0; flex-basis: 100%; justify-content: space-between; }
 }
 
 /* ---- ABOUT (/about) & PRESS (/press) ----------------------------------------------------
